@@ -134,6 +134,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\CombatTrackerLib\App.h" />
+    <ClInclude Include="src\CombatTrackerLib\Window.h" />
+    <ClInclude Include="vendor\glad\glad.h" />
     <ClInclude Include="vendor\Imgui\backends\imgui_impl_glfw.h" />
     <ClInclude Include="vendor\Imgui\backends\imgui_impl_opengl3.h" />
     <ClInclude Include="vendor\Imgui\backends\imgui_impl_opengl3_loader.h" />
@@ -146,7 +149,9 @@
     <ClInclude Include="vendor\Imgui\misc\cpp\imgui_stdlib.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\CombatTrackerApp\main.cpp" />
+    <ClCompile Include="src\CombatTrackerLib\App.cpp" />
+    <ClCompile Include="src\CombatTrackerLib\Window.cpp" />
     <ClCompile Include="vendor\glad\glad.c" />
     <ClCompile Include="vendor\Imgui\backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="vendor\Imgui\backends\imgui_impl_opengl3.cpp" />
