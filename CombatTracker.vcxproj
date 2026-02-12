@@ -134,6 +134,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\CombatTrackerApp\Entity\Creature\CreatureConstants.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entity\Creature\CreatureTypes.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entity\Creature\Creature.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entity\Creature\CreatureEnums.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entity\Monster\Monster.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entity\Monster\MonsterConstants.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entity\PlayerCharacter\PlayerCharacter.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entity\PlayerCharacter\PlayerCharacterConstants.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entity\PlayerCharacter\PlayerCharacterEnums.h" />
     <ClInclude Include="src\CombatTrackerLib\App.h" />
     <ClInclude Include="src\CombatTrackerLib\Window.h" />
     <ClInclude Include="vendor\glad\glad.h" />
@@ -149,6 +158,9 @@
     <ClInclude Include="vendor\Imgui\misc\cpp\imgui_stdlib.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CombatTrackerApp\Entity\Creature\Creature.cpp" />
+    <ClCompile Include="src\CombatTrackerApp\Entity\Monster\Monster.cpp" />
+    <ClCompile Include="src\CombatTrackerApp\Entity\PlayerCharacter\PlayerCharacter.cpp" />
     <ClCompile Include="src\CombatTrackerApp\main.cpp" />
     <ClCompile Include="src\CombatTrackerLib\App.cpp" />
     <ClCompile Include="src\CombatTrackerLib\Window.cpp" />

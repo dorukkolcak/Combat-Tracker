@@ -1,7 +1,8 @@
+#pragma once
+
 #include "Window.h"
+
 #include <memory>
-#ifndef APP
-#define APP
 
 namespace CombatTrackerLib {
 	struct AppSpecification {
@@ -19,4 +20,3 @@ namespace CombatTrackerLib {
 		std::unique_ptr<Window> mainWindow;
 	};
 }
-#endif

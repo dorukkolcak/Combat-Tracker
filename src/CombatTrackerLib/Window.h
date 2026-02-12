@@ -1,11 +1,11 @@
+#pragma once
+
 #include <cstdint>
 #include <string>
 // Pay attention to the ordering here.
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
-#ifndef WINDOW
-#define WINDOW
 namespace CombatTrackerLib {
 	struct WindowSpecification {
 		std::uint16_t width;
@@ -23,10 +23,9 @@ namespace CombatTrackerLib {
 		int getWindowShouldClose();
 		GLFWwindow*& getGLFWwindow();
 	private:
-		WindowSpecification specification;
+		const WindowSpecification INITIAL_WINDOW_SPECIFICATION;
 		GLFWwindow* window;
 
 		void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
 	};
 }
-#endif

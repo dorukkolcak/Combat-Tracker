@@ -6,8 +6,7 @@
 #include "Window.h"
 
 namespace CombatTrackerLib {
-	Window::Window(const WindowSpecification& specification) {
-		this->specification = specification;
+	Window::Window(const WindowSpecification& specification) : INITIAL_WINDOW_SPECIFICATION(specification) {
 		// Window is created for OpenGL 3.3 Core Profile.
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
