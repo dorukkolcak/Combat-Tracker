@@ -134,16 +134,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\CombatTrackerApp\Entity\Creature\CreatureConstants.h" />
-    <ClInclude Include="src\CombatTrackerApp\Entity\Creature\CreatureTypes.h" />
-    <ClInclude Include="src\CombatTrackerApp\Entity\Creature\Creature.h" />
-    <ClInclude Include="src\CombatTrackerApp\Entity\Creature\CreatureEnums.h" />
-    <ClInclude Include="src\CombatTrackerApp\Entity\Monster\Monster.h" />
-    <ClInclude Include="src\CombatTrackerApp\Entity\Monster\MonsterConstants.h" />
-    <ClInclude Include="src\CombatTrackerApp\Entity\PlayerCharacter\PlayerCharacter.h" />
-    <ClInclude Include="src\CombatTrackerApp\Entity\PlayerCharacter\PlayerCharacterConstants.h" />
-    <ClInclude Include="src\CombatTrackerApp\Entity\PlayerCharacter\PlayerCharacterEnums.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entities\Creature\CreatureConstants.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entities\Creature\CreatureTypes.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entities\Creature\Creature.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entities\Creature\CreatureEnums.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entities\Encounter\Encounter.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entities\Turn\Turn.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entities\Monster\Monster.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entities\Monster\MonsterConstants.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacter.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacterConstants.h" />
+    <ClInclude Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacterEnums.h" />
+    <ClInclude Include="src\CombatTrackerApp\Scenes\MainMenuScene.h" />
     <ClInclude Include="src\CombatTrackerLib\App.h" />
+    <ClInclude Include="src\CombatTrackerLib\Scene.h" />
     <ClInclude Include="src\CombatTrackerLib\Window.h" />
     <ClInclude Include="vendor\glad\glad.h" />
     <ClInclude Include="vendor\Imgui\backends\imgui_impl_glfw.h" />
@@ -158,11 +162,15 @@
     <ClInclude Include="vendor\Imgui\misc\cpp\imgui_stdlib.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\CombatTrackerApp\Entity\Creature\Creature.cpp" />
-    <ClCompile Include="src\CombatTrackerApp\Entity\Monster\Monster.cpp" />
-    <ClCompile Include="src\CombatTrackerApp\Entity\PlayerCharacter\PlayerCharacter.cpp" />
+    <ClCompile Include="src\CombatTrackerApp\Entities\Creature\Creature.cpp" />
+    <ClCompile Include="src\CombatTrackerApp\Entities\Encounter\Encounter.cpp" />
+    <ClCompile Include="src\CombatTrackerApp\Entities\Turn\Turn.cpp" />
+    <ClCompile Include="src\CombatTrackerApp\Entities\Monster\Monster.cpp" />
+    <ClCompile Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacter.cpp" />
     <ClCompile Include="src\CombatTrackerApp\main.cpp" />
+    <ClCompile Include="src\CombatTrackerApp\Scenes\PresenceScene.h" />
     <ClCompile Include="src\CombatTrackerLib\App.cpp" />
+    <ClCompile Include="src\CombatTrackerLib\Scene.cpp" />
     <ClCompile Include="src\CombatTrackerLib\Window.cpp" />
     <ClCompile Include="vendor\glad\glad.c" />
     <ClCompile Include="vendor\Imgui\backends\imgui_impl_glfw.cpp" />

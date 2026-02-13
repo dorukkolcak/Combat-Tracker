@@ -54,31 +54,43 @@
     <ClInclude Include="vendor\glad\glad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\CombatTrackerApp\Entity\PlayerCharacter\PlayerCharacter.h">
+    <ClInclude Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\CombatTrackerApp\Entity\Monster\Monster.h">
+    <ClInclude Include="src\CombatTrackerApp\Entities\Monster\Monster.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\CombatTrackerApp\Entity\Creature\CreatureEnums.h">
+    <ClInclude Include="src\CombatTrackerApp\Entities\Creature\CreatureEnums.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\CombatTrackerApp\Entity\Creature\Creature.h">
+    <ClInclude Include="src\CombatTrackerApp\Entities\Creature\Creature.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\CombatTrackerApp\Entity\Creature\CreatureTypes.h">
+    <ClInclude Include="src\CombatTrackerApp\Entities\Creature\CreatureTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\CombatTrackerApp\Entity\PlayerCharacter\PlayerCharacterEnums.h">
+    <ClInclude Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacterEnums.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\CombatTrackerApp\Entity\Creature\CreatureConstants.h">
+    <ClInclude Include="src\CombatTrackerApp\Entities\Creature\CreatureConstants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\CombatTrackerApp\Entity\PlayerCharacter\PlayerCharacterConstants.h">
+    <ClInclude Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacterConstants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\CombatTrackerApp\Entity\Monster\MonsterConstants.h">
+    <ClInclude Include="src\CombatTrackerApp\Entities\Monster\MonsterConstants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CombatTrackerLib\Scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CombatTrackerApp\Entities\Encounter\Encounter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CombatTrackerApp\Entities\Turn\Turn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CombatTrackerApp\Scenes\MainMenuScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -119,13 +131,25 @@
     <ClCompile Include="src\CombatTrackerApp\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CombatTrackerApp\Entity\Creature\Creature.cpp">
+    <ClCompile Include="src\CombatTrackerApp\Entities\Creature\Creature.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CombatTrackerApp\Entity\Monster\Monster.cpp">
+    <ClCompile Include="src\CombatTrackerApp\Entities\Monster\Monster.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CombatTrackerApp\Entity\PlayerCharacter\PlayerCharacter.cpp">
+    <ClCompile Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CombatTrackerApp\Entities\Encounter\Encounter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CombatTrackerApp\Entities\Turn\Turn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CombatTrackerLib\Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CombatTrackerApp\Scenes\PresenceScene.h">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

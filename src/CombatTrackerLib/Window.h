@@ -12,6 +12,7 @@ namespace CombatTrackerLib {
 		std::uint16_t height;
 		std::string title;
 		bool isResizable;
+		bool isVsyncEnabled;
 	};
 
 	class Window {
@@ -19,6 +20,7 @@ namespace CombatTrackerLib {
 		Window(const WindowSpecification& specification);
 		~Window();
 
+		void update();
 		void destroy();
 		int getWindowShouldClose();
 		GLFWwindow*& getGLFWwindow();

@@ -14,6 +14,9 @@ namespace CombatTrackerLib {
 		if (specification.isResizable) {
 			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		}
+		if (specification.isVsyncEnabled) {
+			glfwSwapInterval(1);
+		}
 		float mainScale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()); 
 		window = glfwCreateWindow((int) (mainScale * specification.width), (int) (mainScale * specification.height), specification.title.c_str(), NULL, NULL);
 		assert(window != nullptr);
@@ -21,6 +24,10 @@ namespace CombatTrackerLib {
 	}
 	Window::~Window() {
 		destroy();
+	}
+	void Window::update() {
+		glfwSwapBuffers(window);
+		glfwPollEvents();
 	}
 	void Window::destroy() {
 		glfwDestroyWindow(window);
