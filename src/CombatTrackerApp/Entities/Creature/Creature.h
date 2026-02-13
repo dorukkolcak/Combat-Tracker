@@ -9,11 +9,20 @@
 #include "CreatureEnums.h"
 #include "CreatureTypes.h"
 
+
 namespace CombatTrackerApp {
+	/*
+	A creature's name must be unique and its name will be used to refer to the overall creature.
+	This also implies that the saved named creatures will have their own unique names.
+	This DOESN'T mean that we can't have creatures with the same name in an encounter.
+	We can have multiples of the same creature. To refer to each instance of the same creature, we will use IDs.
+	An INSTANCE of any creature will have a unique ID, that will be generated at the start of encounter runnning.
+	This ID isn't really used to refer to creature'S type/identity, we use its name for this purpose.
+	*/
 	struct CreatureStatBlock {
 		// COMPUTED, NOT OVERRIDABLE
 		std::uint32_t ID;
-		// MANUALLY SET
+		//MANUALLY SET
 		std::string name;
 		// MANUALLY SET
 		Size size;

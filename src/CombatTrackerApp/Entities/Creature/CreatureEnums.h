@@ -30,8 +30,14 @@ namespace CombatTrackerApp {
 		ACTION,
 		BONUS_ACTION,
 		REACTION,
-		LEGENDARY_ACTION,
-		LAIR_ACTION
+		LEGENDARY_ACTION, // Should only be available to Monster. 
+		LAIR_ACTION // Should only be available to Monster.
+		/*
+		Unleash Actions need a lot more custom functionality compared to other actions.
+		Action Progress Bar, Immediate Trigger support
+		References to Progressive Actions (Monster Actions that contribute progress to Unleash Action's trigger.)
+		Should only be available to Monster.
+		*/
 		//UNLEASH_ACTION
 	};
 	enum class Skill {

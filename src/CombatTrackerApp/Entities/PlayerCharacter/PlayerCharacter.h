@@ -11,7 +11,6 @@ namespace CombatTrackerApp {
 		std::unordered_map<PlayerClass, std::uint16_t> levels;
 		// MANUALLY SET, level of the appropriate PlayerClass must surpass SUBCLASS_LEVEL_THRESHOLD for each subclass.
 		// Each PlayerClass can only have one PlayerSubclass.
-		// TODO: Reconsider the use of data structure here later.
 		std::unordered_map<PlayerClass, PlayerSubclass> subclasses;
 		// MANUALLY SET
 		std::unordered_set<WeaponType> weaponProficiencies;

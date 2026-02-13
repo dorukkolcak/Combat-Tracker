@@ -12,6 +12,8 @@ namespace CombatTrackerApp {
 	public:
 		Monster(CreatureStatBlock statBlock, const double creatureCR, const std::uint32_t creatureXP);
 		~Monster();
+
+		std::uint32_t getXP();
 	};
 	class MonsterBuilder : public CreatureBuilder {
 	public:
