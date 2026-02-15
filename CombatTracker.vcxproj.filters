@@ -149,7 +149,13 @@
     <ClCompile Include="src\CombatTrackerLib\Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CombatTrackerApp\Scenes\PresenceScene.h">
+    <ClCompile Include="src\CombatTrackerApp\Scenes\OverlayScene.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CombatTrackerApp\Scenes\OverlayScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CombatTrackerApp\Scenes\MainMenuScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -7,9 +7,8 @@
 #include <unordered_map>
 #include <vector>
 
-class Scene;
-
 namespace CombatTrackerLib {
+	class Scene;
 	struct AppSpecification {
 		std::string applicationName;
 		CombatTrackerLib::WindowSpecification mainWindowSpecification;
@@ -25,6 +24,7 @@ namespace CombatTrackerLib {
 		void queueDeleteScene(Scene* sceneToBeDeleted);
 		void queueSceneTransition(Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo);
 		void dequeueSceneOperations();
+
 	private:
 		AppSpecification applicationSpecification;
 		std::unique_ptr<Window> mainWindow;

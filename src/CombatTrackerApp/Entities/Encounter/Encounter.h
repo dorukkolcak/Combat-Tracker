@@ -8,9 +8,10 @@
 #include "../Monster/Monster.h"
 #include "../Turn/Turn.h"
 
-class Turn;
+
 
 namespace CombatTrackerApp {
+	class Turn;
 	class Encounter {
 	private:
 		std::uint32_t ID;

@@ -27,7 +27,7 @@ namespace CombatTrackerLib {
 	private:
 		const WindowSpecification INITIAL_WINDOW_SPECIFICATION;
 		GLFWwindow* window;
-
-		void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
+		// This needs to be static to be registered as frame buffer callback function.
+		static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
 	};
 }

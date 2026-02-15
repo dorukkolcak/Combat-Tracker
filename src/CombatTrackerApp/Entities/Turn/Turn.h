@@ -2,9 +2,8 @@
 
 #include "../Encounter/Encounter.h"
 
-class Encounter;
-
 namespace CombatTrackerApp {
+	class Encounter;
 	class Turn {
 	private:
 		std::uint16_t turnNumber;

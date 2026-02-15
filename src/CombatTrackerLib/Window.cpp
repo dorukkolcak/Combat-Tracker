@@ -3,6 +3,7 @@
 #include "imgui_impl_opengl3.h"
 #include <iostream>
 #include <cassert>
+
 #include "Window.h"
 
 namespace CombatTrackerLib {
@@ -14,20 +15,19 @@ namespace CombatTrackerLib {
 		if (specification.isResizable) {
 			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		}
-		if (specification.isVsyncEnabled) {
-			glfwSwapInterval(1);
-		}
 		float mainScale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()); 
 		window = glfwCreateWindow((int) (mainScale * specification.width), (int) (mainScale * specification.height), specification.title.c_str(), NULL, NULL);
 		assert(window != nullptr);
 		glfwMakeContextCurrent(window);
+		if (specification.isVsyncEnabled) {
+			glfwSwapInterval(1);
+		}
+		glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
 	}
-	Window::~Window() {
-		destroy();
-	}
+	// Once again should be left empty as we have a seperate function for destroying the window.
+	Window::~Window() {}
 	void Window::update() {
 		glfwSwapBuffers(window);
-		glfwPollEvents();
 	}
 	void Window::destroy() {
 		glfwDestroyWindow(window);

@@ -168,7 +168,9 @@
     <ClCompile Include="src\CombatTrackerApp\Entities\Monster\Monster.cpp" />
     <ClCompile Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacter.cpp" />
     <ClCompile Include="src\CombatTrackerApp\main.cpp" />
-    <ClCompile Include="src\CombatTrackerApp\Scenes\PresenceScene.h" />
+    <ClCompile Include="src\CombatTrackerApp\Scenes\MainMenuScene.cpp" />
+    <ClCompile Include="src\CombatTrackerApp\Scenes\OverlayScene.cpp" />
+    <ClCompile Include="src\CombatTrackerApp\Scenes\OverlayScene.h" />
     <ClCompile Include="src\CombatTrackerLib\App.cpp" />
     <ClCompile Include="src\CombatTrackerLib\Scene.cpp" />
     <ClCompile Include="src\CombatTrackerLib\Window.cpp" />
