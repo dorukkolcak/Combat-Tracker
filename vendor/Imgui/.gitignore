@@ -1,46 +1,3 @@
-<<<<<<< HEAD
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-# debug information files
-*.dwo
-=======
 ## OSX artifacts
 .DS_Store
 
@@ -120,4 +77,3 @@ examples/example_sdl3_opengl3/example_sdl3_opengl3
 examples/example_sdl3_sdlgpu3/example_sdl3_sdlgpu3
 examples/example_sdl3_sdlrenderer3/example_sdl3_sdlrenderer3
 examples/example_sdl3_vulkan/example_sdl3_vulkan
->>>>>>> 1bcc23ef123869240971427902b32109c8157e24

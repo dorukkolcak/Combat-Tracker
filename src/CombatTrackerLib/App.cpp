@@ -32,7 +32,7 @@ namespace CombatTrackerLib {
 		ImGuiIO& imguiIO = ImGui::GetIO();
 		imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 		imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;	   // Enable Gamepad Controls
-
+		imguiIO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;		   // Enable Docking
 		// Set the reset color value used when glClear is called. Currently this is tan.
 		glClearColor(0.858824f, 0.576471f, 0.439216f, 1.0f);
 
