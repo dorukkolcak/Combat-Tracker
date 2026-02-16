@@ -1,47 +1,85 @@
 #include "MainMenuScene.h"
+#include "./EncounterManagement/EncounterCreationScene.h"
+#include "./EncounterManagement/EncounterRunningScene.h"
+#include "./EncounterManagement/CompletedEncountersScene.h"
 #include "imgui.h"
+#include "imgui_internal.h"
 
 namespace CombatTrackerApp {
-	MainMenuScene::MainMenuScene(CombatTrackerLib::App* app) : CombatTrackerLib::Scene(app)
+	MainMenuScene::MainMenuScene(CombatTrackerLib::App* app) : 
+		CombatTrackerLib::Scene(app)
 	{
+        mainMenuDockspaceFlags =
+            ImGuiDockNodeFlags_NoResize |
+            ImGuiDockNodeFlags_NoSplit |
+            ImGuiDockNodeFlags_PassthruCentralNode;
+        hostWindowFlags = 
+        ImGuiWindowFlags_NoDocking |
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoBringToFrontOnFocus |
+            ImGuiWindowFlags_NoNavFocus |
+            ImGuiWindowFlags_MenuBar;
+
 	}
 	MainMenuScene::~MainMenuScene() {}
     void MainMenuScene::notifyScene(ImGuiIO& imguiIO) {}
     void MainMenuScene::updateScene(double timeInterval) {}
-    void MainMenuScene::renderUI() {
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
+    void MainMenuScene::renderUI()  {
 
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-        {
+        mainMenuDockspaceID = ImGui::GetID("Main Menu Dockspace");
+        mainMenuViewport = ImGui::GetMainViewport();
 
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+        // Set configurations of the host window of the scene.
+        ImGui::SetNextWindowPos(mainMenuViewport->WorkPos);
+        ImGui::SetNextWindowSize(mainMenuViewport->WorkSize);
+        ImGui::SetNextWindowViewport(mainMenuViewport->ID);
+        // Create the host window.
+        ImGui::Begin("Host Window", nullptr, hostWindowFlags);
 
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
+        // Create the dockplace settings and layout.
+        ImGui::DockBuilderAddNode(mainMenuDockspaceID, ImGuiDockNodeFlags_DockSpace);
+        ImGui::DockBuilderSetNodeSize(mainMenuDockspaceID, mainMenuViewport->WorkSize);
 
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+        ImGui::DockBuilderSplitNode(mainMenuDockspaceID, ImGuiDir_Left, 0.33f, &encounterCreationID, &encounterRunningID);
+        ImGui::DockBuilderSplitNode(encounterRunningID, ImGuiDir_Right, 0.50f, &completedEncountersViewID, &encounterRunningID);
 
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-            ImGui::End();
-        }
+        ImGui::DockBuilderDockWindow("Encounter Creation", encounterCreationID);
+        ImGui::DockBuilderDockWindow("Run Encounter", encounterRunningID);
+        ImGui::DockBuilderDockWindow("View Completed Encounters", completedEncountersViewID);
 
-        // 3. Show another simple window.
-        if (show_another_window)
-        {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me")) {
-                show_another_window = false;
-                applicationReference->queueDeleteScene(this);
+        ImGui::DockBuilderFinish(mainMenuDockspaceID);
+
+        // Create the actual dockspace inside the host window.
+        ImGui::DockSpace(mainMenuDockspaceID, ImVec2(0, 0), mainMenuDockspaceFlags);
+        ImGui::End();
+
+        // TODO: Create the Encounter Creation window. Finalize UI designs.
+        if (ImGui::Begin("Encounter Creation")) {
+            if (ImGui::Button("Create Encounter")) {
+                applicationReference->queueSceneTransition(this,std::make_unique<EncounterCreationScene>(applicationReference));
             }
-            ImGui::End();
         }
+        ImGui::End();
+
+        // TODO: Create the Run Encounter window. Finalize UI designs.
+        if (ImGui::Begin("Run Encounter")) {
+            if (ImGui::Button("Select Encounter")) {
+                applicationReference->queueSceneTransition(this, std::make_unique<EncounterRunningScene>(applicationReference));
+            }
+        }
+        ImGui::End();
+
+        // TODO: Create the Completed Encounters window. Finalize UI designs.
+        if (ImGui::Begin("View Completed Encounters")) {
+            if (ImGui::Button("Browse Encounters")) {
+                applicationReference->queueSceneTransition(this, std::make_unique<CompletedEncountersScene>(applicationReference));
+            }
+        }
+        ImGui::End();
     }
+
 	void MainMenuScene::renderScene() {}
 }

@@ -11,6 +11,7 @@ namespace CombatTrackerLib {
 	class Scene;
 	struct AppSpecification {
 		std::string applicationName;
+		bool isDarkModeEnabled;
 		CombatTrackerLib::WindowSpecification mainWindowSpecification;
 	};
 	class App {
@@ -23,7 +24,6 @@ namespace CombatTrackerLib {
 		void queueAddScene(std::unique_ptr<Scene> scene);
 		void queueDeleteScene(Scene* sceneToBeDeleted);
 		void queueSceneTransition(Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo);
-		void dequeueSceneOperations();
 
 	private:
 		AppSpecification applicationSpecification;
@@ -62,6 +62,14 @@ namespace CombatTrackerLib {
 		Once again this can easily be done with std::move
 		You might notice that scene transitions are simply deletion + addition consecutively.
 		*/
+		void dequeueSceneOperations();
+
+		void createImguiLightTheme();
+		void createImguiDarkTheme();
+
+		static void setupLayout();
+		static void initializeCommonColors();
+
 	};
 	// A functor (function object) that marks whether a scene is empty or not by looking for null pointers.
 	// Used in scene deletion.

@@ -93,6 +93,27 @@
     <ClInclude Include="src\CombatTrackerApp\Scenes\MainMenuScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterCreationScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CombatTrackerApp\Scenes\CompletedEncountersScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterRunningScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterManagement\CompletedEncountersScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterManagement\EncounterCreationScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterManagement\EncounterRunningScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CombatTrackerLib\Styling.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vendor\Imgui\imgui.cpp">
@@ -156,6 +177,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\CombatTrackerApp\Scenes\MainMenuScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CombatTrackerApp\Scenes\EncounterManagement\CompletedEncountersScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CombatTrackerApp\Scenes\EncounterManagement\EncounterCreationScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CombatTrackerApp\Scenes\EncounterManagement\EncounterRunningScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

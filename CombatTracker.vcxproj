@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -145,9 +145,16 @@
     <ClInclude Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacter.h" />
     <ClInclude Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacterConstants.h" />
     <ClInclude Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacterEnums.h" />
+    <ClInclude Include="src\CombatTrackerApp\Scenes\CompletedEncountersScene.h" />
+    <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterCreationScene.h" />
+    <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterManagement\CompletedEncountersScene.h" />
+    <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterManagement\EncounterCreationScene.h" />
+    <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterManagement\EncounterRunningScene.h" />
+    <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterRunningScene.h" />
     <ClInclude Include="src\CombatTrackerApp\Scenes\MainMenuScene.h" />
     <ClInclude Include="src\CombatTrackerLib\App.h" />
     <ClInclude Include="src\CombatTrackerLib\Scene.h" />
+    <ClInclude Include="src\CombatTrackerLib\Styling.h" />
     <ClInclude Include="src\CombatTrackerLib\Window.h" />
     <ClInclude Include="vendor\glad\glad.h" />
     <ClInclude Include="vendor\Imgui\backends\imgui_impl_glfw.h" />
@@ -168,6 +175,9 @@
     <ClCompile Include="src\CombatTrackerApp\Entities\Monster\Monster.cpp" />
     <ClCompile Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacter.cpp" />
     <ClCompile Include="src\CombatTrackerApp\main.cpp" />
+    <ClCompile Include="src\CombatTrackerApp\Scenes\EncounterManagement\CompletedEncountersScene.cpp" />
+    <ClCompile Include="src\CombatTrackerApp\Scenes\EncounterManagement\EncounterCreationScene.cpp" />
+    <ClCompile Include="src\CombatTrackerApp\Scenes\EncounterManagement\EncounterRunningScene.cpp" />
     <ClCompile Include="src\CombatTrackerApp\Scenes\MainMenuScene.cpp" />
     <ClCompile Include="src\CombatTrackerApp\Scenes\OverlayScene.cpp" />
     <ClCompile Include="src\CombatTrackerApp\Scenes\OverlayScene.h" />

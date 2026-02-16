@@ -9,6 +9,8 @@ namespace CombatTrackerApp {
 
 	void OverlayScene::notifyScene(ImGuiIO& imguiIO) {}
 	void OverlayScene::updateScene(double timeInterval) {}
-	void OverlayScene::renderUI() {}
+	void OverlayScene::renderUI() {
+		ImGui::ShowDebugLogWindow();
+	}
 	void OverlayScene::renderScene() {}
 }
