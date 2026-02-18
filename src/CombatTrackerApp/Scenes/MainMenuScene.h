@@ -14,15 +14,14 @@ namespace CombatTrackerApp {
 		virtual void renderScene() override;
 
 	private:
-		ImGuiID mainMenuDockspaceID{};
-		ImGuiViewport* mainMenuViewport = nullptr;
-
-		ImGuiDockNodeFlags mainMenuDockspaceFlags;
+		ImGuiDockNodeFlags mainMenuDockspaceFlags{};
 		ImGuiWindowFlags hostWindowFlags{};
 
-		ImGuiID encounterCreationID{};
-		ImGuiID encounterRunningID{};
-		ImGuiID completedEncountersViewID{};
+		ImGuiID mainMenuDockspaceID{};
+		ImGuiID encounterCreationWindowID{};
+		ImGuiID encounterRunningWindowID{};
+		ImGuiID completedEncountersWindowID{};
+		ImGuiID mainMenuTitleWindowID{};
 
 	};
 

@@ -17,7 +17,7 @@ namespace CombatTrackerApp {
 	This DOESN'T mean that we can't have creatures with the same name in an encounter.
 	We can have multiples of the same creature. To refer to each instance of the same creature, we will use IDs.
 	An INSTANCE of any creature will have a unique ID, that will be generated at the start of encounter runnning.
-	This ID isn't really used to refer to creature'S type/identity, we use its name for this purpose.
+	This ID isn't really used to refer to creature's type/identity, we use its name for this purpose.
 	*/
 	struct CreatureStatBlock {
 		// COMPUTED, NOT OVERRIDABLE

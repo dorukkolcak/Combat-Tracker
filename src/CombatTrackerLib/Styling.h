@@ -6,13 +6,6 @@ namespace CombatTrackerLib {
 	inline constexpr ImVec2 FRAME_PADDING(10, 7);
 	inline constexpr ImVec2 ITEM_SPACING(10, 9);
 	inline constexpr ImVec2 ITEM_INNER_SPACING(8, 6);
-	inline constexpr float WINDOW_ROUNDING { 10.0f };
-	inline constexpr float CHILD_ROUNDING { 10.0f };
-	inline constexpr float FRAME_ROUNDING { 8.0f };
-	inline constexpr float POPUP_ROUNDING { 10.0f };
-	inline constexpr float SCROLLBAR_ROUNDING { 10.0f };
-	inline constexpr float GRAB_ROUNDING { 10.0f };
-	inline constexpr float TAB_ROUNDING { 10.0f };
 	inline constexpr float WINDOW_BORDER_SIZE { 1.0f };
 	inline constexpr float FRAME_BORDER_SIZE { 1.0f };
 	inline constexpr float TAB_BORDER_SIZE { 1.0f };

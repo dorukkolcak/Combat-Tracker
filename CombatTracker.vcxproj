@@ -147,9 +147,7 @@
     <ClInclude Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacterEnums.h" />
     <ClInclude Include="src\CombatTrackerApp\Scenes\CompletedEncountersScene.h" />
     <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterCreationScene.h" />
-    <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterManagement\CompletedEncountersScene.h" />
-    <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterManagement\EncounterCreationScene.h" />
-    <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterManagement\EncounterRunningScene.h" />
+    <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterCreationScene.h" />
     <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterRunningScene.h" />
     <ClInclude Include="src\CombatTrackerApp\Scenes\MainMenuScene.h" />
     <ClInclude Include="src\CombatTrackerLib\App.h" />
@@ -175,9 +173,7 @@
     <ClCompile Include="src\CombatTrackerApp\Entities\Monster\Monster.cpp" />
     <ClCompile Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacter.cpp" />
     <ClCompile Include="src\CombatTrackerApp\main.cpp" />
-    <ClCompile Include="src\CombatTrackerApp\Scenes\EncounterManagement\CompletedEncountersScene.cpp" />
-    <ClCompile Include="src\CombatTrackerApp\Scenes\EncounterManagement\EncounterCreationScene.cpp" />
-    <ClCompile Include="src\CombatTrackerApp\Scenes\EncounterManagement\EncounterRunningScene.cpp" />
+    <ClCompile Include="src\CombatTrackerApp\Scenes\EncounterCreationScene.cpp" />
     <ClCompile Include="src\CombatTrackerApp\Scenes\MainMenuScene.cpp" />
     <ClCompile Include="src\CombatTrackerApp\Scenes\OverlayScene.cpp" />
     <ClCompile Include="src\CombatTrackerApp\Scenes\OverlayScene.h" />

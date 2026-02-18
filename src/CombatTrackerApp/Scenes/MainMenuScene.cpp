@@ -1,7 +1,5 @@
 #include "MainMenuScene.h"
-#include "./EncounterManagement/EncounterCreationScene.h"
-#include "./EncounterManagement/EncounterRunningScene.h"
-#include "./EncounterManagement/CompletedEncountersScene.h"
+#include "EncounterCreationScene.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
@@ -20,66 +18,100 @@ namespace CombatTrackerApp {
             ImGuiWindowFlags_NoResize |
             ImGuiWindowFlags_NoMove |
             ImGuiWindowFlags_NoBringToFrontOnFocus |
-            ImGuiWindowFlags_NoNavFocus |
-            ImGuiWindowFlags_MenuBar;
+            ImGuiWindowFlags_NoNavFocus;
 
 	}
 	MainMenuScene::~MainMenuScene() {}
+    // Will probably be unused as all event handling in this scene is done by ImGui.
     void MainMenuScene::notifyScene(ImGuiIO& imguiIO) {}
+    // Will probably be unused as no real application logic occurs here.
     void MainMenuScene::updateScene(double timeInterval) {}
+
     void MainMenuScene::renderUI()  {
 
         mainMenuDockspaceID = ImGui::GetID("Main Menu Dockspace");
-        mainMenuViewport = ImGui::GetMainViewport();
+
+        ImGuiViewport* mainViewport = ImGui::GetMainViewport();
 
         // Set configurations of the host window of the scene.
-        ImGui::SetNextWindowPos(mainMenuViewport->WorkPos);
-        ImGui::SetNextWindowSize(mainMenuViewport->WorkSize);
-        ImGui::SetNextWindowViewport(mainMenuViewport->ID);
+        ImGui::SetNextWindowPos(mainViewport->WorkPos);
+        ImGui::SetNextWindowSize(mainViewport->WorkSize);
+        ImGui::SetNextWindowViewport(mainViewport->ID);
         // Create the host window.
         ImGui::Begin("Host Window", nullptr, hostWindowFlags);
 
         // Create the dockplace settings and layout.
         ImGui::DockBuilderAddNode(mainMenuDockspaceID, ImGuiDockNodeFlags_DockSpace);
-        ImGui::DockBuilderSetNodeSize(mainMenuDockspaceID, mainMenuViewport->WorkSize);
+        ImGui::DockBuilderSetNodeSize(mainMenuDockspaceID, mainViewport->WorkSize);
 
-        ImGui::DockBuilderSplitNode(mainMenuDockspaceID, ImGuiDir_Left, 0.33f, &encounterCreationID, &encounterRunningID);
-        ImGui::DockBuilderSplitNode(encounterRunningID, ImGuiDir_Right, 0.50f, &completedEncountersViewID, &encounterRunningID);
-
-        ImGui::DockBuilderDockWindow("Encounter Creation", encounterCreationID);
-        ImGui::DockBuilderDockWindow("Run Encounter", encounterRunningID);
-        ImGui::DockBuilderDockWindow("View Completed Encounters", completedEncountersViewID);
-
+        // Configure dockspace layout.
+        ImGuiID bottom = mainMenuDockspaceID;
+        ImGui::DockBuilderSplitNode(mainMenuDockspaceID, ImGuiDir_Up, 0.60f, &mainMenuTitleWindowID, &bottom);
+        ImGui::DockBuilderSplitNode(bottom, ImGuiDir_Left, 0.33f, &encounterCreationWindowID, &encounterRunningWindowID);
+        ImGui::DockBuilderSplitNode(encounterRunningWindowID, ImGuiDir_Right, 0.50f, &completedEncountersWindowID, &encounterRunningWindowID);
+       
+        // Dock windows.
+        ImGui::DockBuilderDockWindow("CombatTracker", mainMenuTitleWindowID);
+        ImGui::DockBuilderDockWindow("Encounter Creation", encounterCreationWindowID);
+        ImGui::DockBuilderDockWindow("Run Encounter", encounterRunningWindowID);
+        ImGui::DockBuilderDockWindow("View Completed Encounters", completedEncountersWindowID);
+       
+        // Finish dockspace creation.
         ImGui::DockBuilderFinish(mainMenuDockspaceID);
-
-        // Create the actual dockspace inside the host window.
         ImGui::DockSpace(mainMenuDockspaceID, ImVec2(0, 0), mainMenuDockspaceFlags);
         ImGui::End();
+        
+        /*
+        TODO: Title screen window. Finalize UI designs. This should ideally render an OpenGL texture.
+        Rather add the texture to be added to the draw list of the window. 
+        So that it can be rendered during renderScene call.
+        */
+        ImGui::Begin("CombatTracker");
+        //ImGui::GetWindowDrawList()->AddImage();
+        ImGui::End();
 
-        // TODO: Create the Encounter Creation window. Finalize UI designs.
-        if (ImGui::Begin("Encounter Creation")) {
-            if (ImGui::Button("Create Encounter")) {
-                applicationReference->queueSceneTransition(this,std::make_unique<EncounterCreationScene>(applicationReference));
-            }
+        // Encounter Creation window.
+        ImGui::Begin("Encounter Creation");
+        ImGui::TextWrapped("Creature Management");
+        ImGui::Bullet(); ImGui::TextWrapped("Create and save monsters and player characters.");
+        ImGui::Bullet(); ImGui::TextWrapped("Browse and modify your saved monsters and player characters through the compendium.");
+        ImGui::Bullet(); ImGui::TextWrapped("In addition, browse premade monsters and player characters through the compendium.");
+        ImGui::TextWrapped("Encounter Management");
+        ImGui::Bullet(); ImGui::TextWrapped("Create and save encounters from the giant list of creatures.");
+        ImGui::Bullet(); ImGui::TextWrapped("Browse and modify your saved encounters through the compendium.");
+        ImGui::Bullet(); ImGui::TextWrapped("In addition, browse premade encounters using premade creatures through the compendium.");
+        ImGui::Bullet(); ImGui::TextWrapped("Attach a battlemap texture to created encounters for better visualization.");
+        if (Scene::centeredButton("Create Encounter")) {
+            applicationReference->queueSceneTransition(this,std::make_unique<EncounterCreationScene>(applicationReference));
         }
         ImGui::End();
 
-        // TODO: Create the Run Encounter window. Finalize UI designs.
-        if (ImGui::Begin("Run Encounter")) {
-            if (ImGui::Button("Select Encounter")) {
-                applicationReference->queueSceneTransition(this, std::make_unique<EncounterRunningScene>(applicationReference));
-            }
+        // Run Encounter window.
+        ImGui::Begin("Run Encounter");
+        ImGui::TextWrapped("Preperation Phase");
+        ImGui::Bullet(); ImGui::TextWrapped("After selecting an encounter, roll or set initiative.");
+        ImGui::Bullet(); ImGui::TextWrapped("Place creatures in their initial positions in either the associated battlemap or an empty-premade battlemap.");
+        ImGui::TextWrapped("Running Encounters");
+        ImGui::Bullet(); ImGui::TextWrapped("Progress encounters in a turn-by-turn basis.");
+        ImGui::Bullet(); ImGui::TextWrapped("Select which actions each creature plays in a turn.");
+        ImGui::Bullet(); ImGui::TextWrapped("Move each creature in the battlemap with both 2D or 3D visualization options.");
+        ImGui::TextWrapped("Finishing Encounters");
+        ImGui::Bullet(); ImGui::TextWrapped("Finish the current encounter and save the results.");
+        if (Scene::centeredButton("Select Encounter")) {
+            //applicationReference->queueSceneTransition(this, std::make_unique<EncounterRunningScene>(applicationReference));
         }
         ImGui::End();
 
-        // TODO: Create the Completed Encounters window. Finalize UI designs.
-        if (ImGui::Begin("View Completed Encounters")) {
-            if (ImGui::Button("Browse Encounters")) {
-                applicationReference->queueSceneTransition(this, std::make_unique<CompletedEncountersScene>(applicationReference));
-            }
+        // Completed Encounters window.
+        ImGui::Begin("View Completed Encounters");
+        ImGui::Bullet(); ImGui::TextWrapped("Browse the list of your completed encounters and analyze their results.");
+        ImGui::Bullet(); ImGui::TextWrapped("Remember what happened exactly in each turn.");
+        if (Scene::centeredButton("Browse Encounters")) {
+            //applicationReference->queueSceneTransition(this, std::make_unique<CompletedEncountersScene>(applicationReference));
         }
         ImGui::End();
     }
-
 	void MainMenuScene::renderScene() {}
+
+
 }

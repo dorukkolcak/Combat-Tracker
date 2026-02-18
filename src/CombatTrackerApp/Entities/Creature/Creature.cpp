@@ -5,7 +5,7 @@ namespace CombatTrackerApp {
 	Creature::Creature(CreatureStatBlock creatureBlock) : statBlockCreaturePortion(std::move(creatureBlock)) {
 		//TODO: Find a method for ID generation.
 	}
-	// Ideally, we do stack allocation for all of these members. So the constructor should be empty.
+	// Ideally, we do stack allocation for all of these members. So the destructor should be empty.
 	Creature::~Creature() {}
 	std::int16_t Creature::findAbilityScoreModifier(int abilityScore) {
 		return (abilityScore - 10) / 2;

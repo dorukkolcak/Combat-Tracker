@@ -16,7 +16,7 @@ namespace CombatTrackerLib {
 	};
 	class App {
 	public:
-		App(const AppSpecification& applicationSpecification);
+		App(const AppSpecification& specification);
 		~App();
 		void run();
 		void stop();
@@ -24,6 +24,10 @@ namespace CombatTrackerLib {
 		void queueAddScene(std::unique_ptr<Scene> scene);
 		void queueDeleteScene(Scene* sceneToBeDeleted);
 		void queueSceneTransition(Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo);
+
+		static void createImguiLightTheme();
+		static void createImguiDarkTheme();
+		static void initializeCommonColors();
 
 	private:
 		AppSpecification applicationSpecification;
@@ -64,11 +68,7 @@ namespace CombatTrackerLib {
 		*/
 		void dequeueSceneOperations();
 
-		void createImguiLightTheme();
-		void createImguiDarkTheme();
-
 		static void setupLayout();
-		static void initializeCommonColors();
 
 	};
 	// A functor (function object) that marks whether a scene is empty or not by looking for null pointers.

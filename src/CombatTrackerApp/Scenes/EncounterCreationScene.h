@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../../../CombatTrackerLib/Scene.h"
+#include "../../CombatTrackerLib/Scene.h"
 
 namespace CombatTrackerApp {
-	class EncounterRunningScene : public CombatTrackerLib::Scene {
+	class EncounterCreationScene : public CombatTrackerLib::Scene {
 	public:
-		EncounterRunningScene(CombatTrackerLib::App* app);
-		virtual ~EncounterRunningScene();
+		EncounterCreationScene(CombatTrackerLib::App* app);
+		virtual ~EncounterCreationScene();
 
 		virtual void notifyScene(ImGuiIO& imguiIO) override;
 		virtual void updateScene(double timeInterval) override;

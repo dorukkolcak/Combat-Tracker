@@ -8,8 +8,8 @@
 #include <ranges>
 
 namespace CombatTrackerLib {
-	App::App(const AppSpecification& applicationSpecification) {
-		this->applicationSpecification = applicationSpecification;
+	App::App(const AppSpecification& specification) : applicationSpecification(specification)
+	{
 		glfwInit();
 		mainWindow = std::make_unique<Window>(applicationSpecification.mainWindowSpecification);
 		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -19,7 +19,7 @@ namespace CombatTrackerLib {
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		/*
-		Pay attention to UI ordering here: 
+		Pay attention to the UI ordering here: 
 		Because we set the Imgui::Style in either dark or light theme, if the common colors are initialized before them, the common colors get overridden.
 		So initialize the common colors after dark or light theme initialization.
 		Ideally we should have an options section that dynamically changes the color scheme.
@@ -257,14 +257,6 @@ namespace CombatTrackerLib {
 		style.FramePadding = FRAME_PADDING;
 		style.ItemSpacing = ITEM_SPACING;
 		style.ItemInnerSpacing = ITEM_INNER_SPACING;
-
-		style.WindowRounding = WINDOW_ROUNDING;
-		style.ChildRounding = CHILD_ROUNDING;
-		style.FrameRounding = FRAME_ROUNDING;
-		style.PopupRounding = POPUP_ROUNDING;
-		style.ScrollbarRounding = SCROLLBAR_ROUNDING;
-		style.GrabRounding = GRAB_ROUNDING;
-		style.TabRounding = TAB_ROUNDING;
 
 		style.WindowBorderSize = WINDOW_BORDER_SIZE;
 		style.FrameBorderSize = FRAME_BORDER_SIZE;

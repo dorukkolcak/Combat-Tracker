@@ -22,5 +22,6 @@ namespace CombatTrackerLib {
 	protected:
 		// We keep this to queue scene events.
 		App* applicationReference;
+		static bool centeredButton(const char* buttonLabel);
 	};
 }
