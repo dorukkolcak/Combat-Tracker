@@ -147,7 +147,6 @@
     <ClInclude Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacterEnums.h" />
     <ClInclude Include="src\CombatTrackerApp\Scenes\CompletedEncountersScene.h" />
     <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterCreationScene.h" />
-    <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterCreationScene.h" />
     <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterRunningScene.h" />
     <ClInclude Include="src\CombatTrackerApp\Scenes\MainMenuScene.h" />
     <ClInclude Include="src\CombatTrackerLib\App.h" />

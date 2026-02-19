@@ -1,13 +1,12 @@
+#include <iostream>
+
 #include "OverlayScene.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_internal.h"
 
 namespace CombatTrackerApp {
-	OverlayScene::OverlayScene(CombatTrackerLib::App* app) : CombatTrackerLib::Scene(app)
+	OverlayScene::OverlayScene(CombatTrackerLib::App* app) : CombatTrackerLib::Scene(app), isOverlayDockspaceInitialized(false)
 	{
-		dockedWindowFlags = ImGuiWindowFlags_NoCollapse |
-			ImGuiWindowFlags_NoBringToFrontOnFocus |
-			ImGuiWindowFlags_NoNavFocus;
 	}
 	OverlayScene::~OverlayScene() {}
 
@@ -25,29 +24,47 @@ namespace CombatTrackerApp {
 		*/
 		ImGui::ShowDebugLogWindow();
 		ImGui::ShowMetricsWindow();
+		ImGui::ShowDemoWindow();
 
 		// Create the window that will host the dockspace.
-		ImGuiViewport* mainViewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowSize(ImVec2(mainViewport->Size.x / 3, mainViewport->Size.y / 3));
-		ImGui::Begin("Options", nullptr, 0);
+		// Set the initial window size based on the main viewport.
+		if (!isOverlayDockspaceInitialized) {
+			mainViewport = ImGui::GetMainViewport();
+			ImGui::SetNextWindowSize(ImVec2(mainViewport->Size.x / 3.0f, mainViewport->Size.y / 3.0f));
+		}
 
-		// Create the dockspace.
-		overlayDockspaceID = ImGui::GetID("Overlay Dockspace");
-		ImGui::DockBuilderAddNode(overlayDockspaceID, ImGuiDockNodeFlags_DockSpace);
-		ImGui::DockBuilderSetNodeSize(overlayDockspaceID, ImVec2(mainViewport->Size.x / 3, mainViewport->Size.y / 3));
+		// Render the host window.
+		ImGui::Begin("Options");
 
-		// TODO: Configure dockspace elements. Add more options as the app gets developed.
-		ImGuiID leftID = overlayDockspaceID;
-		ImGui::DockBuilderSplitNode(overlayDockspaceID, ImGuiDir_Left, 0.25f, &viewID, &leftID);
-		ImGui::DockBuilderDockWindow("View", viewID);
+		// Configure the dockspace if it isn't configured previously or has received changes.
+		if (!isOverlayDockspaceInitialized) {
 
-		// Finish dockspace creation.
-		ImGui::DockBuilderFinish(overlayDockspaceID);
-		ImGui::DockSpace(overlayDockspaceID, ImVec2(0, 0), 0);
+			overlayDockspaceID = ImGui::GetID("Overlay Dockspace");
+
+			// Setup dockspace node.
+			ImGui::DockBuilderRemoveNode(overlayDockspaceID);
+			ImGui::DockBuilderAddNode(overlayDockspaceID, ImGuiDockNodeFlags_DockSpace);
+			ImGui::DockBuilderSetNodeSize(overlayDockspaceID, ImVec2(mainViewport->Size.x / 3, mainViewport->Size.y / 3));
+
+			// Configure dockspace elements.
+			ImGui::DockBuilderSplitNode(overlayDockspaceID, ImGuiDir_Left, 0.50f, &generalID, &viewID);
+			ImGui::DockBuilderDockWindow("General", generalID);
+			ImGui::DockBuilderDockWindow("View", viewID);
+
+			// Finish dockspace creation.
+			ImGui::DockBuilderFinish(overlayDockspaceID);
+			isOverlayDockspaceInitialized = true;
+		}
+		// Render the dockspace.
+		ImGui::DockSpace(overlayDockspaceID, ImGui::GetWindowSize(), 0);
 		ImGui::End();
 
 		// Submit windows in dockspace.
-		ImGui::Begin("View", nullptr, dockedWindowFlags);
+		ImGui::Begin("General");
+
+		ImGui::End();
+
+		ImGui::Begin("View");
 		static int buttonCounter = 0;
 		if (ImGui::RadioButton("Dark Mode", &buttonCounter, 0)) {
 			CombatTrackerLib::App::createImguiDarkTheme();

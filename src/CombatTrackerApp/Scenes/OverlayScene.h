@@ -14,12 +14,11 @@ namespace CombatTrackerApp {
 		virtual void renderUI() override;
 		virtual void renderScene() override;
 	private:
+		// UI IDs.
 		ImGuiID overlayDockspaceID{};
-		ImGuiWindowFlags dockedWindowFlags{};
-
-		// Feel free to expand this as more options are added.
-		// If this get to large, consider storing them in a data structure.
+		ImGuiID generalID{};
 		ImGuiID viewID{};
-
+		// Dockspace layout flag.
+		bool isOverlayDockspaceInitialized;
 	};
 }

@@ -22,6 +22,9 @@ namespace CombatTrackerLib {
 	protected:
 		// We keep this to queue scene events.
 		App* applicationReference;
+
+		ImGuiViewport* mainViewport = nullptr;
+		
 		static bool centeredButton(const char* buttonLabel);
 	};
 }

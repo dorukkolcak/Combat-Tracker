@@ -13,5 +13,24 @@ namespace CombatTrackerApp {
 		virtual void renderUI() override;
 		virtual void renderScene() override;
 	private:
+		// Flags.
+		ImGuiWindowFlags encounterCreationWindowFlags{};
+		ImGuiDockNodeFlags encounterCreationDockFlags{};
+
+		// High level windows.
+		ImGuiID encounterManagerDockspaceID{};
+		ImGuiID encounterManagerWindowID{};
+		ImGuiID entityBrowserWindowID{};
+		ImGuiID buttonsWindowID{};
+
+		//Entity Browser lower level windows.
+		ImGuiID entityBrowserDockspaceID{};
+		ImGuiID monsterBrowserWindowID{};
+		ImGuiID playerCharacterBrowserWindowID{};
+		ImGuiID encounterBrowserWindowID{};
+
+		// Dockspace layout flags.
+		bool isEncounterManagerDockspaceInitialized;
+		bool isEntityBrowserDockspaceInitialized;
 	};
 }
