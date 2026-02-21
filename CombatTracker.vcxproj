@@ -164,6 +164,7 @@
     <ClInclude Include="vendor\Imgui\imstb_textedit.h" />
     <ClInclude Include="vendor\Imgui\imstb_truetype.h" />
     <ClInclude Include="vendor\Imgui\misc\cpp\imgui_stdlib.h" />
+    <ClInclude Include="vendor\json.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CombatTrackerApp\Entities\Creature\Creature.cpp" />

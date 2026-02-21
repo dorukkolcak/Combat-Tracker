@@ -1,9 +1,32 @@
 #pragma once
 
+#include <string>
+
 #include "../../CombatTrackerLib/Scene.h"
 
 namespace CombatTrackerApp {
+
+	// Ordered from high level windows to low level windows. 
+	enum class EncounterCreationWindows {
+		ENCOUNTER_CREATOR,
+		MENU,
+		ENTITY_BROWSER,
+		ENCOUNTER_MANAGER,
+		MONSTER_BROWSER,
+		PLAYER_CHARACTER_BROWSER,
+		ENCOUNTER_BROWSER
+	};
+
+	using EncounterCreationWindows::ENCOUNTER_CREATOR;
+	using EncounterCreationWindows::MENU;
+	using EncounterCreationWindows::ENTITY_BROWSER;
+	using EncounterCreationWindows::ENCOUNTER_MANAGER;
+	using EncounterCreationWindows::MONSTER_BROWSER;
+	using EncounterCreationWindows::PLAYER_CHARACTER_BROWSER;
+	using EncounterCreationWindows::ENCOUNTER_BROWSER;
+
 	class EncounterCreationScene : public CombatTrackerLib::Scene {
+
 	public:
 		EncounterCreationScene(CombatTrackerLib::App* app);
 		virtual ~EncounterCreationScene();
@@ -16,21 +39,27 @@ namespace CombatTrackerApp {
 		// Flags.
 		ImGuiWindowFlags encounterCreationWindowFlags{};
 		ImGuiDockNodeFlags encounterCreationDockFlags{};
+		
+		// Dockspace variables.
+		std::unordered_map<EncounterCreationWindows, ImGuiID> dockspaceIDs;
+		std::unordered_map<EncounterCreationWindows, bool> dockspaceInitializations{
+			{ENCOUNTER_CREATOR, false},
+			{ENTITY_BROWSER, false},
+			{MONSTER_BROWSER, false},
+			{PLAYER_CHARACTER_BROWSER, false},
+			{ENCOUNTER_BROWSER, false}
+		};
 
-		// High level windows.
-		ImGuiID encounterManagerDockspaceID{};
-		ImGuiID encounterManagerWindowID{};
-		ImGuiID entityBrowserWindowID{};
-		ImGuiID buttonsWindowID{};
+		const std::unordered_map<EncounterCreationWindows, std::string> MAPPED_WINDOW_NAMES{
+			{ENCOUNTER_CREATOR, "Encounter Creator"},
+			{ENCOUNTER_MANAGER, "Encounter Manager"},
+			{MENU, "Menu"},
+			{ENTITY_BROWSER, "Entity Browser"},
+			{MONSTER_BROWSER, "Monster Browser"},
+			{PLAYER_CHARACTER_BROWSER, "Player Character Browser"},
+			{ENCOUNTER_BROWSER, "Encounter Browser"}
+		};
 
-		//Entity Browser lower level windows.
-		ImGuiID entityBrowserDockspaceID{};
-		ImGuiID monsterBrowserWindowID{};
-		ImGuiID playerCharacterBrowserWindowID{};
-		ImGuiID encounterBrowserWindowID{};
-
-		// Dockspace layout flags.
-		bool isEncounterManagerDockspaceInitialized;
-		bool isEntityBrowserDockspaceInitialized;
+		void initializeSubBrowserDockspace(EncounterCreationWindows windowType);
 	};
 }
