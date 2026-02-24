@@ -13,7 +13,7 @@ namespace CombatTrackerApp {
 		}
 	}
 	Encounter::~Encounter() {}
-	void Encounter::setInitiatives(std::map<std::uint32_t, std::uint16_t> initiatives) {
+	void Encounter::setInitiatives(std::map<int, int> initiatives) {
 		mappedInitiatives = std::move(initiatives);
 	}
 	void Encounter::setAsCompleted() {

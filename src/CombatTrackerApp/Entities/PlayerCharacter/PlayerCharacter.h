@@ -8,7 +8,7 @@ namespace CombatTrackerApp {
 		// MANUALLY SET, OVERRIDES CreatureType to HUMANOID. => CreatureType can be overriden by the user again, if they want.
 		Species species;
 		// MANUALLY SET, DEFAULT TO ZERO PER PlayerClass
-		std::unordered_map<PlayerClass, std::uint16_t> levels;
+		std::unordered_map<PlayerClass, int> levels;
 		// MANUALLY SET, level of the appropriate PlayerClass must surpass SUBCLASS_LEVEL_THRESHOLD for each subclass.
 		// Each PlayerClass can only have one PlayerSubclass.
 		std::unordered_map<PlayerClass, PlayerSubclass> subclasses;
@@ -33,7 +33,7 @@ namespace CombatTrackerApp {
 	class PlayerCharacterBuilder : public CreatureBuilder {
 	public:
 		PlayerCharacterBuilder& setSpecies(const Species creatureSpecies);
-		PlayerCharacterBuilder& setLevels(std::unordered_map<PlayerClass, std::uint16_t> creatureLevels);
+		PlayerCharacterBuilder& setLevels(std::unordered_map<PlayerClass, int> creatureLevels);
 		PlayerCharacterBuilder& setSubclasses(std::unordered_map<PlayerClass, PlayerSubclass> creatureSubclasses);
 		PlayerCharacterBuilder& setWeaponProficiencies(std::unordered_set<WeaponType> creatureWeaponProficiencies);
 		PlayerCharacterBuilder& setArmorProficiencies(std::unordered_set<ArmorType> creatureArmorProficiencies);

@@ -6,7 +6,7 @@ namespace CombatTrackerApp {
 	class Encounter;
 	class Turn {
 	private:
-		std::uint16_t turnNumber;
+		int turnNumber;
 		// A turn should keep a reference to its encounter. There is no concept of ownership here, so use a raw pointer.
 		// Pass the address of the Encounter to initialize this.
 		Encounter* parentEncounter;
@@ -15,9 +15,9 @@ namespace CombatTrackerApp {
 		// But I can also see an argument for turns just keeping a reference to owned Creatures of an Encounter.
 		// This also works considering Encounter's Smart Pointer will outlive the pointers of the Turn.
 		std::vector<Creature*> turnParticipants;
-		std::unordered_map<std::uint32_t, std::vector<CreatureAction>> mappedActions; //Maps actions by creature ID, just like initiative mapping.
+		std::unordered_map<int, std::vector<CreatureAction>> mappedActions; //Maps actions by creature ID, just like initiative mapping.
 	public:
-		Turn(Encounter* encounter, std::uint16_t number, std::unordered_map<std::uint32_t, std::vector<CreatureAction>> actions);
+		Turn(Encounter* encounter, int number, std::unordered_map<int, std::vector<CreatureAction>> actions);
 		~Turn();
 	};
 };

@@ -3,6 +3,7 @@
 #include <string>
 
 #include "../../CombatTrackerLib/Scene.h"
+#include "../Entities/Creature/CreatureEnums.h"
 
 namespace CombatTrackerApp {
 
@@ -17,6 +18,7 @@ namespace CombatTrackerApp {
 		ENCOUNTER_BROWSER
 	};
 
+	// No need to repeat these, they will exist throughout the entire namespace from this point onwards if the header gets included.
 	using EncounterCreationWindows::ENCOUNTER_CREATOR;
 	using EncounterCreationWindows::MENU;
 	using EncounterCreationWindows::ENTITY_BROWSER;
@@ -24,6 +26,13 @@ namespace CombatTrackerApp {
 	using EncounterCreationWindows::MONSTER_BROWSER;
 	using EncounterCreationWindows::PLAYER_CHARACTER_BROWSER;
 	using EncounterCreationWindows::ENCOUNTER_BROWSER;
+
+
+	struct ListBoxParameters {
+		int chosenIndex;
+		int highlightedIndex;
+		bool isHighlighted;
+	};
 
 	class EncounterCreationScene : public CombatTrackerLib::Scene {
 
@@ -60,6 +69,65 @@ namespace CombatTrackerApp {
 			{ENCOUNTER_BROWSER, "Encounter Browser"}
 		};
 
+		// TODO: Try to template, minimize the number of functins as much as possible here.
+		void renderHostWindow();
+		void renderMenuWindow();
+		void renderEntityBrowserWindow();
+		void renderMonsterBrowserWindow();
+		void renderPlayerCharacterBrowserWindow();
+		void renderEncounterBrowserWindow();
+		void renderEncounterManagerWindow();
+		
 		void initializeSubBrowserDockspace(EncounterCreationWindows windowType);
+
+		void renderMonsterCreationPopupModal();
+
+		template <typename T, typename MapType>
+		void renderListBox(ListBoxParameters& parameters, T& type, const char* listBoxLabel, const MapType& items);
+		void renderNonOverridableInputInt(int& value, const char* label);
+		template <typename T, typename MapType>
+		void renderOveriddableInputInt (
+			int& value, 
+			bool& overrideFlag, 
+			const char* label, 
+			const char* overrideLabel, 
+			const MapType& items,
+			const int lowerBound,
+			const int upperBound,
+			const T key
+		);
+		template <typename MapType, typename NameMap>
+		void renderProficiencyAndExpertiseCluster (
+			const char* proficiencyLabel, 
+			std::string& proficiencyLabelSuffix,
+			const char* expertiseLabel,
+			std::string& expertiseLabelSuffix,
+			MapType& proficiencyItems,
+			MapType& expertiseItems,
+			const NameMap& itemNames
+		);
+
+		// These are way too specific so I don't think I can template this in a convenient way.
+		void renderAbilityScoresAndModifiers (
+			std::unordered_map<Ability, int>& abilityScores,
+			std::unordered_map<Ability, int>& abilityModifiers,
+			std::unordered_map<Ability, bool>& abilityScoresOverride
+		);
+		void renderSavingThrowModifiers (
+			std::unordered_map<Ability, int>& savingThrowModifiers, 
+			std::unordered_map<Ability, bool>& savingThrowModifiersOverride,
+			std::unordered_map<Ability, bool>& proficientSavingThrows,
+			std::unordered_map<Ability, bool>& expertiseSavingThrows,
+			std::unordered_map<Ability, int>& abilityModifiers,
+			const int PB
+		);
+		void renderSkillModifiers( 
+			std::unordered_map<Skill, int>& skillModifiers, 
+			std::unordered_map<Skill, bool>& skillModifiersOverride,
+			std::unordered_map<Skill, bool>& proficientSkills,
+			std::unordered_map<Skill, bool>& expertiseSkills,
+			std::unordered_map<Ability, int>& abilityModifiers,
+			const int PB
+		);
 	};
 }

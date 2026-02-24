@@ -85,7 +85,7 @@ namespace CombatTrackerApp {
 		{Tool::POISONERS_KIT, Ability::INTELLIGENCE},
 		{Tool::THIEVES_TOOLS, Ability::DEXTERITY}
 	};
-	inline constexpr std::uint16_t MIN_CLASS_LEVEL { 0 }; 
-	inline constexpr std::uint16_t MAX_TOTAL_CLASS_LEVEL { 20 };
-	inline constexpr std::uint16_t SUBCLASS_LEVEL_THRESHOLD { 3 };
+	inline constexpr int MIN_CLASS_LEVEL { 0 }; 
+	inline constexpr int MAX_TOTAL_CLASS_LEVEL { 20 };
+	inline constexpr int SUBCLASS_LEVEL_THRESHOLD { 3 };
 }

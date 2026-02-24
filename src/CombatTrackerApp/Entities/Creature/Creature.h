@@ -20,8 +20,6 @@ namespace CombatTrackerApp {
 	This ID isn't really used to refer to creature's type/identity, we use its name for this purpose.
 	*/
 	struct CreatureStatBlock {
-		// COMPUTED, NOT OVERRIDABLE
-		std::uint32_t ID;
 		//MANUALLY SET
 		std::string name;
 		// MANUALLY SET
@@ -32,25 +30,25 @@ namespace CombatTrackerApp {
 		// MANUALLY SET
 		Alignment alignment;
 		// MANUALLY SET
-		std::uint16_t AC;
+		int AC;
 		// OVERRIDABLE, COMPUTED IF NOT OVERRIDDEN (Dexterity modifier)
-		std::int16_t initiativeBonus;
+		int initiativeBonus;
 		// OVERRIDABLE, COMPUTED IF NOT OVERRIDDEN (See MAPPED_CR_TO_PB and MAPPED_PLAYER_LEVEL_TO_PB)
-		std::uint16_t proficiencyBonus;
+		int proficiencyBonus;
 		// MANUALLY SET
-		std::uint16_t HP;
+		int HP;
 		// OVERRIDABLE, COMPUTED IF NOT OVERRIDDEN (Wisdom modifier + Perception Score + 10)
-		std::uint16_t passivePerception;
+		int passivePerception;
 		// MANUALLY SET
-		std::uint16_t walkSpeed;
+		int walkSpeed;
 		// MANUALLY SET
-		std::uint16_t climbingSpeed;
+		int climbingSpeed;
 		// MANUALLY SET
-		std::uint16_t swimmingSpeed;
+		int swimmingSpeed;
 		// MANUALLY SET
-		std::uint16_t burrowSpeed;
+		int burrowSpeed;
 		// MANUALLY SET
-		std::uint16_t flySpeed;
+		int flySpeed;
 		// MANUALLY SET
 		std::unordered_set<Ability> savingThrowProficiencies;
 		// MANUALLY SET
@@ -60,13 +58,13 @@ namespace CombatTrackerApp {
 		// MANUALLY SET
 		std::unordered_set<Skill> skillExpertise;
 		// MANUALLY SET
-		std::unordered_map<Ability, std::uint16_t> abilityScores;
+		std::unordered_map<Ability, int> abilityScores;
 		// OVERRIDABLE, COMPUTED IF NOT OVERRIDDEN (See MAPPED_ABILITY_SCORES)
-		std::unordered_map<Ability, std::int16_t> abilityScoreModifiers;
+		std::unordered_map<Ability, int> abilityScoreModifiers;
 		// OVERRIDABLE, COMPUTED IF NOT OVERRIDDEN (Relevant Ability Modifier + PB or Relevant Ability Modifier + 2 x PB, depending on proficiency or expertise.)
-		std::unordered_map<Ability, std::int16_t> savingThrowModifiers;
+		std::unordered_map<Ability, int> savingThrowModifiers;
 		// OVERRIDABLE, COMPUTED IF NOT OVERRIDDEN (Relevant Ability Modifier + PB or Relevant Ability Modifier + 2 x PB, depending on proficiency or expertise.)
-		std::unordered_map<Skill, std::int16_t> skillModifiers;
+		std::unordered_map<Skill, int> skillModifiers;
 		// MANUALLY SET
 		std::vector<CreatureAction> actions;
 		// MANUALLY SET
@@ -81,7 +79,7 @@ namespace CombatTrackerApp {
 		std::vector<Trait> traits;
 		// MANUALLY SET
 		// The second field is the distance of the sense. 0 feet implies that the creature doesn't have that sense.
-		std::unordered_map<Sense, std::uint16_t> senses;
+		std::unordered_map<Sense, int> senses;
 		// MANUALLY SET
 		std::unordered_set<Language> languages;
 		// MANUALLY SET
@@ -91,12 +89,13 @@ namespace CombatTrackerApp {
 	class Creature {
 	protected:
 		// COMPUTED, NOT OVERRIDABLE
+		int ID;
+		// COMPUTED, NOT OVERRIDABLE
 		CreatureStatBlock statBlockCreaturePortion;
-		std::uint32_t ID;
 	public:
 		Creature(CreatureStatBlock statBlockCreaturePortion);
 		~Creature();
-		static std::int16_t findAbilityScoreModifier(int abilityScore);
+		static int findAbilityScoreModifier(int abilityScore);
 	};
 	class CreatureBuilder {
 	public:
@@ -104,31 +103,31 @@ namespace CombatTrackerApp {
 		CreatureBuilder& setSize(const Size creatureSize);
 		CreatureBuilder& setType(const CreatureType creatureType);
 		CreatureBuilder& setAlignment(const Alignment creatureAlignment);
-		CreatureBuilder& setAC(const std::uint16_t creatureAC);
-		CreatureBuilder& setInitiativeBonus(const std::int16_t creatureInitiativeBonus);
-		CreatureBuilder& setPB(const std::uint16_t creatureProficiencyBonus);
-		CreatureBuilder& setHP(const std::uint16_t creatureHP);
-		CreatureBuilder& setPassivePerception(const std::uint16_t creaturePassivePerception);
-		CreatureBuilder& setWalkSpeed(const std::uint16_t creatureWalkSpeed);
-		CreatureBuilder& setClimbingSpeed(const std::uint16_t creatureClimbingSpeed);
-		CreatureBuilder& setSwimmingSpeed(const std::uint16_t creatureSwimmingSpeed);
-		CreatureBuilder& setBurrowSpeed(const std::uint16_t creatureBurrowSpeed);
-		CreatureBuilder& setFlySpeed(const std::uint16_t creatureFlySpeed);
+		CreatureBuilder& setAC(const int creatureAC);
+		CreatureBuilder& setInitiativeBonus(const int creatureInitiativeBonus);
+		CreatureBuilder& setPB(const int creatureProficiencyBonus);
+		CreatureBuilder& setHP(const int creatureHP);
+		CreatureBuilder& setPassivePerception(const int creaturePassivePerception);
+		CreatureBuilder& setWalkSpeed(const int creatureWalkSpeed);
+		CreatureBuilder& setClimbingSpeed(const int creatureClimbingSpeed);
+		CreatureBuilder& setSwimmingSpeed(const int creatureSwimmingSpeed);
+		CreatureBuilder& setBurrowSpeed(const int creatureBurrowSpeed);
+		CreatureBuilder& setFlySpeed(const int creatureFlySpeed);
 		CreatureBuilder& setSavingThrowProficiencies(std::unordered_set<Ability> creatureSavingThrowProficiencies);
 		CreatureBuilder& setSavingThrowExpertise(std::unordered_set<Ability> creatureSavingThrowExpertise);
 		CreatureBuilder& setSkillProficiencies(std::unordered_set<Skill> creatureSkillProficiencies);
 		CreatureBuilder& setSkillExpertise(std::unordered_set<Skill> creatureSkillExpertise);
-		CreatureBuilder& setAbilityScores(std::unordered_map<Ability, std::uint16_t> creatureAbilityScores);
-		CreatureBuilder& setAbilityScoreModifiers(std::unordered_map<Ability, std::int16_t> creatureAbilityScoreModifiers);
-		CreatureBuilder& setSavingThrowModifiers(std::unordered_map<Ability, std::int16_t> creatureSavingThrowModifiers);
-		CreatureBuilder& setSkillModifiers(std::unordered_map<Skill, std::int16_t> creatureSkillModifiers);
+		CreatureBuilder& setAbilityScores(std::unordered_map<Ability, int> creatureAbilityScores);
+		CreatureBuilder& setAbilityScoreModifiers(std::unordered_map<Ability, int> creatureAbilityScoreModifiers);
+		CreatureBuilder& setSavingThrowModifiers(std::unordered_map<Ability, int> creatureSavingThrowModifiers);
+		CreatureBuilder& setSkillModifiers(std::unordered_map<Skill, int> creatureSkillModifiers);
 		CreatureBuilder& setActions(std::vector<CreatureAction> creatureActions);
 		CreatureBuilder& setDamageVulnerabilities(std::unordered_set<DamageType> creatureDamageVulnerabilities);
 		CreatureBuilder& setDamageResistances(std::unordered_set<DamageType> creatureDamageResistances);
 		CreatureBuilder& setDamageImmunities(std::unordered_set<DamageType> creatureDamageImmunities);
 		CreatureBuilder& setConditionImmunities(std::unordered_set<Condition> creatureConditionImmunities);
 		CreatureBuilder& setTraits(std::vector<Trait> creatureTraits);
-		CreatureBuilder& setSenses(std::unordered_map<Sense, std::uint16_t> creatureSenses);
+		CreatureBuilder& setSenses(std::unordered_map<Sense, int> creatureSenses);
 		CreatureBuilder& setLanguages(std::unordered_set<Language> creatureLanguages);
 		CreatureBuilder& setEquipment(std::vector<Gear> creatureEquipment);
 		Creature createCreature();

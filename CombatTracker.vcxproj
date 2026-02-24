@@ -145,6 +145,7 @@
     <ClInclude Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacter.h" />
     <ClInclude Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacterConstants.h" />
     <ClInclude Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacterEnums.h" />
+    <ClInclude Include="src\CombatTrackerApp\JSONUtils.h" />
     <ClInclude Include="src\CombatTrackerApp\Scenes\CompletedEncountersScene.h" />
     <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterCreationScene.h" />
     <ClInclude Include="src\CombatTrackerApp\Scenes\EncounterRunningScene.h" />
@@ -172,6 +173,7 @@
     <ClCompile Include="src\CombatTrackerApp\Entities\Turn\Turn.cpp" />
     <ClCompile Include="src\CombatTrackerApp\Entities\Monster\Monster.cpp" />
     <ClCompile Include="src\CombatTrackerApp\Entities\PlayerCharacter\PlayerCharacter.cpp" />
+    <ClCompile Include="src\CombatTrackerApp\JSONUtils.cpp" />
     <ClCompile Include="src\CombatTrackerApp\main.cpp" />
     <ClCompile Include="src\CombatTrackerApp\Scenes\EncounterCreationScene.cpp" />
     <ClCompile Include="src\CombatTrackerApp\Scenes\MainMenuScene.cpp" />

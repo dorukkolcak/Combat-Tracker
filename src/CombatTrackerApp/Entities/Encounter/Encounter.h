@@ -14,9 +14,9 @@ namespace CombatTrackerApp {
 	class Turn;
 	class Encounter {
 	private:
-		std::uint32_t ID;
+		int ID;
 		bool isCompleted;
-		std::uint64_t totalXPReward;
+		int totalXPReward;
 		/*
 		Multiple encounters can own Creatures, so use shared pointers. 
 		Only encounters will actually own instances of Creatures, as they are created solely for encounters. 
@@ -26,14 +26,14 @@ namespace CombatTrackerApp {
 		std::vector<std::unique_ptr<Monster>> monsters;
 		std::vector<std::unique_ptr<PlayerCharacter>> players;
 		// This is the initial mapping of initiatives so it contains every single creature.
-		std::map<std::uint32_t, std::uint16_t> mappedInitiatives; //Maps initiatives by creature ID, which is unique by definition.
+		std::map<int, int> mappedInitiatives; //Maps initiatives by creature ID, which is unique by definition.
 		// An encounter is the sole owner of its turns.
 		std::vector<std::unique_ptr<Turn>> turns;
 	public:
 		Encounter(std::vector<std::unique_ptr<Monster>> encounterMonsters, std::vector<std::unique_ptr<PlayerCharacter>> encounterPlayers);
 		~Encounter();
 
-		void setInitiatives(std::map<std::uint32_t, std::uint16_t> initiatives);
+		void setInitiatives(std::map<int, int> initiatives);
 		void setAsCompleted();
 		void addTurn(std::unique_ptr<Turn> turn);
 	};
