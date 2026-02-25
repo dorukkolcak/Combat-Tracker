@@ -4,6 +4,7 @@
 
 #include "../../CombatTrackerLib/Scene.h"
 #include "../Entities/Creature/CreatureEnums.h"
+#include "../Entities/Creature/CreatureTypes.h"
 
 namespace CombatTrackerApp {
 
@@ -69,7 +70,7 @@ namespace CombatTrackerApp {
 			{ENCOUNTER_BROWSER, "Encounter Browser"}
 		};
 
-		// TODO: Try to template, minimize the number of functins as much as possible here.
+		// TODO: Try to template, minimize the number of functions as much as possible here.
 		void renderHostWindow();
 		void renderMenuWindow();
 		void renderEntityBrowserWindow();
@@ -77,24 +78,27 @@ namespace CombatTrackerApp {
 		void renderPlayerCharacterBrowserWindow();
 		void renderEncounterBrowserWindow();
 		void renderEncounterManagerWindow();
-		
 		void initializeSubBrowserDockspace(EncounterCreationWindows windowType);
 
+		// TODO: Consider passing a Creature object as a parameter here when implementing editing functionality.
+		// So that we can populate all static parameters through that object and just reuse all rendering code.
 		void renderMonsterCreationPopupModal();
+		void renderPlayerCharacterCreationPopupModal();
 
-		template <typename T, typename MapType>
-		void renderListBox(ListBoxParameters& parameters, T& type, const char* listBoxLabel, const MapType& items);
-		void renderNonOverridableInputInt(int& value, const char* label);
-		template <typename T, typename MapType>
-		void renderOveriddableInputInt (
-			int& value, 
-			bool& overrideFlag, 
-			const char* label, 
-			const char* overrideLabel, 
-			const MapType& items,
-			const int lowerBound,
-			const int upperBound,
-			const T key
+		void renderGeneralCreatureInfo(
+			std::string& name,
+			Size& size,
+			CreatureType& type,
+			Alignment& alignment,
+			int& AC,
+			int& HP
+		);
+		void renderSpeedInfo (
+			int& walkSpeed,
+			int& climbingSpeed,
+			int& swimmingSpeed,
+			int& burrowSpeed,
+			int& flySpeed
 		);
 		template <typename MapType, typename NameMap>
 		void renderProficiencyAndExpertiseCluster (
@@ -128,6 +132,40 @@ namespace CombatTrackerApp {
 			std::unordered_map<Skill, bool>& expertiseSkills,
 			std::unordered_map<Ability, int>& abilityModifiers,
 			const int PB
+		);
+		void renderDmgVulnResAndImm(
+			std::unordered_map<DamageType, bool>& damageVulnerabilities,
+			std::unordered_map<DamageType, bool>& damageResistances,
+			std::unordered_map<DamageType, bool>& damageImmunities
+		);
+		template <typename MapType, typename NameMap>
+		void renderMutuallyExclusiveCheckboxCluster(MapType& items, NameMap& names, const char* label);
+		void renderSenses(std::unordered_map<Sense, int>& senses);
+		// Reserved for traits and gear.
+		template <typename Items>
+		void renderAddables(Items& currentItems, const char* label);
+		void renderActions(std::vector<CreatureAction>& currentActions);
+
+		void renderMonsterSpecificInfo(
+			double& CR,
+			int& XP,
+			int& PB
+		);
+		void renderPlayerCharacterSpecificInfo();
+
+		template <typename T, typename MapType>
+		void renderListBox(ListBoxParameters& parameters, T& type, const char* listBoxLabel, const MapType& items);
+		void renderNonOverridableInputInt(int& value, const char* label);
+		template <typename T, typename MapType>
+		void renderOveriddableInputInt(
+			int& value,
+			bool& overrideFlag,
+			const char* label,
+			const char* overrideLabel,
+			const MapType& items,
+			const int lowerBound,
+			const int upperBound,
+			const T key
 		);
 	};
 }

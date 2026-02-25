@@ -1,7 +1,10 @@
+#include <vector>
+
 #include "EncounterCreationScene.h"
 #include "MainMenuScene.h"
 #include "../Entities/Creature/CreatureConstants.h"
 #include "../Entities/Creature/Creature.h"
+#include "../Entities/Monster/Monster.h"
 #include "../Entities/Monster/MonsterConstants.h"
 
 #include "imgui_internal.h"
@@ -281,56 +284,38 @@ namespace CombatTrackerApp {
 		ImGui::SetNextWindowSize(ImGui::GetMainViewport()->Size);
 		if (ImGui::BeginPopupModal("Monster Creation", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
 
-			static std::string name;
-			ImGui::InputText("Name", &name);
-
-			static ListBoxParameters monsterListBoxParameters(-1, -1, false);
-			static Size monsterSize{ Size::NO_SIZE };
-			renderListBox(monsterListBoxParameters, monsterSize, "Size", SIZE_NAMES);
-
-			ImGui::SameLine();
-			static ListBoxParameters monsterCreatureTypeParameters(-1, -1, false);
+			static std::string name;;
+			static Size monsterSize{ Size::NO_SIZE };;
 			static CreatureType monsterType{ CreatureType::NO_TYPE };
-			renderListBox(monsterCreatureTypeParameters, monsterType, "Creature Type", CREATURE_TYPE_NAMES);
-
-			ImGui::SameLine();
-			static ListBoxParameters monsterAlignmentParameters{ -1, -1, false };
 			static Alignment monsterAlignment{ Alignment::UNALIGNED };
-			renderListBox(monsterAlignmentParameters, monsterAlignment, "Alignment", ALIGNMENT_NAMES);
-
-			ImGui::SameLine();
-			static ListBoxParameters monsterCRParameters{ -1, -1, false };
-			static double monsterCR{};
-			renderListBox(monsterCRParameters, monsterCR, "CR", CR_NAMES);
-
-			ImGui::SameLine();
-			static int monsterXP{};
-			static bool isXPOverridden{ false };
-			renderOveriddableInputInt(monsterXP, isXPOverridden, "XP", "Reset XP Override", MAPPED_CR_TO_XP, 0, INT_MAX, monsterCR)
-				;
 			static int monsterAC{};
-			renderNonOverridableInputInt(monsterAC, "AC");
-			ImGui::SameLine(); static int monsterHP{};
-			renderNonOverridableInputInt(monsterHP, "HP");
+			static int monsterHP{};
+			renderGeneralCreatureInfo(
+				name,
+				monsterSize,
+				monsterType,
+				monsterAlignment,
+				monsterAC,
+				monsterHP
+			);
 
-			ImGui::SameLine(); static int monsterPB{};
-			static bool isPBOverridden{ false };
-			renderOveriddableInputInt(monsterPB, isPBOverridden, "Proficiency Bonus", "Reset PB Override", MAPPED_CR_TO_PB, -5, 10, monsterCR);
+			static double monsterCR{};
+			static int monsterXP{};
+			static int monsterPB{};
+			renderMonsterSpecificInfo(monsterCR, monsterXP, monsterPB);
 
 			static int monsterWalkSpeed{};
-			renderNonOverridableInputInt(monsterWalkSpeed, "Walk Speed");
-
-			ImGui::SameLine(); static int monsterClimbingSpeed{};
-			renderNonOverridableInputInt(monsterClimbingSpeed, "Climbing Speed");
-
-			ImGui::SameLine(); static int monsterSwimSpeed{};
-			renderNonOverridableInputInt(monsterSwimSpeed, "Swim Speed");
-
-			ImGui::SameLine(); static int monsterBurrowSpeed{};
-			renderNonOverridableInputInt(monsterBurrowSpeed, "Burrow Speed");
-
-			ImGui::SameLine(); static int monsterFlySpeed{};
-			renderNonOverridableInputInt(monsterFlySpeed, "Fly Speed");
+			static int monsterClimbingSpeed{};
+			static int monsterSwimSpeed{};
+			static int monsterBurrowSpeed{};
+			static int monsterFlySpeed{};
+			renderSpeedInfo(
+				monsterWalkSpeed,
+				monsterClimbingSpeed,
+				monsterSwimSpeed,
+				monsterBurrowSpeed,
+				monsterFlySpeed
+			);
 
 			static std::unordered_map<Ability, int> monsterAbilityScores{
 				{Ability::STRENGTH, 10},
@@ -406,7 +391,7 @@ namespace CombatTrackerApp {
 				monsterAbilityModifiers,
 				monsterPB);
 
-			static std::unordered_map<Skill, bool> proficientSkills{
+			static std::unordered_map<Skill, bool> proficientSkills {
 				{Skill::ATHLETICS, false},
 				{Skill::ACROBATICS, false},
 				{Skill::SLEIGHT_OF_HAND, false},
@@ -424,7 +409,7 @@ namespace CombatTrackerApp {
 				{Skill::PERFORMANCE, false},
 				{Skill::PERSUASION, false} 
 			};
-			static std::unordered_map<Skill, bool> expertiseSkills{
+			static std::unordered_map<Skill, bool> expertiseSkills {
 				{Skill::ATHLETICS, false},
 				{Skill::ACROBATICS, false},
 				{Skill::SLEIGHT_OF_HAND, false},
@@ -476,7 +461,7 @@ namespace CombatTrackerApp {
 				{Skill::PERFORMANCE, 0},
 				{Skill::PERSUASION, 0} 
 			};
-			static std::unordered_map<Skill, bool> monsterSkillModifiersOverride{
+			static std::unordered_map<Skill, bool> monsterSkillModifiersOverride {
 				{Skill::ATHLETICS, false},
 				{Skill::ACROBATICS, false},
 				{Skill::SLEIGHT_OF_HAND, false},
@@ -496,7 +481,7 @@ namespace CombatTrackerApp {
 				{Skill::PERFORMANCE, false},
 				{Skill::PERSUASION, false}
 			};
-			renderSkillModifiers(
+			renderSkillModifiers (
 				monsterSkillModifiers,
 				monsterSkillModifiersOverride,
 				proficientSkills, expertiseSkills,
@@ -504,21 +489,112 @@ namespace CombatTrackerApp {
 				monsterPB
 			);
 
-			// TODO: Damage vulnerabilities, resistances and immunities. 
+			static std::unordered_map<DamageType, bool> monsterDamageVulnerabilities {
+				{DamageType::ACID, false},
+				{DamageType::BLUDGEONING, false},
+				{DamageType::COLD, false},
+				{DamageType::FIRE, false},
+				{DamageType::FORCE, false},
+				{DamageType::LIGHTNING, false},
+				{DamageType::NECROTIC, false},
+				{DamageType::PIERCING, false},
+				{DamageType::POISON, false},
+				{DamageType::PSYCHIC, false},
+				{DamageType::RADIANT, false},
+				{DamageType::SLASHING, false},
+				{DamageType::THUNDER, false}
+			};
+			static std::unordered_map<DamageType, bool> monsterDamageResistances {
+				{DamageType::ACID, false},
+				{DamageType::BLUDGEONING, false},
+				{DamageType::COLD, false},
+				{DamageType::FIRE, false},
+				{DamageType::FORCE, false},
+				{DamageType::LIGHTNING, false},
+				{DamageType::NECROTIC, false},
+				{DamageType::PIERCING, false},
+				{DamageType::POISON, false},
+				{DamageType::PSYCHIC, false},
+				{DamageType::RADIANT, false},
+				{DamageType::SLASHING, false},
+				{DamageType::THUNDER, false}
+			};
+			static std::unordered_map<DamageType, bool> monsterDamageImmunites {
+				{DamageType::ACID, false},
+				{DamageType::BLUDGEONING, false},
+				{DamageType::COLD, false},
+				{DamageType::FIRE, false},
+				{DamageType::FORCE, false},
+				{DamageType::LIGHTNING, false},
+				{DamageType::NECROTIC, false},
+				{DamageType::PIERCING, false},
+				{DamageType::POISON, false},
+				{DamageType::PSYCHIC, false},
+				{DamageType::RADIANT, false},
+				{DamageType::SLASHING, false},
+				{DamageType::THUNDER, false}
+			};
+			renderDmgVulnResAndImm(monsterDamageVulnerabilities, monsterDamageResistances, monsterDamageImmunites);
 
-			// TODO: Condition immunities. 
+			static std::unordered_map<Condition, bool> monsterConditionImmunities {
+				{Condition::BLINDED, false},
+				{Condition::CHARMED, false},
+				{Condition::DEAFENED, false},
+				{Condition::FRIGHTENED, false},
+				{Condition::GRAPPLED, false},
+				{Condition::INCAPACITATED, false},
+				{Condition::INVISIBLE, false},
+				{Condition::PARALYZED, false},
+				{Condition::PETRIFIED, false},
+				{Condition::POISONED, false},
+				{Condition::PRONE, false},
+				{Condition::RESTRAINED, false},
+				{Condition::STUNNED, false},
+				{Condition::UNCONSCIOUS, false},
+				{Condition::EXHAUSTION, false}
+			};
+			renderMutuallyExclusiveCheckboxCluster(monsterConditionImmunities, CONDITTON_NAMES, "Condition Immunities");
 
-			// TODO: Senses. 
- 
-			//TODO: Languages.
+			static std::unordered_map<Language, bool> monsterLanguages {
+				{Language::COMMON, false},
+				{Language::COMMON_SIGN_LANGUAGE, false},
+				{Language::DWARVISH, false},
+				{Language::ELVISH, false},
+				{Language::GIANT, false},
+				{Language::GNOMISH, false},
+				{Language::GOBLIN, false},
+				{Language::HALFLING, false},
+				{Language::ORC, false},
+				{Language::ABYSSAL, false},
+				{Language::CELESTIAL, false},
+				{Language::DEEP_SPEECH, false},
+				{Language::DRUIDIC, false},
+				{Language::INFERNAL, false},
+				{Language::PRIMORDIAL, false},
+				{Language::SYLVAN, false},
+				{Language::THIEVES_CANT, false},
+				{Language::UNDERCOMMON, false}
+			};
+			renderMutuallyExclusiveCheckboxCluster(monsterLanguages, LANGUAGE_NAMES, "Languages");
 
-			// TODO: Adding actions. 
+			static std::unordered_map<Sense, int> monsterSenses {
+				{Sense::BLINDSIGHT, 0},
+				{Sense::DARKVISION, 0},
+				{Sense::TREMORSENSE, 0},
+				{Sense::TRUESIGHT, 0}
+			};
+			renderSenses(monsterSenses);
 
-			// TODO: Adding traits. 
+			static std::vector<CreatureAction> monsterActions;
+			renderActions(monsterActions);
 
-			// TODO: Adding equipment. 
+			static std::vector<Trait> monsterTraits;
+			renderAddables(monsterTraits, "Traits");
 
-			// TODO: Validation of monster stats and saving functionality. 
+			static std::vector<Gear> monsterEquipment;
+			renderAddables(monsterEquipment, "Gear");
+
+			// TODO: Validation of monster stats and saving functionality using the builder pattern.
 			if (centeredButton("Complete Monster Creation")) {
 
 			}
@@ -572,7 +648,6 @@ namespace CombatTrackerApp {
 			overrideFlag = false;
 		}
 	}
-	// TODO: Fix the UI layouting of this.
 	template <typename MapType, typename NameMap>
 	void EncounterCreationScene::renderProficiencyAndExpertiseCluster(
 		const char* proficiencyLabel,
@@ -690,5 +765,130 @@ namespace CombatTrackerApp {
 				skillModifiersOverride.at(item.first) = false;
 			}
 		}
+	}
+	void EncounterCreationScene::renderGeneralCreatureInfo (
+		std::string& name,
+		Size& size,
+		CreatureType& type,
+		Alignment& alignment,
+		int& AC,
+		int& HP
+	) {
+
+		ImGui::InputText("Name", &name);
+
+		static ListBoxParameters sizeListBoxParameters(-1, -1, false);;
+		renderListBox(sizeListBoxParameters, size, "Size", SIZE_NAMES);
+
+		ImGui::SameLine();
+		static ListBoxParameters creatureTypeParameters(-1, -1, false);
+		renderListBox(creatureTypeParameters, type, "Creature Type", CREATURE_TYPE_NAMES);
+
+		ImGui::SameLine();
+		static ListBoxParameters alignmentParameters{ -1, -1, false };
+		renderListBox(alignmentParameters, alignment, "Alignment", ALIGNMENT_NAMES);
+
+		renderNonOverridableInputInt(AC, "AC");
+		ImGui::SameLine(); 
+		renderNonOverridableInputInt(HP, "HP");
+		
+	}
+	void EncounterCreationScene::renderMonsterSpecificInfo (
+		double& CR,
+		int& XP,
+		int& PB
+	) {
+		static ListBoxParameters monsterCRParameters{ -1, -1, false };
+		renderListBox(monsterCRParameters, CR, "CR", CR_NAMES);
+
+		ImGui::SameLine();
+		static bool isXPOverridden{ false };
+		renderOveriddableInputInt(XP, isXPOverridden, "XP", "Reset XP Override", MAPPED_CR_TO_XP, 0, INT_MAX, CR);
+		
+		ImGui::SameLine();
+		static bool isPBOverridden{ false };
+		renderOveriddableInputInt(PB, isPBOverridden, "Proficiency Bonus", "Reset PB Override", MAPPED_CR_TO_PB, -5, 10, CR);
+	}
+	void EncounterCreationScene::renderSpeedInfo(
+		int& walkSpeed,
+		int& climbingSpeed,
+		int& swimmingSpeed,
+		int& burrowSpeed,
+		int& flySpeed
+	) {
+		renderNonOverridableInputInt(walkSpeed, "Walk Speed");
+
+		ImGui::SameLine(); 
+		renderNonOverridableInputInt(climbingSpeed, "Climbing Speed");
+
+		ImGui::SameLine(); 
+		renderNonOverridableInputInt(swimmingSpeed, "Swim Speed");
+
+		ImGui::SameLine();
+		renderNonOverridableInputInt(burrowSpeed, "Burrow Speed");
+
+		ImGui::SameLine();
+		renderNonOverridableInputInt(flySpeed, "Fly Speed");
+	}
+	void EncounterCreationScene::renderDmgVulnResAndImm (
+		std::unordered_map<DamageType, bool>& damageVulnerabilities,
+		std::unordered_map<DamageType, bool>& damageResistances,
+		std::unordered_map<DamageType, bool>& damageImmunities
+	) {
+		ImGui::TextWrapped("Damage Vulnerabilities");
+		for (auto& item : DAMAGE_TYPE_NAMES) {
+			if ( ImGui::Checkbox((item.second + "Vuln").c_str(), &damageVulnerabilities.at(item.first)) ) {
+				if (damageVulnerabilities.at(item.first) && damageResistances.at(item.first)) {
+					damageResistances.at(item.first) = false;
+				}
+				if (damageVulnerabilities.at(item.first) && damageImmunities.at(item.first)) {
+					damageImmunities.at(item.first) = false;
+				}
+			}
+		}
+
+		ImGui::TextWrapped("Damage Resistances");
+		for (auto& item : DAMAGE_TYPE_NAMES) {
+			if (ImGui::Checkbox((item.second + "Res").c_str(), &damageResistances.at(item.first))) {
+				if (damageVulnerabilities.at(item.first) && damageResistances.at(item.first)) {
+					damageVulnerabilities.at(item.first) = false;
+				}
+				if (damageResistances.at(item.first) && damageImmunities.at(item.first)) {
+					damageImmunities.at(item.first) = false;
+				}
+			}
+		}
+		ImGui::TextWrapped("Damage Immunities");
+		for (auto& item : DAMAGE_TYPE_NAMES) {
+			if (ImGui::Checkbox((item.second + "Imm").c_str(), &damageImmunities.at(item.first))) {
+				if (damageVulnerabilities.at(item.first) && damageImmunities.at(item.first)) {
+					damageVulnerabilities.at(item.first) = false;
+				}
+				if (damageResistances.at(item.first) && damageImmunities.at(item.first)) {
+					damageResistances.at(item.first) = false;
+				}
+			}
+		}
+	}
+	template <typename MapType, typename NameMap>
+	void EncounterCreationScene::renderMutuallyExclusiveCheckboxCluster(MapType& items, NameMap& names, const char* label) {
+		ImGui::TextWrapped(label);
+		for (auto& item : names) {
+			ImGui::Checkbox(item.second.c_str(), &items.at(item.first));
+		}
+	}
+	void EncounterCreationScene::renderSenses(std::unordered_map<Sense, int>& senses) {
+		for (auto& item : senses) {
+			renderNonOverridableInputInt(item.second, SENSE_NAMES.at(item.first).c_str());
+			ImGui::SameLine();
+		}
+	}
+	// TODO: Create another popup modal for addition functions.
+	template <typename Items>
+	void EncounterCreationScene::renderAddables(Items& currentItems, const char* label) {
+
+	}
+	void EncounterCreationScene::renderActions(std::vector<CreatureAction>& currentActions) {
+
 	}
 }

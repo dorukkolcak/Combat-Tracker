@@ -130,6 +130,8 @@ namespace CombatTrackerApp {
 		CreatureBuilder& setSenses(std::unordered_map<Sense, int> creatureSenses);
 		CreatureBuilder& setLanguages(std::unordered_set<Language> creatureLanguages);
 		CreatureBuilder& setEquipment(std::vector<Gear> creatureEquipment);
+
+		CreatureStatBlock& getCreatureStatBlock(); 
 		Creature createCreature();
 	protected:
 		CreatureStatBlock block;

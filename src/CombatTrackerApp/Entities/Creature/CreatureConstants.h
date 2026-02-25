@@ -90,4 +90,62 @@ namespace CombatTrackerApp {
 		{Skill::PERFORMANCE, "Performance"},
 		{Skill::PERSUASION, "Persuasion"}
 	};
+	inline const std::unordered_map<DamageType, std::string> DAMAGE_TYPE_NAMES {
+		{DamageType::ACID, "Acid"},
+		{DamageType::BLUDGEONING, "Bludgeoning"},
+		{DamageType::COLD, "Cold"},
+		{DamageType::FIRE, "Fire"},
+		{DamageType::FORCE, "Force"},
+		{DamageType::LIGHTNING, "Lightning"},
+		{DamageType::NECROTIC, "Necrotic"},
+		{DamageType::PIERCING, "Piercing"},
+		{DamageType::POISON, "Poison"},
+		{DamageType::PSYCHIC, "Psychic"},
+		{DamageType::RADIANT, "Radiant"},
+		{DamageType::SLASHING, "Slashing"},
+		{DamageType::THUNDER, "Thunder"}
+	};
+	inline const std::unordered_map<Condition, std::string> CONDITTON_NAMES {
+		{Condition::BLINDED, "Blinded"},
+		{Condition::CHARMED, "Charmed"},
+		{Condition::DEAFENED, "Deafened"},
+		{Condition::FRIGHTENED, "Frightened"},
+		{Condition::GRAPPLED, "Grappled"},
+		{Condition::INCAPACITATED, "Incapacitated"},
+		{Condition::INVISIBLE, "Invisible"},
+		{Condition::PARALYZED, "Paralyzed"},
+		{Condition::PETRIFIED, "Petrified"},
+		{Condition::POISONED, "Poisoned"},
+		{Condition::PRONE, "Prone"},
+		{Condition::RESTRAINED, "Restratined"},
+		{Condition::STUNNED, "Stunned"},
+		{Condition::UNCONSCIOUS, "Unconscious"},
+		{Condition::EXHAUSTION, "Exhaustion"}
+	};
+	inline const std::unordered_map<Language, std::string> LANGUAGE_NAMES {
+		{Language::COMMON, "Common"},
+		{Language::COMMON_SIGN_LANGUAGE, "Common Sign Language"},
+		{Language::DWARVISH, "Dwarvish"},
+		{Language::ELVISH, "Elvish"},
+		{Language::GIANT, "Giant"},
+		{Language::GNOMISH, "Gnomish"},
+		{Language::GOBLIN, "Goblin"},
+		{Language::HALFLING, "Halfling"},
+		{Language::ORC, "Orc"},
+		{Language::ABYSSAL, "Abyssal"},
+		{Language::CELESTIAL, "Celestial"},
+		{Language::DEEP_SPEECH, "Deep Speech"},
+		{Language::DRUIDIC, "Druidic"},
+		{Language::INFERNAL, "Infernal"},
+		{Language::PRIMORDIAL, "Primordial"},
+		{Language::SYLVAN, "Sylvan"},
+		{Language::THIEVES_CANT, "Thieves' Cant"},
+		{Language::UNDERCOMMON, "Undercommon"}
+	};
+	inline const std::unordered_map<Sense, std::string> SENSE_NAMES {
+		{Sense::BLINDSIGHT, "Blindsight"},
+		{Sense::DARKVISION, "Darkvision"},
+		{Sense::TREMORSENSE, "Tremorsense"},
+		{Sense::TRUESIGHT, "Truesight"}
+	};
 }

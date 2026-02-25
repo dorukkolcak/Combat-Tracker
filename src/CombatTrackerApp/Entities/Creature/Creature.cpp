@@ -41,5 +41,7 @@ namespace CombatTrackerApp {
 	CreatureBuilder& CreatureBuilder::setSenses(std::unordered_map<Sense, int> creatureSenses) { block.senses = std::move(creatureSenses); return *this; }
 	CreatureBuilder& CreatureBuilder::setLanguages(std::unordered_set<Language> creatureLanguages) { block.languages = std::move(creatureLanguages); return *this; }
 	CreatureBuilder& CreatureBuilder::setEquipment(std::vector<Gear> creatureEquipment) { block.equipment = std::move(creatureEquipment); return *this; }
+	CreatureStatBlock& CreatureBuilder::getCreatureStatBlock() { return block; }
+
 	Creature CreatureBuilder::createCreature() { return std::move(Creature(block)); }
 }
