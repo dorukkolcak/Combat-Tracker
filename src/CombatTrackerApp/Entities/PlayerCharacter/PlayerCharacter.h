@@ -93,8 +93,6 @@ namespace CombatTrackerApp {
 		std::unordered_map<Tool, bool> toolProficiencies;
 		// MANUALLY SET
 		std::unordered_map<WeaponMastery, bool> weaponMasteries;
-		// TODO: Could also track money as well but not keeping it for now as it is pretty irrelevant for combat scenarios.
-		// TODO: Spellcasting stats might also be relevant.
 	};
 	class PlayerCharacter : public Creature {
 	private:

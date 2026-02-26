@@ -57,6 +57,80 @@ namespace CombatTrackerApp {
 		{PlayerSubclass::EVOKER, PlayerClass::WIZARD},
 		{PlayerSubclass::ILLUSIONIST, PlayerClass::WIZARD}
 	};
+	inline const std::unordered_map<PlayerClass, std::unordered_set<PlayerSubclass>> MAPPED_CLASSES{
+		{PlayerClass::BARBARIAN, {
+			PlayerSubclass::PATH_OF_THE_BERSERKER,
+			PlayerSubclass::PATH_OF_THE_WILD_HEART,
+			PlayerSubclass::PATH_OF_THE_WORLD_TREE,
+			PlayerSubclass::PATH_OF_THE_ZEALOT
+		}},
+		{PlayerClass::BARD, {
+			PlayerSubclass::COLLEGE_OF_DANCE,
+			PlayerSubclass::COLLEGE_OF_GLAMOUR,
+			PlayerSubclass::COLLEGE_OF_LORE,
+			PlayerSubclass::COLLEGE_OF_VALOR
+		}},
+		{PlayerClass::CLERIC, {
+			PlayerSubclass::LIFE_DOMAIN,
+			PlayerSubclass::LIGHT_DOMAIN,
+			PlayerSubclass::TRICKERY_DOMAIN,
+			PlayerSubclass::WAR_DOMAIN
+		}},
+		{PlayerClass::DRUID, {
+			PlayerSubclass::CIRCLE_OF_THE_LAND,
+			PlayerSubclass::CIRCLE_OF_THE_MOON,
+			PlayerSubclass::CIRCLE_OF_THE_SEA,
+			PlayerSubclass::CIRCLE_OF_THE_STARS
+		}},
+		{PlayerClass::FIGHTER, {
+			PlayerSubclass::BATTLE_MASTER,
+			PlayerSubclass::CHAMPION,
+			PlayerSubclass::ELDRITCH_KNIGHT,
+			PlayerSubclass::PSI_WARRIOR
+		}},
+		{PlayerClass::MONK, {
+			PlayerSubclass::WARRIOR_OF_MERCY,
+			PlayerSubclass::WARRIOR_OF_SHADOW,
+			PlayerSubclass::WARRIOR_OF_THE_ELEMENTS,
+			PlayerSubclass::WARRIOR_OF_THE_OPEN_HAND
+		}},
+		{PlayerClass::PALADIN, {
+			PlayerSubclass::OATH_OF_DEVOTION,
+			PlayerSubclass::OATH_OF_GLORY,
+			PlayerSubclass::OATH_OF_THE_ANCIENTS,
+			PlayerSubclass::OATH_OF_VENGEANCE
+		}},
+		{PlayerClass::RANGER, {
+			PlayerSubclass::BEAST_MASTER,
+			PlayerSubclass::FEY_WANDERER,
+			PlayerSubclass::GLOOM_STALKER,
+			PlayerSubclass::HUNTER
+		}},
+		{PlayerClass::ROGUE, {
+			PlayerSubclass::ARCANE_TRICKSTER,
+			PlayerSubclass::ASSASSIN,
+			PlayerSubclass::SOULKNIFE,
+			PlayerSubclass::THIEF
+		}},
+		{PlayerClass::SORCERER, {
+			PlayerSubclass::ABERRANT_SORCERY,
+			PlayerSubclass::CLOCKWORK_SORCERY,
+			PlayerSubclass::DRACONIC_SORCERY,
+			PlayerSubclass::WILD_MAGIC_SORCERY
+		}},
+		{PlayerClass::WARLOCK, {
+			PlayerSubclass::ARCHFEY_PATRON,
+			PlayerSubclass::CELESTIAL_PATRON,
+			PlayerSubclass::FIEND_PATRON,
+			PlayerSubclass::GREAT_OLD_ONE_PATRON
+		}},
+		{PlayerClass::WIZARD, {
+			PlayerSubclass::ABJURER,
+			PlayerSubclass::DIVINER,
+			PlayerSubclass::EVOKER,
+			PlayerSubclass::ILLUSIONIST
+		}}
+	};
 	// Will probably be unused.
 	inline const std::unordered_map<Tool, Ability> MAPPED_TOOLS {
 		{Tool::ALCHEMISTS_SUPPLIES, Ability::INTELLIGENCE},

@@ -23,6 +23,8 @@ namespace CombatTrackerApp {
 		sizeListBoxParameters{ -1, -1, false },
 		creatureTypeParameters{ -1, -1, false },
 		alignmentParameters{ -1, -1, false },
+		speciesParameters{ -1, -1, false },
+		originParameters{ -1, -1, false },
 		isInitiativeOverriden{false},
 		isPassivePerceptionOverridden(false),
 		isXPOverridden{false},
@@ -193,12 +195,12 @@ namespace CombatTrackerApp {
 	}
 	void EncounterCreationScene::renderMonsterBrowserWindow() {
 		
-		static bool editingMode{ true };
+		static bool editingModeMonster{ true };
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(MONSTER_BROWSER).c_str());
 		if (CombatTrackerLib::Scene::centeredButton("Create Monster")) {
 
 			ImGui::OpenPopup("Monster Creation");
-			editingMode = false;
+			editingModeMonster = false;
 		}
 
 		if (!dockspaceInitializations.at(MONSTER_BROWSER)) {
@@ -211,7 +213,7 @@ namespace CombatTrackerApp {
 		Otherwise it won't be rendered at all, as it exists in a different ID context.
 		See https://github.com/ocornut/imgui/blob/master/docs/FAQ.md#q-about-the-id-stack-system.
 		*/
-		renderEntityCreationPopupModal(true, editingMode);
+		renderEntityCreationPopupModal(true, editingModeMonster);
 
 		ImGui::End();
 
@@ -235,7 +237,8 @@ namespace CombatTrackerApp {
 
 	// TODO: Exact same comments for the monster browser apply to the player browser as well.
 	void EncounterCreationScene::renderPlayerCharacterBrowserWindow() {
-
+		
+		static bool editingModePlayerCharacter{ true };
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(PLAYER_CHARACTER_BROWSER).c_str());
 		if (!dockspaceInitializations.at(PLAYER_CHARACTER_BROWSER)) {
 			initializeSubBrowserDockspace(PLAYER_CHARACTER_BROWSER);
@@ -243,14 +246,12 @@ namespace CombatTrackerApp {
 
 		if (CombatTrackerLib::Scene::centeredButton("Create Player Character")) {
 			ImGui::OpenPopup("Player Character Creation");
+			editingModePlayerCharacter = false;
 		}
 
 		ImGui::DockSpace(dockspaceIDs.at(PLAYER_CHARACTER_BROWSER), ImGui::GetWindowSize());
 
-		if (ImGui::BeginPopupModal("Player Character Creation", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
-
-			ImGui::EndPopup();;
-		}
+		renderEntityCreationPopupModal(false, editingModePlayerCharacter);
 
 		ImGui::End();
 
@@ -398,13 +399,10 @@ namespace CombatTrackerApp {
 					ImGui::SeparatorText("Monster Specific Data");
 					renderMonsterSpecificInfo();
 				}
-				// TODO: Player character specific info goes here.
-				// Might need to change UI layout as the player character data is much larger than the monster.
 				else {
-					ImGui::SeparatorText("Player Character Specific Data");
-					renderPlayerCharacterSpecificInfo();
+					ImGui::SeparatorText("Classes and Subclasses");
+					renderPlayerClassAndSubclasses();
 				}
-
 				ImGui::EndTable();
 			}
 
@@ -487,6 +485,13 @@ namespace CombatTrackerApp {
 			);
 			renderSenses();
 
+			// TODO: Player character specific info goes here.
+			// Might need to change UI layout as the player character data is much larger than the monster.
+			ImGui::Spacing();
+			if (!isMonster) {
+				ImGui::SeparatorText("Player Character Specific Data");
+				renderPlayerCharacterSpecificInfo();
+			}
 			ImGui::Spacing();
 			ImGui::SeparatorText("Actions, Traits, Equipment");
 			renderActions(isMonster);
@@ -500,12 +505,12 @@ namespace CombatTrackerApp {
 			ImGui::Separator();
 			if (isMonster) {
 				if (editMode) {
-					if (centeredButton("Update Monster")) {
+					if (CombatTrackerLib::Scene::centeredButton("Update Monster")) {
 
 					}
 				}
 				else {
-					if (centeredButton("Complete Monster Creation")) {
+					if (CombatTrackerLib::Scene::centeredButton("Complete Monster Creation")) {
 						if (saveMonster(currentCreatureStatBlock, currentMonsterCR, currentMonsterXP)) {
 							resetParametersAndOverrides();
 							ImGui::CloseCurrentPopup();
@@ -515,12 +520,12 @@ namespace CombatTrackerApp {
 			}
 			else {
 				if (editMode) {
-					if (centeredButton("Update Player Character")) {
+					if (CombatTrackerLib::Scene::centeredButton("Update Player Character")) {
 
 					}
 				}
 				else {
-					if (centeredButton("Complete Player Character Creation")) {
+					if (CombatTrackerLib::Scene::centeredButton("Complete Player Character Creation")) {
 						if (savePlayerCharacter(currentCreatureStatBlock, currentPlayerStatBlock)) {
 							resetParametersAndOverrides();
 							ImGui::CloseCurrentPopup();
@@ -1285,7 +1290,78 @@ namespace CombatTrackerApp {
 		}
 	}
 	void EncounterCreationScene::renderPlayerCharacterSpecificInfo() {
+		renderListBox(speciesParameters, currentPlayerStatBlock.species, "Species", SPECIES_NAMES);
+		renderListBox(originParameters, currentPlayerStatBlock.origin, "Origin", ORIGIN_NAMES);
+		renderMutuallyExclusiveCheckboxCluster(currentPlayerStatBlock.weaponProficiencies, WEAPON_TYPE_NAMES, "Weapon Proficiencies");
+		renderMutuallyExclusiveCheckboxCluster(currentPlayerStatBlock.armorProficiencies, ARMOR_TYPE_NAMES, "Armor Proficiencies");
+		renderMutuallyExclusiveCheckboxCluster(currentPlayerStatBlock.toolProficiencies, TOOL_NAMES, "Tool Proficiencies");
+		renderMutuallyExclusiveCheckboxCluster(currentPlayerStatBlock.weaponMasteries, WEAPON_MASTERY_NAMES, "Weapon Masteries");
+	}
+	void EncounterCreationScene::renderPlayerClassAndSubclasses() {
+		if (ImGui::BeginTable("Classes and Subclasses", 1, ImGuiTableFlags_SizingStretchSame)) {
 
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+
+			for (auto& item : currentPlayerStatBlock.levels) {
+				if (item.second == 0) {
+					continue;
+				}
+				ImGui::TextWrapped("%s %d", CLASS_NAMES.at(item.first).c_str(), item.second);
+			}
+			for (auto& item : currentPlayerStatBlock.subclasses) {
+				ImGui::TextWrapped("%s", SUBCLASS_NAMES.at(item.second).c_str() );
+			}
+			if (CombatTrackerLib::Scene::centeredButton("Configure Classes and Subclasses")) {
+				ImGui::OpenPopup("Configuration");
+			}
+			if (ImGui::BeginPopupModal("Configuration")) {
+
+				// TODO: This is a fucking terrible way to do this please change this later.
+				for (auto& item : CLASS_NAMES) {
+					renderNonOverridableInputInt(currentPlayerStatBlock.levels.at(item.first), item.second.c_str());
+				}
+				for (auto& item : SUBCLASS_NAMES) {
+					if (currentPlayerStatBlock.levels.at(MAPPED_SUBCLASSES.at(item.first)) < SUBCLASS_LEVEL_THRESHOLD) {
+						chosenSubclasses.at(item.first) = false;
+						currentPlayerStatBlock.subclasses.erase(MAPPED_SUBCLASSES.at(item.first));
+					}
+					if (ImGui::Checkbox(item.second.c_str(), &chosenSubclasses.at(item.first))) {
+						hasCorrespondingSubclass.at(MAPPED_SUBCLASSES.at(item.first)) = true;
+						currentPlayerStatBlock.subclasses[MAPPED_SUBCLASSES.at(item.first)] = item.first;
+						for (auto& secondItem : MAPPED_CLASSES.at(MAPPED_SUBCLASSES.at(item.first))) {
+							if ((chosenSubclasses.at(secondItem) && secondItem != item.first)
+								|| currentPlayerStatBlock.levels.at(MAPPED_SUBCLASSES.at(secondItem)) < SUBCLASS_LEVEL_THRESHOLD )  
+							{
+								chosenSubclasses.at(secondItem) = false;
+							}
+						}
+					}
+				}
+
+				if (CombatTrackerLib::Scene::centeredButton("Finish Class and Subclass Configuration")) {
+
+					// Lengthy but necessary validation.
+					int sum{};
+					bool isValid{ false };
+					for (auto& item : currentPlayerStatBlock.levels) {
+						if (item.second > MIN_CLASS_LEVEL) {
+							isValid = true;
+						}
+						sum += item.second;
+						if (sum > MAX_TOTAL_CLASS_LEVEL) {
+							isValid = false;
+							break;
+						}
+					}
+					if (isValid) {
+						ImGui::CloseCurrentPopup();
+					}
+				}
+				ImGui::EndPopup();
+			}
+			ImGui::EndTable();
+		}
 	}
 
 	// Call this after creating/completing editing of Monsters/Player Characters.
@@ -1294,6 +1370,8 @@ namespace CombatTrackerApp {
 		sizeListBoxParameters = { -1, -1, false };
 		creatureTypeParameters = { -1, -1, false };
 		alignmentParameters = { -1, -1, false };
+		speciesParameters = { -1, -1, false };
+		originParameters = { -1, -1, false };
 		isInitiativeOverriden = false;
 		isPassivePerceptionOverridden = false;
 		isXPOverridden = false;
