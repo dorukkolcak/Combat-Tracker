@@ -5,6 +5,9 @@
 #include "../../CombatTrackerLib/Scene.h"
 #include "../Entities/Creature/CreatureEnums.h"
 #include "../Entities/Creature/CreatureTypes.h"
+#include "../Entities/Creature/Creature.h"
+#include "../Entities/Monster/Monster.h"
+#include "../Entities/PlayerCharacter/PlayerCharacter.h"
 
 namespace CombatTrackerApp {
 
@@ -49,10 +52,11 @@ namespace CombatTrackerApp {
 		// Flags.
 		ImGuiWindowFlags encounterCreationWindowFlags{};
 		ImGuiDockNodeFlags encounterCreationDockFlags{};
-		
+		ImGuiWindowFlags popupWindowFlags{};
+
 		// Dockspace variables.
 		std::unordered_map<EncounterCreationWindows, ImGuiID> dockspaceIDs;
-		std::unordered_map<EncounterCreationWindows, bool> dockspaceInitializations{
+		std::unordered_map<EncounterCreationWindows, bool> dockspaceInitializations {
 			{ENCOUNTER_CREATOR, false},
 			{ENTITY_BROWSER, false},
 			{MONSTER_BROWSER, false},
@@ -70,7 +74,35 @@ namespace CombatTrackerApp {
 			{ENCOUNTER_BROWSER, "Encounter Browser"}
 		};
 
-		// TODO: Try to template, minimize the number of functions as much as possible here.
+		const std::string proficiencySuffix{ " Proficiency" };
+		const std::string expertiseSuffix{ " Expertise" };
+		const std::string traitLabel{ "Trait" };
+		const std::string equipmentLabel{ "Gear" };
+		std::string popupName;
+
+		MonsterBuilder monsterBuilder;
+		PlayerCharacterBuilder playerCharacterBuilder;
+
+		CreatureStatBlock& currentCreatureStatBlock;
+		PlayerStatBlock& currentPlayerStatBlock;
+
+		double currentMonsterCR;
+		int currentMonsterXP;
+
+		ListBoxParameters monsterCRParameters;
+		ListBoxParameters sizeListBoxParameters;
+		ListBoxParameters creatureTypeParameters;
+		ListBoxParameters alignmentParameters;
+
+		bool isInitiativeOverriden;
+		bool isPassivePerceptionOverridden;
+		bool isXPOverridden;
+		bool isPBOverridden;
+
+		std::unordered_map<Ability, bool> abilityModifiersOverride;
+		std::unordered_map<Ability, bool> savingThrowsOverride;
+		std::unordered_map<Skill, bool> skillModifiersOverride;
+
 		void renderHostWindow();
 		void renderMenuWindow();
 		void renderEntityBrowserWindow();
@@ -80,84 +112,41 @@ namespace CombatTrackerApp {
 		void renderEncounterManagerWindow();
 		void initializeSubBrowserDockspace(EncounterCreationWindows windowType);
 
-		// TODO: Consider passing a Creature object as a parameter here when implementing editing functionality.
-		// So that we can populate all static parameters through that object and just reuse all rendering code.
-		void renderMonsterCreationPopupModal();
-		void renderPlayerCharacterCreationPopupModal();
+		void renderEntityCreationPopupModal(bool isMonster, bool editMode);
 
-		void renderGeneralCreatureInfo(
-			std::string& name,
-			Size& size,
-			CreatureType& type,
-			Alignment& alignment,
-			int& AC,
-			int& HP
-		);
-		void renderSpeedInfo (
-			int& walkSpeed,
-			int& climbingSpeed,
-			int& swimmingSpeed,
-			int& burrowSpeed,
-			int& flySpeed
-		);
+		void renderGeneralCreatureInfo ();
+		void renderSpeedInfo ();
 		template <typename MapType, typename NameMap>
 		void renderProficiencyAndExpertiseCluster (
 			const char* proficiencyLabel, 
-			std::string& proficiencyLabelSuffix,
 			const char* expertiseLabel,
-			std::string& expertiseLabelSuffix,
 			MapType& proficiencyItems,
 			MapType& expertiseItems,
 			const NameMap& itemNames
 		);
 
 		// These are way too specific so I don't think I can template this in a convenient way.
-		void renderAbilityScoresAndModifiers (
-			std::unordered_map<Ability, int>& abilityScores,
-			std::unordered_map<Ability, int>& abilityModifiers,
-			std::unordered_map<Ability, bool>& abilityScoresOverride
-		);
-		void renderSavingThrowModifiers (
-			std::unordered_map<Ability, int>& savingThrowModifiers, 
-			std::unordered_map<Ability, bool>& savingThrowModifiersOverride,
-			std::unordered_map<Ability, bool>& proficientSavingThrows,
-			std::unordered_map<Ability, bool>& expertiseSavingThrows,
-			std::unordered_map<Ability, int>& abilityModifiers,
-			const int PB
-		);
-		void renderSkillModifiers( 
-			std::unordered_map<Skill, int>& skillModifiers, 
-			std::unordered_map<Skill, bool>& skillModifiersOverride,
-			std::unordered_map<Skill, bool>& proficientSkills,
-			std::unordered_map<Skill, bool>& expertiseSkills,
-			std::unordered_map<Ability, int>& abilityModifiers,
-			const int PB
-		);
-		void renderDmgVulnResAndImm(
-			std::unordered_map<DamageType, bool>& damageVulnerabilities,
-			std::unordered_map<DamageType, bool>& damageResistances,
-			std::unordered_map<DamageType, bool>& damageImmunities
-		);
+		void renderAbilityScoresAndModifiers ();
+		void renderSavingThrowModifiers ();
+		void renderSkillModifiers ();
+		void renderDmgVulnResAndImm ();
 		template <typename MapType, typename NameMap>
 		void renderMutuallyExclusiveCheckboxCluster(MapType& items, NameMap& names, const char* label);
-		void renderSenses(std::unordered_map<Sense, int>& senses);
+		void renderSenses();
 		// Reserved for traits and gear.
-		template <typename Items>
-		void renderAddables(Items& currentItems, const char* label);
-		void renderActions(std::vector<CreatureAction>& currentActions);
+		template <typename Item>
+		void renderAddables(std::vector<Item>& currentItems, const std::string& label);
 
-		void renderMonsterSpecificInfo(
-			double& CR,
-			int& XP,
-			int& PB
-		);
+		void renderActions(bool isMonster);
+
+		void renderMonsterSpecificInfo ();
 		void renderPlayerCharacterSpecificInfo();
 
 		template <typename T, typename MapType>
 		void renderListBox(ListBoxParameters& parameters, T& type, const char* listBoxLabel, const MapType& items);
 		void renderNonOverridableInputInt(int& value, const char* label);
 		template <typename T, typename MapType>
-		void renderOveriddableInputInt(
+		void renderOverriddableInputInt (
 			int& value,
 			bool& overrideFlag,
 			const char* label,
@@ -167,5 +156,6 @@ namespace CombatTrackerApp {
 			const int upperBound,
 			const T key
 		);
+		void resetParametersAndOverrides();
 	};
 }

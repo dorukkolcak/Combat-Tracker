@@ -75,7 +75,8 @@ namespace CombatTrackerApp {
 		HALFLING,
 		HUMAN,
 		ORC,
-		TIEFLING
+		TIEFLING,
+		NO_SPECIES
 	};
 	enum class Origin {
 		ACOLYTE,
@@ -93,7 +94,8 @@ namespace CombatTrackerApp {
 		SAILOR,
 		SCRIBE,
 		SOLDIER,
-		WAYFARER
+		WAYFARER,
+		NO_ORIGIN
 	};
 	enum class WeaponType {
 		SIMPLE_MELEE,

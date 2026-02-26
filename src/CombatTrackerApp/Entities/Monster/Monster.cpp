@@ -13,5 +13,5 @@ namespace CombatTrackerApp {
 	}
 	MonsterBuilder& MonsterBuilder::setCR(const double creatureCR) { CR = creatureCR; return *this; }
 	MonsterBuilder& MonsterBuilder::setXP(const int creatureXP) { XP = creatureXP; return *this; }
-	Monster MonsterBuilder::createMonster() { return std::move(Monster(block, CR, XP)); }
+	Monster MonsterBuilder::moveMonster() { return std::move(Monster(block, CR, XP)); }
 }

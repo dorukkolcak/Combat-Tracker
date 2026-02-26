@@ -32,7 +32,8 @@ namespace CombatTrackerApp {
 		BONUS_ACTION,
 		REACTION,
 		LEGENDARY_ACTION, // Should only be available to Monster. 
-		LAIR_ACTION // Should only be available to Monster.
+		LAIR_ACTION, // Should only be available to Monster.
+		NO_ACTION
 	};
 	enum class Skill {
 		ATHLETICS,

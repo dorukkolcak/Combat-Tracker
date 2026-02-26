@@ -15,11 +15,11 @@ namespace CombatTrackerApp {
 
 		int getXP();
 	};
-	class MonsterBuilder : public CreatureBuilder {
+	class MonsterBuilder : public CreatureBuilder<MonsterBuilder> {
 	public:
 		MonsterBuilder& setCR(const double creatureCR);
 		MonsterBuilder& setXP(const int XP);
-		Monster createMonster();
+		Monster moveMonster();
 	private:
 		double CR;
 		int XP;

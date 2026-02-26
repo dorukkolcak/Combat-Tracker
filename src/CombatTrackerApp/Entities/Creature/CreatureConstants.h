@@ -25,7 +25,11 @@ namespace CombatTrackerApp {
 		{Skill::PERFORMANCE, Ability::CHARISMA},
 		{Skill::PERSUASION, Ability::CHARISMA}
 	};
+	inline constexpr int PB_LOWER_BOUND{ 2 };
 	inline constexpr int ABILITY_SCORE_UPPER_BOUND{ 30 };
+	inline constexpr int ABILITY_SCORE_LOWER_BOUND{};
+	inline constexpr int ABILITY_MODIFIERS_UPPER_BOUND{ 10 };
+	inline constexpr int ABILITY_MODIFIERS_LOWER_BOUND{ -5 };
 	inline const std::unordered_map<Size, std::string> SIZE_NAMES {
 		{Size::TINY, "Tiny"},
 		{Size::SMALL, "Small"},
@@ -147,5 +151,17 @@ namespace CombatTrackerApp {
 		{Sense::DARKVISION, "Darkvision"},
 		{Sense::TREMORSENSE, "Tremorsense"},
 		{Sense::TRUESIGHT, "Truesight"}
+	};
+	inline const std::unordered_map<ActionType, std::string> ACTION_NAMES {
+		{ActionType::ACTION, "Action"},
+		{ActionType::BONUS_ACTION, "Bonus Action"},
+		{ActionType::REACTION, "Reaction"},
+		{ActionType::LEGENDARY_ACTION, "Legendary Action"},
+		{ActionType::LAIR_ACTION, "Lair Action"}
+	};
+	inline const std::unordered_map<ActionType, std::string> PLAYER_ACTION_NAMES{
+		{ActionType::ACTION, "Action"},
+		{ActionType::BONUS_ACTION, "Bonus Action"},
+		{ActionType::REACTION, "Reaction"}
 	};
 }

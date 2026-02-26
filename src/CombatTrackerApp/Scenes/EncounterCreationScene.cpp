@@ -1,19 +1,33 @@
 #include <vector>
+#include <algorithm>
 
 #include "EncounterCreationScene.h"
 #include "MainMenuScene.h"
+#include "../JSONUtils.h"
 #include "../Entities/Creature/CreatureConstants.h"
-#include "../Entities/Creature/Creature.h"
-#include "../Entities/Monster/Monster.h"
 #include "../Entities/Monster/MonsterConstants.h"
 
 #include "imgui_internal.h"
 #include "Imgui/misc/cpp/imgui_stdlib.h" // std::string support
 
-
 namespace CombatTrackerApp {
 	EncounterCreationScene::EncounterCreationScene(CombatTrackerLib::App* app) :
-		CombatTrackerLib::Scene(app)
+		CombatTrackerLib::Scene(app),
+		monsterBuilder(),
+		playerCharacterBuilder(),
+		currentCreatureStatBlock(monsterBuilder.getCreatureBlock()), // Doesn't matter which builder is used here.
+		currentPlayerStatBlock(playerCharacterBuilder.getPlayerCharacterBlock()),
+		currentMonsterCR{},
+		currentMonsterXP{},
+		monsterCRParameters{-1, -1, false},
+		sizeListBoxParameters{ -1, -1, false },
+		creatureTypeParameters{ -1, -1, false },
+		alignmentParameters{ -1, -1, false },
+		isInitiativeOverriden{false},
+		isPassivePerceptionOverridden(false),
+		isXPOverridden{false},
+		isPBOverridden{false},
+		popupName{}
 	{
 		encounterCreationDockFlags =
 			ImGuiDockNodeFlags_NoResize |
@@ -25,6 +39,16 @@ namespace CombatTrackerApp {
 			ImGuiWindowFlags_NoMove |
 			ImGuiWindowFlags_NoBringToFrontOnFocus |
 			ImGuiWindowFlags_NoNavFocus;
+		popupWindowFlags = ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoCollapse;
+		for (const auto& ability : ABILITY_NAMES) {
+			abilityModifiersOverride[ability.first] = false;
+			savingThrowsOverride[ability.first] = false;
+		}
+		for (const auto& skill : SKILL_NAMES) {
+			skillModifiersOverride[skill.first] = false;
+		}
 	}
 	EncounterCreationScene::~EncounterCreationScene() {}
 
@@ -129,6 +153,7 @@ namespace CombatTrackerApp {
 	void EncounterCreationScene::renderEntityBrowserWindow() {
 
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(ENTITY_BROWSER).c_str());
+
 		// Set configurations of the window of the scene on first render pass.
 		if (!dockspaceInitializations.at(ENTITY_BROWSER)) {
 
@@ -167,12 +192,15 @@ namespace CombatTrackerApp {
 		ImGui::End();
 	}
 	void EncounterCreationScene::renderMonsterBrowserWindow() {
-
+		
+		static bool editingMode{ true };
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(MONSTER_BROWSER).c_str());
 		if (CombatTrackerLib::Scene::centeredButton("Create Monster")) {
 
 			ImGui::OpenPopup("Monster Creation");
+			editingMode = false;
 		}
+
 		if (!dockspaceInitializations.at(MONSTER_BROWSER)) {
 			initializeSubBrowserDockspace(MONSTER_BROWSER);
 		}
@@ -182,36 +210,43 @@ namespace CombatTrackerApp {
 		IMPORTANT: The popup modal rendering code should be precisely within the rendering code of its parent window.
 		Otherwise it won't be rendered at all, as it exists in a different ID context.
 		See https://github.com/ocornut/imgui/blob/master/docs/FAQ.md#q-about-the-id-stack-system.
-		TODO: Finish the popup modal UI and integrate JSON saving functionality.
 		*/
-		renderMonsterCreationPopupModal();
+		renderEntityCreationPopupModal(true, editingMode);
 
 		ImGui::End();
 
-		// TODO: Finalize UI design after "backend" stuff is done.
+		/*
+		TODO: Finalize UI design. Handle button for all monsters should be in the context of the window.
+		With each button corresponding to a monster available in JSON.
+		When this button is clicked, a popup should open with outlining three options:
+		1) Delete Monster.
+		2) Edit Monster.
+		3) Add monster to current encounter.
+		*/
 		ImGui::Begin((MAPPED_WINDOW_NAMES.at(MONSTER_BROWSER) + " - User Created").c_str());
 
 		ImGui::End();
 
+		// TODO: Finalize UI design. Clicking on a compendium monster should add it to the current encounter.
 		ImGui::Begin((MAPPED_WINDOW_NAMES.at(MONSTER_BROWSER) + " - Compendium").c_str());
 
 		ImGui::End();
 	}
+
+	// TODO: Exact same comments for the monster browser apply to the player browser as well.
 	void EncounterCreationScene::renderPlayerCharacterBrowserWindow() {
-		// Player character browser window.
+
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(PLAYER_CHARACTER_BROWSER).c_str());
 		if (!dockspaceInitializations.at(PLAYER_CHARACTER_BROWSER)) {
 			initializeSubBrowserDockspace(PLAYER_CHARACTER_BROWSER);
 		}
 
 		if (CombatTrackerLib::Scene::centeredButton("Create Player Character")) {
-			ImGui::BeginPopupModal("Player Character Creation");
+			ImGui::OpenPopup("Player Character Creation");
 		}
 
 		ImGui::DockSpace(dockspaceIDs.at(PLAYER_CHARACTER_BROWSER), ImGui::GetWindowSize());
 
-		// Same exact thing applies to this popup modal as well.
-		// TODO: Finish the popup modal UI and integrate JSON saving functionality.
 		if (ImGui::BeginPopupModal("Player Character Creation", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
 
 			ImGui::EndPopup();;
@@ -219,7 +254,6 @@ namespace CombatTrackerApp {
 
 		ImGui::End();
 
-		// TODO: Finalize UI design after "backend" stuff is done.
 		ImGui::Begin((MAPPED_WINDOW_NAMES.at(PLAYER_CHARACTER_BROWSER) + " - User Created").c_str());
 
 		ImGui::End();
@@ -228,6 +262,8 @@ namespace CombatTrackerApp {
 
 		ImGui::End();
 	}
+
+	// TODO: Finish this window when all monster, player character and encounter browser functionality is done.
 	void EncounterCreationScene::renderEncounterBrowserWindow() {
 
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(ENCOUNTER_BROWSER).c_str());
@@ -237,7 +273,6 @@ namespace CombatTrackerApp {
 		ImGui::DockSpace(dockspaceIDs.at(ENCOUNTER_BROWSER), ImGui::GetWindowSize());
 		ImGui::End();
 
-		// TODO: Finalize UI design after "backend" stuff is done.
 		ImGui::Begin((MAPPED_WINDOW_NAMES.at(ENCOUNTER_BROWSER) + " - User Created").c_str());
 
 		ImGui::End();
@@ -247,12 +282,15 @@ namespace CombatTrackerApp {
 		ImGui::End();
 
 	}
+
+	// TODO: Finish this window when all monster and player character functionality is done.
 	void EncounterCreationScene::renderEncounterManagerWindow() {
 
-		// TODO: Encounter manager window. Finalize UI design after "backend" stuff is done.
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(ENCOUNTER_MANAGER).c_str());
 		ImGui::End();
 	}
+
+	// Helper used for creating the user-compendium split windows. 
 	void EncounterCreationScene::initializeSubBrowserDockspace(EncounterCreationWindows windowType) {
 
 		dockspaceIDs[windowType] =
@@ -276,357 +314,267 @@ namespace CombatTrackerApp {
 		dockspaceInitializations.at(windowType) = true;
 	}
 
-	void EncounterCreationScene::renderMonsterCreationPopupModal() {
+	// This is used for both adding monsters and players AND for editing them as well. 
+	// So this is a pretty chunky function.
+	void EncounterCreationScene::renderEntityCreationPopupModal(bool isMonster, bool editMode) {
 
-		// Set popup configs. 
-		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		// Set popup configs.
+		if (isMonster) {
+			if (editMode) {
+				popupName = "Monster Editing";
+			}
+			else {
+				popupName = "Monster Creation";
+			}
+		}
+		else {
+			if (editMode) {
+				popupName = "Player Character Editing";
+			}
+			else {
+				popupName = "Player Character Creation";
+			}
+		}
+		const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-		ImGui::SetNextWindowSize(ImGui::GetMainViewport()->Size);
-		if (ImGui::BeginPopupModal("Monster Creation", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
+		const ImVec2 viewportSize = ImGui::GetMainViewport()->Size;
+		ImGui::SetNextWindowSize(ImVec2(viewportSize.x * 0.92f, viewportSize.y * 0.92f));
 
-			static std::string name;;
-			static Size monsterSize{ Size::NO_SIZE };;
-			static CreatureType monsterType{ CreatureType::NO_TYPE };
-			static Alignment monsterAlignment{ Alignment::UNALIGNED };
-			static int monsterAC{};
-			static int monsterHP{};
-			renderGeneralCreatureInfo(
-				name,
-				monsterSize,
-				monsterType,
-				monsterAlignment,
-				monsterAC,
-				monsterHP
-			);
+		// Render the monolithic popup.
+		if (ImGui::BeginPopupModal(popupName.c_str(), NULL, popupWindowFlags)) {
 
-			static double monsterCR{};
-			static int monsterXP{};
-			static int monsterPB{};
-			renderMonsterSpecificInfo(monsterCR, monsterXP, monsterPB);
+			// Scrollable region for the entire popup modal.
+			const float footerHeight = ImGui::GetFrameHeightWithSpacing() * 2.0f;
+			ImGui::BeginChild("EntityManagementScroll", ImVec2(0, -footerHeight));
 
-			static int monsterWalkSpeed{};
-			static int monsterClimbingSpeed{};
-			static int monsterSwimSpeed{};
-			static int monsterBurrowSpeed{};
-			static int monsterFlySpeed{};
-			renderSpeedInfo(
-				monsterWalkSpeed,
-				monsterClimbingSpeed,
-				monsterSwimSpeed,
-				monsterBurrowSpeed,
-				monsterFlySpeed
-			);
+			// TODO: Add a close button.
 
-			static std::unordered_map<Ability, int> monsterAbilityScores{
-				{Ability::STRENGTH, 10},
-				{Ability::DEXTERITY, 10},
-				{Ability::CONSTITUTION, 10},
-				{Ability::WISDOM, 10},
-				{Ability::INTELLIGENCE, 10},
-				{Ability::CHARISMA, 10} 
+			// TODO: Properly setup initial values of the entity that is being created/edited.
+			if (ImGui::IsWindowAppearing()) {
+				if (editMode) {
+					if (isMonster) {
+
+					}
+					else {
+
+					}
+				}
+				else {
+					if (isMonster) {
+						monsterBuilder.reset();
+						currentCreatureStatBlock = monsterBuilder.getCreatureBlock();
+						monsterBuilder.
+							setCR(0.0).
+							setXP(0).
+							setPB(0);
+					}
+					else {
+						playerCharacterBuilder.reset();
+						currentCreatureStatBlock = playerCharacterBuilder.getCreatureBlock();
+						currentPlayerStatBlock = playerCharacterBuilder.getPlayerCharacterBlock();
+					}
+				}
+
 			};
-			static std::unordered_map<Ability, int> monsterAbilityModifiers{
-				{Ability::STRENGTH, 0},
-				{Ability::DEXTERITY, 0},
-				{Ability::CONSTITUTION, 0},
-				{Ability::WISDOM, 0},
-				{Ability::INTELLIGENCE, 0},
-				{Ability::CHARISMA, 0} };
-			static std::unordered_map<Ability, bool> abilityModifiersOverridden
-			{ {Ability::STRENGTH, false},
-				{Ability::DEXTERITY, false},
-				{Ability::CONSTITUTION, false},
-				{Ability::WISDOM, false}, {Ability::INTELLIGENCE, false},
-				{Ability::CHARISMA, false} 
-			};
-			renderAbilityScoresAndModifiers(monsterAbilityScores, monsterAbilityModifiers, abilityModifiersOverridden);
 
-			static std::unordered_map<Ability, bool> proficientSavingThrows{
-				{Ability::STRENGTH, false},
-				{Ability::DEXTERITY, false},
-				{Ability::CONSTITUTION, false},
-				{Ability::WISDOM, false},
-				{Ability::INTELLIGENCE, false},
-				{Ability::CHARISMA, false} 
-			};
-			static std::unordered_map<Ability, bool> expertiseSavingThrows{
-				{Ability::STRENGTH, false},
-				{Ability::DEXTERITY, false},
-				{Ability::CONSTITUTION, false},
-				{Ability::WISDOM, false}, {Ability::INTELLIGENCE, false},
-				{Ability::CHARISMA, false} 
-			};
-			static std::string savingThrowProficiencySuffix{ " Proficiency" };
-			static std::string savingThrowExpertiseSuffix{ " Expertise" };
-			renderProficiencyAndExpertiseCluster(
-				"Saving Throw Proficiencies",
-				savingThrowProficiencySuffix,
-				"Saving Throw Expertises",
-				savingThrowExpertiseSuffix,
-				proficientSavingThrows,
-				expertiseSavingThrows,
-				ABILITY_NAMES
-			);
+			// Top UI elements, which include are laid out as follow:
+			// Left: General Creature info + speed data.
+			// Right: Player character or monster specific info.
+			if (ImGui::BeginTable("TopEntitySplit", 2, ImGuiTableFlags_SizingStretchProp)) {
+				ImGui::TableSetupColumn("Left", ImGuiTableColumnFlags_WidthStretch, 0.75f);
+				ImGui::TableSetupColumn("Right", ImGuiTableColumnFlags_WidthStretch, 0.25f);
+				ImGui::TableNextRow();
 
-			static std::unordered_map<Ability, int> monsterSavingThrowModifiers{
-				{Ability::STRENGTH, 0},
-				{Ability::DEXTERITY, 0},
-				{Ability::CONSTITUTION, 0},
-				{Ability::WISDOM, 0}, {Ability::INTELLIGENCE, 0},
-				{Ability::CHARISMA, 0} 
-			};
-			static std::unordered_map<Ability, bool> monsterSavingThrowsOverride{
-				{Ability::STRENGTH, false},
-				{Ability::DEXTERITY, false},
-				{Ability::CONSTITUTION, false},
-				{Ability::WISDOM, false},
-				{Ability::INTELLIGENCE, false},
-				{Ability::CHARISMA, false}
-			};
-			renderSavingThrowModifiers(
-				monsterSavingThrowModifiers,
-				monsterSavingThrowsOverride,
-				proficientSavingThrows,
-				expertiseSavingThrows,
-				monsterAbilityModifiers,
-				monsterPB);
+				ImGui::TableSetColumnIndex(0);
+				ImGui::SeparatorText("General");
+				renderGeneralCreatureInfo();
 
-			static std::unordered_map<Skill, bool> proficientSkills {
-				{Skill::ATHLETICS, false},
-				{Skill::ACROBATICS, false},
-				{Skill::SLEIGHT_OF_HAND, false},
-				{Skill::STEALTH, false}, {Skill::ARCANA, false},
-				{Skill::HISTORY, false}, {Skill::INVESTIGATION, false},
-				{Skill::NATURE, false},
-				{Skill::RELIGION, false},
-				{Skill::ANIMAL_HANDLING, false},
-				{Skill::INSIGHT, false},
-				{Skill::MEDICINE, false},
-				{Skill::PERCEPTION, false},
-				{Skill::SURVIVAL, false},
-				{Skill::DECEPTION, false},
-				{Skill::INTIMIDATION, false},
-				{Skill::PERFORMANCE, false},
-				{Skill::PERSUASION, false} 
-			};
-			static std::unordered_map<Skill, bool> expertiseSkills {
-				{Skill::ATHLETICS, false},
-				{Skill::ACROBATICS, false},
-				{Skill::SLEIGHT_OF_HAND, false},
-				{Skill::STEALTH, false},
-				{Skill::ARCANA, false},
-				{Skill::HISTORY, false},
-				{Skill::INVESTIGATION, false},
-				{Skill::NATURE, false},
-				{Skill::RELIGION, false},
-				{Skill::ANIMAL_HANDLING, false},
-				{Skill::INSIGHT, false},
-				{Skill::MEDICINE, false},
-				{Skill::PERCEPTION, false},
-				{Skill::SURVIVAL, false},
-				{Skill::DECEPTION, false},
-				{Skill::INTIMIDATION, false},
-				{Skill::PERFORMANCE, false},
-				{Skill::PERSUASION, false}
-			};
-			static std::string skillProficiencySuffix{ " Proficiency" };
-			static std::string skillExpertiseSuffix{ " Expertise" };
-			renderProficiencyAndExpertiseCluster(
-				"Skill Proficiencies",
-				skillProficiencySuffix,
-				"Skill Expertises",
-				skillExpertiseSuffix,
-				proficientSkills,
-				expertiseSkills,
-				SKILL_NAMES
-			);
+				ImGui::Spacing();
+				ImGui::SeparatorText("Movement");
+				renderSpeedInfo();
 
-			static std::unordered_map<Skill, int> monsterSkillModifiers{
-				{Skill::ATHLETICS, 0},
-				{Skill::ACROBATICS, 0},
-				{Skill::SLEIGHT_OF_HAND, 0},
-				{Skill::STEALTH, 0},
-				{Skill::ARCANA, 0},
-				{Skill::HISTORY, 0},
-				{Skill::INVESTIGATION, 0},
-				{Skill::NATURE, 0},
-				{Skill::RELIGION, 0},
-				{Skill::ANIMAL_HANDLING, 0},
-				{Skill::INSIGHT, 0},
-				{Skill::MEDICINE, 0},
-				{Skill::PERCEPTION, 0},
-				{Skill::SURVIVAL, 0},
-				{Skill::DECEPTION, 0},
-				{Skill::INTIMIDATION, 0},
-				{Skill::PERFORMANCE, 0},
-				{Skill::PERSUASION, 0} 
-			};
-			static std::unordered_map<Skill, bool> monsterSkillModifiersOverride {
-				{Skill::ATHLETICS, false},
-				{Skill::ACROBATICS, false},
-				{Skill::SLEIGHT_OF_HAND, false},
-				{Skill::STEALTH, false},
-				{Skill::ARCANA, false},
-				{Skill::HISTORY, false},
-				{Skill::INVESTIGATION, false},
-				{Skill::NATURE, false},
-				{Skill::RELIGION, false},
-				{Skill::ANIMAL_HANDLING, false},
-				{Skill::INSIGHT, false},
-				{Skill::MEDICINE, false},
-				{Skill::PERCEPTION, false},
-				{Skill::SURVIVAL, false},
-				{Skill::DECEPTION, false},
-				{Skill::INTIMIDATION, false},
-				{Skill::PERFORMANCE, false},
-				{Skill::PERSUASION, false}
-			};
-			renderSkillModifiers (
-				monsterSkillModifiers,
-				monsterSkillModifiersOverride,
-				proficientSkills, expertiseSkills,
-				monsterAbilityModifiers,
-				monsterPB
-			);
+				ImGui::TableSetColumnIndex(1);
+				if (isMonster) {
+					ImGui::SeparatorText("Monster Specific Data");
+					renderMonsterSpecificInfo();
+				}
+				// TODO: Player character specific info goes here.
+				// Might need to change UI layout as the player character data is much larger than the monster.
+				else {
+					ImGui::SeparatorText("Player Character Specific Data");
+					renderPlayerCharacterSpecificInfo();
+				}
 
-			static std::unordered_map<DamageType, bool> monsterDamageVulnerabilities {
-				{DamageType::ACID, false},
-				{DamageType::BLUDGEONING, false},
-				{DamageType::COLD, false},
-				{DamageType::FIRE, false},
-				{DamageType::FORCE, false},
-				{DamageType::LIGHTNING, false},
-				{DamageType::NECROTIC, false},
-				{DamageType::PIERCING, false},
-				{DamageType::POISON, false},
-				{DamageType::PSYCHIC, false},
-				{DamageType::RADIANT, false},
-				{DamageType::SLASHING, false},
-				{DamageType::THUNDER, false}
-			};
-			static std::unordered_map<DamageType, bool> monsterDamageResistances {
-				{DamageType::ACID, false},
-				{DamageType::BLUDGEONING, false},
-				{DamageType::COLD, false},
-				{DamageType::FIRE, false},
-				{DamageType::FORCE, false},
-				{DamageType::LIGHTNING, false},
-				{DamageType::NECROTIC, false},
-				{DamageType::PIERCING, false},
-				{DamageType::POISON, false},
-				{DamageType::PSYCHIC, false},
-				{DamageType::RADIANT, false},
-				{DamageType::SLASHING, false},
-				{DamageType::THUNDER, false}
-			};
-			static std::unordered_map<DamageType, bool> monsterDamageImmunites {
-				{DamageType::ACID, false},
-				{DamageType::BLUDGEONING, false},
-				{DamageType::COLD, false},
-				{DamageType::FIRE, false},
-				{DamageType::FORCE, false},
-				{DamageType::LIGHTNING, false},
-				{DamageType::NECROTIC, false},
-				{DamageType::PIERCING, false},
-				{DamageType::POISON, false},
-				{DamageType::PSYCHIC, false},
-				{DamageType::RADIANT, false},
-				{DamageType::SLASHING, false},
-				{DamageType::THUNDER, false}
-			};
-			renderDmgVulnResAndImm(monsterDamageVulnerabilities, monsterDamageResistances, monsterDamageImmunites);
-
-			static std::unordered_map<Condition, bool> monsterConditionImmunities {
-				{Condition::BLINDED, false},
-				{Condition::CHARMED, false},
-				{Condition::DEAFENED, false},
-				{Condition::FRIGHTENED, false},
-				{Condition::GRAPPLED, false},
-				{Condition::INCAPACITATED, false},
-				{Condition::INVISIBLE, false},
-				{Condition::PARALYZED, false},
-				{Condition::PETRIFIED, false},
-				{Condition::POISONED, false},
-				{Condition::PRONE, false},
-				{Condition::RESTRAINED, false},
-				{Condition::STUNNED, false},
-				{Condition::UNCONSCIOUS, false},
-				{Condition::EXHAUSTION, false}
-			};
-			renderMutuallyExclusiveCheckboxCluster(monsterConditionImmunities, CONDITTON_NAMES, "Condition Immunities");
-
-			static std::unordered_map<Language, bool> monsterLanguages {
-				{Language::COMMON, false},
-				{Language::COMMON_SIGN_LANGUAGE, false},
-				{Language::DWARVISH, false},
-				{Language::ELVISH, false},
-				{Language::GIANT, false},
-				{Language::GNOMISH, false},
-				{Language::GOBLIN, false},
-				{Language::HALFLING, false},
-				{Language::ORC, false},
-				{Language::ABYSSAL, false},
-				{Language::CELESTIAL, false},
-				{Language::DEEP_SPEECH, false},
-				{Language::DRUIDIC, false},
-				{Language::INFERNAL, false},
-				{Language::PRIMORDIAL, false},
-				{Language::SYLVAN, false},
-				{Language::THIEVES_CANT, false},
-				{Language::UNDERCOMMON, false}
-			};
-			renderMutuallyExclusiveCheckboxCluster(monsterLanguages, LANGUAGE_NAMES, "Languages");
-
-			static std::unordered_map<Sense, int> monsterSenses {
-				{Sense::BLINDSIGHT, 0},
-				{Sense::DARKVISION, 0},
-				{Sense::TREMORSENSE, 0},
-				{Sense::TRUESIGHT, 0}
-			};
-			renderSenses(monsterSenses);
-
-			static std::vector<CreatureAction> monsterActions;
-			renderActions(monsterActions);
-
-			static std::vector<Trait> monsterTraits;
-			renderAddables(monsterTraits, "Traits");
-
-			static std::vector<Gear> monsterEquipment;
-			renderAddables(monsterEquipment, "Gear");
-
-			// TODO: Validation of monster stats and saving functionality using the builder pattern.
-			if (centeredButton("Complete Monster Creation")) {
-
+				ImGui::EndTable();
 			}
 
-			// TODO: Close Button. 
+			ImGui::Spacing();
+			ImGui::SeparatorText("Abilities");
+			renderAbilityScoresAndModifiers();
+
+			ImGui::Spacing();
+			ImGui::SeparatorText("Saving Throws & Skills");
+			if (ImGui::BeginTable("##SavingThrowSkillsSplit", 2, ImGuiTableFlags_SizingStretchProp)) {
+				ImGui::TableSetupColumn("Left", ImGuiTableColumnFlags_WidthStretch, 0.5f);
+				ImGui::TableSetupColumn("Right", ImGuiTableColumnFlags_WidthStretch, 0.5f);
+				ImGui::TableNextRow();
+
+				// Compute a sensible dynamic height for the children so both columns match.
+				// We take most of the available content height, leaving a bit for separators/buttons.
+				const float availY = ImGui::GetContentRegionAvail().y;
+				const float minChildH = 180.0f;
+				const float childHeight = std::max(minChildH, availY * 0.46f);
+
+				// Saving throw data as a seperate collapsable header.
+				ImGui::TableSetColumnIndex(0);
+				if (ImGui::CollapsingHeader("Saving Throws", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+					// Saving Throw proficiency and expertise.
+					ImGui::BeginChild("##SaveProfandExp", ImVec2(0.0f, childHeight), true);
+					renderProficiencyAndExpertiseCluster(
+						"Saving Throw Proficiencies",
+						"Saving Throw Expertises",
+						currentCreatureStatBlock.savingThrowProficiencies,
+						currentCreatureStatBlock.savingThrowExpertise,
+						ABILITY_NAMES
+					);
+					ImGui::EndChild();
+
+					// Saving Throw Modifiers.
+					ImGui::BeginChild("##SaveMods", ImVec2(0.0f, childHeight), true);
+					renderSavingThrowModifiers();
+					ImGui::EndChild();
+				}
+
+				// Skill data as a seperate collapsable header.
+				ImGui::TableSetColumnIndex(1);
+				if (ImGui::CollapsingHeader("Skills", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+					// Skill proficiency and expertise.
+					ImGui::BeginChild("##SkillProfandExp", ImVec2(0.0f, childHeight), true);
+					renderProficiencyAndExpertiseCluster(
+						"Skill Proficiencies",
+						"Skill Expertises",
+						currentCreatureStatBlock.skillProficiencies,
+						currentCreatureStatBlock.skillExpertise,
+						SKILL_NAMES
+					);
+					ImGui::EndChild();
+
+					// Skill modifiers.
+					ImGui::BeginChild("##SkillMods", ImVec2(0.0f, childHeight), true);
+					renderSkillModifiers();
+					ImGui::EndChild();
+				}
+				ImGui::EndTable();
+			}
+
+			ImGui::Spacing();
+			ImGui::SeparatorText("Damage & Conditions");
+			renderDmgVulnResAndImm();
+			renderMutuallyExclusiveCheckboxCluster(
+				currentCreatureStatBlock.conditionImmunities,
+				CONDITTON_NAMES, 
+				"Condition Immunities"
+			);
+
+			ImGui::Spacing();
+			ImGui::SeparatorText("Senses & Languages");
+			renderMutuallyExclusiveCheckboxCluster(
+				currentCreatureStatBlock.languages,
+				LANGUAGE_NAMES, 
+				"Languages"
+			);
+			renderSenses();
+
+			ImGui::Spacing();
+			ImGui::SeparatorText("Actions, Traits, Equipment");
+			renderActions(isMonster);
+			renderAddables(currentCreatureStatBlock.traits, traitLabel);
+			renderAddables(currentCreatureStatBlock.equipment, equipmentLabel);
+
+			// End scrollable region.
+			ImGui::EndChild();
+
+			// TODO: Different "finalization" buttons based upon the context of the popup modal.
+			ImGui::Separator();
+			if (isMonster) {
+				if (editMode) {
+					if (centeredButton("Update Monster")) {
+
+					}
+				}
+				else {
+					if (centeredButton("Complete Monster Creation")) {
+						if (saveMonster(currentCreatureStatBlock, currentMonsterCR, currentMonsterXP)) {
+							resetParametersAndOverrides();
+							ImGui::CloseCurrentPopup();
+						}
+					}
+				}
+			}
+			else {
+				if (editMode) {
+					if (centeredButton("Update Player Character")) {
+
+					}
+				}
+				else {
+					if (centeredButton("Complete Player Character Creation")) {
+						if (savePlayerCharacter(currentCreatureStatBlock, currentPlayerStatBlock)) {
+							resetParametersAndOverrides();
+							ImGui::CloseCurrentPopup();
+						}
+					}
+				}
+			}
 			ImGui::EndPopup();
 		}
 	}
+
+	// Generic helper for single selectable listbox layouts.
+	// Used for creature type, alignment, size, monster CR, action type during action creation.
 	template <typename T, typename MapType>
-	void EncounterCreationScene::renderListBox(ListBoxParameters& parameters, T& type, const char* listBoxLabel, const MapType& items) {
+	void EncounterCreationScene::renderListBox (
+		ListBoxParameters& parameters,
+		T& type,
+		const char* listBoxLabel,
+		const MapType& items
+	) {
 		int counter{};
-		ImGui::BeginListBox(listBoxLabel);
-		for (const auto& item : items) {
-			const bool isSelected{ counter == parameters.chosenIndex };
-			if (ImGui::Selectable(item.second.c_str(), isSelected)) {
-				parameters.chosenIndex = counter;
-				type = item.first;
+		const float height = ImGui::GetTextLineHeightWithSpacing() * 8.0f;
+		if (ImGui::BeginListBox(listBoxLabel, ImVec2(0, height))) {
+			for (const auto& item : items) {
+				const bool isSelected{ counter == parameters.chosenIndex };
+				if (ImGui::Selectable(item.second.c_str(), isSelected)) {
+					parameters.chosenIndex = counter;
+					type = item.first;
+				}
+				if (parameters.isHighlighted && ImGui::IsItemHovered()) {
+					parameters.highlightedIndex = counter;
+				}
+				++counter;
 			}
-			if (parameters.isHighlighted && ImGui::IsItemHovered()) {
-				parameters.highlightedIndex = counter;
-			}
-			++counter;
+			ImGui::EndListBox();
 		}
-		ImGui::EndListBox();
 	}
+	
+	// Simple helper method used for user input of HP, AC, movement speed and sense distances.
 	void EncounterCreationScene::renderNonOverridableInputInt(int& value, const char* label) {
 		if (ImGui::InputInt(label, &value)) {
 			value = std::max(0, value);
 		}
 	}
+
+	/*
+	A slightly more complicated helper used for user input of monster XP and PB.
+	The common thing about these two types is that they set mapped values.
+	Various other overridable user input can also be put in this format.
+	But mapping these types is meaningless as their mapping is quite simple.
+	Example: Iniative Bonus: Dexterity Modifier, Passive Perception: Perception Modifier + 10
+	*/
 	template <typename T, typename MapType>
-	void EncounterCreationScene::renderOveriddableInputInt(
+	void EncounterCreationScene::renderOverriddableInputInt (
 		int& value,
 		bool& overrideFlag,
 		const char* label,
@@ -648,247 +596,714 @@ namespace CombatTrackerApp {
 			overrideFlag = false;
 		}
 	}
+	/*
+	Used for rendering skill and saving throw proficiencies and expertises for both monsters and player characters.
+	The two clusters have a simple deduping logic between them. 
+	We can't have proficiency and expertise of the same "thing" at the same time.
+	*/
 	template <typename MapType, typename NameMap>
-	void EncounterCreationScene::renderProficiencyAndExpertiseCluster(
+	void EncounterCreationScene::renderProficiencyAndExpertiseCluster (
 		const char* proficiencyLabel,
-		std::string& proficiencyLabelSuffix,
 		const char* expertiseLabel,
-		std::string& expertiseLabelSuffix,
 		MapType& proficiencyItems,
 		MapType& expertiseItems,
 		const NameMap& itemNames
 	) {
-		ImGui::TextWrapped(proficiencyLabel);
-		for (auto& item : itemNames) {
-			if (ImGui::Checkbox((item.second + proficiencyLabelSuffix).c_str(), &proficiencyItems.at(item.first))) {
-				if (proficiencyItems.at(item.first) && expertiseItems.at(item.first)) {
-					expertiseItems.at(item.first) = false;
-				}
-			}
-		}
+		if (ImGui::BeginTable("ProfExpTable", 2, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_BordersInnerV)) {
 
-		ImGui::TextWrapped(expertiseLabel);
-		for (auto& item : itemNames) {
-			if (ImGui::Checkbox((item.second + expertiseLabelSuffix).c_str(), &expertiseItems.at(item.first))) {
-				if (expertiseItems.at(item.first) && proficiencyItems.at(item.first)) {
-					proficiencyItems.at(item.first) = false;
+			ImGui::TableSetupColumn("Left");
+			ImGui::TableSetupColumn("Right");
+			ImGui::TableNextRow();
+
+			// Proficiency checkboxes.
+			ImGui::TableSetColumnIndex(0);
+			ImGui::TextWrapped("%s", proficiencyLabel);
+			for (auto& item : itemNames) {
+				if (ImGui::Checkbox((item.second + "##" + proficiencySuffix).c_str(), &proficiencyItems.at(item.first))) {
+					if (proficiencyItems.at(item.first) && expertiseItems.at(item.first)) {
+						expertiseItems.at(item.first) = false;
+					}
 				}
 			}
+
+			// Expertise checkboxes.
+			ImGui::TableSetColumnIndex(1);
+			ImGui::TextWrapped("%s", expertiseLabel);
+			for (auto& item : itemNames) {
+				if (ImGui::Checkbox((item.second + "##" + expertiseSuffix).c_str(), &expertiseItems.at(item.first))) {
+					if (expertiseItems.at(item.first) && proficiencyItems.at(item.first)) {
+						proficiencyItems.at(item.first) = false;
+					}
+				}
+			}
+			ImGui::EndTable();
 		}
 	}
-	void EncounterCreationScene::renderAbilityScoresAndModifiers(
-		std::unordered_map<Ability, int>& abilityScores,
-		std::unordered_map<Ability, int>& abilityModifiers,
-		std::unordered_map<Ability, bool>& abilityScoresOverride
-	) {
-		for (auto& item : abilityScores) {
-			if (!abilityScoresOverride.at(item.first)) {
-				abilityModifiers.at(item.first) = Creature::findAbilityScoreModifier(item.second);
+	void EncounterCreationScene::renderAbilityScoresAndModifiers () {
+		if (ImGui::BeginTable("AbilityTable",
+			4,
+			ImGuiTableFlags_SizingStretchProp | 
+			ImGuiTableFlags_BordersInnerV |
+			ImGuiTableFlags_RowBg
+		)) {
+			/*
+			The table is split into four parts: 
+			1) Ability name.
+			2) Ability score.
+			3) Ability modifier.
+			4) Override button.
+			*/
+			ImGui::TableSetupColumn("Ability", ImGuiTableColumnFlags_WidthStretch, 0.25f);
+			ImGui::TableSetupColumn("Score", ImGuiTableColumnFlags_WidthStretch, 0.20f);
+			ImGui::TableSetupColumn("Modifier", ImGuiTableColumnFlags_WidthStretch, 0.20f);
+			ImGui::TableSetupColumn("Override", ImGuiTableColumnFlags_WidthStretch, 0.35f);
+
+			// Render each column of the table for each ability.
+			for (auto& item : currentCreatureStatBlock.abilityScores) {
+				ImGui::TableNextRow();
+
+				// Compute and show default ability score modifiers.
+				if (!abilityModifiersOverride.at(item.first)) {
+					currentCreatureStatBlock.abilityScoreModifiers.at(item.first) = Creature::findAbilityScoreModifier(item.second);
+				}
+
+				ImGui::TableSetColumnIndex(0);
+				ImGui::TextUnformatted(ABILITY_NAMES.at(item.first).c_str());
+
+				// General special value reserved for stretching items.
+				ImGui::SetNextItemWidth(-1);
+				ImGui::TableSetColumnIndex(1);
+				if (ImGui::InputInt(("##" + ABILITY_NAMES.at(item.first) + " Ability Score").c_str(), &item.second)) {
+					item.second = std::max(std::min(item.second, ABILITY_SCORE_UPPER_BOUND), ABILITY_SCORE_LOWER_BOUND);
+				}
+
+				ImGui::TableSetColumnIndex(2);
+				ImGui::SetNextItemWidth(-1);
+				if (ImGui::InputInt(("##" + ABILITY_NAMES.at(item.first) + " Ability Modifier").c_str(), 
+					&currentCreatureStatBlock.abilityScoreModifiers.at(item.first))
+					) {
+					currentCreatureStatBlock.abilityScoreModifiers.at(item.first) = 
+						std::max(std::min(currentCreatureStatBlock.abilityScoreModifiers.at(item.first), 
+							ABILITY_MODIFIERS_UPPER_BOUND), ABILITY_MODIFIERS_LOWER_BOUND);
+					abilityModifiersOverride.at(item.first) = true;
+				}
+
+				ImGui::TableSetColumnIndex(3);
+				if (ImGui::Button(("Reset " + ABILITY_NAMES.at(item.first) + " Modifier").c_str())) {
+					abilityModifiersOverride.at(item.first) = false;
+				}
 			}
-			if (ImGui::InputInt((ABILITY_NAMES.at(item.first) + " Score").c_str(), &item.second)) {
-				item.second = std::max(std::min(item.second, ABILITY_SCORE_UPPER_BOUND), 0);
-			}
-			ImGui::SameLine();
-			if (ImGui::InputInt((ABILITY_NAMES.at(item.first) + " Modifier").c_str(), &abilityModifiers.at(item.first))) {
-				abilityModifiers.at(item.first) = std::max(std::min(abilityModifiers.at(item.first), 10), -5);
-				abilityScoresOverride.at(item.first) = true;
-			}
-			ImGui::SameLine();
-			if (ImGui::Button(("Reset " + ABILITY_NAMES.at(item.first) + " Modifier Override").c_str())) {
-				abilityScoresOverride.at(item.first) = false;
-			}
+			ImGui::EndTable();
 		}
 	}
-	void EncounterCreationScene::renderSavingThrowModifiers(
-		std::unordered_map<Ability, int>& savingThrowModifiers,
-		std::unordered_map<Ability, bool>& savingThrowModifiersOverride,
-		std::unordered_map<Ability, bool>& proficientSavingThrows,
-		std::unordered_map<Ability, bool>& expertiseSavingThrows,
-		std::unordered_map<Ability, int>& abilityModifiers,
-		const int PB)
-	{
+	void EncounterCreationScene::renderSavingThrowModifiers () {
 		ImGui::TextWrapped("Saving Throw Modifiers");
-		for (auto& item : ABILITY_NAMES) {
-			if (!savingThrowModifiersOverride.at(item.first)) {
-				if (expertiseSavingThrows.at(item.first)) {
-					savingThrowModifiers.at(item.first) =
-						abilityModifiers.at(item.first) + 2 * PB;
-				}
-				else if (proficientSavingThrows.at(item.first)) {
-					savingThrowModifiers.at(item.first) =
-						abilityModifiers.at(item.first) + PB;
-				}
-				else {
-					savingThrowModifiers.at(item.first) = abilityModifiers.at(item.first);
-				}
-			}
-			if (ImGui::InputInt((item.second + " Saving Throw Modifier").c_str(), &savingThrowModifiers.at(item.first))) {
-				savingThrowModifiers.at(item.first) = std::max(std::min(savingThrowModifiers.at(item.first), 10), -5);
-				savingThrowModifiersOverride.at(item.first) = true;
-			}
-			ImGui::SameLine();
-			if (ImGui::Button(("Reset " + item.second + " Saving Throw Modifier Override").c_str())) {
-				savingThrowModifiersOverride.at(item.first) = false;
+		if (ImGui::BeginTable("SaveModsTable", 
+			3,
+			ImGuiTableFlags_SizingStretchProp | 
+			ImGuiTableFlags_RowBg | 
+			ImGuiTableFlags_BordersInnerV)) 
+		{
+			// This table is split into only three parts.
+			// The modifiers of saving throws are computed from ability scores/modifiers if not overridden.
+			ImGui::TableSetupColumn("Ability##Save", ImGuiTableColumnFlags_WidthStretch, 0.35f);
+			ImGui::TableSetupColumn("Modifier##Save", ImGuiTableColumnFlags_WidthStretch, 0.25f);
+			ImGui::TableSetupColumn("Reset##Save", ImGuiTableColumnFlags_WidthStretch, 0.40f);
 
+			for (auto& item : ABILITY_NAMES) {
+
+				// Saving throw modifier calculations.
+				if (!savingThrowsOverride.at(item.first)) {
+					if (currentCreatureStatBlock.savingThrowExpertise.at(item.first)) {
+						currentCreatureStatBlock.savingThrowModifiers.at(item.first) = 
+							currentCreatureStatBlock.abilityScoreModifiers.at(item.first) + 
+							2 * currentCreatureStatBlock.proficiencyBonus;
+					}
+					else if (currentCreatureStatBlock.savingThrowProficiencies.at(item.first)) {
+						currentCreatureStatBlock.savingThrowModifiers.at(item.first) = 
+							currentCreatureStatBlock.abilityScoreModifiers.at(item.first) + 
+							currentCreatureStatBlock.proficiencyBonus;
+					}
+					else {
+						currentCreatureStatBlock.savingThrowModifiers.at(item.first) =
+							currentCreatureStatBlock.abilityScoreModifiers.at(item.first);
+					}
+				}
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::TextUnformatted(item.second.c_str());
+
+				ImGui::TableSetColumnIndex(1);
+				ImGui::SetNextItemWidth(-1);
+				if (ImGui::InputInt(("##" + item.second + "Saving Throw Modifiers").c_str(), 
+					&currentCreatureStatBlock.savingThrowModifiers.at(item.first)
+				)) {
+
+					// Setup no bounds for saving throw modifiers as their values can get quite large, low depending upon expertise and proficiency.
+					// The "largeness" depends on PB. As the PB can be overridden to be quite large, the modifiers can bu quite large.
+					currentCreatureStatBlock.savingThrowModifiers.at(item.first) = currentCreatureStatBlock.savingThrowModifiers.at(item.first);
+					savingThrowsOverride.at(item.first) = true;
+				}
+
+				ImGui::TableSetColumnIndex(2);
+				if (ImGui::Button(("Reset " + item.second + " Saving Throw Modifier").c_str())) {
+					savingThrowsOverride.at(item.first) = false;
+				}
 			}
+			ImGui::EndTable();
 		}
 	}
-	void EncounterCreationScene::renderSkillModifiers(
-		std::unordered_map<Skill, int>& skillModifiers,
-		std::unordered_map<Skill, bool>& skillModifiersOverride,
-		std::unordered_map<Skill, bool>& proficientSkills,
-		std::unordered_map<Skill, bool>& expertiseSkills,
-		std::unordered_map<Ability, int>& abilityModifiers,
-		const int PB
-	) {
+	void EncounterCreationScene::renderSkillModifiers () {
+
 		ImGui::TextWrapped("Skill Modifiers");
-		for (auto& item : SKILL_NAMES) {
-			if (!skillModifiersOverride.at(item.first)) {
-				if (expertiseSkills.at(item.first)) {
-					skillModifiers.at(item.first) =
-						abilityModifiers.at(MAPPED_SKILLS.at(item.first)) + 2 * PB;
+		if (ImGui::BeginTable("SkillModsTable", 
+			3,
+			ImGuiTableFlags_SizingStretchProp | 
+			ImGuiTableFlags_RowBg | 
+			ImGuiTableFlags_BordersInnerV
+		)) {
+
+			// Exact same setup as saving throws.
+			ImGui::TableSetupColumn("Skill", ImGuiTableColumnFlags_WidthStretch, 0.45f);
+			ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch, 0.20f);
+			ImGui::TableSetupColumn("Reset", ImGuiTableColumnFlags_WidthStretch, 0.35f);
+
+			// Default skill modifier calculations.
+			for (auto& item : SKILL_NAMES) {
+				if (!skillModifiersOverride.at(item.first)) {
+					if (currentCreatureStatBlock.skillExpertise.at(item.first)) {
+						currentCreatureStatBlock.skillModifiers.at(item.first) =
+							currentCreatureStatBlock.abilityScoreModifiers.at(MAPPED_SKILLS.at(item.first)) + 
+							2 * currentCreatureStatBlock.proficiencyBonus;
+					}
+					else if (currentCreatureStatBlock.skillProficiencies.at(item.first)) {
+						currentCreatureStatBlock.skillModifiers.at(item.first) =
+							currentCreatureStatBlock.abilityScoreModifiers.at(MAPPED_SKILLS.at(item.first)) 
+							+ currentCreatureStatBlock.proficiencyBonus;
+					}
+					else {
+						currentCreatureStatBlock.skillModifiers.at(item.first) =
+							currentCreatureStatBlock.abilityScoreModifiers.at(MAPPED_SKILLS.at(item.first));
+					}
 				}
-				else if (proficientSkills.at(item.first)) {
-					skillModifiers.at(item.first) =
-						abilityModifiers.at(MAPPED_SKILLS.at(item.first)) + PB;
+
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::TextUnformatted(item.second.c_str());
+
+				ImGui::TableSetColumnIndex(1);
+				ImGui::SetNextItemWidth(-1);
+				if (ImGui::InputInt(("##" + item.second + "Skill Modifier").c_str(), 
+					&currentCreatureStatBlock.skillModifiers.at(item.first)
+				)) {
+
+					// Exact same reasoning as saving throw modifiers is applicable to here.
+					currentCreatureStatBlock.skillModifiers.at(item.first) = currentCreatureStatBlock.skillModifiers.at(item.first);
+					skillModifiersOverride.at(item.first) = true;
 				}
-				else {
-					skillModifiers.at(item.first) = abilityModifiers.at(MAPPED_SKILLS.at(item.first)) + PB;
+
+				ImGui::TableSetColumnIndex(2);
+				if (ImGui::Button(("Reset " + item.second + " Skill Modifier").c_str())) {
+					skillModifiersOverride.at(item.first) = false;
 				}
 			}
-			if (ImGui::InputInt((item.second + " Skill Modifier").c_str(), &skillModifiers.at(item.first))) {
-				skillModifiers.at(item.first) = std::max(std::min(skillModifiers.at(item.first), 10), -5);
-				skillModifiersOverride.at(item.first) = true;
-			}
-			ImGui::SameLine();
-			if (ImGui::Button(("Reset " + item.second + " Skill Modifier Override").c_str())) {
-				skillModifiersOverride.at(item.first) = false;
-			}
+			ImGui::EndTable();
 		}
 	}
-	void EncounterCreationScene::renderGeneralCreatureInfo (
-		std::string& name,
-		Size& size,
-		CreatureType& type,
-		Alignment& alignment,
-		int& AC,
-		int& HP
-	) {
 
-		ImGui::InputText("Name", &name);
+	/*
+	The general creature info includes these parameters:
+	1) Name
+	2) Size
+	3) Type
+	4) Alignment
+	5) Iniative Bonus
+	6) Passive Perception
+	7) AC
+	8) HP
+	*/
+	void EncounterCreationScene::renderGeneralCreatureInfo() {
 
-		static ListBoxParameters sizeListBoxParameters(-1, -1, false);;
-		renderListBox(sizeListBoxParameters, size, "Size", SIZE_NAMES);
+		if (ImGui::BeginTable("##GeneralCreatureInfo_NameRow", 2, ImGuiTableFlags_SizingStretchProp)) {
+			ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+			ImGui::TableSetupColumn("Field", ImGuiTableColumnFlags_WidthStretch);
 
-		ImGui::SameLine();
-		static ListBoxParameters creatureTypeParameters(-1, -1, false);
-		renderListBox(creatureTypeParameters, type, "Creature Type", CREATURE_TYPE_NAMES);
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::AlignTextToFramePadding();
+			ImGui::TextUnformatted("Name");
 
-		ImGui::SameLine();
-		static ListBoxParameters alignmentParameters{ -1, -1, false };
-		renderListBox(alignmentParameters, alignment, "Alignment", ALIGNMENT_NAMES);
+			ImGui::TableSetColumnIndex(1);
+			ImGui::SetNextItemWidth(-1.0f);
+			ImGui::InputText("##Name", &currentCreatureStatBlock.name);
 
-		renderNonOverridableInputInt(AC, "AC");
-		ImGui::SameLine(); 
-		renderNonOverridableInputInt(HP, "HP");
-		
-	}
-	void EncounterCreationScene::renderMonsterSpecificInfo (
-		double& CR,
-		int& XP,
-		int& PB
-	) {
-		static ListBoxParameters monsterCRParameters{ -1, -1, false };
-		renderListBox(monsterCRParameters, CR, "CR", CR_NAMES);
-
-		ImGui::SameLine();
-		static bool isXPOverridden{ false };
-		renderOveriddableInputInt(XP, isXPOverridden, "XP", "Reset XP Override", MAPPED_CR_TO_XP, 0, INT_MAX, CR);
-		
-		ImGui::SameLine();
-		static bool isPBOverridden{ false };
-		renderOveriddableInputInt(PB, isPBOverridden, "Proficiency Bonus", "Reset PB Override", MAPPED_CR_TO_PB, -5, 10, CR);
-	}
-	void EncounterCreationScene::renderSpeedInfo(
-		int& walkSpeed,
-		int& climbingSpeed,
-		int& swimmingSpeed,
-		int& burrowSpeed,
-		int& flySpeed
-	) {
-		renderNonOverridableInputInt(walkSpeed, "Walk Speed");
-
-		ImGui::SameLine(); 
-		renderNonOverridableInputInt(climbingSpeed, "Climbing Speed");
-
-		ImGui::SameLine(); 
-		renderNonOverridableInputInt(swimmingSpeed, "Swim Speed");
-
-		ImGui::SameLine();
-		renderNonOverridableInputInt(burrowSpeed, "Burrow Speed");
-
-		ImGui::SameLine();
-		renderNonOverridableInputInt(flySpeed, "Fly Speed");
-	}
-	void EncounterCreationScene::renderDmgVulnResAndImm (
-		std::unordered_map<DamageType, bool>& damageVulnerabilities,
-		std::unordered_map<DamageType, bool>& damageResistances,
-		std::unordered_map<DamageType, bool>& damageImmunities
-	) {
-		ImGui::TextWrapped("Damage Vulnerabilities");
-		for (auto& item : DAMAGE_TYPE_NAMES) {
-			if ( ImGui::Checkbox((item.second + "Vuln").c_str(), &damageVulnerabilities.at(item.first)) ) {
-				if (damageVulnerabilities.at(item.first) && damageResistances.at(item.first)) {
-					damageResistances.at(item.first) = false;
-				}
-				if (damageVulnerabilities.at(item.first) && damageImmunities.at(item.first)) {
-					damageImmunities.at(item.first) = false;
-				}
-			}
+			ImGui::EndTable();
 		}
 
-		ImGui::TextWrapped("Damage Resistances");
-		for (auto& item : DAMAGE_TYPE_NAMES) {
-			if (ImGui::Checkbox((item.second + "Res").c_str(), &damageResistances.at(item.first))) {
-				if (damageVulnerabilities.at(item.first) && damageResistances.at(item.first)) {
-					damageVulnerabilities.at(item.first) = false;
-				}
-				if (damageResistances.at(item.first) && damageImmunities.at(item.first)) {
-					damageImmunities.at(item.first) = false;
-				}
+		ImGui::Spacing();
+
+		if (ImGui::BeginTable("##GeneralCreatureInfo_MainSplit", 2, ImGuiTableFlags_SizingStretchProp)) {
+
+			// Give right side a reasonable fixed width so it never spills into the Entity Specific column.
+			float avail = ImGui::GetContentRegionAvail().x;
+			float rightW = std::min(300.0f, std::max(240.0f, avail * 0.30f));
+
+			ImGui::TableSetupColumn("Left", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+			ImGui::TableSetupColumn("Right", ImGuiTableColumnFlags_WidthFixed, rightW);
+
+			ImGui::TableNextRow();
+
+			ImGui::TableSetColumnIndex(0);
+			if (ImGui::BeginTable("##GeneralCreatureInfo_Listboxes", 3, ImGuiTableFlags_SizingStretchProp)) {
+				ImGui::TableSetupColumn("SizeCol", ImGuiTableColumnFlags_WidthStretch, 0.33f);
+				ImGui::TableSetupColumn("TypeCol", ImGuiTableColumnFlags_WidthStretch, 0.34f);
+				ImGui::TableSetupColumn("AlignmentCol", ImGuiTableColumnFlags_WidthStretch, 0.33f);
+
+				ImGui::TableNextRow();
+
+				ImGui::TableSetColumnIndex(0);
+				ImGui::TextUnformatted("Size");
+				renderListBox(sizeListBoxParameters, currentCreatureStatBlock.size, "##Size", SIZE_NAMES);
+
+				ImGui::TableSetColumnIndex(1);
+				ImGui::TextUnformatted("Creature Type");
+				renderListBox(creatureTypeParameters, currentCreatureStatBlock.type, "##CreatureType", CREATURE_TYPE_NAMES);
+
+				ImGui::TableSetColumnIndex(2);
+				ImGui::TextUnformatted("Alignment");
+				renderListBox(alignmentParameters, currentCreatureStatBlock.alignment, "##Alignment", ALIGNMENT_NAMES);
+
+				ImGui::EndTable();
 			}
+
+			ImGui::TableSetColumnIndex(1);
+
+			if (!isInitiativeOverriden) {
+				currentCreatureStatBlock.initiativeBonus = currentCreatureStatBlock.abilityScoreModifiers.at(Ability::DEXTERITY);
+			}
+
+			// Hide the label of the input field. Instead use text field for the label for better layout.
+			ImGui::TextUnformatted("Iniative Bonus");
+			ImGui::SetNextItemWidth(-1.0f);
+			if (ImGui::InputInt("##IniativeBonus", &currentCreatureStatBlock.initiativeBonus, 0, 0)) {
+				currentCreatureStatBlock.initiativeBonus =
+					std::min(std::max(ABILITY_SCORE_LOWER_BOUND, currentCreatureStatBlock.initiativeBonus),
+						ABILITY_MODIFIERS_UPPER_BOUND);
+				isInitiativeOverriden = true;
+			}
+			ImGui::SetNextItemWidth(-1.0f);
+			if (ImGui::Button("Reset Iniative Bonus", ImVec2(-1.0f, 0.0f))) {
+				isInitiativeOverriden = false;
+			}
+
+			ImGui::Spacing();
+			if (!isPassivePerceptionOverridden) {
+				currentCreatureStatBlock.passivePerception = currentCreatureStatBlock.skillModifiers.at(Skill::PERCEPTION) + 10;
+			}
+
+			// Same thing here.
+			ImGui::TextUnformatted("Passive Perception");
+			ImGui::SetNextItemWidth(-1.0f);
+			if (ImGui::InputInt("##PassivePerception", &currentCreatureStatBlock.passivePerception, 0, 0)) {
+				currentCreatureStatBlock.passivePerception =
+					std::min(std::max(10 + ABILITY_MODIFIERS_UPPER_BOUND, currentCreatureStatBlock.passivePerception),
+						10 + ABILITY_MODIFIERS_LOWER_BOUND);
+				isPassivePerceptionOverridden = true;
+			}
+			ImGui::SetNextItemWidth(-1.0f);
+			if (ImGui::Button("Reset Passive Perception", ImVec2(-1.0f, 0.0f))) {
+				isPassivePerceptionOverridden = false;
+			}
+			ImGui::EndTable();
 		}
-		ImGui::TextWrapped("Damage Immunities");
-		for (auto& item : DAMAGE_TYPE_NAMES) {
-			if (ImGui::Checkbox((item.second + "Imm").c_str(), &damageImmunities.at(item.first))) {
-				if (damageVulnerabilities.at(item.first) && damageImmunities.at(item.first)) {
-					damageVulnerabilities.at(item.first) = false;
-				}
-				if (damageResistances.at(item.first) && damageImmunities.at(item.first)) {
-					damageResistances.at(item.first) = false;
-				}
+
+		ImGui::Spacing();
+		if (ImGui::BeginTable("##ACHP", 2, ImGuiTableFlags_SizingStretchProp)) {
+			ImGui::TableSetupColumn("ACCol", ImGuiTableColumnFlags_WidthStretch, 0.5f);
+			ImGui::TableSetupColumn("HPCol", ImGuiTableColumnFlags_WidthStretch, 0.5f);
+			ImGui::TableNextRow();
+
+			// AC inner table.
+			ImGui::TableSetColumnIndex(0);
+			if (ImGui::BeginTable("##ACRow", 2, ImGuiTableFlags_SizingStretchProp)) {
+				ImGui::TableSetupColumn("ACLabel", ImGuiTableColumnFlags_WidthFixed, 30.0f);
+				ImGui::TableSetupColumn("ACField", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableNextRow();
+
+				ImGui::TableSetColumnIndex(0);
+				ImGui::AlignTextToFramePadding();
+				ImGui::TextUnformatted("AC");
+
+				ImGui::TableSetColumnIndex(1);
+				ImGui::SetNextItemWidth(-1.0f);
+				renderNonOverridableInputInt(currentCreatureStatBlock.AC, "##AC");
+
+				ImGui::EndTable();
 			}
+
+			// HP inner cell.
+			ImGui::TableSetColumnIndex(1);
+			if (ImGui::BeginTable("##HPRow", 2, ImGuiTableFlags_SizingStretchProp)) {
+				ImGui::TableSetupColumn("HPLabel", ImGuiTableColumnFlags_WidthFixed, 30.0f);
+				ImGui::TableSetupColumn("HPField", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableNextRow();
+
+				ImGui::TableSetColumnIndex(0);
+				ImGui::AlignTextToFramePadding();
+				ImGui::TextUnformatted("HP");
+
+				ImGui::TableSetColumnIndex(1);
+				ImGui::SetNextItemWidth(-1.0f);
+				renderNonOverridableInputInt(currentCreatureStatBlock.HP, "##HP");
+
+				ImGui::EndTable();
+			}
+			ImGui::EndTable();
 		}
 	}
+
+	// Monster specific info includes CR, XP and PB.
+	// Even though PB isn't specific to monsters, how it is computed is different for monsters and player characters.
+	void EncounterCreationScene::renderMonsterSpecificInfo () {
+		if (ImGui::BeginTable("MonsterSpecificGrid", 1, ImGuiTableFlags_SizingStretchSame)) {
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			renderListBox(monsterCRParameters, currentMonsterCR, "CR", CR_NAMES);
+
+			ImGui::Spacing();
+			renderOverriddableInputInt(currentMonsterXP, isXPOverridden, "XP", "Reset XP", MAPPED_CR_TO_XP, 0, INT_MAX, currentMonsterCR);
+
+			ImGui::Spacing();
+			renderOverriddableInputInt(currentCreatureStatBlock.proficiencyBonus, isPBOverridden, "PB", "Reset PB", MAPPED_CR_TO_PB, PB_LOWER_BOUND, INT_MAX, currentMonsterCR);
+
+			ImGui::EndTable();
+		}
+	}
+	void EncounterCreationScene::renderSpeedInfo () {
+		if (ImGui::BeginTable("SpeedGrid", 5, ImGuiTableFlags_SizingStretchSame)) {
+			ImGui::TableNextRow();
+
+			ImGui::TableSetColumnIndex(0);
+			renderNonOverridableInputInt(currentCreatureStatBlock.walkSpeed, "Walk");
+
+			ImGui::TableSetColumnIndex(1);
+			renderNonOverridableInputInt(currentCreatureStatBlock.climbingSpeed, "Climb");
+
+			ImGui::TableSetColumnIndex(2);
+			renderNonOverridableInputInt(currentCreatureStatBlock.swimmingSpeed, "Swim");
+
+			ImGui::TableSetColumnIndex(3);
+			renderNonOverridableInputInt(currentCreatureStatBlock.burrowSpeed, "Burrow");
+
+			ImGui::TableSetColumnIndex(4);
+			renderNonOverridableInputInt(currentCreatureStatBlock.flySpeed, "Fly");
+
+			ImGui::EndTable();
+		}
+	}
+	void EncounterCreationScene::renderDmgVulnResAndImm () {
+		if (ImGui::BeginTable("DmgTri", 3, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_BordersInnerV)) {
+			ImGui::TableNextRow();
+
+			ImGui::TableSetColumnIndex(0);
+			ImGui::TextWrapped("Vulnerabilities");
+			for (auto& item : DAMAGE_TYPE_NAMES) {
+				if (ImGui::Checkbox((item.second + " ##Vuln").c_str(), 
+					&currentCreatureStatBlock.damageVulnerabilities.at(item.first)
+				)) {
+
+					// Triple simple deduping logic.
+					if (currentCreatureStatBlock.damageVulnerabilities.at(item.first) 
+						&& currentCreatureStatBlock.damageResistances.at(item.first)) {
+						currentCreatureStatBlock.damageResistances.at(item.first) = false;
+					}
+					if (currentCreatureStatBlock.damageVulnerabilities.at(item.first) 
+						&& currentCreatureStatBlock.damageImmunities.at(item.first)) {
+						currentCreatureStatBlock.damageImmunities.at(item.first) = false;
+					}
+				}
+			}
+
+			ImGui::TableSetColumnIndex(1);
+			ImGui::TextWrapped("Resistances");
+			for (auto& item : DAMAGE_TYPE_NAMES) {
+				if (ImGui::Checkbox((item.second + " ##Res").c_str(), 
+					&currentCreatureStatBlock.damageResistances.at(item.first)
+				)) {
+
+					// Exact same logic here.
+					if (currentCreatureStatBlock.damageVulnerabilities.at(item.first) 
+						&& currentCreatureStatBlock.damageResistances.at(item.first)) {
+						currentCreatureStatBlock.damageVulnerabilities.at(item.first) = false;
+					}
+					if (currentCreatureStatBlock.damageResistances.at(item.first) 
+						&& currentCreatureStatBlock.damageImmunities.at(item.first)) {
+						currentCreatureStatBlock.damageImmunities.at(item.first) = false;
+					}
+				}
+			}
+
+			ImGui::TableSetColumnIndex(2);
+			ImGui::TextWrapped("Immunities");
+			for (auto& item : DAMAGE_TYPE_NAMES) {
+				if (ImGui::Checkbox((item.second + " ##Imm").c_str(), 
+					&currentCreatureStatBlock.damageImmunities.at(item.first)
+				)) {
+
+					// Same here.
+					if (currentCreatureStatBlock.damageVulnerabilities.at(item.first) 
+						&& currentCreatureStatBlock.damageImmunities.at(item.first)) {
+						currentCreatureStatBlock.damageVulnerabilities.at(item.first) = false;
+					}
+					if (currentCreatureStatBlock.damageResistances.at(item.first) 
+						&& currentCreatureStatBlock.damageImmunities.at(item.first)) {
+						currentCreatureStatBlock.damageResistances.at(item.first) = false;
+					}
+				}
+			}
+			ImGui::EndTable();
+		}
+	}
+
+	// Simple helper method for rendering multi-selectable creature parameters.
+	// Used in condition immunites and languages.
 	template <typename MapType, typename NameMap>
 	void EncounterCreationScene::renderMutuallyExclusiveCheckboxCluster(MapType& items, NameMap& names, const char* label) {
-		ImGui::TextWrapped(label);
-		for (auto& item : names) {
-			ImGui::Checkbox(item.second.c_str(), &items.at(item.first));
+		ImGui::TextWrapped("%s", label);
+		if (ImGui::BeginTable(label, 3, ImGuiTableFlags_SizingStretchSame)) {
+			int counter = {};
+			for (auto& item : names) {
+				ImGui::TableNextColumn();
+				ImGui::Checkbox(item.second.c_str(), &items.at(item.first));
+				++counter;
+			}
+			ImGui::EndTable();
 		}
 	}
-	void EncounterCreationScene::renderSenses(std::unordered_map<Sense, int>& senses) {
-		for (auto& item : senses) {
-			renderNonOverridableInputInt(item.second, SENSE_NAMES.at(item.first).c_str());
+
+	// Specific function for sense rendering, just calls renderNonOverridableInputInt() for all senses.
+	void EncounterCreationScene::renderSenses() {
+		if (ImGui::BeginTable("SensesGrid", 4, ImGuiTableFlags_SizingStretchSame)) {
+			ImGui::TableNextRow();
+			for (auto& item : currentCreatureStatBlock.senses) {
+				ImGui::TableNextColumn();
+				renderNonOverridableInputInt(item.second, SENSE_NAMES.at(item.first).c_str());
+			}
+			ImGui::EndTable();
+		}
+	}
+
+	// Chunky helper used for rendering traits and gear items.
+	template <typename Item>
+	void EncounterCreationScene::renderAddables(std::vector<Item>& currentItems, const std::string& label) {
+		ImGui::TextWrapped("%s", label.c_str());
+
+		// It is fine for this to be actually static as we clear it on each render pass anyways.
+		// Furthermore, this vector is only used in this function and nowhere else.
+		static std::vector<size_t> markedForDeletion;
+		for (size_t i = 0; i < currentItems.size(); ++i) {
+			ImGui::TableNextColumn();
+
+			// Cache the string to prevent recomputing it.
+			std::string popupName = ("Edit " + label + "##" + std::to_string(i)).c_str();
+
+			// Push a separate id to the ID stack for each item.
+			ImGui::PushID(static_cast<int> (i));
+
+			// We should check seperate IO events explicitly instead of generically checking for any IO events for these buttons.
+			// Unlike most of the widgets. This is because we need a tooltip for each button.
+			// TODO: Fix the layouting of these buttons.
+			ImGui::Button(currentItems[i].name.c_str());
 			ImGui::SameLine();
+			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				ImGui::SetTooltip("%s", currentItems[i].description.c_str());
+			}
+			if (ImGui::IsItemClicked()) {
+				ImGui::OpenPopup(popupName.c_str());
+			}
+
+			// Setup configs of the edit popup of items.
+			const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+			const ImVec2 vp = ImGui::GetMainViewport()->Size;
+			ImGui::SetNextWindowSize(ImVec2(vp.x * 0.70f, vp.y * 0.70f), ImGuiCond_Appearing);
+
+			// Popup modal for editing/deleting items.				
+			if (ImGui::BeginPopupModal(popupName.c_str(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
+
+				// The layouting is quite similar to the big entity creation popup modal.
+				ImGui::BeginChild("EditAddableScroll", ImVec2(0, -ImGui::GetFrameHeightWithSpacing() * 2.0f), true);
+				ImGui::InputText((label + " Name").c_str(), &currentItems[i].name);
+				ImGui::InputText((label + " Description").c_str(), &currentItems[i].description);
+				ImGui::EndChild();
+
+				ImGui::Separator();
+				if (CombatTrackerLib::Scene::centeredButton(("Finish " + label + " Editing").c_str())) {
+					ImGui::CloseCurrentPopup();
+				}
+				if (CombatTrackerLib::Scene::centeredButton(("Delete " + label).c_str())) {
+					markedForDeletion.push_back(i);
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+			ImGui::PopID();
+		}
+
+		// Delete marked items safely, starting from the largest index to the smallest index.
+		std::sort(markedForDeletion.begin(), markedForDeletion.end());
+		for (size_t i = markedForDeletion.size(); i-- > 0;) {
+			currentItems.erase(currentItems.begin() + markedForDeletion[i]);
+		}
+		markedForDeletion.clear();
+
+		// Add item section.
+		ImGui::Spacing();
+		if (ImGui::Button(("Add " + label).c_str())) {
+			ImGui::OpenPopup(label.c_str());
+		}
+
+		// Setup configs of the add item popup.
+		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+		ImVec2 vp = ImGui::GetMainViewport()->Size;
+		ImGui::SetNextWindowSize(ImVec2(vp.x * 0.70f, vp.y * 0.70f), ImGuiCond_Appearing);
+		if (ImGui::BeginPopupModal(label.c_str(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
+			ImGui::BeginChild("AddAddableScroll", ImVec2(0, -ImGui::GetFrameHeightWithSpacing() * 2.0f), true);
+
+			// Again it is fine for these to be static, we only use them here and reset them after adding the item.
+			static std::string name;
+			static std::string description;
+			ImGui::InputText((label + " Name").c_str(), &name);
+			ImGui::InputText((label + " Description").c_str(), &description);
+			ImGui::EndChild();
+
+			// Button and cleanup section.
+			ImGui::Separator();
+			if (CombatTrackerLib::Scene::centeredButton(("Finish " + label + " Creation").c_str()) &&
+				!name.empty() && !description.empty()) {
+				Item item(name, description);
+				currentItems.push_back(item);
+				name.clear();
+				description.clear();
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
 		}
 	}
-	// TODO: Create another popup modal for addition functions.
-	template <typename Items>
-	void EncounterCreationScene::renderAddables(Items& currentItems, const char* label) {
+
+	// Really similar to renderAddables() just adds actionType as a seperate parameter. 
+	void EncounterCreationScene::renderActions(bool isMonster) {
+		ImGui::TextWrapped("Actions");
+		static std::vector<size_t> actionsMarkedForDeletion;
+		for (size_t i = 0; i < currentCreatureStatBlock.actions.size(); ++i) {
+			ImGui::TableNextColumn();
+			ImGui::PushID(static_cast<int> (i));
+
+			ImGui::SetNextItemWidth(-1.0f);
+			ImGui::Button(currentCreatureStatBlock.actions[i].name.c_str());
+			ImGui::SameLine();
+			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				ImGui::SetTooltip("%s: %s", ACTION_NAMES.at(currentCreatureStatBlock.actions[i].type).c_str(), currentCreatureStatBlock.actions[i].description.c_str());
+			}
+			if (ImGui::IsItemClicked()) {
+				ImGui::OpenPopup(("Edit Action##" + std::to_string(i)).c_str());
+			}
+
+			ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+			ImVec2 vp = ImGui::GetMainViewport()->Size;
+			ImGui::SetNextWindowSize(ImVec2(vp.x * 0.70f, vp.y * 0.70f), ImGuiCond_Appearing);
+			if (ImGui::BeginPopupModal(("Edit Action##" + std::to_string(i)).c_str(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
+				ImGui::BeginChild("EditActionScroll", ImVec2(0, -ImGui::GetFrameHeightWithSpacing() * 2.0f), true);
+				ImGui::InputText("Action Name", &currentCreatureStatBlock.actions[i].name);
+				ImGui::InputText("Action Description", &currentCreatureStatBlock.actions[i].description);
+				ImGui::EndChild();
+
+				ImGui::Separator();
+				if (CombatTrackerLib::Scene::centeredButton("Finish Action Editing")) {
+					ImGui::CloseCurrentPopup();
+				}
+				if (CombatTrackerLib::Scene::centeredButton("Delete Action")) {
+					actionsMarkedForDeletion.push_back(i);
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+			ImGui::PopID();
+		}
+
+		std::sort(actionsMarkedForDeletion.begin(), actionsMarkedForDeletion.end());
+		for (size_t i = actionsMarkedForDeletion.size(); i-- > 0;) {
+			currentCreatureStatBlock.actions.erase(currentCreatureStatBlock.actions.begin() + actionsMarkedForDeletion[i]);
+		}
+		actionsMarkedForDeletion.clear();
+		
+		// Action adding popup modal.
+		ImGui::Spacing();
+		if (ImGui::Button("Add Action")) {
+			ImGui::OpenPopup("Action");
+		}
+		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+		ImVec2 vp = ImGui::GetMainViewport()->Size;
+		ImGui::SetNextWindowSize(ImVec2(vp.x * 0.70f, vp.y * 0.70f), ImGuiCond_Appearing);
+		if (ImGui::BeginPopupModal("Action", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
+			ImGui::BeginChild("##AddActionScroll", ImVec2(0, -ImGui::GetFrameHeightWithSpacing() * 2.0f), true);
+
+			// Again, fine for these to be static as they are reset after each addition of actions.
+			static ListBoxParameters actionParameters{ -1, -1, false };
+			static ActionType type{ ActionType::NO_ACTION };
+
+			// Important logic to prevent PCs from creating Legendary Actions and Lair Actions.
+			if (isMonster) {
+				renderListBox(actionParameters, type, "Action Type", ACTION_NAMES);
+			}
+			else {
+				renderListBox(actionParameters, type, "Action Type", PLAYER_ACTION_NAMES);
+			}
+
+			static std::string name;
+			static std::string description;
+			ImGui::InputText("Action Name", &name);
+			ImGui::InputText("Action Description", &description);
+			ImGui::EndChild();
+
+			ImGui::Separator();
+			if (CombatTrackerLib::Scene::centeredButton("Finish Action Creation") &&
+				!name.empty() && !description.empty() && type != ActionType::NO_ACTION) {
+				CreatureAction action(type, name, description);
+				currentCreatureStatBlock.actions.push_back(action);
+				actionParameters = { -1, -1, false };
+				type = { ActionType::NO_ACTION };
+				name.clear();
+				description.clear();
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+	}
+	void EncounterCreationScene::renderPlayerCharacterSpecificInfo() {
 
 	}
-	void EncounterCreationScene::renderActions(std::vector<CreatureAction>& currentActions) {
 
+	// Call this after creating/completing editing of Monsters/Player Characters.
+	void EncounterCreationScene::resetParametersAndOverrides() {
+		monsterCRParameters = { -1, -1, false };
+		sizeListBoxParameters = { -1, -1, false };
+		creatureTypeParameters = { -1, -1, false };
+		alignmentParameters = { -1, -1, false };
+		isInitiativeOverriden = false;
+		isPassivePerceptionOverridden = false;
+		isXPOverridden = false;
+		isPBOverridden = false;
+		for (const auto& ability : ABILITY_NAMES) {
+			abilityModifiersOverride[ability.first] = false;
+			savingThrowsOverride[ability.first] = false;
+		}
+		for (const auto& skill : SKILL_NAMES) {
+			skillModifiersOverride[skill.first] = false;
+		}
 	}
 }
