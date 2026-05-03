@@ -304,7 +304,9 @@ namespace CombatTrackerApp {
 	public:
 		Creature(CreatureStatBlock statBlockCreaturePortion);
 		~Creature();
-		static int findAbilityScoreModifier(int abilityScore);
+		static constexpr int findAbilityScoreModifier(int abilityScore) {
+			return (abilityScore - 10) / 2;
+		}
 		void setID();
 	};
 	// Templating is required so that we can chain the correct type when creating objects with the builders.

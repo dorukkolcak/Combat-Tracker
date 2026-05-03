@@ -1,0 +1,110 @@
+
+# Download releases as dependecies at configure time.
+include(FetchContent)
+
+# GLFW
+find_package(glfw3 3.4 QUIET)
+
+if (glfw3_FOUND)
+    if (TARGET glfw3::glfw)
+        add_library(glfw_target ALIAS glfw3::glfw)
+    elseif (TARGET glfw)
+        add_library(glfw_target ALIAS glfw)
+    else()
+        message(FATAL_ERROR "glfw3 found, but no known CMake target was provided.")
+    endif()
+else()
+    FetchContent_Declare(
+        glfw3
+        DOWNLOAD_EXTRACT_TIMESTAMP OFF
+        URL https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip
+    )
+
+    FetchContent_MakeAvailable(glfw3)
+
+    if (TARGET glfw)
+        add_library(glfw_target ALIAS glfw)
+    elseif (TARGET glfw3::glfw)
+        add_library(glfw_target ALIAS glfw3::glfw)
+    else()
+        message(FATAL_ERROR "GLFW was fetched, but no known CMake target was provided.")
+    endif()
+endif()
+
+# OpenGL
+find_package(OpenGL REQUIRED)
+
+# GLAD
+add_library(glad STATIC
+    ${PROJECT_SOURCE_DIR}/external/glad/src/glad.c
+)
+
+target_include_directories(glad PUBLIC
+    ${PROJECT_SOURCE_DIR}/external/glad/include
+)
+
+#set_target_properties(glad PROPERTIES FOLDER "Dependencies")
+
+# GLM
+find_package(glm 1.0.1 QUIET)
+
+if (NOT glm_FOUND)
+    FetchContent_Declare(
+        glm
+        DOWNLOAD_EXTRACT_TIMESTAMP OFF
+        URL https://github.com/g-truc/glm/archive/refs/tags/1.0.1.zip
+    )
+
+    FetchContent_MakeAvailable(glm)
+endif()
+
+if (NOT TARGET glm::glm)
+    message(FATAL_ERROR "GLM target glm::glm was not found.")
+endif()
+
+# ImGui
+set(IMGUI_DIR ${PROJECT_SOURCE_DIR}/external/imgui)
+
+add_library(imgui STATIC
+    ${IMGUI_DIR}/imgui.cpp
+    ${IMGUI_DIR}/imgui_demo.cpp
+    ${IMGUI_DIR}/imgui_draw.cpp
+    ${IMGUI_DIR}/imgui_tables.cpp
+    ${IMGUI_DIR}/imgui_widgets.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+    ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp
+    ${IMGUI_DIR}/misc/cpp/imgui_stdlib.h
+    ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp
+)
+
+target_include_directories(imgui PUBLIC
+    ${IMGUI_DIR}
+    ${IMGUI_DIR}/backends
+    ${IMGUI_DIR}/misc/cpp
+)
+
+# Link all external libraries
+target_link_libraries(imgui PUBLIC
+    glfw_target
+    OpenGL::GL
+    glad
+)
+target_compile_definitions(imgui PUBLIC
+    IMGUI_IMPL_OPENGL_LOADER_GLAD
+)
+
+set_target_properties(imgui PROPERTIES FOLDER "Dependencies")
+
+# nlohmann/json
+FetchContent_Declare(
+    json
+    DOWNLOAD_EXTRACT_TIMESTAMP OFF
+    URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
+)
+
+FetchContent_MakeAvailable(json)
+
+if (NOT TARGET nlohmann_json::nlohmann_json)
+    message(FATAL_ERROR "nlohmann_json::nlohmann_json target was not found.")
+endif()

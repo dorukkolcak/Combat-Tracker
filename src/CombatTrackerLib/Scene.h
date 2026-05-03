@@ -26,5 +26,6 @@ namespace CombatTrackerLib {
 		ImGuiViewport* mainViewport = nullptr;
 		
 		static bool centeredButton(const char* buttonLabel);
+		static bool rightAlignedButton(const char* label);
 	};
 }

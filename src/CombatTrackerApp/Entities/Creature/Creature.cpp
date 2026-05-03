@@ -7,9 +7,6 @@ namespace CombatTrackerApp {
 	}
 	// Ideally, we do stack allocation for all of these members. So the destructor should be empty.
 	Creature::~Creature() {}
-	int Creature::findAbilityScoreModifier(int abilityScore) {
-		return (abilityScore - 10) / 2;
-	}
 	void setID() {
 
 	}

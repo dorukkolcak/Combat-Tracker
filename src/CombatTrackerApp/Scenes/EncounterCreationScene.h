@@ -49,6 +49,7 @@ namespace CombatTrackerApp {
 		virtual void renderUI() override;
 		virtual void renderScene() override;
 	private:
+
 		// Flags.
 		ImGuiWindowFlags encounterCreationWindowFlags{};
 		ImGuiDockNodeFlags encounterCreationDockFlags{};
@@ -169,6 +170,7 @@ namespace CombatTrackerApp {
 			{PlayerClass::WARLOCK, false},
 			{PlayerClass::WIZARD, false}
 		};
+
 		void renderHostWindow();
 		void renderMenuWindow();
 		void renderEntityBrowserWindow();
@@ -176,7 +178,6 @@ namespace CombatTrackerApp {
 		void renderPlayerCharacterBrowserWindow();
 		void renderEncounterBrowserWindow();
 		void renderEncounterManagerWindow();
-		void initializeSubBrowserDockspace(EncounterCreationWindows windowType);
 
 		void renderEntityCreationPopupModal(bool isMonster, bool editMode);
 
@@ -190,8 +191,6 @@ namespace CombatTrackerApp {
 			MapType& expertiseItems,
 			const NameMap& itemNames
 		);
-
-		// These are way too specific so I don't think I can template this in a convenient way.
 		void renderAbilityScoresAndModifiers ();
 		void renderSavingThrowModifiers ();
 		void renderSkillModifiers ();
@@ -199,16 +198,14 @@ namespace CombatTrackerApp {
 		template <typename MapType, typename NameMap>
 		void renderMutuallyExclusiveCheckboxCluster(MapType& items, NameMap& names, const char* label);
 		void renderSenses();
-		// Reserved for traits and gear.
 		template <typename Item>
 		void renderAddables(std::vector<Item>& currentItems, const std::string& label);
-
 		void renderActions(bool isMonster);
-
 		void renderMonsterSpecificInfo ();
 		void renderPlayerClassAndSubclasses();
 		void renderPlayerCharacterSpecificInfo();
 
+		void initializeSubBrowserDockspace(EncounterCreationWindows windowType);
 		template <typename T, typename MapType>
 		void renderListBox(ListBoxParameters& parameters, T& type, const char* listBoxLabel, const MapType& items);
 		void renderNonOverridableInputInt(int& value, const char* label);

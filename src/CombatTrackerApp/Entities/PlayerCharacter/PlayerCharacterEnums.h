@@ -13,7 +13,8 @@ namespace CombatTrackerApp {
 		ROGUE,
 		SORCERER,
 		WARLOCK,
-		WIZARD
+		WIZARD,
+		NO_CLASS
 	};
 	enum class PlayerSubclass {
 		PATH_OF_THE_BERSERKER,

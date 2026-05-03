@@ -8,7 +8,7 @@
 #include "../Entities/Monster/MonsterConstants.h"
 
 #include "imgui_internal.h"
-#include "Imgui/misc/cpp/imgui_stdlib.h" // std::string support
+#include "misc/cpp/imgui_stdlib.h" // std::string support
 
 namespace CombatTrackerApp {
 	EncounterCreationScene::EncounterCreationScene(CombatTrackerLib::App* app) :
@@ -348,8 +348,10 @@ namespace CombatTrackerApp {
 			const float footerHeight = ImGui::GetFrameHeightWithSpacing() * 2.0f;
 			ImGui::BeginChild("EntityManagementScroll", ImVec2(0, -footerHeight));
 
-			// TODO: Add a close button.
-
+			if (CombatTrackerLib::Scene::rightAlignedButton("Close Window")) {
+				ImGui::CloseCurrentPopup();
+			}
+			
 			// TODO: Properly setup initial values of the entity that is being created/edited.
 			if (ImGui::IsWindowAppearing()) {
 				if (editMode) {
@@ -485,8 +487,7 @@ namespace CombatTrackerApp {
 			);
 			renderSenses();
 
-			// TODO: Player character specific info goes here.
-			// Might need to change UI layout as the player character data is much larger than the monster.
+			// Some parts of the player character specific info goes here.
 			ImGui::Spacing();
 			if (!isMonster) {
 				ImGui::SeparatorText("Player Character Specific Data");
@@ -511,10 +512,12 @@ namespace CombatTrackerApp {
 				}
 				else {
 					if (CombatTrackerLib::Scene::centeredButton("Complete Monster Creation")) {
+						/*
 						if (saveMonster(currentCreatureStatBlock, currentMonsterCR, currentMonsterXP)) {
 							resetParametersAndOverrides();
 							ImGui::CloseCurrentPopup();
 						}
+						*/
 					}
 				}
 			}
@@ -526,10 +529,12 @@ namespace CombatTrackerApp {
 				}
 				else {
 					if (CombatTrackerLib::Scene::centeredButton("Complete Player Character Creation")) {
+						/*
 						if (savePlayerCharacter(currentCreatureStatBlock, currentPlayerStatBlock)) {
 							resetParametersAndOverrides();
 							ImGui::CloseCurrentPopup();
 						}
+						*/
 					}
 				}
 			}
@@ -1118,7 +1123,6 @@ namespace CombatTrackerApp {
 
 			// We should check seperate IO events explicitly instead of generically checking for any IO events for these buttons.
 			// Unlike most of the widgets. This is because we need a tooltip for each button.
-			// TODO: Fix the layouting of these buttons.
 			ImGui::Button(currentItems[i].name.c_str());
 			ImGui::SameLine();
 			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
@@ -1250,9 +1254,9 @@ namespace CombatTrackerApp {
 		if (ImGui::Button("Add Action")) {
 			ImGui::OpenPopup("Action");
 		}
-		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-		ImVec2 vp = ImGui::GetMainViewport()->Size;
+		const ImVec2 vp = ImGui::GetMainViewport()->Size;
 		ImGui::SetNextWindowSize(ImVec2(vp.x * 0.70f, vp.y * 0.70f), ImGuiCond_Appearing);
 		if (ImGui::BeginPopupModal("Action", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
 			ImGui::BeginChild("##AddActionScroll", ImVec2(0, -ImGui::GetFrameHeightWithSpacing() * 2.0f), true);
@@ -1315,13 +1319,25 @@ namespace CombatTrackerApp {
 			if (CombatTrackerLib::Scene::centeredButton("Configure Classes and Subclasses")) {
 				ImGui::OpenPopup("Configuration");
 			}
-			if (ImGui::BeginPopupModal("Configuration")) {
+			const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+			const ImVec2 viewportSize = ImGui::GetMainViewport()->Size;
+			ImGui::SetNextWindowSize(ImVec2(viewportSize.x * 0.92f, viewportSize.y * 0.92f));
+			if (ImGui::BeginPopupModal("Configuration", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
+				ImGui::BeginChild("EditClassScroll", ImVec2(0, -ImGui::GetFrameHeightWithSpacing() * 2.0f), true);
 
-				// TODO: This is a fucking terrible way to do this please change this later.
+				
+				ImGui::TextWrapped("Classes");
 				for (auto& item : CLASS_NAMES) {
 					renderNonOverridableInputInt(currentPlayerStatBlock.levels.at(item.first), item.second.c_str());
 				}
+
+				static PlayerClass currentClass{ PlayerClass::NO_CLASS };
+				ImGui::SeparatorText("Subclasses");
 				for (auto& item : SUBCLASS_NAMES) {
+					if (currentClass != MAPPED_SUBCLASSES.at(item.first)) {
+						ImGui::SeparatorText(CLASS_NAMES.at(MAPPED_SUBCLASSES.at(item.first)).c_str());
+					}
 					if (currentPlayerStatBlock.levels.at(MAPPED_SUBCLASSES.at(item.first)) < SUBCLASS_LEVEL_THRESHOLD) {
 						chosenSubclasses.at(item.first) = false;
 						currentPlayerStatBlock.subclasses.erase(MAPPED_SUBCLASSES.at(item.first));
@@ -1337,7 +1353,9 @@ namespace CombatTrackerApp {
 							}
 						}
 					}
+					currentClass = MAPPED_SUBCLASSES.at(item.first);
 				}
+				ImGui::EndChild();
 
 				if (CombatTrackerLib::Scene::centeredButton("Finish Class and Subclass Configuration")) {
 
