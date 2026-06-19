@@ -1,5 +1,4 @@
 // These constants are used to style the UI.
-// We will support dynamic theme changing later on so it is really important for these constants to be inline constexprs.
 namespace CombatTrackerLib {
 
 	inline constexpr ImVec2 WINDOW_PADDING(14, 12);

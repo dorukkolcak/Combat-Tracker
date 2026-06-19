@@ -8,8 +8,6 @@ namespace CombatTrackerApp {
 	struct PlayerStatBlock {
 
 		PlayerStatBlock() :
-			species(Species::NO_SPECIES),
-			origin(Origin::NO_ORIGIN),
 			levels{
 				{PlayerClass::BARBARIAN, MIN_CLASS_LEVEL},
 				{PlayerClass::BARD, MIN_CLASS_LEVEL},
@@ -73,38 +71,35 @@ namespace CombatTrackerApp {
 				{WeaponMastery::SLOW, false},
 				{WeaponMastery::TOPPLE, false},
 				{WeaponMastery::VEX, false}
-			}
+			},
+			species{},
+			origin{}
 		{}
 
-		// MANUALLY SET.
-		Species species;
-		// MANUALLY SET.
-		Origin origin;
-		// MANUALLY SET, DEFAULT TO ZERO PER PlayerClass
-		std::unordered_map<PlayerClass, int> levels;
-		// MANUALLY SET, level of the appropriate PlayerClass must surpass SUBCLASS_LEVEL_THRESHOLD for each subclass.
+		std::unordered_map<PlayerClass, int> levels{};
+
 		// Each PlayerClass can only have one PlayerSubclass.
-		std::unordered_map<PlayerClass, PlayerSubclass> subclasses;
-		// MANUALLY SET
-		std::unordered_map<WeaponType, bool> weaponProficiencies;
-		// MANUALLY SET
-		std::unordered_map<ArmorType, bool> armorProficiencies;
-		// MANUALLY SET
-		std::unordered_map<Tool, bool> toolProficiencies;
-		// MANUALLY SET
-		std::unordered_map<WeaponMastery, bool> weaponMasteries;
+		std::unordered_map<PlayerClass, PlayerSubclass> subclasses{};
+		std::unordered_map<WeaponType, bool> weaponProficiencies{};
+		std::unordered_map<ArmorType, bool> armorProficiencies{};
+		std::unordered_map<Tool, bool> toolProficiencies{};
+		std::unordered_map<WeaponMastery, bool> weaponMasteries{};
+
+		Species species{};
+		Origin origin{};
 	};
 	class PlayerCharacter : public Creature {
 	private:
-		PlayerStatBlock statBlockPlayerPortion;
+		PlayerStatBlock statBlockPlayerPortion{};
 	public:
+
+		// Same deal as most constructors, stat blocks are moved so pass them by value.
 		PlayerCharacter(CreatureStatBlock creaturePortion, PlayerStatBlock playerPortion);
 		~PlayerCharacter();
 	};
 	class PlayerCharacterBuilder : public CreatureBuilder<PlayerCharacterBuilder> {
 	public:
-		PlayerCharacterBuilder& setSpecies(const Species creatureSpecies);
-		PlayerCharacterBuilder& setOrigin(const Origin creatureOrigin);
+
 		PlayerCharacterBuilder& setLevels(std::unordered_map<PlayerClass, int>& creatureLevels);
 		PlayerCharacterBuilder& setSubclasses(std::unordered_map<PlayerClass, PlayerSubclass>& creatureSubclasses);
 		PlayerCharacterBuilder& setWeaponProficiencies(std::unordered_map<WeaponType, bool>& creatureWeaponProficiencies);
@@ -112,10 +107,13 @@ namespace CombatTrackerApp {
 		PlayerCharacterBuilder& setToolProficiencies(std::unordered_map<Tool, bool>& creatureToolProficiencies);
 		PlayerCharacterBuilder& setWeaponMasteries(std::unordered_map<WeaponMastery, bool>& creatureWeaponMasteries);
 
+		PlayerCharacterBuilder& setSpecies(Species creatureSpecies);
+		PlayerCharacterBuilder& setOrigin(Origin creatureOrigin);
+
 		PlayerStatBlock& getPlayerCharacterBlock();
 		PlayerCharacter movePlayerCharacter();
 
 	private:
-		PlayerStatBlock playerBlock;
+		PlayerStatBlock playerBlock{};
 	};
 }

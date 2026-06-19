@@ -1,14 +1,16 @@
 #include "Encounter.h"
 
 namespace CombatTrackerApp {
+
+	// TODO: Find a way for ID generation.
 	Encounter::Encounter(std::vector<std::unique_ptr<Monster>> encounterMonsters, std::vector<std::unique_ptr<PlayerCharacter>> encounterPlayers) :
-		monsters(std::move(encounterMonsters)),
-		players(std::move(encounterPlayers)),
-		isCompleted(false),
-		totalXPReward(0)
+		monsters{ std::move(encounterMonsters) },
+		players{ std::move(encounterPlayers) },
+		isCompleted{false},
+		totalXPReward{ 0 },
+		ID{-1}
 		{
-		// TODO: Find a way for ID generation.
-		for (int i = 0; i < monsters.size(); ++i) {
+		for (size_t i{}; i < monsters.size(); ++i) {
 			totalXPReward += (monsters[i])->getXP();
 		}
 	}

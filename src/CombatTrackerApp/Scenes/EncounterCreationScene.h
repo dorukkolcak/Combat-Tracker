@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <utility>
 
 #include "../../CombatTrackerLib/Scene.h"
 #include "../Entities/Creature/CreatureEnums.h"
@@ -22,16 +23,6 @@ namespace CombatTrackerApp {
 		ENCOUNTER_BROWSER
 	};
 
-	// No need to repeat these, they will exist throughout the entire namespace from this point onwards if the header gets included.
-	using EncounterCreationWindows::ENCOUNTER_CREATOR;
-	using EncounterCreationWindows::MENU;
-	using EncounterCreationWindows::ENTITY_BROWSER;
-	using EncounterCreationWindows::ENCOUNTER_MANAGER;
-	using EncounterCreationWindows::MONSTER_BROWSER;
-	using EncounterCreationWindows::PLAYER_CHARACTER_BROWSER;
-	using EncounterCreationWindows::ENCOUNTER_BROWSER;
-
-
 	struct ListBoxParameters {
 		int chosenIndex;
 		int highlightedIndex;
@@ -44,67 +35,52 @@ namespace CombatTrackerApp {
 		EncounterCreationScene(CombatTrackerLib::App* app);
 		virtual ~EncounterCreationScene();
 
-		virtual void notifyScene(ImGuiIO& imguiIO) override;
+		virtual void notifyScene(const ImGuiIO& imguiIO) override;
 		virtual void updateScene(double timeInterval) override;
 		virtual void renderUI() override;
 		virtual void renderScene() override;
 	private:
-
+		
 		// Flags.
 		ImGuiWindowFlags encounterCreationWindowFlags{};
 		ImGuiDockNodeFlags encounterCreationDockFlags{};
 		ImGuiWindowFlags popupWindowFlags{};
 
 		// Dockspace variables.
-		std::unordered_map<EncounterCreationWindows, ImGuiID> dockspaceIDs;
+		std::unordered_map<EncounterCreationWindows, ImGuiID> dockspaceIDs{};
 		std::unordered_map<EncounterCreationWindows, bool> dockspaceInitializations {
-			{ENCOUNTER_CREATOR, false},
-			{ENTITY_BROWSER, false},
-			{MONSTER_BROWSER, false},
-			{PLAYER_CHARACTER_BROWSER, false},
-			{ENCOUNTER_BROWSER, false}
+			{EncounterCreationWindows::ENCOUNTER_CREATOR, false},
+			{EncounterCreationWindows::ENTITY_BROWSER, false},
+			{EncounterCreationWindows::MONSTER_BROWSER, false},
+			{EncounterCreationWindows::PLAYER_CHARACTER_BROWSER, false},
+			{EncounterCreationWindows::ENCOUNTER_BROWSER, false}
 		};
 
-		const std::unordered_map<EncounterCreationWindows, std::string> MAPPED_WINDOW_NAMES{
-			{ENCOUNTER_CREATOR, "Encounter Creator"},
-			{ENCOUNTER_MANAGER, "Encounter Manager"},
-			{MENU, "Menu"},
-			{ENTITY_BROWSER, "Entity Browser"},
-			{MONSTER_BROWSER, "Monster Browser"},
-			{PLAYER_CHARACTER_BROWSER, "Player Character Browser"},
-			{ENCOUNTER_BROWSER, "Encounter Browser"}
-		};
+		std::string currentPopupName{};
+		MonsterBuilder monsterBuilder{};
+		PlayerCharacterBuilder playerCharacterBuilder{};
 
-		const std::string proficiencySuffix{ " Proficiency" };
-		const std::string expertiseSuffix{ " Expertise" };
-		const std::string traitLabel{ "Trait" };
-		const std::string equipmentLabel{ "Gear" };
-		std::string popupName;
+		CreatureStatBlock& currentCreatureStatBlock{ monsterBuilder.getCreatureBlock() };
+		PlayerStatBlock& currentPlayerStatBlock{ playerCharacterBuilder.getPlayerCharacterBlock() };
 
-		MonsterBuilder monsterBuilder;
-		PlayerCharacterBuilder playerCharacterBuilder;
+		double currentMonsterCR{};
+		int currentMonsterXP{};
 
-		CreatureStatBlock& currentCreatureStatBlock;
-		PlayerStatBlock& currentPlayerStatBlock;
+		ListBoxParameters monsterCRParameters{};
+		ListBoxParameters sizeListBoxParameters{};
+		ListBoxParameters creatureTypeParameters{};
+		ListBoxParameters alignmentParameters{};
+		ListBoxParameters speciesParameters{};
+		ListBoxParameters originParameters{};
 
-		double currentMonsterCR;
-		int currentMonsterXP;
+		bool isInitiativeOverriden{};
+		bool isPassivePerceptionOverridden{};
+		bool isXPOverridden{};
+		bool isPBOverridden{};
 
-		ListBoxParameters monsterCRParameters;
-		ListBoxParameters sizeListBoxParameters;
-		ListBoxParameters creatureTypeParameters;
-		ListBoxParameters alignmentParameters;
-		ListBoxParameters speciesParameters;
-		ListBoxParameters originParameters;
-
-		bool isInitiativeOverriden;
-		bool isPassivePerceptionOverridden;
-		bool isXPOverridden;
-		bool isPBOverridden;
-
-		std::unordered_map<Ability, bool> abilityModifiersOverride;
-		std::unordered_map<Ability, bool> savingThrowsOverride;
-		std::unordered_map<Skill, bool> skillModifiersOverride;
+		std::unordered_map<Ability, bool> abilityModifiersOverride{};
+		std::unordered_map<Ability, bool> savingThrowsOverride{};
+		std::unordered_map<Skill, bool> skillModifiersOverride{};
 
 		std::unordered_map<PlayerSubclass, bool> chosenSubclasses{
 			{PlayerSubclass::PATH_OF_THE_BERSERKER, false},
@@ -171,6 +147,23 @@ namespace CombatTrackerApp {
 			{PlayerClass::WIZARD, false}
 		};
 
+		
+		// Constant UI labels. These should be static as they shouldn't be instantiated per object/scene.
+		inline static const std::unordered_map<EncounterCreationWindows, std::string> MAPPED_WINDOW_NAMES{
+			{EncounterCreationWindows::ENCOUNTER_CREATOR, "Encounter Creator"},
+			{EncounterCreationWindows::ENCOUNTER_MANAGER, "Encounter Manager"},
+			{EncounterCreationWindows::MENU, "Menu"},
+			{EncounterCreationWindows::ENTITY_BROWSER, "Entity Browser"},
+			{EncounterCreationWindows::MONSTER_BROWSER, "Monster Browser"},
+			{EncounterCreationWindows::PLAYER_CHARACTER_BROWSER, "Player Character Browser"},
+			{EncounterCreationWindows::ENCOUNTER_BROWSER, "Encounter Browser"}
+		};
+		inline static const std::string PROFICIENCY_SUFFIX{ " Proficiency" };
+		inline static const std::string EXPERTISE_SUFFIX{ " Expertise" };
+		inline static const std::string TRAIT_LABEL{ "Trait" };
+		inline static const std::string EQUIPMENT_LABEL{ "Gear" };
+		inline static constexpr float MIN_CHILD_HEIGHT{ 180.f };
+
 		void renderHostWindow();
 		void renderMenuWindow();
 		void renderEntityBrowserWindow();
@@ -183,39 +176,46 @@ namespace CombatTrackerApp {
 
 		void renderGeneralCreatureInfo ();
 		void renderSpeedInfo ();
-		template <typename MapType, typename NameMap>
-		void renderProficiencyAndExpertiseCluster (
+
+		// Proficiency and expertise items get changed in this function so pass them as non-const lvalue reference.
+		template <typename M, typename N>
+		void renderProficiencyAndExpertiseCluster(
 			const char* proficiencyLabel, 
 			const char* expertiseLabel,
-			MapType& proficiencyItems,
-			MapType& expertiseItems,
-			const NameMap& itemNames
+			M& proficiencyItems,
+			M& expertiseItems,
+			const N& itemNames
 		);
-		void renderAbilityScoresAndModifiers ();
-		void renderSavingThrowModifiers ();
-		void renderSkillModifiers ();
-		void renderDmgVulnResAndImm ();
-		template <typename MapType, typename NameMap>
-		void renderMutuallyExclusiveCheckboxCluster(MapType& items, NameMap& names, const char* label);
+		void renderAbilityScoresAndModifiers();
+		void renderSavingThrowModifiers();
+		void renderSkillModifiers();
+		void renderDmgVulnResAndImm();
+
+		template <typename M, typename N>
+		void renderMutuallyExclusiveCheckboxCluster(M& items, const N& names, const char* label);
 		void renderSenses();
-		template <typename Item>
-		void renderAddables(std::vector<Item>& currentItems, const std::string& label);
+
+		template <typename I>
+		void renderAddables(std::vector<I>& currentItems, const std::string& label);
 		void renderActions(bool isMonster);
-		void renderMonsterSpecificInfo ();
+		void renderMonsterSpecificInfo();
 		void renderPlayerClassAndSubclasses();
 		void renderPlayerCharacterSpecificInfo();
-
 		void initializeSubBrowserDockspace(EncounterCreationWindows windowType);
-		template <typename T, typename MapType>
-		void renderListBox(ListBoxParameters& parameters, T& type, const char* listBoxLabel, const MapType& items);
+
+		// We change the value of the type in this function so pass it as non-const lvalue reference.
+		template <typename T, typename M>
+		void renderListBox(ListBoxParameters& parameters, T& type, const char* listBoxLabel, const M& items);
 		void renderNonOverridableInputInt(int& value, const char* label);
-		template <typename T, typename MapType>
+
+		// Pass the value as non-const lvalue reference as we need to modify its value in this function.
+		template <typename T, typename M>
 		void renderOverriddableInputInt (
 			int& value,
 			bool& overrideFlag,
 			const char* label,
 			const char* overrideLabel,
-			const MapType& items,
+			const M& items,
 			const int lowerBound,
 			const int upperBound,
 			const T key

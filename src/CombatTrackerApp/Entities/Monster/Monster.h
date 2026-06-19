@@ -5,23 +5,22 @@
 namespace CombatTrackerApp {
 	class Monster : public Creature {
 	private:
-		// MANUALLY SET
-		double CR;
-		// OVERRIDABLE, COMPUTED IF NOT OVERRIDDEN (See MAPPED_CR_TO_XP)
-		int XP;
+		double CR{};
+		int XP{};
 	public:
-		Monster(CreatureStatBlock statBlock, const double creatureCR, const int creatureXP);
+		Monster(CreatureStatBlock statBlock, double creatureCR, int creatureXP);
 		~Monster();
 
 		int getXP();
 	};
+
 	class MonsterBuilder : public CreatureBuilder<MonsterBuilder> {
 	public:
-		MonsterBuilder& setCR(const double creatureCR);
-		MonsterBuilder& setXP(const int XP);
+		MonsterBuilder& setCR(double creatureCR);
+		MonsterBuilder& setXP(int XP);
 		Monster moveMonster();
 	private:
-		double CR;
-		int XP;
+		double CR{};
+		int XP{};
 	};
 }

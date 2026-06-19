@@ -30,6 +30,8 @@ namespace CombatTrackerApp {
 	inline constexpr int ABILITY_SCORE_LOWER_BOUND{};
 	inline constexpr int ABILITY_MODIFIERS_UPPER_BOUND{ 10 };
 	inline constexpr int ABILITY_MODIFIERS_LOWER_BOUND{ -5 };
+
+	// We can also just have a function that returns the names of the enumerators but I like the mapping approach better.
 	inline const std::unordered_map<Size, std::string> SIZE_NAMES {
 		{Size::TINY, "Tiny"},
 		{Size::SMALL, "Small"},
@@ -121,7 +123,7 @@ namespace CombatTrackerApp {
 		{Condition::PETRIFIED, "Petrified"},
 		{Condition::POISONED, "Poisoned"},
 		{Condition::PRONE, "Prone"},
-		{Condition::RESTRAINED, "Restratined"},
+		{Condition::RESTRAINED, "Restrained"},
 		{Condition::STUNNED, "Stunned"},
 		{Condition::UNCONSCIOUS, "Unconscious"},
 		{Condition::EXHAUSTION, "Exhaustion"}

@@ -8,6 +8,7 @@ add_library(Combat-Tracker-Lib STATIC
     Styling.h
     Window.h
     Window.cpp
+    Utils.h
 )
 target_include_directories(Combat-Tracker-Lib PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}

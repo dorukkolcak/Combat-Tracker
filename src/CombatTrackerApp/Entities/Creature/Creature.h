@@ -2,7 +2,6 @@
 
 #include <unordered_map>
 #include <string>
-#include <cstdint>
 #include <vector>
 #include <unordered_set>
 
@@ -11,31 +10,18 @@
 
 
 namespace CombatTrackerApp {
+
 	/*
 	A creature's name must be unique and its name will be used to refer to the overall creature.
 	This also implies that the saved named creatures will have their own unique names.
 	This DOESN'T mean that we can't have creatures with the same name in an encounter.
 	We can have multiples of the same creature. To refer to each instance of the same creature, we will use IDs.
-	An INSTANCE of any creature will have a unique ID, that will be generated at the start of encounter runnning.
+	An INSTANCE of any creature will have a unique ID, that will be generated at the start of encounter running.
 	This ID isn't really used to refer to creature's type/identity, we use its name for this purpose.
 	*/
 	struct CreatureStatBlock {
 
 		CreatureStatBlock() :
-			name(""),
-			size(Size::NO_SIZE),
-			type(CreatureType::NO_TYPE),
-			alignment(Alignment::UNALIGNED),
-			AC{},
-			HP{},
-			passivePerception{},
-			initiativeBonus{},
-			proficiencyBonus{},
-			walkSpeed{},
-			climbingSpeed{},
-			swimmingSpeed{},
-			burrowSpeed{},
-			flySpeed{},
 			abilityScores{
 				{Ability::STRENGTH, 10},
 				{Ability::DEXTERITY, 10},
@@ -198,6 +184,12 @@ namespace CombatTrackerApp {
 				{Condition::UNCONSCIOUS, false},
 				{Condition::EXHAUSTION, false}
 			},
+			senses {
+				{Sense::BLINDSIGHT, 0},
+				{Sense::DARKVISION, 0},
+				{Sense::TREMORSENSE, 0},
+				{Sense::TRUESIGHT, 0}
+			},
 			languages{
 				{Language::COMMON, false},
 				{Language::COMMON_SIGN_LANGUAGE, false},
@@ -218,119 +210,88 @@ namespace CombatTrackerApp {
 				{Language::THIEVES_CANT, false},
 				{Language::UNDERCOMMON, false}
 			},
-			senses{
-				{Sense::BLINDSIGHT, 0},
-				{Sense::DARKVISION, 0},
-				{Sense::TREMORSENSE, 0},
-				{Sense::TRUESIGHT, 0}
-			},
 			actions{},
 			traits{},
-			equipment{}
+			equipment{},
+			name{""},
+			size{},
+			type{},
+			alignment{},
+			AC{},
+			HP{},
+			passivePerception{},
+			initiativeBonus{},
+			proficiencyBonus{},
+			walkSpeed{},
+			climbingSpeed{},
+			swimmingSpeed{},
+			burrowSpeed{},
+			flySpeed{}
 		{}
 
-		//MANUALLY SET
-		std::string name;
-		// MANUALLY SET
-		Size size;
-		// MANUALLY SET FOR Monster
-		// OVERRIDABLE, COMPUTED IF NOT OVERRIDDEN for PlayerCharacter (HUMANOID for all Species)
-		CreatureType type;
-		// MANUALLY SET
-		Alignment alignment;
-		// MANUALLY SET
-		int AC;
-		// OVERRIDABLE, COMPUTED IF NOT OVERRIDDEN (Dexterity modifier)
-		int initiativeBonus;
-		// OVERRIDABLE, COMPUTED IF NOT OVERRIDDEN (See MAPPED_CR_TO_PB and MAPPED_PLAYER_LEVEL_TO_PB)
-		int proficiencyBonus;
-		// MANUALLY SET
-		int HP;
-		// OVERRIDABLE, COMPUTED IF NOT OVERRIDDEN (Wisdom modifier + Perception Score + 10)
-		int passivePerception;
-		// MANUALLY SET
-		int walkSpeed;
-		// MANUALLY SET
-		int climbingSpeed;
-		// MANUALLY SET
-		int swimmingSpeed;
-		// MANUALLY SET
-		int burrowSpeed;
-		// MANUALLY SET
-		int flySpeed;
-		// MANUALLY SET
-		std::unordered_map<Ability, bool> savingThrowProficiencies;
-		// MANUALLY SET
-		std::unordered_map<Ability, bool> savingThrowExpertise;
-		// MANUALLY SET
-		std::unordered_map<Skill, bool> skillProficiencies;
-		// MANUALLY SET
-		std::unordered_map<Skill, bool> skillExpertise;
-		// MANUALLY SET
-		std::unordered_map<Ability, int> abilityScores;
-		// OVERRIDABLE, COMPUTED IF NOT OVERRIDDEN (See MAPPED_ABILITY_SCORES)
-		std::unordered_map<Ability, int> abilityScoreModifiers;
-		// OVERRIDABLE, COMPUTED IF NOT OVERRIDDEN (Relevant Ability Modifier + PB or Relevant Ability Modifier + 2 x PB, depending on proficiency or expertise.)
-		std::unordered_map<Ability, int> savingThrowModifiers;
-		// OVERRIDABLE, COMPUTED IF NOT OVERRIDDEN (Relevant Ability Modifier + PB or Relevant Ability Modifier + 2 x PB, depending on proficiency or expertise.)
-		std::unordered_map<Skill, int> skillModifiers;
-		// MANUALLY SET
-		std::vector<CreatureAction> actions;
-		// MANUALLY SET
-		std::unordered_map<DamageType, bool> damageVulnerabilities;
-		// MANUALLY SET
-		std::unordered_map<DamageType, bool> damageResistances;
-		// MANUALLY SET
-		std::unordered_map<DamageType, bool> damageImmunities;
-		// MANUALLY SET
-		std::unordered_map<Condition, bool> conditionImmunities;
-		// MANUALLY SET, feats are conceptually included in this.
-		std::vector<Trait> traits;
-		// MANUALLY SET
-		// The second field is the distance of the sense. 0 feet implies that the creature doesn't have that sense.
-		std::unordered_map<Sense, int> senses;
-		// MANUALLY SET
-		std::unordered_map<Language, bool> languages;
-		// MANUALLY SET
-		std::vector<Gear> equipment;
+		// Order struct data members in decreasing size to potentially minimize padding.
+		std::unordered_map<Ability, bool> savingThrowProficiencies{};
+		std::unordered_map<Ability, bool> savingThrowExpertise{};
+		std::unordered_map<Skill, bool> skillProficiencies{};
+		std::unordered_map<Skill, bool> skillExpertise{};
+		std::unordered_map<Ability, int> abilityScores{};
+		std::unordered_map<Ability, int> abilityScoreModifiers{};
+		std::unordered_map<Ability, int> savingThrowModifiers{};
+		std::unordered_map<Skill, int> skillModifiers{};
+		std::unordered_map<DamageType, bool> damageVulnerabilities{};
+		std::unordered_map<DamageType, bool> damageResistances{};
+		std::unordered_map<DamageType, bool> damageImmunities{};
+		std::unordered_map<Condition, bool> conditionImmunities{};
+		std::unordered_map<Sense, int> senses{};
+		std::unordered_map<Language, bool> languages{};
+
+		std::vector<CreatureAction> actions{};
+		std::vector<Trait> traits{};
+		std::vector<Gear> equipment{};
+
+		std::string name{};
+
+		Size size{};
+		CreatureType type{};
+		Alignment alignment{};
+
+		int AC{};
+		int initiativeBonus{};
+		int proficiencyBonus{};
+		int HP{};
+		int passivePerception{};
+		int walkSpeed{};
+		int climbingSpeed{};
+		int swimmingSpeed{};
+		int burrowSpeed{};
+		int flySpeed{};
 	};
 
 	class Creature {
 	protected:
-		// COMPUTED, NOT OVERRIDABLE
-		int ID;
-		// COMPUTED, NOT OVERRIDABLE
-		CreatureStatBlock statBlockCreaturePortion;
+		int ID{};
+		CreatureStatBlock statBlockCreaturePortion{};
 	public:
+
+		// A creature will own its stat block, hence we use std::move in the constructor. So the stat block is passed by value.
+		// As for how the stat block is created, we use the Builder design pattern and pass the corresponding stat block from the builder.
 		Creature(CreatureStatBlock statBlockCreaturePortion);
 		~Creature();
 		static constexpr int findAbilityScoreModifier(int abilityScore) {
 			return (abilityScore - 10) / 2;
 		}
-		void setID();
 	};
+
 	// Templating is required so that we can chain the correct type when creating objects with the builders.
+	// Also note that for template instantiation, the class definition has to be in the header. 
+	// Unlike the subclasses of this class, which have only declarations in the headers.
 	template <typename Derived>
 	class CreatureBuilder {
 	public:
 
 		Derived& self() { return static_cast<Derived&>(*this); }
-		Derived& reset() { block = CreatureStatBlock(); return self(); }
+		Derived& reset() { block = CreatureStatBlock{}; return self(); }
 
-		Derived& setName(std::string creatureName) { block.name = std::move(creatureName); return self(); }
-		Derived& setSize(const Size creatureSize) { block.size = creatureSize; return self(); }
-		Derived& setType(const CreatureType creatureType) { block.type = creatureType; return self(); }
-		Derived& setAlignment(const Alignment creatureAlignment) { block.alignment = creatureAlignment; return self(); }
-		Derived& setAC(const int creatureAC) { block.AC = creatureAC; return self(); }
-		Derived& setInitiativeBonus(const int creatureInitiativeBonus) { block.initiativeBonus = creatureInitiativeBonus; return self(); }
-		Derived& setPB(const int creatureProficiencyBonus) { block.proficiencyBonus = creatureProficiencyBonus; return self(); }
-		Derived& setHP(const int creatureHP) { block.HP = creatureHP; return self(); }
-		Derived& setPassivePerception(const int creaturePassivePerception) { return self(); }
-		Derived& setWalkSpeed(const int creatureWalkSpeed) { block.walkSpeed = creatureWalkSpeed; return self(); }
-		Derived& setClimbingSpeed(const int creatureClimbingSpeed) { block.climbingSpeed = creatureClimbingSpeed; return self(); }
-		Derived& setSwimmingSpeed(const int creatureSwimmingSpeed) { block.swimmingSpeed = creatureSwimmingSpeed; return self(); }
-		Derived& setBurrowSpeed(const int creatureBurrowSpeed) { block.burrowSpeed = creatureBurrowSpeed; return self(); }
-		Derived& setFlySpeed(const int creatureFlySpeed) { block.flySpeed = creatureFlySpeed;  return self(); }
 		Derived& setSavingThrowProficiencies(const std::unordered_map<Ability, bool>& creatureSavingThrowProficiencies) { block.savingThrowProficiencies = creatureSavingThrowProficiencies; return self(); }
 		Derived& setSavingThrowExpertise(const std::unordered_map<Ability, bool>& creatureSavingThrowExpertise) { block.savingThrowExpertise = creatureSavingThrowExpertise;  return self(); }
 		Derived& setSkillProficiencies(const std::unordered_map<Skill, bool>& creatureSkillProficiencies) { block.skillProficiencies = creatureSkillProficiencies; return self(); }
@@ -349,9 +310,25 @@ namespace CombatTrackerApp {
 		Derived& setLanguages(const std::unordered_map<Language, bool>& creatureLanguages) { block.languages = creatureLanguages; return self(); }
 		Derived& setEquipment(const std::vector<Gear>& creatureEquipment) { block.equipment = creatureEquipment; return self(); }
 
+		Derived& setName(std::string creatureName) { block.name = std::move(creatureName); return self(); }
+
+		Derived& setSize(Size creatureSize) { block.size = creatureSize; return self(); }
+		Derived& setType(CreatureType creatureType) { block.type = creatureType; return self(); }
+		Derived& setAlignment(Alignment creatureAlignment) { block.alignment = creatureAlignment; return self(); }
+		Derived& setAC(int creatureAC) { block.AC = creatureAC; return self(); }
+		Derived& setInitiativeBonus(int creatureInitiativeBonus) { block.initiativeBonus = creatureInitiativeBonus; return self(); }
+		Derived& setPB(int creatureProficiencyBonus) { block.proficiencyBonus = creatureProficiencyBonus; return self(); }
+		Derived& setHP(int creatureHP) { block.HP = creatureHP; return self(); }
+		Derived& setPassivePerception(const int creaturePassivePerception) { return self(); }
+		Derived& setWalkSpeed(int creatureWalkSpeed) { block.walkSpeed = creatureWalkSpeed; return self(); }
+		Derived& setClimbingSpeed(int creatureClimbingSpeed) { block.climbingSpeed = creatureClimbingSpeed; return self(); }
+		Derived& setSwimmingSpeed(int creatureSwimmingSpeed) { block.swimmingSpeed = creatureSwimmingSpeed; return self(); }
+		Derived& setBurrowSpeed(int creatureBurrowSpeed) { block.burrowSpeed = creatureBurrowSpeed; return self(); }
+		Derived& setFlySpeed(int creatureFlySpeed) { block.flySpeed = creatureFlySpeed;  return self(); }
+
 		CreatureStatBlock& getCreatureBlock() { return block; }
 		CreatureStatBlock moveCreatureBlock() { return std::move(block);  }
 	protected:
-		CreatureStatBlock block;
+		CreatureStatBlock block{};
 	};
 }

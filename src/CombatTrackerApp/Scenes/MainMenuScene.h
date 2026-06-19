@@ -8,7 +8,7 @@ namespace CombatTrackerApp {
 		MainMenuScene(CombatTrackerLib::App* app);
 		~MainMenuScene();
 
-		virtual void notifyScene(ImGuiIO& imguiIO) override;
+		virtual void notifyScene(const ImGuiIO& imguiIO) override;
 		virtual void updateScene(double timeInterval) override;
 		virtual void renderUI() override;
 		virtual void renderScene() override;
@@ -30,7 +30,7 @@ namespace CombatTrackerApp {
 		ImGuiID mainMenuTitleWindowID{};
 
 		// Dockspace layout flag.
-		bool isMainMenuDockspaceInitialized;
+		bool isMainMenuDockspaceInitialized{};
 	};
 
 }

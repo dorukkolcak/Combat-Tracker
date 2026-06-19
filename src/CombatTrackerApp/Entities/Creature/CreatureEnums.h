@@ -1,21 +1,21 @@
 #pragma once
 
-#include <cstdint>
-#include <string>
-
 // It is actually quite important that these are enum classes, not plain enums.
 // If these were plain enums, implicit conversion of enum values would be an absolute nightmare to track.
+// For all of the scoped enumerations, the default/invalid value should be the first enumerator (integral value zero).
+// This causes any zero-initialized enum types to be initialized to the default/invalid value.
 namespace CombatTrackerApp {
 	enum class Size {
+		NO_SIZE,
 		TINY,
 		SMALL,
 		MEDIUM,
 		LARGE,
 		HUGE,
 		GARGANTUAN,
-		NO_SIZE
 	};
 	enum class Alignment {
+		UNALIGNED,
 		LAWFUL_GOOD,
 		NEUTRAL_GOOD,
 		CHAOTIC_GOOD,
@@ -25,15 +25,14 @@ namespace CombatTrackerApp {
 		LAWFUL_EVIL,
 		NEUTRAL_EVIL,
 		CHAOTIC_EVIL,
-		UNALIGNED
 	};
 	enum class ActionType {
+		NO_ACTION,
 		ACTION,
 		BONUS_ACTION,
 		REACTION,
 		LEGENDARY_ACTION, // Should only be available to Monster. 
 		LAIR_ACTION, // Should only be available to Monster.
-		NO_ACTION
 	};
 	enum class Skill {
 		ATHLETICS,
@@ -56,13 +55,13 @@ namespace CombatTrackerApp {
 		PERSUASION,
 	};
 	enum class Ability {
+		NO_ABILITY,
 		STRENGTH,
 		DEXTERITY,
 		CONSTITUTION,
 		WISDOM,
 		INTELLIGENCE,
 		CHARISMA,
-		NO_ABILITY
 	};
 	enum class DamageType {
 		ACID,
@@ -77,7 +76,7 @@ namespace CombatTrackerApp {
 		PSYCHIC,
 		RADIANT,
 		SLASHING,
-		THUNDER
+		THUNDER,
 	};
 	enum class Condition {
 		BLINDED,
@@ -94,7 +93,7 @@ namespace CombatTrackerApp {
 		RESTRAINED,
 		STUNNED,
 		UNCONSCIOUS,
-		EXHAUSTION
+		EXHAUSTION,
 	};
 	enum class Language {
 		COMMON,
@@ -114,9 +113,10 @@ namespace CombatTrackerApp {
 		PRIMORDIAL,
 		SYLVAN,
 		THIEVES_CANT,
-		UNDERCOMMON
+		UNDERCOMMON,
 	};
 	enum class CreatureType {
+		NO_TYPE,
 		ABERRATION,
 		BEAST,
 		CELESTIAL,
@@ -131,12 +131,11 @@ namespace CombatTrackerApp {
 		OOZE,
 		PLANT,
 		UNDEAD,
-		NO_TYPE
 	};
 	enum class Sense {
 		BLINDSIGHT,
 		DARKVISION,
 		TREMORSENSE,
-		TRUESIGHT
+		TRUESIGHT,
 	};
 }

@@ -1,12 +1,14 @@
 #include "MainMenuScene.h"
 #include "EncounterCreationScene.h"
+#include "Utils.h"
+
 #include "imgui.h"
 #include "imgui_internal.h"
 
 namespace CombatTrackerApp {
     MainMenuScene::MainMenuScene(CombatTrackerLib::App* app) :
-        CombatTrackerLib::Scene(app),
-        isMainMenuDockspaceInitialized(false)
+        CombatTrackerLib::Scene{ app },
+        isMainMenuDockspaceInitialized{ false }
 	{   
         mainMenuDockspaceFlags =
             ImGuiDockNodeFlags_NoResize |
@@ -23,7 +25,7 @@ namespace CombatTrackerApp {
         mainMenuWindowClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
 	}
 	MainMenuScene::~MainMenuScene() {}
-    void MainMenuScene::notifyScene(ImGuiIO& imguiIO) {}
+    void MainMenuScene::notifyScene(const ImGuiIO& imguiIO) {}
     void MainMenuScene::updateScene(double timeInterval) {}
 
     void MainMenuScene::renderUI()  {
@@ -50,7 +52,7 @@ namespace CombatTrackerApp {
             ImGui::DockBuilderSetNodeSize(mainMenuDockspaceID, mainViewport->WorkSize);
 
             // Configure dockspace layout.
-            ImGuiID bottom = mainMenuDockspaceID;
+            ImGuiID bottom{ mainMenuDockspaceID };
             ImGui::DockBuilderSplitNode(mainMenuDockspaceID, ImGuiDir_Up, 0.60f, &mainMenuTitleWindowID, &bottom);
             ImGui::DockBuilderSplitNode(bottom, ImGuiDir_Left, 0.33f, &encounterCreationWindowID, &encounterRunningWindowID);
             ImGui::DockBuilderSplitNode(encounterRunningWindowID, ImGuiDir_Right, 0.50f, &completedEncountersWindowID, &encounterRunningWindowID);
@@ -91,7 +93,7 @@ namespace CombatTrackerApp {
         ImGui::Bullet(); ImGui::TextWrapped("Browse and modify your saved encounters through the compendium.");
         ImGui::Bullet(); ImGui::TextWrapped("In addition, browse premade encounters using premade creatures through the compendium.");
         ImGui::Bullet(); ImGui::TextWrapped("Attach a battlemap texture to created encounters for better visualization.");
-        if (Scene::centeredButton("Create Encounter")) {
+        if (CombatTrackerLib::alignedButton("Create Encounter", 0.5f)) {
             applicationReference->queueSceneTransition(this, std::make_unique<EncounterCreationScene>(applicationReference));
         }
         ImGui::End();
@@ -107,7 +109,7 @@ namespace CombatTrackerApp {
         ImGui::Bullet(); ImGui::TextWrapped("Move each creature in the battlemap with both 2D or 3D visualization options.");
         ImGui::TextWrapped("Finishing Encounters");
         ImGui::Bullet(); ImGui::TextWrapped("Finish the current encounter and save the results.");
-        if (Scene::centeredButton("Select Encounter")) {
+        if (CombatTrackerLib::alignedButton("Select Encounter", 0.5f)) {
             //applicationReference->queueSceneTransition(this, std::make_unique<EncounterRunningScene>(applicationReference));
         }
         ImGui::End();
@@ -116,7 +118,7 @@ namespace CombatTrackerApp {
         ImGui::Begin("View Completed Encounters");
         ImGui::Bullet(); ImGui::TextWrapped("Browse the list of your completed encounters and analyze their results.");
         ImGui::Bullet(); ImGui::TextWrapped("Remember what happened exactly in each turn.");
-        if (Scene::centeredButton("Browse Encounters")) {
+        if (CombatTrackerLib::alignedButton("Browse Encounters", 0.5f)) {
             //applicationReference->queueSceneTransition(this, std::make_unique<CompletedEncountersScene>(applicationReference));
         }
         ImGui::End();

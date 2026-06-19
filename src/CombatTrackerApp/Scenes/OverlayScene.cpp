@@ -1,16 +1,18 @@
 #include <iostream>
 
 #include "OverlayScene.h"
+#include "Utils.h"
+
 #include "imgui_impl_opengl3.h"
 #include "imgui_internal.h"
 
 namespace CombatTrackerApp {
-	OverlayScene::OverlayScene(CombatTrackerLib::App* app) : CombatTrackerLib::Scene(app), isOverlayDockspaceInitialized(false)
+	OverlayScene::OverlayScene(CombatTrackerLib::App* app) : CombatTrackerLib::Scene{ app }, isOverlayDockspaceInitialized{ false }
 	{
 	}
 	OverlayScene::~OverlayScene() {}
 
-	void OverlayScene::notifyScene(ImGuiIO& imguiIO) {}
+	void OverlayScene::notifyScene(const ImGuiIO& imguiIO) {}
 	void OverlayScene::updateScene(double timeInterval) {}
 	void OverlayScene::renderUI() {
 
@@ -30,7 +32,7 @@ namespace CombatTrackerApp {
 		// Set the initial window size based on the main viewport.
 		if (!isOverlayDockspaceInitialized) {
 			mainViewport = ImGui::GetMainViewport();
-			ImGui::SetNextWindowSize(ImVec2(mainViewport->Size.x / 3.0f, mainViewport->Size.y / 3.0f));
+			ImGui::SetNextWindowSize(ImVec2{ mainViewport->Size.x / 3.0f, mainViewport->Size.y / 3.0f });
 		}
 
 		// Render the host window.
@@ -44,7 +46,7 @@ namespace CombatTrackerApp {
 			// Setup dockspace node.
 			ImGui::DockBuilderRemoveNode(overlayDockspaceID);
 			ImGui::DockBuilderAddNode(overlayDockspaceID, ImGuiDockNodeFlags_DockSpace);
-			ImGui::DockBuilderSetNodeSize(overlayDockspaceID, ImVec2(mainViewport->Size.x / 3, mainViewport->Size.y / 3));
+			ImGui::DockBuilderSetNodeSize(overlayDockspaceID, ImVec2{ mainViewport->Size.x / 3, mainViewport->Size.y / 3 } );
 
 			// Configure dockspace elements.
 			ImGui::DockBuilderSplitNode(overlayDockspaceID, ImGuiDir_Left, 0.50f, &generalID, &viewID);
@@ -55,6 +57,7 @@ namespace CombatTrackerApp {
 			ImGui::DockBuilderFinish(overlayDockspaceID);
 			isOverlayDockspaceInitialized = true;
 		}
+
 		// Render the dockspace.
 		ImGui::DockSpace(overlayDockspaceID, ImGui::GetWindowSize(), 0);
 		ImGui::End();
@@ -65,14 +68,14 @@ namespace CombatTrackerApp {
 		ImGui::End();
 
 		ImGui::Begin("View");
-		static int buttonCounter = 0;
+		static int buttonCounter{};
 		if (ImGui::RadioButton("Dark Mode", &buttonCounter, 0)) {
-			CombatTrackerLib::App::createImguiDarkTheme();
-			CombatTrackerLib::App::initializeCommonColors();
+			CombatTrackerLib::createImguiDarkTheme();
+			CombatTrackerLib::initializeCommonColors();
 		}
 		if (ImGui::RadioButton("Light Mode", &buttonCounter, 1)) {
-			CombatTrackerLib::App::createImguiLightTheme();
-			CombatTrackerLib::App::initializeCommonColors();
+			CombatTrackerLib::createImguiLightTheme();
+			CombatTrackerLib::initializeCommonColors();
 		}
 		ImGui::End();
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <unordered_map>
-#include <cstdint>
 
 #include "../Creature/CreatureEnums.h"
 #include "PlayerCharacterEnums.h"
@@ -131,6 +130,7 @@ namespace CombatTrackerApp {
 			PlayerSubclass::ILLUSIONIST
 		}}
 	};
+
 	// Will probably be unused.
 	inline const std::unordered_map<Tool, Ability> MAPPED_TOOLS {
 		{Tool::ALCHEMISTS_SUPPLIES, Ability::INTELLIGENCE},

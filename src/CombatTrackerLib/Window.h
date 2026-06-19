@@ -2,17 +2,20 @@
 
 #include <cstdint>
 #include <string>
+
 // Pay attention to the ordering here.
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
 namespace CombatTrackerLib {
 	struct WindowSpecification {
-		std::uint16_t width;
-		std::uint16_t height;
-		std::string title;
-		bool isResizable;
-		bool isVsyncEnabled;
+		std::string title{};
+
+		std::uint16_t width{};
+		std::uint16_t height{};
+
+		bool isResizable{};
+		bool isVsyncEnabled{};
 	};
 
 	class Window {
@@ -25,9 +28,7 @@ namespace CombatTrackerLib {
 		int getWindowShouldClose();
 		GLFWwindow*& getGLFWwindow();
 	private:
-		const WindowSpecification INITIAL_WINDOW_SPECIFICATION;
-		GLFWwindow* window;
-		// This needs to be static to be registered as frame buffer callback function.
-		static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
+		WindowSpecification windowSpecification{};
+		GLFWwindow* window{};
 	};
 }

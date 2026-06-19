@@ -10,9 +10,9 @@
 namespace CombatTrackerLib {
 	class Scene;
 	struct AppSpecification {
-		std::string applicationName;
-		bool isDarkModeEnabled;
-		CombatTrackerLib::WindowSpecification mainWindowSpecification;
+		CombatTrackerLib::WindowSpecification mainWindowSpecification{};
+		std::string applicationName{};
+		bool isDarkModeEnabled{};
 	};
 	class App {
 	public:
@@ -25,18 +25,16 @@ namespace CombatTrackerLib {
 		void queueDeleteScene(Scene* sceneToBeDeleted);
 		void queueSceneTransition(Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo);
 
-		static void createImguiLightTheme();
-		static void createImguiDarkTheme();
-		static void initializeCommonColors();
-
 	private:
-		AppSpecification applicationSpecification;
-		std::unique_ptr<Window> mainWindow;
+		AppSpecification applicationSpecification{};
+		std::unique_ptr<Window> mainWindow{};
+
 		// I prefer using vector as sort of a stack because it is much better at resizing, compared to a pure stack data structure.
-		std::vector<std::unique_ptr<Scene>> sceneStack;
-		std::vector<std::unique_ptr<Scene>> sceneAdditionQueue;
-		std::vector<Scene*> sceneDeletionQueue;
-		std::unordered_map<Scene*, std::unique_ptr<Scene>> sceneTransitionQueue;
+		std::vector<std::unique_ptr<Scene>> sceneStack{};
+		std::vector<std::unique_ptr<Scene>> sceneAdditionQueue{};
+		std::vector<Scene*> sceneDeletionQueue{};
+		std::unordered_map<Scene*, std::unique_ptr<Scene>> sceneTransitionQueue{};
+
 		/*
 		So here is the rough idea of how scenes work:
 		sceneStack maintains our active scenes at an instance. 
@@ -67,10 +65,8 @@ namespace CombatTrackerLib {
 		You might notice that scene transitions are simply deletion + addition consecutively.
 		*/
 		void dequeueSceneOperations();
-
-		static void setupLayout();
-
 	};
+
 	// A functor (function object) that marks whether a scene is empty or not by looking for null pointers.
 	// Used in scene deletion.
 	struct isSceneEmpty {

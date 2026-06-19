@@ -2,6 +2,7 @@
 
 namespace CombatTrackerApp {
 	enum class PlayerClass {
+		NO_CLASS,
 		BARBARIAN,
 		BARD,
 		CLERIC,
@@ -14,7 +15,6 @@ namespace CombatTrackerApp {
 		SORCERER,
 		WARLOCK,
 		WIZARD,
-		NO_CLASS
 	};
 	enum class PlayerSubclass {
 		PATH_OF_THE_BERSERKER,
@@ -64,9 +64,10 @@ namespace CombatTrackerApp {
 		ABJURER,
 		DIVINER,
 		EVOKER,
-		ILLUSIONIST
+		ILLUSIONIST,
 	};
 	enum class Species {
+		NO_SPECIES,
 		AASIMAR,
 		DRAGONBORN,
 		DWARF,
@@ -77,9 +78,9 @@ namespace CombatTrackerApp {
 		HUMAN,
 		ORC,
 		TIEFLING,
-		NO_SPECIES
 	};
 	enum class Origin {
+		NO_ORIGIN,
 		ACOLYTE,
 		ARTISAN,
 		CHARLATAN,
@@ -96,19 +97,18 @@ namespace CombatTrackerApp {
 		SCRIBE,
 		SOLDIER,
 		WAYFARER,
-		NO_ORIGIN
 	};
 	enum class WeaponType {
 		SIMPLE_MELEE,
 		SIMPLE_RANGED,
 		MARTIAL_MELEE,
-		MARTIAL_RANGED
+		MARTIAL_RANGED,
 	};
 	enum class ArmorType {
 		LIGHT,
 		MEDIUM,
 		HEAVY,
-		SHIELD
+		SHIELD,
 	};
 	enum class WeaponMastery {
 		CLEAVE,
@@ -118,7 +118,7 @@ namespace CombatTrackerApp {
 		SAP,
 		SLOW,
 		TOPPLE,
-		VEX
+		VEX,
 	};
 	enum class Tool {
 		ALCHEMISTS_SUPPLIES,
@@ -145,6 +145,6 @@ namespace CombatTrackerApp {
 		MUSICAL_INSTRUMENT,
 		NAVIGATORS_TOOLS,
 		POISONERS_KIT,
-		THIEVES_TOOLS
+		THIEVES_TOOLS,
 	};
 }
