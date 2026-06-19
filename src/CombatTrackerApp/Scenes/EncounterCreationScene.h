@@ -20,7 +20,7 @@ namespace CombatTrackerApp {
 		ENCOUNTER_MANAGER,
 		MONSTER_BROWSER,
 		PLAYER_CHARACTER_BROWSER,
-		ENCOUNTER_BROWSER
+		ENCOUNTER_BROWSER,
 	};
 
 	struct ListBoxParameters {

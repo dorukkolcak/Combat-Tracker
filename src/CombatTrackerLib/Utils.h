@@ -1,6 +1,11 @@
 #include "imgui.h"
 #include "Styling.h"
 
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+
 namespace CombatTrackerLib {
 
 	// Taken from https://github.com/ocornut/imgui/discussions/3862.
@@ -144,5 +149,18 @@ namespace CombatTrackerLib {
 		colors[ImGuiCol_Button] = CommonColors::BRICK_RED_COLOR;
 		colors[ImGuiCol_ButtonHovered] = CommonColors::BRICK_RED_HOVER_COLOR;
 		colors[ImGuiCol_ButtonActive] = CommonColors::BRICK_RED_ACTIVE_COLOR;
+	}
+	inline std::string readFile(const std::filesystem::path& filePath) {
+
+		std::ifstream file(filePath);
+		if (!file.is_open()) {
+			std::cerr << " Can't open file: " << filePath.string() << "\n";
+			return "";
+		}
+
+		std::ostringstream fileStream;
+		fileStream << file.rdbuf();
+		file.close();
+		return std::move(fileStream.str());
 	}
 }
