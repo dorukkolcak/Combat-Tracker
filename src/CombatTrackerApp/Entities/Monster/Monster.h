@@ -9,7 +9,6 @@ namespace CombatTrackerApp {
 		int XP{};
 	public:
 		Monster(CreatureStatBlock statBlock, double creatureCR, int creatureXP);
-		~Monster();
 
 		int getXP();
 	};
@@ -18,6 +17,9 @@ namespace CombatTrackerApp {
 	public:
 		MonsterBuilder& setCR(double creatureCR);
 		MonsterBuilder& setXP(int XP);
+
+		// Hides CreatureBuilder::reset to also clear the monster-specific fields.
+		MonsterBuilder& reset();
 		Monster moveMonster();
 	private:
 		double CR{};

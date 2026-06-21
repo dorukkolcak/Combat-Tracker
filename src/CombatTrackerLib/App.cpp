@@ -53,23 +53,27 @@ namespace CombatTrackerLib {
 		// Set the reset color value used when glClear is called. Currently this is tan.
 		glClearColor(0.858824f, 0.576471f, 0.439216f, 1.0f);
 
+		double lastFrameTime{ glfwGetTime() };
 		// Main application loop
 		while (!App::mainWindow->getWindowShouldClose()) {
+
+			// Get the delta time between frames, in seconds.
+			double currentTime{ glfwGetTime() };
+			double dt{ currentTime - lastFrameTime };
+			lastFrameTime = currentTime;
 
 			// This specifies the order in which we traverse the scenes.
 			std::ranges::reverse_view reverseView{ sceneStack };
 
 			// Scene event handling occurs here.
 			glfwPollEvents();
-			for (auto& scene : reverseView) {
+			for (const auto& scene : reverseView) {
 				scene->notifyScene(imguiIO);
 			}
 
 			// Duration based scene updates goes here.
-			double ts = glfwGetTime();
-			ts = glfwGetTime() - ts;
-			for (auto& scene : reverseView) {
-				scene->updateScene(ts);
+			for (const auto& scene : reverseView) {
+				scene->updateScene(dt);
 			}
 
 			// Start the Dear ImGui frame
@@ -81,13 +85,13 @@ namespace CombatTrackerLib {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 			// UI layouting and rendering goes here.
-			for (auto& scene : reverseView) {
+			for (const auto& scene : reverseView) {
 				scene->renderUI();
 			}
 			ImGui::Render();
 
 			// OpenGL rendering work goes here. We do the rendering from bottom to top.
-			for (auto& scene : sceneStack) {
+			for (const auto& scene : sceneStack) {
 				scene->renderScene();
 			}
 

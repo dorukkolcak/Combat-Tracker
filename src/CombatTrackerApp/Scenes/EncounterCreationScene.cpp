@@ -379,10 +379,6 @@ namespace CombatTrackerApp {
 					if (isMonster) {
 						monsterBuilder.reset();
 						currentCreatureStatBlock = monsterBuilder.getCreatureBlock();
-						monsterBuilder.
-							setCR(0.0).
-							setXP(0).
-							setPB(0);
 					}
 					else {
 						playerCharacterBuilder.reset();
@@ -524,12 +520,7 @@ namespace CombatTrackerApp {
 				}
 				else {
 					if (CombatTrackerLib::alignedButton("Complete Monster Creation", 0.5f)) {
-						/*
-						if (saveMonster(currentCreatureStatBlock, currentMonsterCR, currentMonsterXP)) {
-							resetParametersAndOverrides();
-							ImGui::CloseCurrentPopup();
-						}
-						*/
+		
 					}
 				}
 			}
@@ -541,12 +532,7 @@ namespace CombatTrackerApp {
 				}
 				else {
 					if (CombatTrackerLib::alignedButton("Complete Player Character Creation", 0.5f)) {
-						/*
-						if (savePlayerCharacter(currentCreatureStatBlock, currentPlayerStatBlock)) {
-							resetParametersAndOverrides();
-							ImGui::CloseCurrentPopup();
-						}
-						*/
+
 					}
 				}
 			}

@@ -95,7 +95,6 @@ namespace CombatTrackerApp {
 
 		// Same deal as most constructors, stat blocks are moved so pass them by value.
 		PlayerCharacter(CreatureStatBlock creaturePortion, PlayerStatBlock playerPortion);
-		~PlayerCharacter();
 	};
 	class PlayerCharacterBuilder : public CreatureBuilder<PlayerCharacterBuilder> {
 	public:
@@ -110,6 +109,8 @@ namespace CombatTrackerApp {
 		PlayerCharacterBuilder& setSpecies(Species creatureSpecies);
 		PlayerCharacterBuilder& setOrigin(Origin creatureOrigin);
 
+		// Hides CreatureBuilder::reset to also clear the player-specific block.
+		PlayerCharacterBuilder& reset();
 		PlayerStatBlock& getPlayerCharacterBlock();
 		PlayerCharacter movePlayerCharacter();
 

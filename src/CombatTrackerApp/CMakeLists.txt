@@ -1,7 +1,7 @@
 add_executable(Combat-Tracker-App
     main.cpp
-    JsonUtils.h
-    JsonUtils.cpp
+    JSONUtils.h
+    JSONUtils.cpp
 
     Entities/Creature/Creature.h
     Entities/Creature/Creature.cpp

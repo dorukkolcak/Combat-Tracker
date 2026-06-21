@@ -30,7 +30,6 @@ namespace CombatTrackerApp {
 	};
 
 	class EncounterCreationScene : public CombatTrackerLib::Scene {
-
 	public:
 		EncounterCreationScene(CombatTrackerLib::App* app);
 		virtual ~EncounterCreationScene();

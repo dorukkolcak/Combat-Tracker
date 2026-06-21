@@ -1,12 +1,11 @@
 #include "PlayerCharacter.h"
 
 namespace CombatTrackerApp {
-	PlayerCharacter::PlayerCharacter (CreatureStatBlock creatureBlock, PlayerStatBlock playerBlock) : 
-		Creature{ creatureBlock }, 
+	PlayerCharacter::PlayerCharacter (CreatureStatBlock creatureBlock, PlayerStatBlock playerBlock) :
+		Creature{ std::move(creatureBlock) },
 		statBlockPlayerPortion{ std::move(playerBlock) }
 	{
 	}
-	PlayerCharacter::~PlayerCharacter() {}
 
 	PlayerCharacterBuilder& PlayerCharacterBuilder::setLevels(std::unordered_map<PlayerClass, int>& creatureLevels) { playerBlock.levels = creatureLevels; return *this; }
 	PlayerCharacterBuilder& PlayerCharacterBuilder::setSubclasses(std::unordered_map<PlayerClass, PlayerSubclass>& creatureSubclasses) { playerBlock.subclasses = creatureSubclasses; return *this; }
@@ -18,6 +17,17 @@ namespace CombatTrackerApp {
 	PlayerCharacterBuilder& PlayerCharacterBuilder::setSpecies(Species creatureSpecies) { playerBlock.species = creatureSpecies; return *this; }
 	PlayerCharacterBuilder& PlayerCharacterBuilder::setOrigin(Origin creatureOrigin) { playerBlock.origin = creatureOrigin; return *this; }
 	
-	PlayerCharacter PlayerCharacterBuilder::movePlayerCharacter() { return std::move(PlayerCharacter(block, playerBlock)); }
+	// Resets the full builder state: The creature block + the player-specific block.
+	PlayerCharacterBuilder& PlayerCharacterBuilder::reset() {
+		CreatureBuilder<PlayerCharacterBuilder>::reset();
+		playerBlock = PlayerStatBlock{};
+		return *this;
+	}
+
+	PlayerCharacter PlayerCharacterBuilder::movePlayerCharacter() {
+		PlayerCharacter playerCharacter{ std::move(block), std::move(playerBlock) };
+		reset();
+		return playerCharacter;
+	}
 	PlayerStatBlock& PlayerCharacterBuilder::getPlayerCharacterBlock() { return playerBlock; }
 }

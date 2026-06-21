@@ -276,7 +276,7 @@ namespace CombatTrackerApp {
 		// A creature will own its stat block, hence we use std::move in the constructor. So the stat block is passed by value.
 		// As for how the stat block is created, we use the Builder design pattern and pass the corresponding stat block from the builder.
 		Creature(CreatureStatBlock statBlockCreaturePortion);
-		~Creature();
+
 		static constexpr int findAbilityScoreModifier(int abilityScore) {
 			return (abilityScore - 10) / 2;
 		}
@@ -319,7 +319,7 @@ namespace CombatTrackerApp {
 		Derived& setInitiativeBonus(int creatureInitiativeBonus) { block.initiativeBonus = creatureInitiativeBonus; return self(); }
 		Derived& setPB(int creatureProficiencyBonus) { block.proficiencyBonus = creatureProficiencyBonus; return self(); }
 		Derived& setHP(int creatureHP) { block.HP = creatureHP; return self(); }
-		Derived& setPassivePerception(const int creaturePassivePerception) { return self(); }
+		Derived& setPassivePerception(const int creaturePassivePerception) { block.passivePerception = creaturePassivePerception; return self(); }
 		Derived& setWalkSpeed(int creatureWalkSpeed) { block.walkSpeed = creatureWalkSpeed; return self(); }
 		Derived& setClimbingSpeed(int creatureClimbingSpeed) { block.climbingSpeed = creatureClimbingSpeed; return self(); }
 		Derived& setSwimmingSpeed(int creatureSwimmingSpeed) { block.swimmingSpeed = creatureSwimmingSpeed; return self(); }
@@ -327,7 +327,18 @@ namespace CombatTrackerApp {
 		Derived& setFlySpeed(int creatureFlySpeed) { block.flySpeed = creatureFlySpeed;  return self(); }
 
 		CreatureStatBlock& getCreatureBlock() { return block; }
-		CreatureStatBlock moveCreatureBlock() { return std::move(block);  }
+
+		/*
+		The builder is meant to be single used:
+		It moves the block out and re-initializes it to a fresh default, 
+		so the builder is ready to be used from scratch after a move.
+		Note that a moved-from block would be left empty, not default valued, so we must reinitialize it.
+		*/
+		CreatureStatBlock moveCreatureBlock() {
+			CreatureStatBlock movedBlock{ std::move(block) };
+			block = CreatureStatBlock{};
+			return movedBlock;
+		}
 	protected:
 		CreatureStatBlock block{};
 	};
