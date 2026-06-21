@@ -8,12 +8,12 @@
 namespace CombatTrackerApp {
     MainMenuScene::MainMenuScene(CombatTrackerLib::App* app) :
         CombatTrackerLib::Scene{ app },
-        isMainMenuDockspaceInitialized{ false }
+        m_isMainMenuDockspaceInitialized{ false }
 	{   
-        mainMenuDockspaceFlags =
+        m_mainMenuDockspaceFlags =
             ImGuiDockNodeFlags_NoResize |
             ImGuiDockNodeFlags_NoSplit;
-        hostWindowFlags = 
+        m_hostWindowFlags = 
         ImGuiWindowFlags_NoDocking |
             ImGuiWindowFlags_NoTitleBar |
             ImGuiWindowFlags_NoCollapse |
@@ -22,7 +22,7 @@ namespace CombatTrackerApp {
             ImGuiWindowFlags_NoBringToFrontOnFocus |
             ImGuiWindowFlags_NoNavFocus;
       
-        mainMenuWindowClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
+        m_mainMenuWindowClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
 	}
 	MainMenuScene::~MainMenuScene() {}
     void MainMenuScene::notifyScene(const ImGuiIO& imguiIO) {}
@@ -31,45 +31,45 @@ namespace CombatTrackerApp {
     void MainMenuScene::renderUI()  {
 
         // Set configurations of the host window of the scene on initial render pass.
-        if (!isMainMenuDockspaceInitialized) {
-            mainViewport = ImGui::GetMainViewport();
-            ImGui::SetNextWindowPos(mainViewport->WorkPos);
-            ImGui::SetNextWindowSize(mainViewport->WorkSize);
-            ImGui::SetNextWindowViewport(mainViewport->ID);
+        if (!m_isMainMenuDockspaceInitialized) {
+            m_mainViewport = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(m_mainViewport->WorkPos);
+            ImGui::SetNextWindowSize(m_mainViewport->WorkSize);
+            ImGui::SetNextWindowViewport(m_mainViewport->ID);
         }
 
         // Render the host window.
-        ImGui::Begin("Host Window", nullptr, hostWindowFlags);
+        ImGui::Begin("Host Window", nullptr, m_hostWindowFlags);
 
         // Create the dockplace settings and layout on initial render pass.
-        if (!isMainMenuDockspaceInitialized) {
+        if (!m_isMainMenuDockspaceInitialized) {
 
-            mainMenuDockspaceID = ImGui::GetID("Main Menu Dockspace");
-            ImGui::DockBuilderRemoveNode(mainMenuDockspaceID);
+            m_mainMenuDockspaceID = ImGui::GetID("Main Menu Dockspace");
+            ImGui::DockBuilderRemoveNode(m_mainMenuDockspaceID);
 
             // Add dockspace nodes.
-            ImGui::DockBuilderAddNode(mainMenuDockspaceID, ImGuiDockNodeFlags_DockSpace);
-            ImGui::DockBuilderSetNodeSize(mainMenuDockspaceID, mainViewport->WorkSize);
+            ImGui::DockBuilderAddNode(m_mainMenuDockspaceID, ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderSetNodeSize(m_mainMenuDockspaceID, m_mainViewport->WorkSize);
 
             // Configure dockspace layout.
-            ImGuiID bottom{ mainMenuDockspaceID };
-            ImGui::DockBuilderSplitNode(mainMenuDockspaceID, ImGuiDir_Up, 0.60f, &mainMenuTitleWindowID, &bottom);
-            ImGui::DockBuilderSplitNode(bottom, ImGuiDir_Left, 0.33f, &encounterCreationWindowID, &encounterRunningWindowID);
-            ImGui::DockBuilderSplitNode(encounterRunningWindowID, ImGuiDir_Right, 0.50f, &completedEncountersWindowID, &encounterRunningWindowID);
+            ImGuiID bottom{ m_mainMenuDockspaceID };
+            ImGui::DockBuilderSplitNode(m_mainMenuDockspaceID, ImGuiDir_Up, 0.60f, &m_mainMenuTitleWindowID, &bottom);
+            ImGui::DockBuilderSplitNode(bottom, ImGuiDir_Left, 0.33f, &m_encounterCreationWindowID, &m_encounterRunningWindowID);
+            ImGui::DockBuilderSplitNode(m_encounterRunningWindowID, ImGuiDir_Right, 0.50f, &m_completedEncountersWindowID, &m_encounterRunningWindowID);
        
             // Dock windows.
-            ImGui::DockBuilderDockWindow("CombatTracker", mainMenuTitleWindowID);
-            ImGui::DockBuilderDockWindow("Encounter Creation", encounterCreationWindowID);
-            ImGui::DockBuilderDockWindow("Run Encounter", encounterRunningWindowID);
-            ImGui::DockBuilderDockWindow("View Completed Encounters", completedEncountersWindowID);
+            ImGui::DockBuilderDockWindow("CombatTracker", m_mainMenuTitleWindowID);
+            ImGui::DockBuilderDockWindow("Encounter Creation", m_encounterCreationWindowID);
+            ImGui::DockBuilderDockWindow("Run Encounter", m_encounterRunningWindowID);
+            ImGui::DockBuilderDockWindow("View Completed Encounters", m_completedEncountersWindowID);
        
             // Finish dockspace creation.
-            ImGui::DockBuilderFinish(mainMenuDockspaceID);
-            isMainMenuDockspaceInitialized = true;
+            ImGui::DockBuilderFinish(m_mainMenuDockspaceID);
+            m_isMainMenuDockspaceInitialized = true;
 
         }
         // Render the dockspace of the host window.
-        ImGui::DockSpace(mainMenuDockspaceID, ImGui::GetWindowSize(), mainMenuDockspaceFlags);
+        ImGui::DockSpace(m_mainMenuDockspaceID, ImGui::GetWindowSize(), m_mainMenuDockspaceFlags);
         ImGui::End();
         
         /*
@@ -77,7 +77,7 @@ namespace CombatTrackerApp {
         Rather add the texture to be added to the draw list of the window. 
         So that it can be rendered during renderScene call.
         */
-        ImGui::SetNextWindowClass(static_cast<const ImGuiWindowClass*> (&mainMenuWindowClass));
+        ImGui::SetNextWindowClass(static_cast<const ImGuiWindowClass*> (&m_mainMenuWindowClass));
         ImGui::Begin("CombatTracker");
         //ImGui::GetWindowDrawList()->AddImage();
         ImGui::End();
@@ -94,7 +94,7 @@ namespace CombatTrackerApp {
         ImGui::Bullet(); ImGui::TextWrapped("In addition, browse premade encounters using premade creatures through the compendium.");
         ImGui::Bullet(); ImGui::TextWrapped("Attach a battlemap texture to created encounters for better visualization.");
         if (CombatTrackerLib::alignedButton("Create Encounter", 0.5f)) {
-            applicationReference->queueSceneTransition(this, std::make_unique<EncounterCreationScene>(applicationReference));
+            m_applicationReference->queueSceneTransition(this, std::make_unique<EncounterCreationScene>(m_applicationReference));
         }
         ImGui::End();
 

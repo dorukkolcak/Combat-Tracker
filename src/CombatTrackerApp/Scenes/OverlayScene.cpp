@@ -7,7 +7,7 @@
 #include "imgui_internal.h"
 
 namespace CombatTrackerApp {
-	OverlayScene::OverlayScene(CombatTrackerLib::App* app) : CombatTrackerLib::Scene{ app }, isOverlayDockspaceInitialized{ false }
+	OverlayScene::OverlayScene(CombatTrackerLib::App* app) : CombatTrackerLib::Scene{ app }, m_isOverlayDockspaceInitialized{ false }
 	{
 	}
 	OverlayScene::~OverlayScene() {}
@@ -30,36 +30,36 @@ namespace CombatTrackerApp {
 
 		// Create the window that will host the dockspace.
 		// Set the initial window size based on the main viewport.
-		if (!isOverlayDockspaceInitialized) {
-			mainViewport = ImGui::GetMainViewport();
-			ImGui::SetNextWindowSize(ImVec2{ mainViewport->Size.x / 3.0f, mainViewport->Size.y / 3.0f });
+		if (!m_isOverlayDockspaceInitialized) {
+			m_mainViewport = ImGui::GetMainViewport();
+			ImGui::SetNextWindowSize(ImVec2{ m_mainViewport->Size.x / 3.0f, m_mainViewport->Size.y / 3.0f });
 		}
 
 		// Render the host window.
 		ImGui::Begin("Options");
 
 		// Configure the dockspace if it isn't configured previously or has received changes.
-		if (!isOverlayDockspaceInitialized) {
+		if (!m_isOverlayDockspaceInitialized) {
 
-			overlayDockspaceID = ImGui::GetID("Overlay Dockspace");
+			m_overlayDockspaceID = ImGui::GetID("Overlay Dockspace");
 
 			// Setup dockspace node.
-			ImGui::DockBuilderRemoveNode(overlayDockspaceID);
-			ImGui::DockBuilderAddNode(overlayDockspaceID, ImGuiDockNodeFlags_DockSpace);
-			ImGui::DockBuilderSetNodeSize(overlayDockspaceID, ImVec2{ mainViewport->Size.x / 3, mainViewport->Size.y / 3 } );
+			ImGui::DockBuilderRemoveNode(m_overlayDockspaceID);
+			ImGui::DockBuilderAddNode(m_overlayDockspaceID, ImGuiDockNodeFlags_DockSpace);
+			ImGui::DockBuilderSetNodeSize(m_overlayDockspaceID, ImVec2{ m_mainViewport->Size.x / 3, m_mainViewport->Size.y / 3 } );
 
 			// Configure dockspace elements.
-			ImGui::DockBuilderSplitNode(overlayDockspaceID, ImGuiDir_Left, 0.50f, &generalID, &viewID);
-			ImGui::DockBuilderDockWindow("General", generalID);
-			ImGui::DockBuilderDockWindow("View", viewID);
+			ImGui::DockBuilderSplitNode(m_overlayDockspaceID, ImGuiDir_Left, 0.50f, &m_generalID, &m_viewID);
+			ImGui::DockBuilderDockWindow("General", m_generalID);
+			ImGui::DockBuilderDockWindow("View", m_viewID);
 
 			// Finish dockspace creation.
-			ImGui::DockBuilderFinish(overlayDockspaceID);
-			isOverlayDockspaceInitialized = true;
+			ImGui::DockBuilderFinish(m_overlayDockspaceID);
+			m_isOverlayDockspaceInitialized = true;
 		}
 
 		// Render the dockspace.
-		ImGui::DockSpace(overlayDockspaceID, ImGui::GetWindowSize(), 0);
+		ImGui::DockSpace(m_overlayDockspaceID, ImGui::GetWindowSize(), 0);
 		ImGui::End();
 
 		// Submit windows in dockspace.

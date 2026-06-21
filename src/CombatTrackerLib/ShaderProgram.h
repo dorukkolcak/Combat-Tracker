@@ -21,6 +21,6 @@ public:
 	unsigned int getProgramID() const;
 
 private:
-	std::vector<unsigned int> shaders{};
-	unsigned int programID{};
+	std::vector<unsigned int> m_shaders{};
+	unsigned int m_programID{};
 };

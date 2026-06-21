@@ -26,14 +26,14 @@ namespace CombatTrackerLib {
 		void queueSceneTransition(Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo);
 
 	private:
-		AppSpecification applicationSpecification{};
-		std::unique_ptr<Window> mainWindow{};
+		AppSpecification m_applicationSpecification{};
+		std::unique_ptr<Window> m_mainWindow{};
 
 		// I prefer using vector as sort of a stack because it is much better at resizing, compared to a pure stack data structure.
-		std::vector<std::unique_ptr<Scene>> sceneStack{};
-		std::vector<std::unique_ptr<Scene>> sceneAdditionQueue{};
-		std::vector<Scene*> sceneDeletionQueue{};
-		std::unordered_map<Scene*, std::unique_ptr<Scene>> sceneTransitionQueue{};
+		std::vector<std::unique_ptr<Scene>> m_sceneStack{};
+		std::vector<std::unique_ptr<Scene>> m_sceneAdditionQueue{};
+		std::vector<Scene*> m_sceneDeletionQueue{};
+		std::unordered_map<Scene*, std::unique_ptr<Scene>> m_sceneTransitionQueue{};
 
 		/*
 		So here is the rough idea of how scenes work:
@@ -69,7 +69,7 @@ namespace CombatTrackerLib {
 
 	// A functor (function object) that marks whether a scene is empty or not by looking for null pointers.
 	// Used in scene deletion.
-	struct isSceneEmpty {
+	struct IsSceneEmpty {
 		bool operator()(const std::unique_ptr<Scene>& scenePointer) {
 			return scenePointer == nullptr;
 		}

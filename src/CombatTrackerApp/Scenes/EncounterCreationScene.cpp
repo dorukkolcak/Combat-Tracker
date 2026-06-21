@@ -14,43 +14,43 @@
 namespace CombatTrackerApp {
 	EncounterCreationScene::EncounterCreationScene(CombatTrackerLib::App* app) :
 		CombatTrackerLib::Scene{ app },
-		monsterBuilder{},
-		playerCharacterBuilder{},
-		currentCreatureStatBlock{ monsterBuilder.getCreatureBlock() }, // Doesn't matter which builder is used here.
-		currentPlayerStatBlock{ playerCharacterBuilder.getPlayerCharacterBlock() },
-		currentMonsterCR{},
-		currentMonsterXP{},
-		monsterCRParameters{-1, -1, false},
-		sizeListBoxParameters{ -1, -1, false },
-		creatureTypeParameters{ -1, -1, false },
-		alignmentParameters{ -1, -1, false },
-		speciesParameters{ -1, -1, false },
-		originParameters{ -1, -1, false },
-		isInitiativeOverriden{false},
-		isPassivePerceptionOverridden{ false },
-		isXPOverridden{false},
-		isPBOverridden{false},
-		currentPopupName{}
+		m_monsterBuilder{},
+		m_playerCharacterBuilder{},
+		m_currentCreatureStatBlock{ m_monsterBuilder.getCreatureBlock() }, // Doesn't matter which builder is used here.
+		m_currentPlayerStatBlock{ m_playerCharacterBuilder.getPlayerCharacterBlock() },
+		m_currentMonsterCR{},
+		m_currentMonsterXP{},
+		m_monsterCRParameters{-1, -1, false},
+		m_sizeListBoxParameters{ -1, -1, false },
+		m_creatureTypeParameters{ -1, -1, false },
+		m_alignmentParameters{ -1, -1, false },
+		m_speciesParameters{ -1, -1, false },
+		m_originParameters{ -1, -1, false },
+		m_isInitiativeOverriden{false},
+		m_isPassivePerceptionOverridden{ false },
+		m_isXPOverridden{false},
+		m_isPBOverridden{false},
+		m_currentPopupName{}
 	{
-		encounterCreationDockFlags =
+		m_encounterCreationDockFlags =
 			ImGuiDockNodeFlags_NoResize |
 			ImGuiDockNodeFlags_NoSplit;
-		encounterCreationWindowFlags =
+		m_encounterCreationWindowFlags =
 			ImGuiWindowFlags_NoTitleBar |
 			ImGuiWindowFlags_NoCollapse |
 			ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoMove |
 			ImGuiWindowFlags_NoBringToFrontOnFocus |
 			ImGuiWindowFlags_NoNavFocus;
-		popupWindowFlags = ImGuiWindowFlags_NoMove |
+		m_popupWindowFlags = ImGuiWindowFlags_NoMove |
 			ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoCollapse;
 		for (const auto& ability : ABILITY_NAMES) {
-			abilityModifiersOverride[ability.first] = false;
-			savingThrowsOverride[ability.first] = false;
+			m_abilityModifiersOverride[ability.first] = false;
+			m_savingThrowsOverride[ability.first] = false;
 		}
 		for (const auto& skill : SKILL_NAMES) {
-			skillModifiersOverride[skill.first] = false;
+			m_skillModifiersOverride[skill.first] = false;
 		}
 	}
 	EncounterCreationScene::~EncounterCreationScene() {}
@@ -76,73 +76,73 @@ namespace CombatTrackerApp {
 		using enum EncounterCreationWindows;
 
 		// Set configurations of the host window of the scene on first render pass.
-		if (!dockspaceInitializations.at(ENCOUNTER_CREATOR)) {
-			mainViewport = ImGui::GetMainViewport();
-			ImGui::SetNextWindowPos(mainViewport->WorkPos);
-			ImGui::SetNextWindowSize(mainViewport->WorkSize);
-			ImGui::SetNextWindowViewport(mainViewport->ID);
+		if (!m_dockspaceInitializations.at(ENCOUNTER_CREATOR)) {
+			m_mainViewport = ImGui::GetMainViewport();
+			ImGui::SetNextWindowPos(m_mainViewport->WorkPos);
+			ImGui::SetNextWindowSize(m_mainViewport->WorkSize);
+			ImGui::SetNextWindowViewport(m_mainViewport->ID);
 		}
 
 		// Render host window.
 		ImGui::Begin(
 			MAPPED_WINDOW_NAMES.at(ENCOUNTER_CREATOR).c_str(),
 			nullptr,
-			encounterCreationWindowFlags
+			m_encounterCreationWindowFlags
 		);
 
 		// Setup dockspace layout on first render pass.
-		if (!dockspaceInitializations.at(ENCOUNTER_CREATOR)) {
+		if (!m_dockspaceInitializations.at(ENCOUNTER_CREATOR)) {
 
-			dockspaceIDs[ENCOUNTER_CREATOR] =
+			m_dockspaceIDs[ENCOUNTER_CREATOR] =
 				ImGui::GetID(
 					(MAPPED_WINDOW_NAMES.at(ENCOUNTER_CREATOR) + " - Dockspace")
 					.c_str()
 				);
-			ImGui::DockBuilderRemoveNode(dockspaceIDs.at(ENCOUNTER_CREATOR));
+			ImGui::DockBuilderRemoveNode(m_dockspaceIDs.at(ENCOUNTER_CREATOR));
 
 			// Add dockspace nodes.
-			ImGui::DockBuilderAddNode(dockspaceIDs.at(ENCOUNTER_CREATOR), ImGuiDockNodeFlags_DockSpace);
-			ImGui::DockBuilderSetNodeSize(dockspaceIDs.at(ENCOUNTER_CREATOR), mainViewport->WorkSize);
+			ImGui::DockBuilderAddNode(m_dockspaceIDs.at(ENCOUNTER_CREATOR), ImGuiDockNodeFlags_DockSpace);
+			ImGui::DockBuilderSetNodeSize(m_dockspaceIDs.at(ENCOUNTER_CREATOR), m_mainViewport->WorkSize);
 
 			// Configure dockspace nodes.
 			ImGuiID leftID{};
 			ImGui::DockBuilderSplitNode(
-				dockspaceIDs.at(ENCOUNTER_CREATOR),
+				m_dockspaceIDs.at(ENCOUNTER_CREATOR),
 				ImGuiDir_Left,
 				0.10f,
-				&(dockspaceIDs[MENU]),
+				&(m_dockspaceIDs[MENU]),
 				&leftID
 			);
 			ImGui::DockBuilderSplitNode(leftID,
 				ImGuiDir_Left,
 				0.36f,
-				&(dockspaceIDs[ENTITY_BROWSER]),
-				&(dockspaceIDs[ENCOUNTER_MANAGER])
+				&(m_dockspaceIDs[ENTITY_BROWSER]),
+				&(m_dockspaceIDs[ENCOUNTER_MANAGER])
 			);
 
 			// Dock windows.
 			ImGui::DockBuilderDockWindow(
 				MAPPED_WINDOW_NAMES.at(ENTITY_BROWSER).c_str(),
-				dockspaceIDs.at(ENTITY_BROWSER)
+				m_dockspaceIDs.at(ENTITY_BROWSER)
 			);
 			ImGui::DockBuilderDockWindow(
 				MAPPED_WINDOW_NAMES.at(ENCOUNTER_MANAGER).c_str(),
-				dockspaceIDs.at(ENCOUNTER_MANAGER)
+				m_dockspaceIDs.at(ENCOUNTER_MANAGER)
 			);
 			ImGui::DockBuilderDockWindow(
 				MAPPED_WINDOW_NAMES.at(MENU).c_str(),
-				dockspaceIDs.at(MENU)
+				m_dockspaceIDs.at(MENU)
 			);
 
 			// Finish dockspace creation.
-			ImGui::DockBuilderFinish(dockspaceIDs.at(ENCOUNTER_CREATOR));
-			dockspaceInitializations.at(ENCOUNTER_CREATOR) = true;
+			ImGui::DockBuilderFinish(m_dockspaceIDs.at(ENCOUNTER_CREATOR));
+			m_dockspaceInitializations.at(ENCOUNTER_CREATOR) = true;
 		}
 		// Render dockspace of the host window.
 		ImGui::DockSpace(
-			dockspaceIDs.at(ENCOUNTER_CREATOR),
+			m_dockspaceIDs.at(ENCOUNTER_CREATOR),
 			ImGui::GetWindowSize(),
-			encounterCreationDockFlags
+			m_encounterCreationDockFlags
 		);
 		ImGui::End();
 	}
@@ -151,7 +151,7 @@ namespace CombatTrackerApp {
 	void EncounterCreationScene::renderMenuWindow() {
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(EncounterCreationWindows::MENU).c_str());
 		if (ImGui::Button("Return to Main Menu")) {
-			applicationReference->queueSceneTransition(this, std::make_unique<MainMenuScene>(applicationReference));
+			m_applicationReference->queueSceneTransition(this, std::make_unique<MainMenuScene>(m_applicationReference));
 		}
 		ImGui::End();
 	}
@@ -162,65 +162,65 @@ namespace CombatTrackerApp {
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(ENTITY_BROWSER).c_str());
 
 		// Set configurations of the window of the scene on first render pass.
-		if (!dockspaceInitializations.at(ENTITY_BROWSER)) {
+		if (!m_dockspaceInitializations.at(ENTITY_BROWSER)) {
 
-			dockspaceIDs[ENTITY_BROWSER] =
+			m_dockspaceIDs[ENTITY_BROWSER] =
 				ImGui::GetID(
 					(MAPPED_WINDOW_NAMES.at(ENTITY_BROWSER) + " - Dockspace")
 					.c_str()
 				);
-			ImGui::DockBuilderRemoveNode(dockspaceIDs.at(ENTITY_BROWSER));
+			ImGui::DockBuilderRemoveNode(m_dockspaceIDs.at(ENTITY_BROWSER));
 
 			// Add dockspace nodes.
-			ImGui::DockBuilderAddNode(dockspaceIDs.at(ENTITY_BROWSER), ImGuiDockNodeFlags_DockSpace);
-			ImGui::DockBuilderSetNodeSize(dockspaceIDs.at(ENTITY_BROWSER), ImGui::GetWindowSize());
+			ImGui::DockBuilderAddNode(m_dockspaceIDs.at(ENTITY_BROWSER), ImGuiDockNodeFlags_DockSpace);
+			ImGui::DockBuilderSetNodeSize(m_dockspaceIDs.at(ENTITY_BROWSER), ImGui::GetWindowSize());
 
 			// Dock windows.
 			ImGui::DockBuilderDockWindow(
 				MAPPED_WINDOW_NAMES.at(MONSTER_BROWSER).c_str(),
-				dockspaceIDs.at(ENTITY_BROWSER)
+				m_dockspaceIDs.at(ENTITY_BROWSER)
 			);
 			ImGui::DockBuilderDockWindow(
 				MAPPED_WINDOW_NAMES.at(PLAYER_CHARACTER_BROWSER).c_str(),
-				dockspaceIDs.at(ENTITY_BROWSER)
+				m_dockspaceIDs.at(ENTITY_BROWSER)
 			);
 			ImGui::DockBuilderDockWindow(
 				MAPPED_WINDOW_NAMES.at(ENCOUNTER_BROWSER).c_str(),
-				dockspaceIDs.at(ENTITY_BROWSER)
+				m_dockspaceIDs.at(ENTITY_BROWSER)
 			);
 
 			// Finish dockspace creation.
-			ImGui::DockBuilderFinish(dockspaceIDs.at(ENTITY_BROWSER));
-			dockspaceInitializations.at(ENTITY_BROWSER) = true;
+			ImGui::DockBuilderFinish(m_dockspaceIDs.at(ENTITY_BROWSER));
+			m_dockspaceInitializations.at(ENTITY_BROWSER) = true;
 		}
 
 		// Render dockspace of the entity browser window.
-		ImGui::DockSpace(dockspaceIDs.at(ENTITY_BROWSER), ImGui::GetWindowSize());
+		ImGui::DockSpace(m_dockspaceIDs.at(ENTITY_BROWSER), ImGui::GetWindowSize());
 		ImGui::End();
 	}
 	void EncounterCreationScene::renderMonsterBrowserWindow() {
 		
 		using enum EncounterCreationWindows;
 
-		static bool editingModeMonster{ true };
+		static bool s_editingModeMonster{ true };
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(MONSTER_BROWSER).c_str());
 		if (CombatTrackerLib::alignedButton("Create Monster", 0.5f)) {
 
 			ImGui::OpenPopup("Monster Creation");
-			editingModeMonster = false;
+			s_editingModeMonster = false;
 		}
 
-		if (!dockspaceInitializations.at(MONSTER_BROWSER)) {
+		if (!m_dockspaceInitializations.at(MONSTER_BROWSER)) {
 			initializeSubBrowserDockspace(MONSTER_BROWSER);
 		}
-		ImGui::DockSpace(dockspaceIDs.at(MONSTER_BROWSER), ImGui::GetWindowSize());
+		ImGui::DockSpace(m_dockspaceIDs.at(MONSTER_BROWSER), ImGui::GetWindowSize());
 
 		/*
 		IMPORTANT: The popup modal rendering code should be precisely within the rendering code of its parent window.
 		Otherwise it won't be rendered at all, as it exists in a different ID context.
 		See https://github.com/ocornut/imgui/blob/master/docs/FAQ.md#q-about-the-id-stack-system.
 		*/
-		renderEntityCreationPopupModal(true, editingModeMonster);
+		renderEntityCreationPopupModal(true, s_editingModeMonster);
 
 		ImGui::End();
 
@@ -247,20 +247,20 @@ namespace CombatTrackerApp {
 		
 		using enum EncounterCreationWindows;
 
-		static bool editingModePlayerCharacter{ true };
+		static bool s_editingModePlayerCharacter{ true };
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(PLAYER_CHARACTER_BROWSER).c_str());
-		if (!dockspaceInitializations.at(PLAYER_CHARACTER_BROWSER)) {
+		if (!m_dockspaceInitializations.at(PLAYER_CHARACTER_BROWSER)) {
 			initializeSubBrowserDockspace(PLAYER_CHARACTER_BROWSER);
 		}
 
 		if (CombatTrackerLib::alignedButton("Create Player Character", 0.5f)) {
 			ImGui::OpenPopup("Player Character Creation");
-			editingModePlayerCharacter = false;
+			s_editingModePlayerCharacter = false;
 		}
 
-		ImGui::DockSpace(dockspaceIDs.at(PLAYER_CHARACTER_BROWSER), ImGui::GetWindowSize());
+		ImGui::DockSpace(m_dockspaceIDs.at(PLAYER_CHARACTER_BROWSER), ImGui::GetWindowSize());
 
-		renderEntityCreationPopupModal(false, editingModePlayerCharacter);
+		renderEntityCreationPopupModal(false, s_editingModePlayerCharacter);
 
 		ImGui::End();
 
@@ -279,10 +279,10 @@ namespace CombatTrackerApp {
 		using enum EncounterCreationWindows;
 
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(ENCOUNTER_BROWSER).c_str());
-		if (!dockspaceInitializations.at(ENCOUNTER_BROWSER)) {
+		if (!m_dockspaceInitializations.at(ENCOUNTER_BROWSER)) {
 			initializeSubBrowserDockspace(ENCOUNTER_BROWSER);
 		}
-		ImGui::DockSpace(dockspaceIDs.at(ENCOUNTER_BROWSER), ImGui::GetWindowSize());
+		ImGui::DockSpace(m_dockspaceIDs.at(ENCOUNTER_BROWSER), ImGui::GetWindowSize());
 		ImGui::End();
 
 		ImGui::Begin((MAPPED_WINDOW_NAMES.at(ENCOUNTER_BROWSER) + " - User Created").c_str());
@@ -307,13 +307,13 @@ namespace CombatTrackerApp {
 	// Helper used for creating the user-compendium split windows. 
 	void EncounterCreationScene::initializeSubBrowserDockspace(EncounterCreationWindows windowType) {
 
-		dockspaceIDs[windowType] =
+		m_dockspaceIDs[windowType] =
 			ImGui::GetID(
 				(MAPPED_WINDOW_NAMES.at(windowType) + "- Dockspace")
 				.c_str()
 			);
 
-		const auto& id{ dockspaceIDs.at(windowType) };
+		const auto& id{ m_dockspaceIDs.at(windowType) };
 
 		ImGui::DockBuilderRemoveNode(id);
 
@@ -325,7 +325,7 @@ namespace CombatTrackerApp {
 		ImGui::DockBuilderDockWindow((MAPPED_WINDOW_NAMES.at(windowType) + " - Compendium").c_str(), id);
 
 		ImGui::DockBuilderFinish(id);
-		dockspaceInitializations.at(windowType) = true;
+		m_dockspaceInitializations.at(windowType) = true;
 	}
 
 	// This is used for both adding monsters and players AND for editing them as well. 
@@ -335,18 +335,18 @@ namespace CombatTrackerApp {
 		// Set popup configs.
 		if (isMonster) {
 			if (editMode) {
-				currentPopupName = "Monster Editing";
+				m_currentPopupName = "Monster Editing";
 			}
 			else {
-				currentPopupName = "Monster Creation";
+				m_currentPopupName = "Monster Creation";
 			}
 		}
 		else {
 			if (editMode) {
-				currentPopupName = "Player Character Editing";
+				m_currentPopupName = "Player Character Editing";
 			}
 			else {
-				currentPopupName = "Player Character Creation";
+				m_currentPopupName = "Player Character Creation";
 			}
 		}
 		const ImVec2& center{ ImGui::GetMainViewport()->GetCenter() };
@@ -355,7 +355,7 @@ namespace CombatTrackerApp {
 		ImGui::SetNextWindowSize(ImVec2{ viewportSize.x * 0.92f, viewportSize.y * 0.92f });
 
 		// Render the monolithic popup.
-		if (ImGui::BeginPopupModal(currentPopupName.c_str(), NULL, popupWindowFlags)) {
+		if (ImGui::BeginPopupModal(m_currentPopupName.c_str(), NULL, m_popupWindowFlags)) {
 
 			// Scrollable region for the entire popup modal.
 			const float footerHeight{ ImGui::GetFrameHeightWithSpacing() * 2.0f };
@@ -377,13 +377,13 @@ namespace CombatTrackerApp {
 				}
 				else {
 					if (isMonster) {
-						monsterBuilder.reset();
-						currentCreatureStatBlock = monsterBuilder.getCreatureBlock();
+						m_monsterBuilder.reset();
+						m_currentCreatureStatBlock = m_monsterBuilder.getCreatureBlock();
 					}
 					else {
-						playerCharacterBuilder.reset();
-						currentCreatureStatBlock = playerCharacterBuilder.getCreatureBlock();
-						currentPlayerStatBlock = playerCharacterBuilder.getPlayerCharacterBlock();
+						m_playerCharacterBuilder.reset();
+						m_currentCreatureStatBlock = m_playerCharacterBuilder.getCreatureBlock();
+						m_currentPlayerStatBlock = m_playerCharacterBuilder.getPlayerCharacterBlock();
 					}
 				}
 
@@ -442,8 +442,8 @@ namespace CombatTrackerApp {
 					renderProficiencyAndExpertiseCluster(
 						"Saving Throw Proficiencies",
 						"Saving Throw Expertises",
-						currentCreatureStatBlock.savingThrowProficiencies,
-						currentCreatureStatBlock.savingThrowExpertise,
+						m_currentCreatureStatBlock.savingThrowProficiencies,
+						m_currentCreatureStatBlock.savingThrowExpertise,
 						ABILITY_NAMES
 					);
 					ImGui::EndChild();
@@ -463,8 +463,8 @@ namespace CombatTrackerApp {
 					renderProficiencyAndExpertiseCluster(
 						"Skill Proficiencies",
 						"Skill Expertises",
-						currentCreatureStatBlock.skillProficiencies,
-						currentCreatureStatBlock.skillExpertise,
+						m_currentCreatureStatBlock.skillProficiencies,
+						m_currentCreatureStatBlock.skillExpertise,
 						SKILL_NAMES
 					);
 					ImGui::EndChild();
@@ -481,7 +481,7 @@ namespace CombatTrackerApp {
 			ImGui::SeparatorText("Damage & Conditions");
 			renderDmgVulnResAndImm();
 			renderMutuallyExclusiveCheckboxCluster(
-				currentCreatureStatBlock.conditionImmunities,
+				m_currentCreatureStatBlock.conditionImmunities,
 				CONDITTON_NAMES, 
 				"Condition Immunities"
 			);
@@ -489,7 +489,7 @@ namespace CombatTrackerApp {
 			ImGui::Spacing();
 			ImGui::SeparatorText("Senses & Languages");
 			renderMutuallyExclusiveCheckboxCluster(
-				currentCreatureStatBlock.languages,
+				m_currentCreatureStatBlock.languages,
 				LANGUAGE_NAMES, 
 				"Languages"
 			);
@@ -504,8 +504,8 @@ namespace CombatTrackerApp {
 			ImGui::Spacing();
 			ImGui::SeparatorText("Actions, Traits, Equipment");
 			renderActions(isMonster);
-			renderAddables(currentCreatureStatBlock.traits, TRAIT_LABEL);
-			renderAddables(currentCreatureStatBlock.equipment, EQUIPMENT_LABEL);
+			renderAddables(m_currentCreatureStatBlock.traits, TRAIT_LABEL);
+			renderAddables(m_currentCreatureStatBlock.equipment, EQUIPMENT_LABEL);
 
 			// End scrollable region.
 			ImGui::EndChild();
@@ -668,12 +668,12 @@ namespace CombatTrackerApp {
 			ImGui::TableSetupColumn("Override", ImGuiTableColumnFlags_WidthStretch, 0.35f);
 
 			// Render each column of the table for each ability.
-			for (auto& item : currentCreatureStatBlock.abilityScores) {
+			for (auto& item : m_currentCreatureStatBlock.abilityScores) {
 				ImGui::TableNextRow();
 
 				// Compute and show default ability score modifiers.
-				if (!abilityModifiersOverride.at(item.first)) {
-					currentCreatureStatBlock.abilityScoreModifiers.at(item.first) = Creature::findAbilityScoreModifier(item.second);
+				if (!m_abilityModifiersOverride.at(item.first)) {
+					m_currentCreatureStatBlock.abilityScoreModifiers.at(item.first) = Creature::findAbilityScoreModifier(item.second);
 				}
 
 				ImGui::TableSetColumnIndex(0);
@@ -689,17 +689,17 @@ namespace CombatTrackerApp {
 				ImGui::TableSetColumnIndex(2);
 				ImGui::SetNextItemWidth(-1);
 				if (ImGui::InputInt(("##" + ABILITY_NAMES.at(item.first) + " Ability Modifier").c_str(), 
-					&currentCreatureStatBlock.abilityScoreModifiers.at(item.first))
+					&m_currentCreatureStatBlock.abilityScoreModifiers.at(item.first))
 					) {
-					currentCreatureStatBlock.abilityScoreModifiers.at(item.first) = 
-						std::max(std::min(currentCreatureStatBlock.abilityScoreModifiers.at(item.first), 
+					m_currentCreatureStatBlock.abilityScoreModifiers.at(item.first) = 
+						std::max(std::min(m_currentCreatureStatBlock.abilityScoreModifiers.at(item.first), 
 							ABILITY_MODIFIERS_UPPER_BOUND), ABILITY_MODIFIERS_LOWER_BOUND);
-					abilityModifiersOverride.at(item.first) = true;
+					m_abilityModifiersOverride.at(item.first) = true;
 				}
 
 				ImGui::TableSetColumnIndex(3);
 				if (ImGui::Button(("Reset " + ABILITY_NAMES.at(item.first) + " Modifier").c_str())) {
-					abilityModifiersOverride.at(item.first) = false;
+					m_abilityModifiersOverride.at(item.first) = false;
 				}
 			}
 			ImGui::EndTable();
@@ -722,20 +722,20 @@ namespace CombatTrackerApp {
 			for (auto& item : ABILITY_NAMES) {
 
 				// Saving throw modifier calculations.
-				if (!savingThrowsOverride.at(item.first)) {
-					if (currentCreatureStatBlock.savingThrowExpertise.at(item.first)) {
-						currentCreatureStatBlock.savingThrowModifiers.at(item.first) = 
-							currentCreatureStatBlock.abilityScoreModifiers.at(item.first) + 
-							2 * currentCreatureStatBlock.proficiencyBonus;
+				if (!m_savingThrowsOverride.at(item.first)) {
+					if (m_currentCreatureStatBlock.savingThrowExpertise.at(item.first)) {
+						m_currentCreatureStatBlock.savingThrowModifiers.at(item.first) = 
+							m_currentCreatureStatBlock.abilityScoreModifiers.at(item.first) + 
+							2 * m_currentCreatureStatBlock.proficiencyBonus;
 					}
-					else if (currentCreatureStatBlock.savingThrowProficiencies.at(item.first)) {
-						currentCreatureStatBlock.savingThrowModifiers.at(item.first) = 
-							currentCreatureStatBlock.abilityScoreModifiers.at(item.first) + 
-							currentCreatureStatBlock.proficiencyBonus;
+					else if (m_currentCreatureStatBlock.savingThrowProficiencies.at(item.first)) {
+						m_currentCreatureStatBlock.savingThrowModifiers.at(item.first) = 
+							m_currentCreatureStatBlock.abilityScoreModifiers.at(item.first) + 
+							m_currentCreatureStatBlock.proficiencyBonus;
 					}
 					else {
-						currentCreatureStatBlock.savingThrowModifiers.at(item.first) =
-							currentCreatureStatBlock.abilityScoreModifiers.at(item.first);
+						m_currentCreatureStatBlock.savingThrowModifiers.at(item.first) =
+							m_currentCreatureStatBlock.abilityScoreModifiers.at(item.first);
 					}
 				}
 				ImGui::TableNextRow();
@@ -745,18 +745,18 @@ namespace CombatTrackerApp {
 				ImGui::TableSetColumnIndex(1);
 				ImGui::SetNextItemWidth(-1);
 				if (ImGui::InputInt(("##" + item.second + "Saving Throw Modifiers").c_str(), 
-					&currentCreatureStatBlock.savingThrowModifiers.at(item.first)
+					&m_currentCreatureStatBlock.savingThrowModifiers.at(item.first)
 				)) {
 
 					// Setup no bounds for saving throw modifiers as their values can get quite large, low depending upon expertise and proficiency.
 					// The "largeness" depends on PB. As the PB can be overridden to be quite large, the modifiers can bu quite large.
-					currentCreatureStatBlock.savingThrowModifiers.at(item.first) = currentCreatureStatBlock.savingThrowModifiers.at(item.first);
-					savingThrowsOverride.at(item.first) = true;
+					m_currentCreatureStatBlock.savingThrowModifiers.at(item.first) = m_currentCreatureStatBlock.savingThrowModifiers.at(item.first);
+					m_savingThrowsOverride.at(item.first) = true;
 				}
 
 				ImGui::TableSetColumnIndex(2);
 				if (ImGui::Button(("Reset " + item.second + " Saving Throw Modifier").c_str())) {
-					savingThrowsOverride.at(item.first) = false;
+					m_savingThrowsOverride.at(item.first) = false;
 				}
 			}
 			ImGui::EndTable();
@@ -779,20 +779,20 @@ namespace CombatTrackerApp {
 
 			// Default skill modifier calculations.
 			for (const auto& item : SKILL_NAMES) {
-				if (!skillModifiersOverride.at(item.first)) {
-					if (currentCreatureStatBlock.skillExpertise.at(item.first)) {
-						currentCreatureStatBlock.skillModifiers.at(item.first) =
-							currentCreatureStatBlock.abilityScoreModifiers.at(MAPPED_SKILLS.at(item.first)) + 
-							2 * currentCreatureStatBlock.proficiencyBonus;
+				if (!m_skillModifiersOverride.at(item.first)) {
+					if (m_currentCreatureStatBlock.skillExpertise.at(item.first)) {
+						m_currentCreatureStatBlock.skillModifiers.at(item.first) =
+							m_currentCreatureStatBlock.abilityScoreModifiers.at(MAPPED_SKILLS.at(item.first)) + 
+							2 * m_currentCreatureStatBlock.proficiencyBonus;
 					}
-					else if (currentCreatureStatBlock.skillProficiencies.at(item.first)) {
-						currentCreatureStatBlock.skillModifiers.at(item.first) =
-							currentCreatureStatBlock.abilityScoreModifiers.at(MAPPED_SKILLS.at(item.first)) 
-							+ currentCreatureStatBlock.proficiencyBonus;
+					else if (m_currentCreatureStatBlock.skillProficiencies.at(item.first)) {
+						m_currentCreatureStatBlock.skillModifiers.at(item.first) =
+							m_currentCreatureStatBlock.abilityScoreModifiers.at(MAPPED_SKILLS.at(item.first)) 
+							+ m_currentCreatureStatBlock.proficiencyBonus;
 					}
 					else {
-						currentCreatureStatBlock.skillModifiers.at(item.first) =
-							currentCreatureStatBlock.abilityScoreModifiers.at(MAPPED_SKILLS.at(item.first));
+						m_currentCreatureStatBlock.skillModifiers.at(item.first) =
+							m_currentCreatureStatBlock.abilityScoreModifiers.at(MAPPED_SKILLS.at(item.first));
 					}
 				}
 
@@ -803,17 +803,17 @@ namespace CombatTrackerApp {
 				ImGui::TableSetColumnIndex(1);
 				ImGui::SetNextItemWidth(-1);
 				if (ImGui::InputInt(("##" + item.second + "Skill Modifier").c_str(), 
-					&currentCreatureStatBlock.skillModifiers.at(item.first)
+					&m_currentCreatureStatBlock.skillModifiers.at(item.first)
 				)) {
 
 					// Exact same reasoning as saving throw modifiers is applicable to here.
-					currentCreatureStatBlock.skillModifiers.at(item.first) = currentCreatureStatBlock.skillModifiers.at(item.first);
-					skillModifiersOverride.at(item.first) = true;
+					m_currentCreatureStatBlock.skillModifiers.at(item.first) = m_currentCreatureStatBlock.skillModifiers.at(item.first);
+					m_skillModifiersOverride.at(item.first) = true;
 				}
 
 				ImGui::TableSetColumnIndex(2);
 				if (ImGui::Button(("Reset " + item.second + " Skill Modifier").c_str())) {
-					skillModifiersOverride.at(item.first) = false;
+					m_skillModifiersOverride.at(item.first) = false;
 				}
 			}
 			ImGui::EndTable();
@@ -844,7 +844,7 @@ namespace CombatTrackerApp {
 
 			ImGui::TableSetColumnIndex(1);
 			ImGui::SetNextItemWidth(-1.0f);
-			ImGui::InputText("##Name", &currentCreatureStatBlock.name);
+			ImGui::InputText("##Name", &m_currentCreatureStatBlock.name);
 
 			ImGui::EndTable();
 		}
@@ -872,56 +872,56 @@ namespace CombatTrackerApp {
 
 				ImGui::TableSetColumnIndex(0);
 				ImGui::TextUnformatted("Size");
-				renderListBox(sizeListBoxParameters, currentCreatureStatBlock.size, "##Size", SIZE_NAMES);
+				renderListBox(m_sizeListBoxParameters, m_currentCreatureStatBlock.size, "##Size", SIZE_NAMES);
 
 				ImGui::TableSetColumnIndex(1);
 				ImGui::TextUnformatted("Creature Type");
-				renderListBox(creatureTypeParameters, currentCreatureStatBlock.type, "##CreatureType", CREATURE_TYPE_NAMES);
+				renderListBox(m_creatureTypeParameters, m_currentCreatureStatBlock.type, "##CreatureType", CREATURE_TYPE_NAMES);
 
 				ImGui::TableSetColumnIndex(2);
 				ImGui::TextUnformatted("Alignment");
-				renderListBox(alignmentParameters, currentCreatureStatBlock.alignment, "##Alignment", ALIGNMENT_NAMES);
+				renderListBox(m_alignmentParameters, m_currentCreatureStatBlock.alignment, "##Alignment", ALIGNMENT_NAMES);
 
 				ImGui::EndTable();
 			}
 
 			ImGui::TableSetColumnIndex(1);
 
-			if (!isInitiativeOverriden) {
-				currentCreatureStatBlock.initiativeBonus = currentCreatureStatBlock.abilityScoreModifiers.at(Ability::DEXTERITY);
+			if (!m_isInitiativeOverriden) {
+				m_currentCreatureStatBlock.initiativeBonus = m_currentCreatureStatBlock.abilityScoreModifiers.at(Ability::DEXTERITY);
 			}
 
 			// Hide the label of the input field. Instead use text field for the label for better layout.
 			ImGui::TextUnformatted("Initiative Bonus");
 			ImGui::SetNextItemWidth(-1.0f);
-			if (ImGui::InputInt("##InitiativeBonus", &currentCreatureStatBlock.initiativeBonus, 0, 0)) {
-				currentCreatureStatBlock.initiativeBonus =
-					std::min(std::max(ABILITY_SCORE_LOWER_BOUND, currentCreatureStatBlock.initiativeBonus),
+			if (ImGui::InputInt("##InitiativeBonus", &m_currentCreatureStatBlock.initiativeBonus, 0, 0)) {
+				m_currentCreatureStatBlock.initiativeBonus =
+					std::min(std::max(ABILITY_SCORE_LOWER_BOUND, m_currentCreatureStatBlock.initiativeBonus),
 						ABILITY_MODIFIERS_UPPER_BOUND);
-				isInitiativeOverriden = true;
+				m_isInitiativeOverriden = true;
 			}
 			ImGui::SetNextItemWidth(-1.0f);
 			if (ImGui::Button("Reset Initiative Bonus", ImVec2{ -1.0f, 0.0f })) {
-				isInitiativeOverriden = false;
+				m_isInitiativeOverriden = false;
 			}
 
 			ImGui::Spacing();
-			if (!isPassivePerceptionOverridden) {
-				currentCreatureStatBlock.passivePerception = currentCreatureStatBlock.skillModifiers.at(Skill::PERCEPTION) + 10;
+			if (!m_isPassivePerceptionOverridden) {
+				m_currentCreatureStatBlock.passivePerception = m_currentCreatureStatBlock.skillModifiers.at(Skill::PERCEPTION) + 10;
 			}
 
 			// Same thing here.
 			ImGui::TextUnformatted("Passive Perception");
 			ImGui::SetNextItemWidth(-1.0f);
-			if (ImGui::InputInt("##PassivePerception", &currentCreatureStatBlock.passivePerception, 0, 0)) {
-				currentCreatureStatBlock.passivePerception =
-					std::min(std::max(10 + ABILITY_MODIFIERS_UPPER_BOUND, currentCreatureStatBlock.passivePerception),
+			if (ImGui::InputInt("##PassivePerception", &m_currentCreatureStatBlock.passivePerception, 0, 0)) {
+				m_currentCreatureStatBlock.passivePerception =
+					std::min(std::max(10 + ABILITY_MODIFIERS_UPPER_BOUND, m_currentCreatureStatBlock.passivePerception),
 						10 + ABILITY_MODIFIERS_LOWER_BOUND);
-				isPassivePerceptionOverridden = true;
+				m_isPassivePerceptionOverridden = true;
 			}
 			ImGui::SetNextItemWidth(-1.0f);
 			if (ImGui::Button("Reset Passive Perception", ImVec2{ -1.0f, 0.0f })) {
-				isPassivePerceptionOverridden = false;
+				m_isPassivePerceptionOverridden = false;
 			}
 			ImGui::EndTable();
 		}
@@ -945,7 +945,7 @@ namespace CombatTrackerApp {
 
 				ImGui::TableSetColumnIndex(1);
 				ImGui::SetNextItemWidth(-1.0f);
-				renderNonOverridableInputInt(currentCreatureStatBlock.AC, "##AC");
+				renderNonOverridableInputInt(m_currentCreatureStatBlock.AC, "##AC");
 
 				ImGui::EndTable();
 			}
@@ -963,7 +963,7 @@ namespace CombatTrackerApp {
 
 				ImGui::TableSetColumnIndex(1);
 				ImGui::SetNextItemWidth(-1.0f);
-				renderNonOverridableInputInt(currentCreatureStatBlock.HP, "##HP");
+				renderNonOverridableInputInt(m_currentCreatureStatBlock.HP, "##HP");
 
 				ImGui::EndTable();
 			}
@@ -978,13 +978,13 @@ namespace CombatTrackerApp {
 
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
-			renderListBox(monsterCRParameters, currentMonsterCR, "CR", CR_NAMES);
+			renderListBox(m_monsterCRParameters, m_currentMonsterCR, "CR", CR_NAMES);
 
 			ImGui::Spacing();
-			renderOverriddableInputInt(currentMonsterXP, isXPOverridden, "XP", "Reset XP", MAPPED_CR_TO_XP, 0, INT_MAX, currentMonsterCR);
+			renderOverriddableInputInt(m_currentMonsterXP, m_isXPOverridden, "XP", "Reset XP", MAPPED_CR_TO_XP, 0, INT_MAX, m_currentMonsterCR);
 
 			ImGui::Spacing();
-			renderOverriddableInputInt(currentCreatureStatBlock.proficiencyBonus, isPBOverridden, "PB", "Reset PB", MAPPED_CR_TO_PB, PB_LOWER_BOUND, INT_MAX, currentMonsterCR);
+			renderOverriddableInputInt(m_currentCreatureStatBlock.proficiencyBonus, m_isPBOverridden, "PB", "Reset PB", MAPPED_CR_TO_PB, PB_LOWER_BOUND, INT_MAX, m_currentMonsterCR);
 
 			ImGui::EndTable();
 		}
@@ -994,19 +994,19 @@ namespace CombatTrackerApp {
 			ImGui::TableNextRow();
 
 			ImGui::TableSetColumnIndex(0);
-			renderNonOverridableInputInt(currentCreatureStatBlock.walkSpeed, "Walk");
+			renderNonOverridableInputInt(m_currentCreatureStatBlock.walkSpeed, "Walk");
 
 			ImGui::TableSetColumnIndex(1);
-			renderNonOverridableInputInt(currentCreatureStatBlock.climbingSpeed, "Climb");
+			renderNonOverridableInputInt(m_currentCreatureStatBlock.climbingSpeed, "Climb");
 
 			ImGui::TableSetColumnIndex(2);
-			renderNonOverridableInputInt(currentCreatureStatBlock.swimmingSpeed, "Swim");
+			renderNonOverridableInputInt(m_currentCreatureStatBlock.swimmingSpeed, "Swim");
 
 			ImGui::TableSetColumnIndex(3);
-			renderNonOverridableInputInt(currentCreatureStatBlock.burrowSpeed, "Burrow");
+			renderNonOverridableInputInt(m_currentCreatureStatBlock.burrowSpeed, "Burrow");
 
 			ImGui::TableSetColumnIndex(4);
-			renderNonOverridableInputInt(currentCreatureStatBlock.flySpeed, "Fly");
+			renderNonOverridableInputInt(m_currentCreatureStatBlock.flySpeed, "Fly");
 
 			ImGui::EndTable();
 		}
@@ -1019,17 +1019,17 @@ namespace CombatTrackerApp {
 			ImGui::TextWrapped("Vulnerabilities");
 			for (const auto& item : DAMAGE_TYPE_NAMES) {
 				if (ImGui::Checkbox((item.second + " ##Vuln").c_str(), 
-					&currentCreatureStatBlock.damageVulnerabilities.at(item.first)
+					&m_currentCreatureStatBlock.damageVulnerabilities.at(item.first)
 				)) {
 
 					// Triple simple deduping logic.
-					if (currentCreatureStatBlock.damageVulnerabilities.at(item.first) 
-						&& currentCreatureStatBlock.damageResistances.at(item.first)) {
-						currentCreatureStatBlock.damageResistances.at(item.first) = false;
+					if (m_currentCreatureStatBlock.damageVulnerabilities.at(item.first) 
+						&& m_currentCreatureStatBlock.damageResistances.at(item.first)) {
+						m_currentCreatureStatBlock.damageResistances.at(item.first) = false;
 					}
-					if (currentCreatureStatBlock.damageVulnerabilities.at(item.first) 
-						&& currentCreatureStatBlock.damageImmunities.at(item.first)) {
-						currentCreatureStatBlock.damageImmunities.at(item.first) = false;
+					if (m_currentCreatureStatBlock.damageVulnerabilities.at(item.first) 
+						&& m_currentCreatureStatBlock.damageImmunities.at(item.first)) {
+						m_currentCreatureStatBlock.damageImmunities.at(item.first) = false;
 					}
 				}
 			}
@@ -1038,17 +1038,17 @@ namespace CombatTrackerApp {
 			ImGui::TextWrapped("Resistances");
 			for (const auto& item : DAMAGE_TYPE_NAMES) {
 				if (ImGui::Checkbox((item.second + " ##Res").c_str(), 
-					&currentCreatureStatBlock.damageResistances.at(item.first)
+					&m_currentCreatureStatBlock.damageResistances.at(item.first)
 				)) {
 
 					// Exact same logic here.
-					if (currentCreatureStatBlock.damageVulnerabilities.at(item.first) 
-						&& currentCreatureStatBlock.damageResistances.at(item.first)) {
-						currentCreatureStatBlock.damageVulnerabilities.at(item.first) = false;
+					if (m_currentCreatureStatBlock.damageVulnerabilities.at(item.first) 
+						&& m_currentCreatureStatBlock.damageResistances.at(item.first)) {
+						m_currentCreatureStatBlock.damageVulnerabilities.at(item.first) = false;
 					}
-					if (currentCreatureStatBlock.damageResistances.at(item.first) 
-						&& currentCreatureStatBlock.damageImmunities.at(item.first)) {
-						currentCreatureStatBlock.damageImmunities.at(item.first) = false;
+					if (m_currentCreatureStatBlock.damageResistances.at(item.first) 
+						&& m_currentCreatureStatBlock.damageImmunities.at(item.first)) {
+						m_currentCreatureStatBlock.damageImmunities.at(item.first) = false;
 					}
 				}
 			}
@@ -1057,17 +1057,17 @@ namespace CombatTrackerApp {
 			ImGui::TextWrapped("Immunities");
 			for (auto& item : DAMAGE_TYPE_NAMES) {
 				if (ImGui::Checkbox((item.second + " ##Imm").c_str(), 
-					&currentCreatureStatBlock.damageImmunities.at(item.first)
+					&m_currentCreatureStatBlock.damageImmunities.at(item.first)
 				)) {
 
 					// Same here.
-					if (currentCreatureStatBlock.damageVulnerabilities.at(item.first) 
-						&& currentCreatureStatBlock.damageImmunities.at(item.first)) {
-						currentCreatureStatBlock.damageVulnerabilities.at(item.first) = false;
+					if (m_currentCreatureStatBlock.damageVulnerabilities.at(item.first) 
+						&& m_currentCreatureStatBlock.damageImmunities.at(item.first)) {
+						m_currentCreatureStatBlock.damageVulnerabilities.at(item.first) = false;
 					}
-					if (currentCreatureStatBlock.damageResistances.at(item.first) 
-						&& currentCreatureStatBlock.damageImmunities.at(item.first)) {
-						currentCreatureStatBlock.damageResistances.at(item.first) = false;
+					if (m_currentCreatureStatBlock.damageResistances.at(item.first) 
+						&& m_currentCreatureStatBlock.damageImmunities.at(item.first)) {
+						m_currentCreatureStatBlock.damageResistances.at(item.first) = false;
 					}
 				}
 			}
@@ -1095,7 +1095,7 @@ namespace CombatTrackerApp {
 	void EncounterCreationScene::renderSenses() {
 		if (ImGui::BeginTable("SensesGrid", 4, ImGuiTableFlags_SizingStretchSame)) {
 			ImGui::TableNextRow();
-			for (auto& item : currentCreatureStatBlock.senses) {
+			for (auto& item : m_currentCreatureStatBlock.senses) {
 				ImGui::TableNextColumn();
 				renderNonOverridableInputInt(item.second, SENSE_NAMES.at(item.first).c_str());
 			}
@@ -1110,7 +1110,7 @@ namespace CombatTrackerApp {
 
 		// It is fine for this to be actually static as we clear it on each render pass anyways.
 		// Furthermore, this vector is only used in this function and nowhere else.
-		static std::vector<size_t> markedForDeletion{};
+		static std::vector<size_t> s_markedForDeletion{};
 		for (size_t i{}; i < currentItems.size(); ++i) {
 			ImGui::TableNextColumn();
 
@@ -1151,7 +1151,7 @@ namespace CombatTrackerApp {
 					ImGui::CloseCurrentPopup();
 				}
 				if (CombatTrackerLib::alignedButton(("Delete " + label).c_str(), 0.5f)) {
-					markedForDeletion.push_back(i);
+					s_markedForDeletion.push_back(i);
 					ImGui::CloseCurrentPopup();
 				}
 				ImGui::EndPopup();
@@ -1160,11 +1160,11 @@ namespace CombatTrackerApp {
 		}
 
 		// Delete marked items safely, starting from the largest index to the smallest index.
-		std::sort(markedForDeletion.begin(), markedForDeletion.end());
-		for (size_t i = markedForDeletion.size(); i-- > 0;) {
-			currentItems.erase(currentItems.begin() + markedForDeletion[i]);
+		std::sort(s_markedForDeletion.begin(), s_markedForDeletion.end());
+		for (size_t i = s_markedForDeletion.size(); i-- > 0;) {
+			currentItems.erase(currentItems.begin() + s_markedForDeletion[i]);
 		}
-		markedForDeletion.clear();
+		s_markedForDeletion.clear();
 
 		// Add item section.
 		ImGui::Spacing();
@@ -1181,20 +1181,20 @@ namespace CombatTrackerApp {
 			ImGui::BeginChild("AddAddableScroll", ImVec2{ 0, -ImGui::GetFrameHeightWithSpacing() * 2.0f }, true);
 
 			// Again it is fine for these to be static, we only use them here and reset them after adding the item.
-			static std::string name{};
-			static std::string description{};
-			ImGui::InputText((label + " Name").c_str(), &name);
-			ImGui::InputText((label + " Description").c_str(), &description);
+			static std::string s_name{};
+			static std::string s_description{};
+			ImGui::InputText((label + " Name").c_str(), &s_name);
+			ImGui::InputText((label + " Description").c_str(), &s_description);
 			ImGui::EndChild();
 
 			// Button and cleanup section.
 			ImGui::Separator();
 			if (CombatTrackerLib::alignedButton(("Finish " + label + " Creation").c_str(), 0.5f) &&
-				!name.empty() && !description.empty()) {
-				I item(name, description);
+				!s_name.empty() && !s_description.empty()) {
+				I item(s_name, s_description);
 				currentItems.push_back(item);
-				name.clear();
-				description.clear();
+				s_name.clear();
+				s_description.clear();
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::EndPopup();
@@ -1204,16 +1204,16 @@ namespace CombatTrackerApp {
 	// Really similar to renderAddables() just adds actionType as a separate parameter. 
 	void EncounterCreationScene::renderActions(bool isMonster) {
 		ImGui::TextWrapped("Actions");
-		static std::vector<size_t> actionsMarkedForDeletion{};
-		for (size_t i{}; i < currentCreatureStatBlock.actions.size(); ++i) {
+		static std::vector<size_t> s_actionsMarkedForDeletion{};
+		for (size_t i{}; i < m_currentCreatureStatBlock.actions.size(); ++i) {
 			ImGui::TableNextColumn();
 			ImGui::PushID(static_cast<int> (i));
 
 			ImGui::SetNextItemWidth(-1.0f);
-			ImGui::Button(currentCreatureStatBlock.actions[i].name.c_str());
+			ImGui::Button(m_currentCreatureStatBlock.actions[i].name.c_str());
 			ImGui::SameLine();
 			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
-				ImGui::SetTooltip("%s: %s", ACTION_NAMES.at(currentCreatureStatBlock.actions[i].type).c_str(), currentCreatureStatBlock.actions[i].description.c_str());
+				ImGui::SetTooltip("%s: %s", ACTION_NAMES.at(m_currentCreatureStatBlock.actions[i].type).c_str(), m_currentCreatureStatBlock.actions[i].description.c_str());
 			}
 			if (ImGui::IsItemClicked()) {
 				ImGui::OpenPopup(("Edit Action##" + std::to_string(i)).c_str());
@@ -1225,8 +1225,8 @@ namespace CombatTrackerApp {
 			ImGui::SetNextWindowSize(ImVec2{ vp.x * 0.70f, vp.y * 0.70f }, ImGuiCond_Appearing);
 			if (ImGui::BeginPopupModal(("Edit Action##" + std::to_string(i)).c_str(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
 				ImGui::BeginChild("EditActionScroll", ImVec2{ 0, -ImGui::GetFrameHeightWithSpacing() * 2.0f }, true);
-				ImGui::InputText("Action Name", &currentCreatureStatBlock.actions[i].name);
-				ImGui::InputText("Action Description", &currentCreatureStatBlock.actions[i].description);
+				ImGui::InputText("Action Name", &m_currentCreatureStatBlock.actions[i].name);
+				ImGui::InputText("Action Description", &m_currentCreatureStatBlock.actions[i].description);
 				ImGui::EndChild();
 
 				ImGui::Separator();
@@ -1234,7 +1234,7 @@ namespace CombatTrackerApp {
 					ImGui::CloseCurrentPopup();
 				}
 				if (CombatTrackerLib::alignedButton("Delete Action", 0.5f)) {
-					actionsMarkedForDeletion.push_back(i);
+					s_actionsMarkedForDeletion.push_back(i);
 					ImGui::CloseCurrentPopup();
 				}
 				ImGui::EndPopup();
@@ -1242,11 +1242,11 @@ namespace CombatTrackerApp {
 			ImGui::PopID();
 		}
 
-		std::sort(actionsMarkedForDeletion.begin(), actionsMarkedForDeletion.end());
-		for (size_t i{ actionsMarkedForDeletion.size() }; i-- > 0;) {
-			currentCreatureStatBlock.actions.erase(currentCreatureStatBlock.actions.begin() + actionsMarkedForDeletion[i]);
+		std::sort(s_actionsMarkedForDeletion.begin(), s_actionsMarkedForDeletion.end());
+		for (size_t i{ s_actionsMarkedForDeletion.size() }; i-- > 0;) {
+			m_currentCreatureStatBlock.actions.erase(m_currentCreatureStatBlock.actions.begin() + s_actionsMarkedForDeletion[i]);
 		}
-		actionsMarkedForDeletion.clear();
+		s_actionsMarkedForDeletion.clear();
 		
 		// Action adding popup modal.
 		ImGui::Spacing();
@@ -1261,44 +1261,44 @@ namespace CombatTrackerApp {
 			ImGui::BeginChild("##AddActionScroll", ImVec2{ 0, -ImGui::GetFrameHeightWithSpacing() * 2.0f }, true);
 
 			// Again, fine for these to be static as they are reset after each addition of actions.
-			static ListBoxParameters actionParameters{ -1, -1, false };
-			static ActionType type{};
+			static ListBoxParameters s_actionParameters{ -1, -1, false };
+			static ActionType s_type{};
 
 			// Important logic to prevent PCs from creating Legendary Actions and Lair Actions.
 			if (isMonster) {
-				renderListBox(actionParameters, type, "Action Type", ACTION_NAMES);
+				renderListBox(s_actionParameters, s_type, "Action Type", ACTION_NAMES);
 			}
 			else {
-				renderListBox(actionParameters, type, "Action Type", PLAYER_ACTION_NAMES);
+				renderListBox(s_actionParameters, s_type, "Action Type", PLAYER_ACTION_NAMES);
 			}
 
-			static std::string name{};
-			static std::string description{};
-			ImGui::InputText("Action Name", &name);
-			ImGui::InputText("Action Description", &description);
+			static std::string s_name{};
+			static std::string s_description{};
+			ImGui::InputText("Action Name", &s_name);
+			ImGui::InputText("Action Description", &s_description);
 			ImGui::EndChild();
 
 			ImGui::Separator();
 			if (CombatTrackerLib::alignedButton("Finish Action Creation", 0.5f) &&
-				!name.empty() && !description.empty() && type != ActionType::NO_ACTION) {
-				CreatureAction action{ name, description, type };
-				currentCreatureStatBlock.actions.push_back(action);
-				actionParameters = { -1, -1, false };
-				type = { ActionType::NO_ACTION };
-				name.clear();
-				description.clear();
+				!s_name.empty() && !s_description.empty() && s_type != ActionType::NO_ACTION) {
+				CreatureAction action{ s_name, s_description, s_type };
+				m_currentCreatureStatBlock.actions.push_back(action);
+				s_actionParameters = { -1, -1, false };
+				s_type = { ActionType::NO_ACTION };
+				s_name.clear();
+				s_description.clear();
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::EndPopup();
 		}
 	}
 	void EncounterCreationScene::renderPlayerCharacterSpecificInfo() {
-		renderListBox(speciesParameters, currentPlayerStatBlock.species, "Species", SPECIES_NAMES);
-		renderListBox(originParameters, currentPlayerStatBlock.origin, "Origin", ORIGIN_NAMES);
-		renderMutuallyExclusiveCheckboxCluster(currentPlayerStatBlock.weaponProficiencies, WEAPON_TYPE_NAMES, "Weapon Proficiencies");
-		renderMutuallyExclusiveCheckboxCluster(currentPlayerStatBlock.armorProficiencies, ARMOR_TYPE_NAMES, "Armor Proficiencies");
-		renderMutuallyExclusiveCheckboxCluster(currentPlayerStatBlock.toolProficiencies, TOOL_NAMES, "Tool Proficiencies");
-		renderMutuallyExclusiveCheckboxCluster(currentPlayerStatBlock.weaponMasteries, WEAPON_MASTERY_NAMES, "Weapon Masteries");
+		renderListBox(m_speciesParameters, m_currentPlayerStatBlock.species, "Species", SPECIES_NAMES);
+		renderListBox(m_originParameters, m_currentPlayerStatBlock.origin, "Origin", ORIGIN_NAMES);
+		renderMutuallyExclusiveCheckboxCluster(m_currentPlayerStatBlock.weaponProficiencies, WEAPON_TYPE_NAMES, "Weapon Proficiencies");
+		renderMutuallyExclusiveCheckboxCluster(m_currentPlayerStatBlock.armorProficiencies, ARMOR_TYPE_NAMES, "Armor Proficiencies");
+		renderMutuallyExclusiveCheckboxCluster(m_currentPlayerStatBlock.toolProficiencies, TOOL_NAMES, "Tool Proficiencies");
+		renderMutuallyExclusiveCheckboxCluster(m_currentPlayerStatBlock.weaponMasteries, WEAPON_MASTERY_NAMES, "Weapon Masteries");
 	}
 	void EncounterCreationScene::renderPlayerClassAndSubclasses() {
 		if (ImGui::BeginTable("Classes and Subclasses", 1, ImGuiTableFlags_SizingStretchSame)) {
@@ -1306,13 +1306,13 @@ namespace CombatTrackerApp {
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
 
-			for (const auto& item : currentPlayerStatBlock.levels) {
+			for (const auto& item : m_currentPlayerStatBlock.levels) {
 				if (item.second == 0) {
 					continue;
 				}
 				ImGui::TextWrapped("%s %d", CLASS_NAMES.at(item.first).c_str(), item.second);
 			}
-			for (const auto& item : currentPlayerStatBlock.subclasses) {
+			for (const auto& item : m_currentPlayerStatBlock.subclasses) {
 				ImGui::TextWrapped("%s", SUBCLASS_NAMES.at(item.second).c_str() );
 			}
 			if (CombatTrackerLib::alignedButton("Configure Classes and Subclasses", 0.5f)) {
@@ -1328,31 +1328,31 @@ namespace CombatTrackerApp {
 				
 				ImGui::TextWrapped("Classes");
 				for (const auto& item : CLASS_NAMES) {
-					renderNonOverridableInputInt(currentPlayerStatBlock.levels.at(item.first), item.second.c_str());
+					renderNonOverridableInputInt(m_currentPlayerStatBlock.levels.at(item.first), item.second.c_str());
 				}
 
-				static PlayerClass currentClass{};
+				static PlayerClass s_currentClass{};
 				ImGui::SeparatorText("Subclasses");
 				for (const auto& item : SUBCLASS_NAMES) {
-					if (currentClass != MAPPED_SUBCLASSES.at(item.first)) {
+					if (s_currentClass != MAPPED_SUBCLASSES.at(item.first)) {
 						ImGui::SeparatorText(CLASS_NAMES.at(MAPPED_SUBCLASSES.at(item.first)).c_str());
 					}
-					if (currentPlayerStatBlock.levels.at(MAPPED_SUBCLASSES.at(item.first)) < SUBCLASS_LEVEL_THRESHOLD) {
-						chosenSubclasses.at(item.first) = false;
-						currentPlayerStatBlock.subclasses.erase(MAPPED_SUBCLASSES.at(item.first));
+					if (m_currentPlayerStatBlock.levels.at(MAPPED_SUBCLASSES.at(item.first)) < SUBCLASS_LEVEL_THRESHOLD) {
+						m_chosenSubclasses.at(item.first) = false;
+						m_currentPlayerStatBlock.subclasses.erase(MAPPED_SUBCLASSES.at(item.first));
 					}
-					if (ImGui::Checkbox(item.second.c_str(), &chosenSubclasses.at(item.first))) {
-						hasCorrespondingSubclass.at(MAPPED_SUBCLASSES.at(item.first)) = true;
-						currentPlayerStatBlock.subclasses[MAPPED_SUBCLASSES.at(item.first)] = item.first;
+					if (ImGui::Checkbox(item.second.c_str(), &m_chosenSubclasses.at(item.first))) {
+						m_hasCorrespondingSubclass.at(MAPPED_SUBCLASSES.at(item.first)) = true;
+						m_currentPlayerStatBlock.subclasses[MAPPED_SUBCLASSES.at(item.first)] = item.first;
 						for (const auto& secondItem : MAPPED_CLASSES.at(MAPPED_SUBCLASSES.at(item.first))) {
-							if ((chosenSubclasses.at(secondItem) && secondItem != item.first)
-								|| currentPlayerStatBlock.levels.at(MAPPED_SUBCLASSES.at(secondItem)) < SUBCLASS_LEVEL_THRESHOLD )  
+							if ((m_chosenSubclasses.at(secondItem) && secondItem != item.first)
+								|| m_currentPlayerStatBlock.levels.at(MAPPED_SUBCLASSES.at(secondItem)) < SUBCLASS_LEVEL_THRESHOLD )  
 							{
-								chosenSubclasses.at(secondItem) = false;
+								m_chosenSubclasses.at(secondItem) = false;
 							}
 						}
 					}
-					currentClass = MAPPED_SUBCLASSES.at(item.first);
+					s_currentClass = MAPPED_SUBCLASSES.at(item.first);
 				}
 				ImGui::EndChild();
 
@@ -1361,7 +1361,7 @@ namespace CombatTrackerApp {
 					// Lengthy but necessary validation.
 					int sum{};
 					bool isValid{ false };
-					for (auto& item : currentPlayerStatBlock.levels) {
+					for (auto& item : m_currentPlayerStatBlock.levels) {
 						if (item.second > MIN_CLASS_LEVEL) {
 							isValid = true;
 						}
@@ -1383,22 +1383,22 @@ namespace CombatTrackerApp {
 
 	// Call this after creating/completing editing of Monsters/Player Characters.
 	void EncounterCreationScene::resetParametersAndOverrides() {
-		monsterCRParameters = { -1, -1, false };
-		sizeListBoxParameters = { -1, -1, false };
-		creatureTypeParameters = { -1, -1, false };
-		alignmentParameters = { -1, -1, false };
-		speciesParameters = { -1, -1, false };
-		originParameters = { -1, -1, false };
-		isInitiativeOverriden = false;
-		isPassivePerceptionOverridden = false;
-		isXPOverridden = false;
-		isPBOverridden = false;
+		m_monsterCRParameters = { -1, -1, false };
+		m_sizeListBoxParameters = { -1, -1, false };
+		m_creatureTypeParameters = { -1, -1, false };
+		m_alignmentParameters = { -1, -1, false };
+		m_speciesParameters = { -1, -1, false };
+		m_originParameters = { -1, -1, false };
+		m_isInitiativeOverriden = false;
+		m_isPassivePerceptionOverridden = false;
+		m_isXPOverridden = false;
+		m_isPBOverridden = false;
 		for (const auto& ability : ABILITY_NAMES) {
-			abilityModifiersOverride[ability.first] = false;
-			savingThrowsOverride[ability.first] = false;
+			m_abilityModifiersOverride[ability.first] = false;
+			m_savingThrowsOverride[ability.first] = false;
 		}
 		for (const auto& skill : SKILL_NAMES) {
-			skillModifiersOverride[skill.first] = false;
+			m_skillModifiersOverride[skill.first] = false;
 		}
 	}
 }

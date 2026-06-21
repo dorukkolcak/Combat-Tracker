@@ -2,7 +2,7 @@
 
 namespace CombatTrackerLib {
 	Scene::Scene(App* app) : 
-        applicationReference{app}
+        m_applicationReference{app}
 	{
 	}
 }

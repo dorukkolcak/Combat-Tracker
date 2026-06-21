@@ -28,7 +28,7 @@ namespace CombatTrackerLib {
 		int getWindowShouldClose();
 		GLFWwindow*& getGLFWwindow();
 	private:
-		WindowSpecification windowSpecification{};
-		GLFWwindow* window{};
+		WindowSpecification m_windowSpecification{};
+		GLFWwindow* m_window{};
 	};
 }

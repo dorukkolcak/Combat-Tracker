@@ -16,11 +16,11 @@ namespace CombatTrackerApp {
 	private:
 
 		// UI IDs.
-		ImGuiID overlayDockspaceID{};
-		ImGuiID generalID{};
-		ImGuiID viewID{};
+		ImGuiID m_overlayDockspaceID{};
+		ImGuiID m_generalID{};
+		ImGuiID m_viewID{};
 
 		// Dockspace layout flag.
-		bool isOverlayDockspaceInitialized{};
+		bool m_isOverlayDockspaceInitialized{};
 	};
 }

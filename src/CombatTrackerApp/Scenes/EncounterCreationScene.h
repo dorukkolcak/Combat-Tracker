@@ -41,13 +41,13 @@ namespace CombatTrackerApp {
 	private:
 		
 		// Flags.
-		ImGuiWindowFlags encounterCreationWindowFlags{};
-		ImGuiDockNodeFlags encounterCreationDockFlags{};
-		ImGuiWindowFlags popupWindowFlags{};
+		ImGuiWindowFlags m_encounterCreationWindowFlags{};
+		ImGuiDockNodeFlags m_encounterCreationDockFlags{};
+		ImGuiWindowFlags m_popupWindowFlags{};
 
 		// Dockspace variables.
-		std::unordered_map<EncounterCreationWindows, ImGuiID> dockspaceIDs{};
-		std::unordered_map<EncounterCreationWindows, bool> dockspaceInitializations {
+		std::unordered_map<EncounterCreationWindows, ImGuiID> m_dockspaceIDs{};
+		std::unordered_map<EncounterCreationWindows, bool> m_dockspaceInitializations {
 			{EncounterCreationWindows::ENCOUNTER_CREATOR, false},
 			{EncounterCreationWindows::ENTITY_BROWSER, false},
 			{EncounterCreationWindows::MONSTER_BROWSER, false},
@@ -55,33 +55,33 @@ namespace CombatTrackerApp {
 			{EncounterCreationWindows::ENCOUNTER_BROWSER, false}
 		};
 
-		std::string currentPopupName{};
-		MonsterBuilder monsterBuilder{};
-		PlayerCharacterBuilder playerCharacterBuilder{};
+		std::string m_currentPopupName{};
+		MonsterBuilder m_monsterBuilder{};
+		PlayerCharacterBuilder m_playerCharacterBuilder{};
 
-		CreatureStatBlock& currentCreatureStatBlock{ monsterBuilder.getCreatureBlock() };
-		PlayerStatBlock& currentPlayerStatBlock{ playerCharacterBuilder.getPlayerCharacterBlock() };
+		CreatureStatBlock& m_currentCreatureStatBlock{ m_monsterBuilder.getCreatureBlock() };
+		PlayerStatBlock& m_currentPlayerStatBlock{ m_playerCharacterBuilder.getPlayerCharacterBlock() };
 
-		double currentMonsterCR{};
-		int currentMonsterXP{};
+		double m_currentMonsterCR{};
+		int m_currentMonsterXP{};
 
-		ListBoxParameters monsterCRParameters{};
-		ListBoxParameters sizeListBoxParameters{};
-		ListBoxParameters creatureTypeParameters{};
-		ListBoxParameters alignmentParameters{};
-		ListBoxParameters speciesParameters{};
-		ListBoxParameters originParameters{};
+		ListBoxParameters m_monsterCRParameters{};
+		ListBoxParameters m_sizeListBoxParameters{};
+		ListBoxParameters m_creatureTypeParameters{};
+		ListBoxParameters m_alignmentParameters{};
+		ListBoxParameters m_speciesParameters{};
+		ListBoxParameters m_originParameters{};
 
-		bool isInitiativeOverriden{};
-		bool isPassivePerceptionOverridden{};
-		bool isXPOverridden{};
-		bool isPBOverridden{};
+		bool m_isInitiativeOverriden{};
+		bool m_isPassivePerceptionOverridden{};
+		bool m_isXPOverridden{};
+		bool m_isPBOverridden{};
 
-		std::unordered_map<Ability, bool> abilityModifiersOverride{};
-		std::unordered_map<Ability, bool> savingThrowsOverride{};
-		std::unordered_map<Skill, bool> skillModifiersOverride{};
+		std::unordered_map<Ability, bool> m_abilityModifiersOverride{};
+		std::unordered_map<Ability, bool> m_savingThrowsOverride{};
+		std::unordered_map<Skill, bool> m_skillModifiersOverride{};
 
-		std::unordered_map<PlayerSubclass, bool> chosenSubclasses{
+		std::unordered_map<PlayerSubclass, bool> m_chosenSubclasses{
 			{PlayerSubclass::PATH_OF_THE_BERSERKER, false},
 			{PlayerSubclass::PATH_OF_THE_WILD_HEART, false},
 			{PlayerSubclass::PATH_OF_THE_WORLD_TREE, false},
@@ -131,7 +131,7 @@ namespace CombatTrackerApp {
 			{PlayerSubclass::EVOKER, false},
 			{PlayerSubclass::ILLUSIONIST, false}
 		};
-		std::unordered_map<PlayerClass, bool> hasCorrespondingSubclass{
+		std::unordered_map<PlayerClass, bool> m_hasCorrespondingSubclass{
 			{PlayerClass::BARBARIAN, false},
 			{PlayerClass::BARD, false},
 			{PlayerClass::CLERIC, false},

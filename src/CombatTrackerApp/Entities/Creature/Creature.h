@@ -268,18 +268,17 @@ namespace CombatTrackerApp {
 	};
 
 	class Creature {
-	protected:
-		int ID{};
-		CreatureStatBlock statBlockCreaturePortion{};
 	public:
 
-		// A creature will own its stat block, hence we use std::move in the constructor. So the stat block is passed by value.
+		// A creature will own its stat block, hence we use std::move in the constructor. 
 		// As for how the stat block is created, we use the Builder design pattern and pass the corresponding stat block from the builder.
 		Creature(CreatureStatBlock statBlockCreaturePortion);
-
 		static constexpr int findAbilityScoreModifier(int abilityScore) {
 			return (abilityScore - 10) / 2;
 		}
+	protected:
+		int m_ID{};
+		CreatureStatBlock m_statBlockCreaturePortion{};
 	};
 
 	// Templating is required so that we can chain the correct type when creating objects with the builders.
@@ -290,43 +289,43 @@ namespace CombatTrackerApp {
 	public:
 
 		Derived& self() { return static_cast<Derived&>(*this); }
-		Derived& reset() { block = CreatureStatBlock{}; return self(); }
+		Derived& reset() { m_block = CreatureStatBlock{}; return self(); }
 
-		Derived& setSavingThrowProficiencies(const std::unordered_map<Ability, bool>& creatureSavingThrowProficiencies) { block.savingThrowProficiencies = creatureSavingThrowProficiencies; return self(); }
-		Derived& setSavingThrowExpertise(const std::unordered_map<Ability, bool>& creatureSavingThrowExpertise) { block.savingThrowExpertise = creatureSavingThrowExpertise;  return self(); }
-		Derived& setSkillProficiencies(const std::unordered_map<Skill, bool>& creatureSkillProficiencies) { block.skillProficiencies = creatureSkillProficiencies; return self(); }
-		Derived& setSkillExpertise(const std::unordered_map<Skill, bool>& creatureSkillExpertise) { block.skillExpertise = creatureSkillExpertise; return self(); }
-		Derived& setAbilityScores(const std::unordered_map<Ability, int>& creatureAbilityScores) { block.abilityScores = creatureAbilityScores;  return self(); }
-		Derived& setAbilityScoreModifiers(const std::unordered_map<Ability, int>& creatureAbilityScoreModifiers) { block.abilityScoreModifiers = creatureAbilityScoreModifiers; return self(); }
-		Derived& setSavingThrowModifiers(const std::unordered_map<Ability, int>& creatureSavingThrowModifiers) { block.savingThrowModifiers = creatureSavingThrowModifiers; return self(); }
-		Derived& setSkillModifiers(const std::unordered_map<Skill, int>& creatureSkillModifiers) { block.skillModifiers = creatureSkillModifiers; return self(); }
-		Derived& setActions(const std::vector<CreatureAction>& creatureActions) { block.actions = creatureActions; return self(); }
-		Derived& setDamageVulnerabilities(const std::unordered_map<DamageType, bool>& creatureDamageVulnerabilities) { block.damageVulnerabilities = creatureDamageVulnerabilities;  return self(); }
-		Derived& setDamageResistances(const std::unordered_map<DamageType, bool>& creatureDamageResistances) { block.damageResistances = creatureDamageResistances;  return self(); }
-		Derived& setDamageImmunities(const std::unordered_map<DamageType, bool>& creatureDamageImmunities) { block.damageImmunities = creatureDamageImmunities; return self(); }
-		Derived& setConditionImmunities(const std::unordered_map<Condition, bool>& creatureConditionImmunities) { block.conditionImmunities = creatureConditionImmunities; return self(); }
-		Derived& setTraits(const std::vector<Trait>& creatureTraits) { block.traits = creatureTraits; return self(); }
-		Derived& setSenses(const std::unordered_map<Sense, int>& creatureSenses) { block.senses = creatureSenses; return self(); }
-		Derived& setLanguages(const std::unordered_map<Language, bool>& creatureLanguages) { block.languages = creatureLanguages; return self(); }
-		Derived& setEquipment(const std::vector<Gear>& creatureEquipment) { block.equipment = creatureEquipment; return self(); }
+		Derived& setSavingThrowProficiencies(const std::unordered_map<Ability, bool>& creatureSavingThrowProficiencies) { m_block.savingThrowProficiencies = creatureSavingThrowProficiencies; return self(); }
+		Derived& setSavingThrowExpertise(const std::unordered_map<Ability, bool>& creatureSavingThrowExpertise) { m_block.savingThrowExpertise = creatureSavingThrowExpertise;  return self(); }
+		Derived& setSkillProficiencies(const std::unordered_map<Skill, bool>& creatureSkillProficiencies) { m_block.skillProficiencies = creatureSkillProficiencies; return self(); }
+		Derived& setSkillExpertise(const std::unordered_map<Skill, bool>& creatureSkillExpertise) { m_block.skillExpertise = creatureSkillExpertise; return self(); }
+		Derived& setAbilityScores(const std::unordered_map<Ability, int>& creatureAbilityScores) { m_block.abilityScores = creatureAbilityScores;  return self(); }
+		Derived& setAbilityScoreModifiers(const std::unordered_map<Ability, int>& creatureAbilityScoreModifiers) { m_block.abilityScoreModifiers = creatureAbilityScoreModifiers; return self(); }
+		Derived& setSavingThrowModifiers(const std::unordered_map<Ability, int>& creatureSavingThrowModifiers) { m_block.savingThrowModifiers = creatureSavingThrowModifiers; return self(); }
+		Derived& setSkillModifiers(const std::unordered_map<Skill, int>& creatureSkillModifiers) { m_block.skillModifiers = creatureSkillModifiers; return self(); }
+		Derived& setActions(const std::vector<CreatureAction>& creatureActions) { m_block.actions = creatureActions; return self(); }
+		Derived& setDamageVulnerabilities(const std::unordered_map<DamageType, bool>& creatureDamageVulnerabilities) { m_block.damageVulnerabilities = creatureDamageVulnerabilities;  return self(); }
+		Derived& setDamageResistances(const std::unordered_map<DamageType, bool>& creatureDamageResistances) { m_block.damageResistances = creatureDamageResistances;  return self(); }
+		Derived& setDamageImmunities(const std::unordered_map<DamageType, bool>& creatureDamageImmunities) { m_block.damageImmunities = creatureDamageImmunities; return self(); }
+		Derived& setConditionImmunities(const std::unordered_map<Condition, bool>& creatureConditionImmunities) { m_block.conditionImmunities = creatureConditionImmunities; return self(); }
+		Derived& setTraits(const std::vector<Trait>& creatureTraits) { m_block.traits = creatureTraits; return self(); }
+		Derived& setSenses(const std::unordered_map<Sense, int>& creatureSenses) { m_block.senses = creatureSenses; return self(); }
+		Derived& setLanguages(const std::unordered_map<Language, bool>& creatureLanguages) { m_block.languages = creatureLanguages; return self(); }
+		Derived& setEquipment(const std::vector<Gear>& creatureEquipment) { m_block.equipment = creatureEquipment; return self(); }
 
-		Derived& setName(std::string creatureName) { block.name = std::move(creatureName); return self(); }
+		Derived& setName(std::string creatureName) { m_block.name = std::move(creatureName); return self(); }
 
-		Derived& setSize(Size creatureSize) { block.size = creatureSize; return self(); }
-		Derived& setType(CreatureType creatureType) { block.type = creatureType; return self(); }
-		Derived& setAlignment(Alignment creatureAlignment) { block.alignment = creatureAlignment; return self(); }
-		Derived& setAC(int creatureAC) { block.AC = creatureAC; return self(); }
-		Derived& setInitiativeBonus(int creatureInitiativeBonus) { block.initiativeBonus = creatureInitiativeBonus; return self(); }
-		Derived& setPB(int creatureProficiencyBonus) { block.proficiencyBonus = creatureProficiencyBonus; return self(); }
-		Derived& setHP(int creatureHP) { block.HP = creatureHP; return self(); }
-		Derived& setPassivePerception(const int creaturePassivePerception) { block.passivePerception = creaturePassivePerception; return self(); }
-		Derived& setWalkSpeed(int creatureWalkSpeed) { block.walkSpeed = creatureWalkSpeed; return self(); }
-		Derived& setClimbingSpeed(int creatureClimbingSpeed) { block.climbingSpeed = creatureClimbingSpeed; return self(); }
-		Derived& setSwimmingSpeed(int creatureSwimmingSpeed) { block.swimmingSpeed = creatureSwimmingSpeed; return self(); }
-		Derived& setBurrowSpeed(int creatureBurrowSpeed) { block.burrowSpeed = creatureBurrowSpeed; return self(); }
-		Derived& setFlySpeed(int creatureFlySpeed) { block.flySpeed = creatureFlySpeed;  return self(); }
+		Derived& setSize(Size creatureSize) { m_block.size = creatureSize; return self(); }
+		Derived& setType(CreatureType creatureType) { m_block.type = creatureType; return self(); }
+		Derived& setAlignment(Alignment creatureAlignment) { m_block.alignment = creatureAlignment; return self(); }
+		Derived& setAC(int creatureAC) { m_block.AC = creatureAC; return self(); }
+		Derived& setInitiativeBonus(int creatureInitiativeBonus) { m_block.initiativeBonus = creatureInitiativeBonus; return self(); }
+		Derived& setPB(int creatureProficiencyBonus) { m_block.proficiencyBonus = creatureProficiencyBonus; return self(); }
+		Derived& setHP(int creatureHP) { m_block.HP = creatureHP; return self(); }
+		Derived& setPassivePerception(const int creaturePassivePerception) { m_block.passivePerception = creaturePassivePerception; return self(); }
+		Derived& setWalkSpeed(int creatureWalkSpeed) { m_block.walkSpeed = creatureWalkSpeed; return self(); }
+		Derived& setClimbingSpeed(int creatureClimbingSpeed) { m_block.climbingSpeed = creatureClimbingSpeed; return self(); }
+		Derived& setSwimmingSpeed(int creatureSwimmingSpeed) { m_block.swimmingSpeed = creatureSwimmingSpeed; return self(); }
+		Derived& setBurrowSpeed(int creatureBurrowSpeed) { m_block.burrowSpeed = creatureBurrowSpeed; return self(); }
+		Derived& setFlySpeed(int creatureFlySpeed) { m_block.flySpeed = creatureFlySpeed;  return self(); }
 
-		CreatureStatBlock& getCreatureBlock() { return block; }
+		CreatureStatBlock& getCreatureBlock() { return m_block; }
 
 		/*
 		The builder is meant to be single used:
@@ -335,11 +334,11 @@ namespace CombatTrackerApp {
 		Note that a moved-from block would be left empty, not default valued, so we must reinitialize it.
 		*/
 		CreatureStatBlock moveCreatureBlock() {
-			CreatureStatBlock movedBlock{ std::move(block) };
-			block = CreatureStatBlock{};
+			CreatureStatBlock movedBlock{ std::move(m_block) };
+			m_block = CreatureStatBlock{};
 			return movedBlock;
 		}
 	protected:
-		CreatureStatBlock block{};
+		CreatureStatBlock m_block{};
 	};
 }

@@ -18,33 +18,33 @@ namespace CombatTrackerLib {
 		const char* shaderCode{ shaderCodeTemp.c_str() };
 		switch (type) {
 		case ShaderType::VERTEX:
-			shaderID = glCreateShader(GL_VERTEX_SHADER);
+			m_shaderID = glCreateShader(GL_VERTEX_SHADER);
 			break;
 		case ShaderType::FRAGMENT:
-			shaderID = glCreateShader(GL_FRAGMENT_SHADER);
+			m_shaderID = glCreateShader(GL_FRAGMENT_SHADER);
 			break;
 		default:
 			std::cerr << "No corresponding shader type: \n";
 			return;
 		}
 
-		glShaderSource(shaderID, 1, &shaderCode, NULL);
-		glCompileShader(shaderID);
+		glShaderSource(m_shaderID, 1, &shaderCode, NULL);
+		glCompileShader(m_shaderID);
 
 		// Error handling.
 		int isCompiled{};
-		glGetShaderiv(shaderID, GL_COMPILE_STATUS, &isCompiled);
+		glGetShaderiv(m_shaderID, GL_COMPILE_STATUS, &isCompiled);
 		if (isCompiled == GL_FALSE) {
 			int logLength = 0;
-			glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &logLength);
+			glGetShaderiv(m_shaderID, GL_INFO_LOG_LENGTH, &logLength);
 			std::string infoLog(static_cast<size_t>(std::max(logLength, 1)), '\0');
-			glGetShaderInfoLog(shaderID, logLength, nullptr, infoLog.data());
+			glGetShaderInfoLog(m_shaderID, logLength, nullptr, infoLog.data());
 			std::cerr << "Shader compilation failed: " << infoLog << std::endl;
-			glDeleteShader(shaderID);
+			glDeleteShader(m_shaderID);
 			return;
 		}
 	}
 	unsigned int Shader::getShaderID() const {
-		return shaderID;
+		return m_shaderID;
 	}
 }

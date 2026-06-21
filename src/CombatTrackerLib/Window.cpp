@@ -7,7 +7,7 @@
 
 namespace CombatTrackerLib {
 	Window::Window(const WindowSpecification& specification) : 
-		windowSpecification{ specification } 
+		m_windowSpecification{ specification } 
 	{
 
 		// Window is created for OpenGL 3.3 Core Profile.
@@ -18,10 +18,10 @@ namespace CombatTrackerLib {
 			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		}
 		float mainScale{ ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()) };
-		window = glfwCreateWindow( static_cast<int> (mainScale * specification.width), static_cast<int> (mainScale * specification.height), specification.title.c_str(), NULL, NULL);
-		assert(window != nullptr);
-		glfwSetWindowUserPointer(window, this);
-		glfwMakeContextCurrent(window);
+		m_window = glfwCreateWindow( static_cast<int> (mainScale * specification.width), static_cast<int> (mainScale * specification.height), specification.title.c_str(), NULL, NULL);
+		assert(m_window != nullptr);
+		glfwSetWindowUserPointer(m_window, this);
+		glfwMakeContextCurrent(m_window);
 		if (specification.isVsyncEnabled) {
 			glfwSwapInterval(1);
 		}
@@ -30,15 +30,15 @@ namespace CombatTrackerLib {
 	// Once again should be left empty as we have a separate function for destroying the window.
 	Window::~Window() {}
 	void Window::update() {
-		glfwSwapBuffers(window);
+		glfwSwapBuffers(m_window);
 	}
 	void Window::destroy() {
-		glfwDestroyWindow(window);
+		glfwDestroyWindow(m_window);
 	}
 	int Window::getWindowShouldClose() {
-		return glfwWindowShouldClose(window);
+		return glfwWindowShouldClose(m_window);
 	}
 	GLFWwindow*& Window::getGLFWwindow() {
-		return window;
+		return m_window;
 	}
 }

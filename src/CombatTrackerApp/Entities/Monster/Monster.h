@@ -4,15 +4,15 @@
 
 namespace CombatTrackerApp {
 	class Monster : public Creature {
-	private:
-		double CR{};
-		int XP{};
 	public:
+
+		// Stat block is moved so pass it by value.
 		Monster(CreatureStatBlock statBlock, double creatureCR, int creatureXP);
-
-		int getXP();
+		int getXP() const;
+	private:
+		double m_CR{};
+		int m_XP{};
 	};
-
 	class MonsterBuilder : public CreatureBuilder<MonsterBuilder> {
 	public:
 		MonsterBuilder& setCR(double creatureCR);
@@ -22,7 +22,7 @@ namespace CombatTrackerApp {
 		MonsterBuilder& reset();
 		Monster moveMonster();
 	private:
-		double CR{};
-		int XP{};
+		double m_CR{};
+		int m_XP{};
 	};
 }

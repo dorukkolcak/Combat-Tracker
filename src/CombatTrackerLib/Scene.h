@@ -26,8 +26,8 @@ namespace CombatTrackerLib {
 	protected:
 
 		// We keep this to queue scene events.
-		App* applicationReference{};
+		App* m_applicationReference{};
 
-		ImGuiViewport* mainViewport{};
+		ImGuiViewport* m_mainViewport{};
 	};
 }

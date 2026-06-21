@@ -4,8 +4,9 @@
 
 namespace CombatTrackerLib {
 	enum class ShaderType {
+		INVALID,
 		VERTEX,
-		FRAGMENT
+		FRAGMENT,
 	};
 	class Shader {
 	public:
@@ -13,6 +14,6 @@ namespace CombatTrackerLib {
 		unsigned int getShaderID() const;
 
 	private:
-		unsigned int shaderID{};
+		unsigned int m_shaderID{};
 	};
 }

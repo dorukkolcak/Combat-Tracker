@@ -89,12 +89,12 @@ namespace CombatTrackerApp {
 		Origin origin{};
 	};
 	class PlayerCharacter : public Creature {
-	private:
-		PlayerStatBlock statBlockPlayerPortion{};
 	public:
 
 		// Same deal as most constructors, stat blocks are moved so pass them by value.
 		PlayerCharacter(CreatureStatBlock creaturePortion, PlayerStatBlock playerPortion);
+	private:
+		PlayerStatBlock m_statBlockPlayerPortion{};
 	};
 	class PlayerCharacterBuilder : public CreatureBuilder<PlayerCharacterBuilder> {
 	public:
@@ -115,6 +115,6 @@ namespace CombatTrackerApp {
 		PlayerCharacter movePlayerCharacter();
 
 	private:
-		PlayerStatBlock playerBlock{};
+		PlayerStatBlock m_playerBlock{};
 	};
 }

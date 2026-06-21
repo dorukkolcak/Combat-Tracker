@@ -3,25 +3,28 @@
 namespace CombatTrackerApp {
 
 	// TODO: Find a way for ID generation.
-	Encounter::Encounter(std::vector<std::unique_ptr<Monster>> encounterMonsters, std::vector<std::unique_ptr<PlayerCharacter>> encounterPlayers) :
-		monsters{ std::move(encounterMonsters) },
-		players{ std::move(encounterPlayers) },
-		isCompleted{false},
-		totalXPReward{ 0 },
-		ID{-1}
+	Encounter::Encounter(
+	std::vector<std::unique_ptr<Monster>> encounterMonsters, 
+		std::vector<std::unique_ptr<PlayerCharacter>> encounterPlayers
+	) :
+		m_monsters{ std::move(encounterMonsters) },
+		m_players{ std::move(encounterPlayers) },
+		m_isCompleted{false},
+		m_totalXPReward{ 0 },
+		m_ID{-1}
 		{
-		for (size_t i{}; i < monsters.size(); ++i) {
-			totalXPReward += (monsters[i])->getXP();
+		for (size_t i{}; i < m_monsters.size(); ++i) {
+			m_totalXPReward += (m_monsters[i])->getXP();
 		}
 	}
 	Encounter::~Encounter() {}
 	void Encounter::setInitiatives(std::map<int, int> initiatives) {
-		mappedInitiatives = std::move(initiatives);
+		m_mappedInitiatives = std::move(initiatives);
 	}
 	void Encounter::setAsCompleted() {
-		isCompleted = true;
+		m_isCompleted = true;
 	}
 	void Encounter::addTurn(std::unique_ptr<Turn> turn) {
-		turns.push_back(std::move(turn));
+		m_turns.push_back(std::move(turn));
 	}
 }

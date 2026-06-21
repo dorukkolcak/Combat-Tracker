@@ -9,10 +9,10 @@
 #include <ranges>
 
 namespace CombatTrackerLib {
-	App::App(const AppSpecification& specification) : applicationSpecification{ specification }
+	App::App(const AppSpecification& specification) : m_applicationSpecification{ specification }
 	{
 		glfwInit();
-		mainWindow = std::make_unique<Window>(applicationSpecification.mainWindowSpecification);
+		m_mainWindow = std::make_unique<Window>(m_applicationSpecification.mainWindowSpecification);
 		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 			glfwTerminate();
 			assert(false);
@@ -27,7 +27,7 @@ namespace CombatTrackerLib {
 		With the way I create the themes this should already be possible, just needs UI support.
 		*/
 		setupLayout();
-		if (applicationSpecification.isDarkModeEnabled) {
+		if (m_applicationSpecification.isDarkModeEnabled) {
 			createImguiDarkTheme();
 		}
 		else {
@@ -36,7 +36,7 @@ namespace CombatTrackerLib {
 		initializeCommonColors();
 
 		// Setup Platform/Renderer backends
-		ImGui_ImplGlfw_InitForOpenGL(mainWindow->getGLFWwindow(), true);
+		ImGui_ImplGlfw_InitForOpenGL(m_mainWindow->getGLFWwindow(), true);
 		const char* glsl_version = "#version 130";
 		ImGui_ImplOpenGL3_Init(glsl_version);
 	}
@@ -55,7 +55,7 @@ namespace CombatTrackerLib {
 
 		double lastFrameTime{ glfwGetTime() };
 		// Main application loop
-		while (!App::mainWindow->getWindowShouldClose()) {
+		while (!App::m_mainWindow->getWindowShouldClose()) {
 
 			// Get the delta time between frames, in seconds.
 			double currentTime{ glfwGetTime() };
@@ -63,7 +63,7 @@ namespace CombatTrackerLib {
 			lastFrameTime = currentTime;
 
 			// This specifies the order in which we traverse the scenes.
-			std::ranges::reverse_view reverseView{ sceneStack };
+			std::ranges::reverse_view reverseView{ m_sceneStack };
 
 			// Scene event handling occurs here.
 			glfwPollEvents();
@@ -91,7 +91,7 @@ namespace CombatTrackerLib {
 			ImGui::Render();
 
 			// OpenGL rendering work goes here. We do the rendering from bottom to top.
-			for (const auto& scene : sceneStack) {
+			for (const auto& scene : m_sceneStack) {
 				scene->renderScene();
 			}
 
@@ -99,7 +99,7 @@ namespace CombatTrackerLib {
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 			// Any window updates go here, after all operations are done.
-			mainWindow->update();
+			m_mainWindow->update();
 
 			// Finally, after everything is done, we handle scene requests.
 			dequeueSceneOperations();
@@ -111,33 +111,33 @@ namespace CombatTrackerLib {
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
-		mainWindow->destroy();
+		m_mainWindow->destroy();
 		glfwTerminate();
 
 	}
 	void App::queueAddScene(std::unique_ptr<Scene> scene) {
-		sceneAdditionQueue.push_back(std::move(scene));
+		m_sceneAdditionQueue.push_back(std::move(scene));
 	}
 	void App::queueDeleteScene(Scene* sceneToBeDeleted) {
-		sceneDeletionQueue.push_back(sceneToBeDeleted);
+		m_sceneDeletionQueue.push_back(sceneToBeDeleted);
 	}
 	void App::queueSceneTransition(Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo) {
-		sceneTransitionQueue.insert({ transitionedFrom, std::move(transitionedTo) });
+		m_sceneTransitionQueue.insert({ transitionedFrom, std::move(transitionedTo) });
 	}
 	void App::dequeueSceneOperations() {
 		// Handle sceneTransition
-		for (auto& transitionedTo : sceneTransitionQueue) {
-			for (auto& transitionedFrom : sceneStack) {
+		for (auto& transitionedTo : m_sceneTransitionQueue) {
+			for (auto& transitionedFrom : m_sceneStack) {
 				if (transitionedFrom.get() == transitionedTo.first) {
 					transitionedFrom = std::move(transitionedTo.second);
 					break;
 				}
 			}
 		}
-		sceneTransitionQueue.clear();
+		m_sceneTransitionQueue.clear();
 		// Handle sceneDeletion
-		for (auto& deletedScene : sceneDeletionQueue) {
-			for (auto& scene : sceneStack) {
+		for (auto& deletedScene : m_sceneDeletionQueue) {
+			for (auto& scene : m_sceneStack) {
 				if (scene.get() == deletedScene) {
 
 					/*
@@ -155,16 +155,16 @@ namespace CombatTrackerLib {
 		}
 
 		// Remove the deleted scene unique_ptrs from the sceneStack.
-		sceneStack.erase(
-			std::remove_if(sceneStack.begin(), sceneStack.end(), isSceneEmpty()),
-			sceneStack.end()
+		m_sceneStack.erase(
+			std::remove_if(m_sceneStack.begin(), m_sceneStack.end(), IsSceneEmpty()),
+			m_sceneStack.end()
 		);
-		sceneDeletionQueue.clear();
+		m_sceneDeletionQueue.clear();
 
 		// Handle sceneAddition
-		for (auto& addedScene : sceneAdditionQueue) {
-			sceneStack.push_back(std::move(addedScene));
+		for (auto& addedScene : m_sceneAdditionQueue) {
+			m_sceneStack.push_back(std::move(addedScene));
 		}
-		sceneAdditionQueue.clear();
+		m_sceneAdditionQueue.clear();
 	}
 }
