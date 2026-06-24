@@ -9,7 +9,7 @@
 #include <ranges>
 
 namespace CombatTrackerLib {
-	App::App(const AppSpecification& specification) : m_applicationSpecification{ specification }
+	App::App(const Specification& specification) : m_applicationSpecification{ specification }
 	{
 		glfwInit();
 		m_mainWindow = std::make_unique<Window>(m_applicationSpecification.mainWindowSpecification);

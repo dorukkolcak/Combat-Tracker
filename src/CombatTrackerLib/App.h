@@ -9,14 +9,16 @@
 
 namespace CombatTrackerLib {
 	class Scene;
-	struct AppSpecification {
-		CombatTrackerLib::WindowSpecification mainWindowSpecification{};
-		std::string applicationName{};
-		bool isDarkModeEnabled{};
-	};
 	class App {
 	public:
-		App(const AppSpecification& specification);
+
+		// Unlike WindowSpecification, AppSpecification is used only for this class. So make it a public nested type.
+		struct Specification {
+			CombatTrackerLib::WindowSpecification mainWindowSpecification{};
+			std::string applicationName{};
+			bool isDarkModeEnabled{};
+		}; 
+		explicit App(const Specification& specification);
 		~App();
 		void run();
 		void stop();
@@ -26,7 +28,7 @@ namespace CombatTrackerLib {
 		void queueSceneTransition(Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo);
 
 	private:
-		AppSpecification m_applicationSpecification{};
+		Specification m_applicationSpecification{};
 		std::unique_ptr<Window> m_mainWindow{};
 
 		// I prefer using vector as sort of a stack because it is much better at resizing, compared to a pure stack data structure.

@@ -1,15 +1,10 @@
-#include <vector>
-#include <algorithm>
-
 #include "EncounterCreationScene.h"
 #include "MainMenuScene.h"
-#include "Utils.h"
 #include "../JSONUtils.h"
 #include "../Entities/Creature/CreatureConstants.h"
 #include "../Entities/Monster/MonsterConstants.h"
 
 #include "imgui_internal.h"
-#include "misc/cpp/imgui_stdlib.h" // std::string support
 
 namespace CombatTrackerApp {
 	EncounterCreationScene::EncounterCreationScene(CombatTrackerLib::App* app) :
@@ -26,7 +21,7 @@ namespace CombatTrackerApp {
 		m_alignmentParameters{ -1, -1, false },
 		m_speciesParameters{ -1, -1, false },
 		m_originParameters{ -1, -1, false },
-		m_isInitiativeOverriden{false},
+		m_isInitiativeOverridden{false},
 		m_isPassivePerceptionOverridden{ false },
 		m_isXPOverridden{false},
 		m_isPBOverridden{false},
@@ -73,7 +68,7 @@ namespace CombatTrackerApp {
 
 	void EncounterCreationScene::renderHostWindow() {
 
-		using enum EncounterCreationWindows;
+		using enum Subwindow;
 
 		// Set configurations of the host window of the scene on first render pass.
 		if (!m_dockspaceInitializations.at(ENCOUNTER_CREATOR)) {
@@ -149,7 +144,7 @@ namespace CombatTrackerApp {
 
 	// TODO: Add more options here. Currently only used as "Back to Main Menu" section.
 	void EncounterCreationScene::renderMenuWindow() {
-		ImGui::Begin(MAPPED_WINDOW_NAMES.at(EncounterCreationWindows::MENU).c_str());
+		ImGui::Begin(MAPPED_WINDOW_NAMES.at(Subwindow::MENU).c_str());
 		if (ImGui::Button("Return to Main Menu")) {
 			m_applicationReference->queueSceneTransition(this, std::make_unique<MainMenuScene>(m_applicationReference));
 		}
@@ -157,7 +152,7 @@ namespace CombatTrackerApp {
 	}
 	void EncounterCreationScene::renderEntityBrowserWindow() {
 
-		using enum EncounterCreationWindows;
+		using enum Subwindow;
 
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(ENTITY_BROWSER).c_str());
 
@@ -200,7 +195,7 @@ namespace CombatTrackerApp {
 	}
 	void EncounterCreationScene::renderMonsterBrowserWindow() {
 		
-		using enum EncounterCreationWindows;
+		using enum Subwindow;
 
 		static bool s_editingModeMonster{ true };
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(MONSTER_BROWSER).c_str());
@@ -245,7 +240,7 @@ namespace CombatTrackerApp {
 	// TODO: Exact same comments for the monster browser apply to the player browser as well.
 	void EncounterCreationScene::renderPlayerCharacterBrowserWindow() {
 		
-		using enum EncounterCreationWindows;
+		using enum Subwindow;
 
 		static bool s_editingModePlayerCharacter{ true };
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(PLAYER_CHARACTER_BROWSER).c_str());
@@ -276,7 +271,7 @@ namespace CombatTrackerApp {
 	// TODO: Finish this window when all monster, player character and encounter browser functionality is done.
 	void EncounterCreationScene::renderEncounterBrowserWindow() {
 
-		using enum EncounterCreationWindows;
+		using enum Subwindow;
 
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(ENCOUNTER_BROWSER).c_str());
 		if (!m_dockspaceInitializations.at(ENCOUNTER_BROWSER)) {
@@ -298,14 +293,14 @@ namespace CombatTrackerApp {
 	// TODO: Finish this window when all monster and player character functionality is done.
 	void EncounterCreationScene::renderEncounterManagerWindow() {
 
-		using enum EncounterCreationWindows;
+		using enum Subwindow;
 
 		ImGui::Begin(MAPPED_WINDOW_NAMES.at(ENCOUNTER_MANAGER).c_str());
 		ImGui::End();
 	}
 
 	// Helper used for creating the user-compendium split windows. 
-	void EncounterCreationScene::initializeSubBrowserDockspace(EncounterCreationWindows windowType) {
+	void EncounterCreationScene::initializeSubBrowserDockspace(Subwindow windowType) {
 
 		m_dockspaceIDs[windowType] =
 			ImGui::GetID(
@@ -539,112 +534,11 @@ namespace CombatTrackerApp {
 			ImGui::EndPopup();
 		}
 	}
-
-	// Generic helper for single selectable listbox layouts.
-	// Used for creature type, alignment, size, monster CR, action type during action creation.
-	template <typename T, typename M>
-	void EncounterCreationScene::renderListBox(
-		ListBoxParameters& parameters,
-		T& type,
-		const char* listBoxLabel,
-		const M& items
-	) {
-		int counter{};
-		const float height{ ImGui::GetTextLineHeightWithSpacing() * 8.0f };
-		if (ImGui::BeginListBox(listBoxLabel, ImVec2{ 0, height })) {
-			for (const auto& item : items) {
-				const bool isSelected{ counter == parameters.chosenIndex };
-				if (ImGui::Selectable(item.second.c_str(), isSelected)) {
-					parameters.chosenIndex = counter;
-					type = item.first;
-				}
-				if (parameters.isHighlighted && ImGui::IsItemHovered()) {
-					parameters.highlightedIndex = counter;
-				}
-				++counter;
-			}
-			ImGui::EndListBox();
-		}
-	}
 	
 	// Simple helper method used for user input of HP, AC, movement speed and sense distances.
 	void EncounterCreationScene::renderNonOverridableInputInt(int& value, const char* label) {
 		if (ImGui::InputInt(label, &value)) {
 			value = std::max(0, value);
-		}
-	}
-
-	/*
-	A slightly more complicated helper used for user input of monster XP and PB.
-	The common thing about these two types is that they set mapped values.
-	Various other overridable user input can also be put in this format.
-	But mapping these types is meaningless as their mapping is quite simple.
-	Example: Initiative Bonus: Dexterity Modifier, Passive Perception: Perception Modifier + 10
-	*/
-	template <typename T, typename M>
-	void EncounterCreationScene::renderOverriddableInputInt (
-		int& value,
-		bool& overrideFlag,
-		const char* label,
-		const char* overrideLabel,
-		const M& items,
-		const int lowerBound,
-		const int upperBound,
-		const T key
-	) {
-		if (!overrideFlag) {
-			value = items.at(key);
-		}
-		if (ImGui::InputInt(label, &value)) {
-			value = std::min(std::max(lowerBound, value), upperBound);
-			overrideFlag = true;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button(overrideLabel)) {
-			overrideFlag = false;
-		}
-	}
-	/*
-	Used for rendering skill and saving throw proficiencies and expertises for both monsters and player characters.
-	The two clusters have a simple deduping logic between them. 
-	We can't have proficiency and expertise of the same "thing" at the same time.
-	*/
-	template <typename M, typename N>
-	void EncounterCreationScene::renderProficiencyAndExpertiseCluster (
-		const char* proficiencyLabel,
-		const char* expertiseLabel,
-		M& proficiencyItems,
-		M& expertiseItems,
-		const N& itemNames
-	) {
-		if (ImGui::BeginTable("ProfExpTable", 2, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_BordersInnerV)) {
-
-			ImGui::TableSetupColumn("Left");
-			ImGui::TableSetupColumn("Right");
-			ImGui::TableNextRow();
-
-			// Proficiency checkboxes.
-			ImGui::TableSetColumnIndex(0);
-			ImGui::TextWrapped("%s", proficiencyLabel);
-			for (const auto& item : itemNames) {
-				if (ImGui::Checkbox((item.second + "##" + PROFICIENCY_SUFFIX).c_str(), &proficiencyItems.at(item.first))) {
-					if (proficiencyItems.at(item.first) && expertiseItems.at(item.first)) {
-						expertiseItems.at(item.first) = false;
-					}
-				}
-			}
-
-			// Expertise checkboxes.
-			ImGui::TableSetColumnIndex(1);
-			ImGui::TextWrapped("%s", expertiseLabel);
-			for (const auto& item : itemNames) {
-				if (ImGui::Checkbox((item.second + "##" + EXPERTISE_SUFFIX).c_str(), &expertiseItems.at(item.first))) {
-					if (expertiseItems.at(item.first) && proficiencyItems.at(item.first)) {
-						proficiencyItems.at(item.first) = false;
-					}
-				}
-			}
-			ImGui::EndTable();
 		}
 	}
 	void EncounterCreationScene::renderAbilityScoresAndModifiers () {
@@ -887,7 +781,7 @@ namespace CombatTrackerApp {
 
 			ImGui::TableSetColumnIndex(1);
 
-			if (!m_isInitiativeOverriden) {
+			if (!m_isInitiativeOverridden) {
 				m_currentCreatureStatBlock.initiativeBonus = m_currentCreatureStatBlock.abilityScoreModifiers.at(Ability::DEXTERITY);
 			}
 
@@ -898,11 +792,11 @@ namespace CombatTrackerApp {
 				m_currentCreatureStatBlock.initiativeBonus =
 					std::min(std::max(ABILITY_SCORE_LOWER_BOUND, m_currentCreatureStatBlock.initiativeBonus),
 						ABILITY_MODIFIERS_UPPER_BOUND);
-				m_isInitiativeOverriden = true;
+				m_isInitiativeOverridden = true;
 			}
 			ImGui::SetNextItemWidth(-1.0f);
 			if (ImGui::Button("Reset Initiative Bonus", ImVec2{ -1.0f, 0.0f })) {
-				m_isInitiativeOverriden = false;
+				m_isInitiativeOverridden = false;
 			}
 
 			ImGui::Spacing();
@@ -1075,22 +969,6 @@ namespace CombatTrackerApp {
 		}
 	}
 
-	// Simple helper method for rendering multi-selectable creature parameters.
-	// Used in condition immunities and languages.
-	template <typename M, typename N>
-	void EncounterCreationScene::renderMutuallyExclusiveCheckboxCluster(M& items, const N& names, const char* label) {
-		ImGui::TextWrapped("%s", label);
-		if (ImGui::BeginTable(label, 3, ImGuiTableFlags_SizingStretchSame)) {
-			int counter{};
-			for (const auto& item : names) {
-				ImGui::TableNextColumn();
-				ImGui::Checkbox(item.second.c_str(), &items.at(item.first));
-				++counter;
-			}
-			ImGui::EndTable();
-		}
-	}
-
 	// Specific function for sense rendering, just calls renderNonOverridableInputInt() for all senses.
 	void EncounterCreationScene::renderSenses() {
 		if (ImGui::BeginTable("SensesGrid", 4, ImGuiTableFlags_SizingStretchSame)) {
@@ -1100,104 +978,6 @@ namespace CombatTrackerApp {
 				renderNonOverridableInputInt(item.second, SENSE_NAMES.at(item.first).c_str());
 			}
 			ImGui::EndTable();
-		}
-	}
-
-	// Chunky helper used for rendering traits and gear items.
-	template <typename I>
-	void EncounterCreationScene::renderAddables(std::vector<I>& currentItems, const std::string& label) {
-		ImGui::TextWrapped("%s", label.c_str());
-
-		// It is fine for this to be actually static as we clear it on each render pass anyways.
-		// Furthermore, this vector is only used in this function and nowhere else.
-		static std::vector<size_t> s_markedForDeletion{};
-		for (size_t i{}; i < currentItems.size(); ++i) {
-			ImGui::TableNextColumn();
-
-			// Cache the string to prevent recomputing it.
-			std::string popupName{ ("Edit " + label + "##" + std::to_string(i)).c_str() };
-
-			// Push a separate id to the ID stack for each item.
-			ImGui::PushID(static_cast<int> (i));
-
-			// We should check separate IO events explicitly instead of generically checking for any IO events for these buttons.
-			// Unlike most of the widgets. This is because we need a tooltip for each button.
-			ImGui::Button(currentItems[i].name.c_str());
-			ImGui::SameLine();
-			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
-				ImGui::SetTooltip("%s", currentItems[i].description.c_str());
-			}
-			if (ImGui::IsItemClicked()) {
-				ImGui::OpenPopup(popupName.c_str());
-			}
-
-			// Setup configs of the edit popup of items.
-			const ImVec2 center{ ImGui::GetMainViewport()->GetCenter() };
-			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2{ 0.5f, 0.5f });
-			const ImVec2 vp{ ImGui::GetMainViewport()->Size };
-			ImGui::SetNextWindowSize(ImVec2{ vp.x * 0.70f, vp.y * 0.70f }, ImGuiCond_Appearing);
-
-			// Popup modal for editing/deleting items.				
-			if (ImGui::BeginPopupModal(popupName.c_str(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
-
-				// The layouting is quite similar to the big entity creation popup modal.
-				ImGui::BeginChild("EditAddableScroll", ImVec2{ 0, -ImGui::GetFrameHeightWithSpacing() * 2.0f }, true);
-				ImGui::InputText((label + " Name").c_str(), &currentItems[i].name);
-				ImGui::InputText((label + " Description").c_str(), &currentItems[i].description);
-				ImGui::EndChild();
-
-				ImGui::Separator();
-				if (CombatTrackerLib::alignedButton(("Finish " + label + " Editing").c_str(), 0.5f)) {
-					ImGui::CloseCurrentPopup();
-				}
-				if (CombatTrackerLib::alignedButton(("Delete " + label).c_str(), 0.5f)) {
-					s_markedForDeletion.push_back(i);
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::EndPopup();
-			}
-			ImGui::PopID();
-		}
-
-		// Delete marked items safely, starting from the largest index to the smallest index.
-		std::sort(s_markedForDeletion.begin(), s_markedForDeletion.end());
-		for (size_t i = s_markedForDeletion.size(); i-- > 0;) {
-			currentItems.erase(currentItems.begin() + s_markedForDeletion[i]);
-		}
-		s_markedForDeletion.clear();
-
-		// Add item section.
-		ImGui::Spacing();
-		if (ImGui::Button(("Add " + label).c_str())) {
-			ImGui::OpenPopup(label.c_str());
-		}
-
-		// Setup configs of the add item popup.
-		ImVec2 center{ ImGui::GetMainViewport()->GetCenter() };
-		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2{ 0.5f, 0.5f });
-		ImVec2 vp{ ImGui::GetMainViewport()->Size };
-		ImGui::SetNextWindowSize(ImVec2{ vp.x * 0.70f, vp.y * 0.70f }, ImGuiCond_Appearing);
-		if (ImGui::BeginPopupModal(label.c_str(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
-			ImGui::BeginChild("AddAddableScroll", ImVec2{ 0, -ImGui::GetFrameHeightWithSpacing() * 2.0f }, true);
-
-			// Again it is fine for these to be static, we only use them here and reset them after adding the item.
-			static std::string s_name{};
-			static std::string s_description{};
-			ImGui::InputText((label + " Name").c_str(), &s_name);
-			ImGui::InputText((label + " Description").c_str(), &s_description);
-			ImGui::EndChild();
-
-			// Button and cleanup section.
-			ImGui::Separator();
-			if (CombatTrackerLib::alignedButton(("Finish " + label + " Creation").c_str(), 0.5f) &&
-				!s_name.empty() && !s_description.empty()) {
-				I item(s_name, s_description);
-				currentItems.push_back(item);
-				s_name.clear();
-				s_description.clear();
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::EndPopup();
 		}
 	}
 
@@ -1389,7 +1169,7 @@ namespace CombatTrackerApp {
 		m_alignmentParameters = { -1, -1, false };
 		m_speciesParameters = { -1, -1, false };
 		m_originParameters = { -1, -1, false };
-		m_isInitiativeOverriden = false;
+		m_isInitiativeOverridden = false;
 		m_isPassivePerceptionOverridden = false;
 		m_isXPOverridden = false;
 		m_isPBOverridden = false;

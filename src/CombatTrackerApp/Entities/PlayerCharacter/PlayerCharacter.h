@@ -5,8 +5,9 @@
 #include "PlayerCharacterConstants.h"
 
 namespace CombatTrackerApp {
-	struct PlayerStatBlock {
 
+	// The stat block types shouldn't be nested types as they are used by the builders.
+	struct PlayerStatBlock {
 		PlayerStatBlock() :
 			levels{
 				{PlayerClass::BARBARIAN, MIN_CLASS_LEVEL},

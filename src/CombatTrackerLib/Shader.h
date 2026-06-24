@@ -3,14 +3,17 @@
 #include <filesystem>
 
 namespace CombatTrackerLib {
-	enum class ShaderType {
-		INVALID,
-		VERTEX,
-		FRAGMENT,
-	};
 	class Shader {
 	public:
-		Shader(const std::filesystem::path& shaderPath, ShaderType type);
+
+		// Should be public to allow for proper object instantiation.
+		enum class Type {
+			INVALID,
+			VERTEX,
+			FRAGMENT,
+		};
+
+		Shader(const std::filesystem::path& shaderPath, Type type);
 		unsigned int getShaderID() const;
 
 	private:

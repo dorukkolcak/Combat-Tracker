@@ -1,3 +1,5 @@
+#pragma once
+
 // These constants are used to style the UI.
 namespace CombatTrackerLib {
 

@@ -6,7 +6,6 @@ namespace CombatTrackerApp {
 		m_statBlockPlayerPortion{ std::move(playerBlock) }
 	{
 	}
-
 	PlayerCharacterBuilder& PlayerCharacterBuilder::setLevels(std::unordered_map<PlayerClass, int>& creatureLevels) { m_playerBlock.levels = creatureLevels; return *this; }
 	PlayerCharacterBuilder& PlayerCharacterBuilder::setSubclasses(std::unordered_map<PlayerClass, PlayerSubclass>& creatureSubclasses) { m_playerBlock.subclasses = creatureSubclasses; return *this; }
 	PlayerCharacterBuilder& PlayerCharacterBuilder::setWeaponProficiencies(std::unordered_map<WeaponType, bool>& creatureWeaponProficiencies) { m_playerBlock.weaponProficiencies = creatureWeaponProficiencies; return *this; }
@@ -23,9 +22,8 @@ namespace CombatTrackerApp {
 		m_playerBlock = PlayerStatBlock{};
 		return *this;
 	}
-
 	PlayerCharacter PlayerCharacterBuilder::movePlayerCharacter() {
-		PlayerCharacter playerCharacter{ std::move(block), std::move(m_playerBlock) };
+		PlayerCharacter playerCharacter{ std::move(m_block), std::move(m_playerBlock) };
 		reset();
 		return playerCharacter;
 	}

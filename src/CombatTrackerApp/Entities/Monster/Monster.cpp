@@ -23,7 +23,7 @@ namespace CombatTrackerApp {
 	}
 
 	Monster MonsterBuilder::moveMonster() {
-		Monster monster{ std::move(block), m_CR, m_XP };
+		Monster monster{ std::move(m_block), m_CR, m_XP };
 		reset();
 		return monster;
 	}

@@ -7,7 +7,7 @@
 #include <fstream>
 
 namespace CombatTrackerLib {
-	Shader::Shader(const std::filesystem::path& shaderPath, ShaderType type) {
+	Shader::Shader(const std::filesystem::path& shaderPath, Type type) {
 
 		std::string shaderCodeTemp{ readFile(shaderPath) };
 		if (shaderCodeTemp.empty()) {
@@ -17,10 +17,10 @@ namespace CombatTrackerLib {
 
 		const char* shaderCode{ shaderCodeTemp.c_str() };
 		switch (type) {
-		case ShaderType::VERTEX:
+		case Type::VERTEX:
 			m_shaderID = glCreateShader(GL_VERTEX_SHADER);
 			break;
-		case ShaderType::FRAGMENT:
+		case Type::FRAGMENT:
 			m_shaderID = glCreateShader(GL_FRAGMENT_SHADER);
 			break;
 		default:

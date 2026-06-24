@@ -6,7 +6,7 @@
 namespace CombatTrackerApp {
 	class OverlayScene : public CombatTrackerLib::Scene {
 	public:
-		OverlayScene(CombatTrackerLib::App* app);
+		explicit OverlayScene(CombatTrackerLib::App* app);
 		virtual ~OverlayScene();
 
 		virtual void notifyScene(const ImGuiIO& imguiIO) override;

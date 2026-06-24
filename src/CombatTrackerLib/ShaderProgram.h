@@ -8,7 +8,7 @@
 
 class ShaderProgram {
 public:
-	ShaderProgram(std::vector<unsigned int> shaders);
+	explicit ShaderProgram(std::vector<unsigned int> shaders);
 	ShaderProgram();
 
 	// These functions mostly serve as simpler abstractions over the OpenGL API.

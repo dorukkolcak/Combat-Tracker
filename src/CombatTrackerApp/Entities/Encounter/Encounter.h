@@ -29,6 +29,7 @@ namespace CombatTrackerApp {
 		void addTurn(std::unique_ptr<Turn> turn);
 
 	private:
+		static int inline currentIDValue{ 1 };
 		int m_ID{};
 		bool m_isCompleted{};
 		int m_totalXPReward{};

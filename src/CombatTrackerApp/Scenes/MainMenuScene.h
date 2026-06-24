@@ -5,7 +5,7 @@
 namespace CombatTrackerApp {
 	class MainMenuScene : public CombatTrackerLib::Scene {
 	public:
-		MainMenuScene(CombatTrackerLib::App* app);
+		explicit MainMenuScene(CombatTrackerLib::App* app);
 		~MainMenuScene();
 
 		virtual void notifyScene(const ImGuiIO& imguiIO) override;

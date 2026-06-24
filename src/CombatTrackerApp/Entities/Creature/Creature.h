@@ -19,6 +19,8 @@ namespace CombatTrackerApp {
 	An INSTANCE of any creature will have a unique ID, that will be generated at the start of encounter running.
 	This ID isn't really used to refer to creature's type/identity, we use its name for this purpose.
 	*/
+
+	// The stat block types shouldn't be nested types as they are used by the builders.
 	struct CreatureStatBlock {
 
 		CreatureStatBlock() :
@@ -277,6 +279,7 @@ namespace CombatTrackerApp {
 			return (abilityScore - 10) / 2;
 		}
 	protected:
+		inline static int currentIDValue{1};
 		int m_ID{};
 		CreatureStatBlock m_statBlockCreaturePortion{};
 	};

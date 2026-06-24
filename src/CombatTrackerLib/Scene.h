@@ -1,4 +1,5 @@
 #pragma once
+
 #include "App.h"
 #include "imgui.h"
 
@@ -8,7 +9,7 @@ namespace CombatTrackerLib {
 	class App;
 	class Scene {
 	public:
-		Scene(App* app);
+		explicit Scene(App* app);
 		virtual ~Scene() = default;
 
 		/*
@@ -27,7 +28,6 @@ namespace CombatTrackerLib {
 
 		// We keep this to queue scene events.
 		App* m_applicationReference{};
-
 		ImGuiViewport* m_mainViewport{};
 	};
 }
