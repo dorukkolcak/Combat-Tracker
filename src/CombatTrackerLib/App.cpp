@@ -19,6 +19,7 @@ namespace CombatTrackerLib {
 		}
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
+
 		/*
 		Pay attention to the UI ordering here:
 		Because we set the Imgui::Style in either dark or light theme, if the common colors are initialized before them, the common colors get overridden.
@@ -125,7 +126,8 @@ namespace CombatTrackerLib {
 		m_sceneTransitionQueue.insert({ transitionedFrom, std::move(transitionedTo) });
 	}
 	void App::dequeueSceneOperations() {
-		// Handle sceneTransition
+
+		// Handle scene transition.
 		for (auto& transitionedTo : m_sceneTransitionQueue) {
 			for (auto& transitionedFrom : m_sceneStack) {
 				if (transitionedFrom.get() == transitionedTo.first) {
@@ -135,7 +137,8 @@ namespace CombatTrackerLib {
 			}
 		}
 		m_sceneTransitionQueue.clear();
-		// Handle sceneDeletion
+
+		// Handle scene deletion.
 		for (auto& deletedScene : m_sceneDeletionQueue) {
 			for (auto& scene : m_sceneStack) {
 				if (scene.get() == deletedScene) {
@@ -143,10 +146,9 @@ namespace CombatTrackerLib {
 					/*
 					This is kinda dumb. The main reason we are using smart pointers in the first place is that they automatically manage memory.
 					But I explicitly "delete" the memory associated with the smart pointer here.
-					The thing is I don't like transfering the ownership of a new object to the "deleted" smart pointer either.
+					The thing is I don't like transferring the ownership of a new object to the "deleted" smart pointer either.
 					As after deletion we might have less scenes than the previous state, aka less smart pointers.
 					So regardless some smart pointers will just be left null with this design and I need to explicitly remove the null ones.
-					Which I do with the functor.
 					*/
 					scene.reset();
 					break;
@@ -156,7 +158,9 @@ namespace CombatTrackerLib {
 
 		// Remove the deleted scene unique_ptrs from the sceneStack.
 		m_sceneStack.erase(
-			std::remove_if(m_sceneStack.begin(), m_sceneStack.end(), IsSceneEmpty()),
+			std::remove_if(m_sceneStack.begin(), m_sceneStack.end(), [](const std::unique_ptr<Scene>& scenePointer) {
+				return scenePointer == nullptr;
+			}),
 			m_sceneStack.end()
 		);
 		m_sceneDeletionQueue.clear();

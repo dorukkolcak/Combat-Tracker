@@ -7,7 +7,9 @@
 #include "imgui_internal.h"
 
 namespace CombatTrackerApp {
-	OverlayScene::OverlayScene(CombatTrackerLib::App* app) : CombatTrackerLib::Scene{ app }, m_isOverlayDockspaceInitialized{ false }
+	OverlayScene::OverlayScene(CombatTrackerLib::App* app) : 
+		CombatTrackerLib::Scene{ app },
+		m_isOverlayDockspaceInitialized{ false }
 	{
 	}
 	OverlayScene::~OverlayScene() {}

@@ -18,7 +18,7 @@ namespace CombatTrackerLib {
 			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		}
 		float mainScale{ ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()) };
-		m_window = glfwCreateWindow( static_cast<int> (mainScale * specification.width), static_cast<int> (mainScale * specification.height), specification.title.c_str(), NULL, NULL);
+		m_window = glfwCreateWindow( static_cast<int> (mainScale * specification.width), static_cast<int> (mainScale * specification.height), specification.title.data(), NULL, NULL);
 		assert(m_window != nullptr);
 		glfwSetWindowUserPointer(m_window, this);
 		glfwMakeContextCurrent(m_window);

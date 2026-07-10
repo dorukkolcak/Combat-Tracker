@@ -6,7 +6,7 @@
 
 // Constructed with std::move as the ShaderProgram should have "ownership" over the set of IDs given in the vector.
 ShaderProgram::ShaderProgram(std::vector<unsigned int> shaderIDs) :
-	m_shaders(std::move(shaderIDs))
+	m_shaders{ std::move(shaderIDs) }
 {
 	m_programID = glCreateProgram();
 	for (const auto& shaderID : m_shaders) {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <string_view>
 
 // Pay attention to the ordering here.
 #include "glad/glad.h"
@@ -10,7 +10,7 @@ namespace CombatTrackerLib {
 
 	// The App class also needs to see the struct definition so we don't nest this struct inside Window's definition.
 	struct WindowSpecification {
-		std::string title{};
+		std::string_view title{};
 
 		unsigned int width{};
 		unsigned int height{};

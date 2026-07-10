@@ -14,6 +14,7 @@ namespace CombatTrackerApp {
 		virtual void renderScene() override;
 
 	private:
+
 		// Flags.
 		ImGuiDockNodeFlags m_mainMenuDockspaceFlags{};
 		ImGuiWindowFlags m_hostWindowFlags{};

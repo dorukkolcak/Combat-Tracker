@@ -6,6 +6,7 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#include <string_view>
 
 namespace CombatTrackerLib {
 	class Scene;
@@ -15,9 +16,9 @@ namespace CombatTrackerLib {
 		// Unlike WindowSpecification, AppSpecification is used only for this class. So make it a public nested type.
 		struct Specification {
 			CombatTrackerLib::WindowSpecification mainWindowSpecification{};
-			std::string applicationName{};
+			std::string_view applicationName{};
 			bool isDarkModeEnabled{};
-		}; 
+		};
 		explicit App(const Specification& specification);
 		~App();
 		void run();
@@ -39,7 +40,7 @@ namespace CombatTrackerLib {
 
 		/*
 		So here is the rough idea of how scenes work:
-		sceneStack maintains our active scenes at an instance. 
+		sceneStack maintains our active scenes at an instance.
 		These scenes are laid out on the application from top to bottom, the first index being the "lowest level" scene.
 		Scene additions, deletions and transitions happen at the last step of the application main loop, so after rendering.
 		IMPORTANT CONSIDERATION:
@@ -49,11 +50,11 @@ namespace CombatTrackerLib {
 		To add a new scene on top, we just push_back to sceneAdditionQueue.
 		I am currently only considering allowing addition to on top of the sceneStack but I might change this later.
 		QUEUEING SCENE DELETIONS:
-		To remove a scene, we first search the scene in the vector (passed by as a raw pointer that points to the object pointed by the unique_ptr) 
+		To remove a scene, we first search the scene in the vector (passed by as a raw pointer that points to the object pointed by the unique_ptr)
 		To find it we just dereference the pointers and check whether a unique_ptr points to the same object as the raw pointer.
 		After finding the scene to be deleted, we keep a reference to it as a raw pointer in the sceneDeletionQueue.
 		QUEUEING SCENE TRANSITIONS:
-		We pass a raw pointer/unique_ptr pair to an unordered map: 
+		We pass a raw pointer/unique_ptr pair to an unordered map:
 		Our keys refer to scenes that are going to be transitioned FROM.
 		The values refer to the scenes that are going to be transitioned TO.
 		Each key and value is unique by the way, despite unordered_map's only condition being making the keys unique.
@@ -67,13 +68,5 @@ namespace CombatTrackerLib {
 		You might notice that scene transitions are simply deletion + addition consecutively.
 		*/
 		void dequeueSceneOperations();
-	};
-
-	// A functor (function object) that marks whether a scene is empty or not by looking for null pointers.
-	// Used in scene deletion.
-	struct IsSceneEmpty {
-		bool operator()(const std::unique_ptr<Scene>& scenePointer) {
-			return scenePointer == nullptr;
-		}
 	};
 }
