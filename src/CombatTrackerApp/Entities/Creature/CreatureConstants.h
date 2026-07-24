@@ -37,7 +37,7 @@ namespace CombatTrackerApp {
 		{Size::SMALL, "Small"},
 		{Size::MEDIUM, "Medium"},
 		{Size::LARGE, "Large"},
-		{Size::HUGE, "Huge"},
+		{Size::HUGE_SIZE, "Huge"},
 		{Size::GARGANTUAN, "Gargantuan"}
 	};
 	inline const std::unordered_map<CreatureType, std::string> CREATURE_TYPE_NAMES{
