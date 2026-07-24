@@ -5,6 +5,7 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui.h"
 
+#include <algorithm>
 #include <cassert>
 #include <ranges>
 
@@ -38,7 +39,7 @@ namespace CombatTrackerLib {
 
 		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForOpenGL(m_mainWindow->getGLFWwindow(), true);
-		const char* glsl_version = "#version 130";
+		const char* glsl_version = "#version 150";
 		ImGui_ImplOpenGL3_Init(glsl_version);
 	}
 	// Destructor should be empty as we can explicitly call app.stop() to free all resources.

@@ -1,0 +1,85 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push to the same branch makes the in-flight run redundant.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # Never cancel the other platforms just because one failed: the point of
+      # this matrix is to see every platform's result on a single run.
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64 Debug
+            os: windows-latest
+            preset: windows-debug
+          - name: Windows x64 Release
+            os: windows-latest
+            preset: windows-release
+          - name: Linux Debug
+            os: ubuntu-latest
+            preset: linux-debug
+          - name: Linux Release
+            os: ubuntu-latest
+            preset: linux-release
+          - name: macOS Debug
+            os: macos-latest
+            preset: macos-debug
+          - name: macOS Release
+            os: macos-latest
+            preset: macos-release
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # GLFW builds both its X11 and Wayland backends on Linux, so both sets of
+      # headers have to be present or the configure step fails.
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ninja-build \
+            xorg-dev \
+            libwayland-dev \
+            libxkbcommon-dev \
+            wayland-protocols \
+            extra-cmake-modules
+
+      - name: Install Ninja (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ninja
+
+      - name: Set up MSVC developer environment
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Cache fetched dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.deps
+          key: deps-${{ runner.os }}-${{ hashFiles('Dependencies.cmake') }}
+          restore-keys: |
+            deps-${{ runner.os }}-
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }} -D FETCHCONTENT_BASE_DIR=${{ github.workspace }}/.deps
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.preset }}

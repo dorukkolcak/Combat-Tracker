@@ -1,4 +1,3 @@
-
 # Download releases as dependecies at configure time.
 include(FetchContent)
 
@@ -19,6 +18,10 @@ else()
         DOWNLOAD_EXTRACT_TIMESTAMP OFF
         URL https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip
     )
+
+    set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
     FetchContent_MakeAvailable(glfw3)
 
@@ -42,6 +45,10 @@ add_library(glad STATIC
 target_include_directories(glad PUBLIC
     ${PROJECT_SOURCE_DIR}/external/glad/include
 )
+
+# glad's loader resolves symbols through dlopen/dlsym on every non-Windows
+# platform, which lives in libdl on glibc older than 2.34.
+target_link_libraries(glad PUBLIC ${CMAKE_DL_LIBS})
 
 #set_target_properties(glad PROPERTIES FOLDER "Dependencies")
 

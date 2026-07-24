@@ -2,6 +2,7 @@
 
 #include "glad/glad.h"
 
+#include <algorithm>
 #include <iostream>
 
 // Constructed with std::move as the ShaderProgram should have "ownership" over the set of IDs given in the vector.

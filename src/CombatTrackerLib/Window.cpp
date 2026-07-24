@@ -2,6 +2,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <cassert>
+#include <stdexcept>
+#include <string>
 
 #include "Window.h"
 
@@ -14,6 +16,7 @@ namespace CombatTrackerLib {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 		if (specification.isResizable) {
 			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		}

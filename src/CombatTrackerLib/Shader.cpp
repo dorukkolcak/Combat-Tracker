@@ -3,6 +3,7 @@
 
 #include "glad/glad.h"
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 
