@@ -33,6 +33,7 @@ add_executable(Combat-Tracker-App
  )
 
 # Link the static library we created earlier to the application.
-target_link_libraries(Combat-Tracker-App PRIVATE
+target_link_libraries(
+    Combat-Tracker-App PRIVATE
     Combat-Tracker-Lib
 )

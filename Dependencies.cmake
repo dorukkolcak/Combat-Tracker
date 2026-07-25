@@ -39,8 +39,7 @@ find_package(OpenGL REQUIRED)
 
 # GLAD
 add_library(glad STATIC
-    ${PROJECT_SOURCE_DIR}/external/glad/src/glad.c
-)
+    ${PROJECT_SOURCE_DIR}/external/glad/src/glad.c)
 
 target_include_directories(glad PUBLIC
     ${PROJECT_SOURCE_DIR}/external/glad/include
@@ -82,8 +81,7 @@ add_library(imgui STATIC
     ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
     ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp
     ${IMGUI_DIR}/misc/cpp/imgui_stdlib.h
-    ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp
-)
+    ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp)
 
 target_include_directories(imgui PUBLIC
     ${IMGUI_DIR}
@@ -115,3 +113,12 @@ FetchContent_MakeAvailable(json)
 if (NOT TARGET nlohmann_json::nlohmann_json)
     message(FATAL_ERROR "nlohmann_json::nlohmann_json target was not found.")
 endif()
+
+# Google Tests
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)

@@ -10,3 +10,5 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies.cmake)
 
 add_subdirectory(src/CombatTrackerLib)
 add_subdirectory(src/CombatTrackerApp)
+add_subdirectory(tests/CombatTrackerLib)
+add_subdirectory(tests/CombatTrackerApp)
