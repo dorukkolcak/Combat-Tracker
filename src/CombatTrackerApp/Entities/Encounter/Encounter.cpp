@@ -17,7 +17,6 @@ namespace CombatTrackerApp {
 			m_totalXPReward += (m_monsters[i])->getXP();
 		}
 	}
-	Encounter::~Encounter() {}
 	void Encounter::setInitiatives(std::map<int, int> initiatives) {
 		m_mappedInitiatives = std::move(initiatives);
 	}

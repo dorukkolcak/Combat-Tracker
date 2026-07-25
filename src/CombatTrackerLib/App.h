@@ -2,6 +2,7 @@
 
 #include "Window.h"
 #include "Scene.h"
+#include "Themes.h"
 
 #include <memory>
 #include <unordered_map>
@@ -15,9 +16,9 @@ namespace CombatTrackerLib {
 
 		// Unlike WindowSpecification, AppSpecification is used only for this class. So make it a public nested type.
 		struct Specification {
+			UIPreset initialPreset{};
 			CombatTrackerLib::WindowSpecification mainWindowSpecification{};
 			std::string_view applicationName{};
-			bool isDarkModeEnabled{};
 		};
 		explicit App(const Specification& specification);
 		~App();
@@ -30,6 +31,7 @@ namespace CombatTrackerLib {
 
 	private:
 		Specification m_applicationSpecification{};
+		UITheme m_theme{};
 		std::unique_ptr<Window> m_mainWindow{};
 
 		// I prefer using vector as sort of a stack because it is much better at resizing, compared to a pure stack data structure.

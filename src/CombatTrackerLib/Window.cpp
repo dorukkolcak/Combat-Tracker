@@ -29,9 +29,6 @@ namespace CombatTrackerLib {
 			glfwSwapInterval(1);
 		}
 	}
-
-	// Once again should be left empty as we have a separate function for destroying the window.
-	Window::~Window() {}
 	void Window::update() {
 		glfwSwapBuffers(m_window);
 	}

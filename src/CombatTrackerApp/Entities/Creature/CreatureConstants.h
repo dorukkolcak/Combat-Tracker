@@ -4,6 +4,7 @@
 
 #include "CreatureEnums.h"
 
+// Unfortunately, none of the unordered_map's can be constexpr (in C++23) which is kinda annoying, as there is no reason for them to not be constexpr.
 namespace CombatTrackerApp {
 	inline const std::unordered_map<Skill, Ability> MAPPED_SKILLS {
 		{Skill::ATHLETICS, Ability::STRENGTH},

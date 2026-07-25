@@ -8,8 +8,6 @@
 #include "../Monster/Monster.h"
 #include "../Turn/Turn.h"
 
-
-
 namespace CombatTrackerApp {
 	
 	// Forward declaration to prevent linker errors.
@@ -22,11 +20,9 @@ namespace CombatTrackerApp {
 			std::vector<std::unique_ptr<Monster>> encounterMonsters, 
 			std::vector<std::unique_ptr<PlayerCharacter>> encounterPlayers
 		);
-		~Encounter();
-
 		void setInitiatives(std::map<int, int> initiatives);
 		void setAsCompleted();
-		void addTurn(std::unique_ptr<Turn> turn);
+		void addTurn(std::unique_ptr<Turn> turn); // Should be moved to the m_turns member variable.
 
 	private:
 		static int inline currentIDValue{ 1 };

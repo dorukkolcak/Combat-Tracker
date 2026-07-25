@@ -1,0 +1,742 @@
+#pragma once
+
+#include "imgui.h"
+
+#include <unordered_map>
+#include <string>
+
+namespace CombatTrackerLib {
+
+	enum class UIPreset {
+		NONE, // Used mostly for value-initialization.
+		DARK,
+		LIGHT,
+		HIGH_CONTRAST,
+		ARCANE,
+		FOREST,
+		INFERNAL,
+		GLACIAL,
+		CELESTIAL,
+		NECROTIC,
+		BLOOD_MOON,
+		FEYWILD,
+		STORM,
+		SANDS,
+		MOONLIT,
+	};
+	inline const std::unordered_map<UIPreset, std::string> PRESET_NAMES{
+		{UIPreset::DARK, "Dark"},
+		{UIPreset::LIGHT, "Light"},
+		{UIPreset::HIGH_CONTRAST, "High Contrast"},
+		{UIPreset::ARCANE, "Arcane"},
+		{UIPreset::FOREST, "Forest"},
+		{UIPreset::INFERNAL, "Infernal"},
+		{UIPreset::GLACIAL, "Glacial"},
+		{UIPreset::CELESTIAL, "Celestial"},
+		{UIPreset::NECROTIC, "Necrotic"},
+		{UIPreset::BLOOD_MOON, "Blood Moon"},
+		{UIPreset::FEYWILD, "Feywild"},
+		{UIPreset::STORM, "Storm"},
+		{UIPreset::SANDS, "Sands"},
+		{UIPreset::MOONLIT, "Moonlit"},
+	};
+	struct UITheme {
+	public:
+		UIPreset preset{};
+		ImGuiStyle config{};
+		inline void setUITheme(UIPreset newPreset);
+	private:
+
+		// Helper to simplify color representation.
+		static constexpr ImVec4 rgba(float red, float green, float blue, float alpha = 255.0f) {
+			return ImVec4(red / 255.0f, green / 255.0f, blue / 255.0f, alpha / 255.0f);
+		}
+		
+		/*
+		The preset styles are created via lambdas that return a ImGuiStyle object.
+		Since the unordered_map is const, the lambdas are called only once.
+		So we don't create unnecessary temporaries when switching between presets.
+		We forward declare this variable and define it outside the class so that it can see the rgba definition.
+		*/
+		static const std::unordered_map<UIPreset, ImGuiStyle> PRESET_TO_CONFIG;
+	};
+
+	/*
+	Defined out of the class body because rgba is only declared, not yet defined, while the class is still being parsed.
+	Which leaves the constexpr color constants below with nothing to evaluate.
+	Also the lambdas are immediately invoked using IIFE (parentheses with empty parameter list at the end of the lambda expression.)
+	*/
+	inline const std::unordered_map<UIPreset, ImGuiStyle> UITheme::PRESET_TO_CONFIG{
+		{UIPreset::DARK, []() {
+
+			ImGuiStyle style{};
+			constexpr ImVec4 windowBackground{ rgba(12, 15, 19) };
+			constexpr ImVec4 childBackground{ rgba(16, 20, 25) };
+			constexpr ImVec4 borderColor{ rgba(42, 50, 60) };
+			constexpr ImVec4 barColor{ rgba(9, 11, 14) };
+			ImVec4* colors{ style.Colors };
+
+			colors[ImGuiCol_Text] = rgba(220, 226, 232);
+			colors[ImGuiCol_TextDisabled] = rgba(160, 170, 180, 140);
+			colors[ImGuiCol_WindowBg] = windowBackground;
+			colors[ImGuiCol_ChildBg] = childBackground;
+			colors[ImGuiCol_PopupBg] = childBackground;
+			colors[ImGuiCol_Border] = borderColor;
+			colors[ImGuiCol_FrameBg] = rgba(18, 23, 29);
+			colors[ImGuiCol_FrameBgHovered] = rgba(22, 28, 35);
+			colors[ImGuiCol_FrameBgActive] = rgba(26, 33, 41);
+			colors[ImGuiCol_TitleBg] = barColor;
+			colors[ImGuiCol_TitleBgActive] = barColor;
+			colors[ImGuiCol_MenuBarBg] = barColor;
+			colors[ImGuiCol_ScrollbarBg] = barColor;
+			colors[ImGuiCol_ScrollbarGrab] = ImVec4(borderColor.x, borderColor.y, borderColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_ScrollbarGrabHovered] = borderColor;
+			colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(borderColor.x * 0.92f, borderColor.y * 0.92f, borderColor.z * 0.92f, 1.0f);
+			colors[ImGuiCol_CheckMark] = rgba(200, 85, 84);
+			colors[ImGuiCol_SliderGrab] = rgba(212, 175, 55);
+			colors[ImGuiCol_SliderGrabActive] = rgba(212, 175, 55);
+			colors[ImGuiCol_Button] = rgba(200, 85, 84);
+			colors[ImGuiCol_ButtonHovered] = rgba(220, 95, 94);
+			colors[ImGuiCol_ButtonActive] = rgba(150, 55, 55);
+			colors[ImGuiCol_Header] = rgba(200, 85, 84, 28);
+			colors[ImGuiCol_HeaderHovered] = rgba(200, 85, 84, 52);
+			colors[ImGuiCol_HeaderActive] = rgba(200, 85, 84, 78);
+			colors[ImGuiCol_Separator] = borderColor;
+			colors[ImGuiCol_SeparatorHovered] = rgba(200, 85, 84, 190);
+			colors[ImGuiCol_SeparatorActive] = rgba(200, 85, 84);
+			colors[ImGuiCol_TabHovered] = rgba(200, 85, 84, 90);
+			colors[ImGuiCol_Tab] = barColor;
+			colors[ImGuiCol_TabSelected] = childBackground;
+			colors[ImGuiCol_TabDimmed] = ImVec4(barColor.x, barColor.y, barColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_TabDimmedSelected] = ImVec4(childBackground.x, childBackground.y, childBackground.z, 240.0f / 255.0f);
+			colors[ImGuiCol_DockingPreview] = rgba(200, 85, 84, 70);
+			colors[ImGuiCol_DockingEmptyBg] = windowBackground;
+			colors[ImGuiCol_TextSelectedBg] = rgba(200, 85, 84, 70);
+			return style;
+		}()},
+		{UIPreset::LIGHT, []() {
+
+			ImGuiStyle style{};
+			ImGui::StyleColorsLight(&style);
+			constexpr ImVec4 windowBackground{ rgba(246, 237, 223) };
+			constexpr ImVec4 childBackground{ rgba(252, 244, 232) };
+			constexpr ImVec4 borderColor{ rgba(206, 186, 166) };
+			constexpr ImVec4 barColor{ rgba(223, 207, 186) };
+			constexpr ImVec4 frameColor{ rgba(255, 250, 242) };
+			ImVec4* colors{ style.Colors };
+
+			colors[ImGuiCol_Text] = rgba(87, 74, 63);
+			colors[ImGuiCol_TextDisabled] = rgba(120, 105, 94, 160);
+			colors[ImGuiCol_WindowBg] = windowBackground;
+			colors[ImGuiCol_ChildBg] = childBackground;
+			colors[ImGuiCol_PopupBg] = childBackground;
+			colors[ImGuiCol_Border] = borderColor;
+			colors[ImGuiCol_FrameBg] = frameColor;
+			colors[ImGuiCol_FrameBgHovered] = ImVec4(frameColor.x, frameColor.y - 0.02f, frameColor.z - 0.03f, 1.0f);
+			colors[ImGuiCol_FrameBgActive] = ImVec4(frameColor.x, frameColor.y - 0.04f, frameColor.z - 0.06f, 1.0f);
+			colors[ImGuiCol_TitleBg] = barColor;
+			colors[ImGuiCol_TitleBgActive] = barColor;
+			colors[ImGuiCol_MenuBarBg] = barColor;
+			colors[ImGuiCol_ScrollbarBg] = barColor;
+			colors[ImGuiCol_ScrollbarGrab] = ImVec4(borderColor.x, borderColor.y, borderColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_ScrollbarGrabHovered] = borderColor;
+			colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(borderColor.x * 0.95f, borderColor.y * 0.95f, borderColor.z * 0.95f, 1.0f);
+			colors[ImGuiCol_CheckMark] = rgba(200, 85, 84);
+			colors[ImGuiCol_SliderGrab] = rgba(212, 175, 55);
+			colors[ImGuiCol_SliderGrabActive] = rgba(212, 175, 55);
+			colors[ImGuiCol_Button] = rgba(200, 85, 84);
+			colors[ImGuiCol_ButtonHovered] = rgba(220, 95, 94);
+			colors[ImGuiCol_ButtonActive] = rgba(150, 55, 55);
+			colors[ImGuiCol_Header] = rgba(200, 85, 84, 28);
+			colors[ImGuiCol_HeaderHovered] = rgba(200, 85, 84, 52);
+			colors[ImGuiCol_HeaderActive] = rgba(200, 85, 84, 78);
+			colors[ImGuiCol_Separator] = rgba(210, 190, 170);
+			colors[ImGuiCol_SeparatorHovered] = rgba(200, 85, 84, 190);
+			colors[ImGuiCol_SeparatorActive] = rgba(200, 85, 84);
+			colors[ImGuiCol_TabHovered] = rgba(200, 85, 84, 90);
+			colors[ImGuiCol_Tab] = barColor;
+			colors[ImGuiCol_TabSelected] = childBackground;
+			colors[ImGuiCol_TabDimmed] = ImVec4(barColor.x, barColor.y, barColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_TabDimmedSelected] = ImVec4(childBackground.x, childBackground.y, childBackground.z, 240.0f / 255.0f);
+			colors[ImGuiCol_DockingPreview] = rgba(200, 85, 84, 60);
+			colors[ImGuiCol_DockingEmptyBg] = windowBackground;
+			colors[ImGuiCol_TextSelectedBg] = rgba(200, 85, 84, 70);
+			return style;
+		}()},
+		{UIPreset::HIGH_CONTRAST, []() {
+
+			ImGuiStyle style{};
+			constexpr ImVec4 windowBackground{ rgba(0, 0, 0) };
+			constexpr ImVec4 childBackground{ rgba(10, 10, 10) };
+			constexpr ImVec4 borderColor{ rgba(255, 255, 255) };
+			constexpr ImVec4 tabSelectedColor{ rgba(38, 38, 38) };
+
+			ImVec4* colors{ style.Colors };
+			colors[ImGuiCol_Text] = rgba(255, 255, 255);
+			colors[ImGuiCol_TextDisabled] = rgba(175, 175, 175, 215);
+			colors[ImGuiCol_WindowBg] = windowBackground;
+			colors[ImGuiCol_ChildBg] = childBackground;
+			colors[ImGuiCol_PopupBg] = childBackground;
+			colors[ImGuiCol_Border] = borderColor;
+			colors[ImGuiCol_FrameBg] = rgba(20, 20, 20);
+			colors[ImGuiCol_FrameBgHovered] = rgba(45, 45, 45);
+			colors[ImGuiCol_FrameBgActive] = rgba(70, 70, 70);
+			colors[ImGuiCol_TitleBg] = windowBackground;
+			colors[ImGuiCol_TitleBgActive] = windowBackground;
+			colors[ImGuiCol_MenuBarBg] = windowBackground;
+			colors[ImGuiCol_ScrollbarBg] = windowBackground;
+			colors[ImGuiCol_ScrollbarGrab] = rgba(200, 200, 200);
+			colors[ImGuiCol_ScrollbarGrabHovered] = borderColor;
+			colors[ImGuiCol_ScrollbarGrabActive] = rgba(255, 255, 255);
+			colors[ImGuiCol_CheckMark] = rgba(255, 214, 0);
+			colors[ImGuiCol_SliderGrab] = rgba(255, 214, 0);
+			colors[ImGuiCol_SliderGrabActive] = rgba(255, 214, 0);
+			colors[ImGuiCol_Button] = rgba(0, 102, 204);
+			colors[ImGuiCol_ButtonHovered] = rgba(32, 132, 232);
+			colors[ImGuiCol_ButtonActive] = rgba(0, 74, 150);
+			colors[ImGuiCol_Header] = rgba(0, 102, 204, 90);
+			colors[ImGuiCol_HeaderHovered] = rgba(0, 102, 204, 140);
+			colors[ImGuiCol_HeaderActive] = rgba(0, 102, 204, 190);
+			colors[ImGuiCol_Separator] = borderColor;
+			colors[ImGuiCol_SeparatorHovered] = rgba(0, 122, 235, 220);
+			colors[ImGuiCol_SeparatorActive] = rgba(0, 122, 235);
+			colors[ImGuiCol_TabHovered] = rgba(0, 102, 204, 160);
+			colors[ImGuiCol_Tab] = windowBackground;
+			colors[ImGuiCol_TabSelected] = tabSelectedColor;
+			colors[ImGuiCol_TabDimmed] = ImVec4(windowBackground.x, windowBackground.y, windowBackground.z, 220.0f / 255.0f);
+			colors[ImGuiCol_TabDimmedSelected] = ImVec4(tabSelectedColor.x, tabSelectedColor.y, tabSelectedColor.z, 240.0f / 255.0f);
+			colors[ImGuiCol_DockingPreview] = rgba(0, 122, 235, 120);
+			colors[ImGuiCol_DockingEmptyBg] = windowBackground;
+			colors[ImGuiCol_TextSelectedBg] = rgba(0, 102, 204, 160);
+			return style;
+		}()},
+		{UIPreset::ARCANE, []() {
+
+			ImGuiStyle style{};
+			constexpr ImVec4 windowBackground{ rgba(18, 14, 28) };
+			constexpr ImVec4 childBackground{ rgba(24, 19, 36) };
+			constexpr ImVec4 borderColor{ rgba(58, 46, 84) };
+			constexpr ImVec4 barColor{ rgba(13, 10, 20) };
+			ImVec4* colors{ style.Colors };
+
+			colors[ImGuiCol_Text] = rgba(226, 220, 242);
+			colors[ImGuiCol_TextDisabled] = rgba(150, 143, 172, 160);
+			colors[ImGuiCol_WindowBg] = windowBackground;
+			colors[ImGuiCol_ChildBg] = childBackground;
+			colors[ImGuiCol_PopupBg] = childBackground;
+			colors[ImGuiCol_Border] = borderColor;
+			colors[ImGuiCol_FrameBg] = rgba(28, 22, 42);
+			colors[ImGuiCol_FrameBgHovered] = rgba(35, 28, 52);
+			colors[ImGuiCol_FrameBgActive] = rgba(42, 34, 62);
+			colors[ImGuiCol_TitleBg] = barColor;
+			colors[ImGuiCol_TitleBgActive] = barColor;
+			colors[ImGuiCol_MenuBarBg] = barColor;
+			colors[ImGuiCol_ScrollbarBg] = barColor;
+			colors[ImGuiCol_ScrollbarGrab] = ImVec4(borderColor.x, borderColor.y, borderColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_ScrollbarGrabHovered] = borderColor;
+			colors[ImGuiCol_ScrollbarGrabActive] = rgba(70, 56, 100);
+			colors[ImGuiCol_CheckMark] = rgba(146, 104, 220);
+			colors[ImGuiCol_SliderGrab] = rgba(212, 175, 55);
+			colors[ImGuiCol_SliderGrabActive] = rgba(212, 175, 55);
+			colors[ImGuiCol_Button] = rgba(124, 84, 196);
+			colors[ImGuiCol_ButtonHovered] = rgba(146, 104, 220);
+			colors[ImGuiCol_ButtonActive] = rgba(94, 62, 152);
+			colors[ImGuiCol_Header] = rgba(140, 96, 214, 28);
+			colors[ImGuiCol_HeaderHovered] = rgba(140, 96, 214, 52);
+			colors[ImGuiCol_HeaderActive] = rgba(140, 96, 214, 78);
+			colors[ImGuiCol_Separator] = borderColor;
+			colors[ImGuiCol_SeparatorHovered] = rgba(140, 96, 214, 190);
+			colors[ImGuiCol_SeparatorActive] = rgba(140, 96, 214);
+			colors[ImGuiCol_TabHovered] = rgba(140, 96, 214, 90);
+			colors[ImGuiCol_Tab] = barColor;
+			colors[ImGuiCol_TabSelected] = childBackground;
+			colors[ImGuiCol_TabDimmed] = ImVec4(barColor.x, barColor.y, barColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_TabDimmedSelected] = ImVec4(childBackground.x, childBackground.y, childBackground.z, 240.0f / 255.0f);
+			colors[ImGuiCol_DockingPreview] = rgba(140, 96, 214, 70);
+			colors[ImGuiCol_DockingEmptyBg] = windowBackground;
+			colors[ImGuiCol_TextSelectedBg] = rgba(140, 96, 214, 70);
+			return style;
+		}()},
+		{UIPreset::FOREST, []() {
+
+			ImGuiStyle style{};
+			constexpr ImVec4 windowBackground{ rgba(14, 20, 16) };
+			constexpr ImVec4 childBackground{ rgba(19, 26, 21) };
+			constexpr ImVec4 borderColor{ rgba(46, 62, 48) };
+			constexpr ImVec4 barColor{ rgba(10, 15, 12) };
+			ImVec4* colors{ style.Colors };
+
+			colors[ImGuiCol_Text] = rgba(228, 234, 222);
+			colors[ImGuiCol_TextDisabled] = rgba(148, 160, 144, 160);
+			colors[ImGuiCol_WindowBg] = windowBackground;
+			colors[ImGuiCol_ChildBg] = childBackground;
+			colors[ImGuiCol_PopupBg] = childBackground;
+			colors[ImGuiCol_Border] = borderColor;
+			colors[ImGuiCol_FrameBg] = rgba(22, 30, 24);
+			colors[ImGuiCol_FrameBgHovered] = rgba(28, 38, 30);
+			colors[ImGuiCol_FrameBgActive] = rgba(34, 46, 36);
+			colors[ImGuiCol_TitleBg] = barColor;
+			colors[ImGuiCol_TitleBgActive] = barColor;
+			colors[ImGuiCol_MenuBarBg] = barColor;
+			colors[ImGuiCol_ScrollbarBg] = barColor;
+			colors[ImGuiCol_ScrollbarGrab] = ImVec4(borderColor.x, borderColor.y, borderColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_ScrollbarGrabHovered] = borderColor;
+			colors[ImGuiCol_ScrollbarGrabActive] = rgba(58, 76, 60);
+			colors[ImGuiCol_CheckMark] = rgba(198, 130, 52);
+			colors[ImGuiCol_SliderGrab] = rgba(198, 178, 96);
+			colors[ImGuiCol_SliderGrabActive] = rgba(198, 178, 96);
+			colors[ImGuiCol_Button] = rgba(166, 106, 38);
+			colors[ImGuiCol_ButtonHovered] = rgba(198, 130, 52);
+			colors[ImGuiCol_ButtonActive] = rgba(126, 78, 26);
+			colors[ImGuiCol_Header] = rgba(196, 126, 44, 28);
+			colors[ImGuiCol_HeaderHovered] = rgba(196, 126, 44, 52);
+			colors[ImGuiCol_HeaderActive] = rgba(196, 126, 44, 78);
+			colors[ImGuiCol_Separator] = borderColor;
+			colors[ImGuiCol_SeparatorHovered] = rgba(196, 126, 44, 190);
+			colors[ImGuiCol_SeparatorActive] = rgba(196, 126, 44);
+			colors[ImGuiCol_TabHovered] = rgba(196, 126, 44, 90);
+			colors[ImGuiCol_Tab] = barColor;
+			colors[ImGuiCol_TabSelected] = childBackground;
+			colors[ImGuiCol_TabDimmed] = ImVec4(barColor.x, barColor.y, barColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_TabDimmedSelected] = ImVec4(childBackground.x, childBackground.y, childBackground.z, 240.0f / 255.0f);
+			colors[ImGuiCol_DockingPreview] = rgba(196, 126, 44, 70);
+			colors[ImGuiCol_DockingEmptyBg] = windowBackground;
+			colors[ImGuiCol_TextSelectedBg] = rgba(196, 126, 44, 70);
+			return style;
+		}()},
+		{UIPreset::INFERNAL, []() {
+
+			ImGuiStyle style{};
+			constexpr ImVec4 windowBackground{ rgba(20, 12, 12) };
+			constexpr ImVec4 childBackground{ rgba(28, 17, 16) };
+			constexpr ImVec4 borderColor{ rgba(72, 34, 28) };
+			constexpr ImVec4 barColor{ rgba(14, 8, 8) };
+			ImVec4* colors{ style.Colors };
+
+			colors[ImGuiCol_Text] = rgba(240, 224, 214);
+			colors[ImGuiCol_TextDisabled] = rgba(160, 138, 130, 160);
+			colors[ImGuiCol_WindowBg] = windowBackground;
+			colors[ImGuiCol_ChildBg] = childBackground;
+			colors[ImGuiCol_PopupBg] = childBackground;
+			colors[ImGuiCol_Border] = borderColor;
+			colors[ImGuiCol_FrameBg] = rgba(34, 20, 19);
+			colors[ImGuiCol_FrameBgHovered] = rgba(44, 26, 24);
+			colors[ImGuiCol_FrameBgActive] = rgba(54, 32, 29);
+			colors[ImGuiCol_TitleBg] = barColor;
+			colors[ImGuiCol_TitleBgActive] = barColor;
+			colors[ImGuiCol_MenuBarBg] = barColor;
+			colors[ImGuiCol_ScrollbarBg] = barColor;
+			colors[ImGuiCol_ScrollbarGrab] = ImVec4(borderColor.x, borderColor.y, borderColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_ScrollbarGrabHovered] = borderColor;
+			colors[ImGuiCol_ScrollbarGrabActive] = rgba(92, 44, 36);
+			colors[ImGuiCol_CheckMark] = rgba(224, 92, 46);
+			colors[ImGuiCol_SliderGrab] = rgba(240, 168, 64);
+			colors[ImGuiCol_SliderGrabActive] = rgba(240, 168, 64);
+			colors[ImGuiCol_Button] = rgba(196, 66, 32);
+			colors[ImGuiCol_ButtonHovered] = rgba(224, 92, 46);
+			colors[ImGuiCol_ButtonActive] = rgba(148, 46, 20);
+			colors[ImGuiCol_Header] = rgba(224, 92, 46, 28);
+			colors[ImGuiCol_HeaderHovered] = rgba(224, 92, 46, 52);
+			colors[ImGuiCol_HeaderActive] = rgba(224, 92, 46, 78);
+			colors[ImGuiCol_Separator] = borderColor;
+			colors[ImGuiCol_SeparatorHovered] = rgba(224, 92, 46, 190);
+			colors[ImGuiCol_SeparatorActive] = rgba(224, 92, 46);
+			colors[ImGuiCol_TabHovered] = rgba(224, 92, 46, 90);
+			colors[ImGuiCol_Tab] = barColor;
+			colors[ImGuiCol_TabSelected] = childBackground;
+			colors[ImGuiCol_TabDimmed] = ImVec4(barColor.x, barColor.y, barColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_TabDimmedSelected] = ImVec4(childBackground.x, childBackground.y, childBackground.z, 240.0f / 255.0f);
+			colors[ImGuiCol_DockingPreview] = rgba(224, 92, 46, 70);
+			colors[ImGuiCol_DockingEmptyBg] = windowBackground;
+			colors[ImGuiCol_TextSelectedBg] = rgba(224, 92, 46, 70);
+			return style;
+		}()},
+		{UIPreset::GLACIAL, []() {
+
+			ImGuiStyle style{};
+			constexpr ImVec4 windowBackground{ rgba(14, 20, 26) };
+			constexpr ImVec4 childBackground{ rgba(19, 27, 34) };
+			constexpr ImVec4 borderColor{ rgba(48, 66, 80) };
+			constexpr ImVec4 barColor{ rgba(10, 15, 20) };
+			ImVec4* colors{ style.Colors };
+
+			colors[ImGuiCol_Text] = rgba(224, 236, 244);
+			colors[ImGuiCol_TextDisabled] = rgba(140, 158, 172, 160);
+			colors[ImGuiCol_WindowBg] = windowBackground;
+			colors[ImGuiCol_ChildBg] = childBackground;
+			colors[ImGuiCol_PopupBg] = childBackground;
+			colors[ImGuiCol_Border] = borderColor;
+			colors[ImGuiCol_FrameBg] = rgba(22, 31, 39);
+			colors[ImGuiCol_FrameBgHovered] = rgba(28, 39, 48);
+			colors[ImGuiCol_FrameBgActive] = rgba(34, 47, 58);
+			colors[ImGuiCol_TitleBg] = barColor;
+			colors[ImGuiCol_TitleBgActive] = barColor;
+			colors[ImGuiCol_MenuBarBg] = barColor;
+			colors[ImGuiCol_ScrollbarBg] = barColor;
+			colors[ImGuiCol_ScrollbarGrab] = ImVec4(borderColor.x, borderColor.y, borderColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_ScrollbarGrabHovered] = borderColor;
+			colors[ImGuiCol_ScrollbarGrabActive] = rgba(60, 82, 98);
+			colors[ImGuiCol_CheckMark] = rgba(96, 196, 224);
+			colors[ImGuiCol_SliderGrab] = rgba(150, 220, 236);
+			colors[ImGuiCol_SliderGrabActive] = rgba(150, 220, 236);
+			colors[ImGuiCol_Button] = rgba(38, 132, 168);
+			colors[ImGuiCol_ButtonHovered] = rgba(56, 158, 196);
+			colors[ImGuiCol_ButtonActive] = rgba(26, 98, 128);
+			colors[ImGuiCol_Header] = rgba(72, 172, 208, 28);
+			colors[ImGuiCol_HeaderHovered] = rgba(72, 172, 208, 52);
+			colors[ImGuiCol_HeaderActive] = rgba(72, 172, 208, 78);
+			colors[ImGuiCol_Separator] = borderColor;
+			colors[ImGuiCol_SeparatorHovered] = rgba(72, 172, 208, 190);
+			colors[ImGuiCol_SeparatorActive] = rgba(72, 172, 208);
+			colors[ImGuiCol_TabHovered] = rgba(72, 172, 208, 90);
+			colors[ImGuiCol_Tab] = barColor;
+			colors[ImGuiCol_TabSelected] = childBackground;
+			colors[ImGuiCol_TabDimmed] = ImVec4(barColor.x, barColor.y, barColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_TabDimmedSelected] = ImVec4(childBackground.x, childBackground.y, childBackground.z, 240.0f / 255.0f);
+			colors[ImGuiCol_DockingPreview] = rgba(72, 172, 208, 70);
+			colors[ImGuiCol_DockingEmptyBg] = windowBackground;
+			colors[ImGuiCol_TextSelectedBg] = rgba(72, 172, 208, 70);
+			return style;
+		}()},
+		{UIPreset::CELESTIAL, []() {
+
+			ImGuiStyle style{};
+			constexpr ImVec4 windowBackground{ rgba(16, 20, 40) };
+			constexpr ImVec4 childBackground{ rgba(22, 27, 50) };
+			constexpr ImVec4 borderColor{ rgba(52, 60, 96) };
+			constexpr ImVec4 barColor{ rgba(11, 14, 30) };
+			ImVec4* colors{ style.Colors };
+
+			colors[ImGuiCol_Text] = rgba(238, 232, 214);
+			colors[ImGuiCol_TextDisabled] = rgba(154, 150, 134, 160);
+			colors[ImGuiCol_WindowBg] = windowBackground;
+			colors[ImGuiCol_ChildBg] = childBackground;
+			colors[ImGuiCol_PopupBg] = childBackground;
+			colors[ImGuiCol_Border] = borderColor;
+			colors[ImGuiCol_FrameBg] = rgba(26, 32, 58);
+			colors[ImGuiCol_FrameBgHovered] = rgba(32, 39, 68);
+			colors[ImGuiCol_FrameBgActive] = rgba(38, 46, 80);
+			colors[ImGuiCol_TitleBg] = barColor;
+			colors[ImGuiCol_TitleBgActive] = barColor;
+			colors[ImGuiCol_MenuBarBg] = barColor;
+			colors[ImGuiCol_ScrollbarBg] = barColor;
+			colors[ImGuiCol_ScrollbarGrab] = ImVec4(borderColor.x, borderColor.y, borderColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_ScrollbarGrabHovered] = borderColor;
+			colors[ImGuiCol_ScrollbarGrabActive] = rgba(66, 76, 118);
+			colors[ImGuiCol_CheckMark] = rgba(226, 190, 96);
+			colors[ImGuiCol_SliderGrab] = rgba(226, 190, 96);
+			colors[ImGuiCol_SliderGrabActive] = rgba(226, 190, 96);
+			colors[ImGuiCol_Button] = rgba(150, 114, 36);
+			colors[ImGuiCol_ButtonHovered] = rgba(184, 142, 50);
+			colors[ImGuiCol_ButtonActive] = rgba(112, 84, 24);
+			colors[ImGuiCol_Header] = rgba(214, 176, 76, 28);
+			colors[ImGuiCol_HeaderHovered] = rgba(214, 176, 76, 52);
+			colors[ImGuiCol_HeaderActive] = rgba(214, 176, 76, 78);
+			colors[ImGuiCol_Separator] = borderColor;
+			colors[ImGuiCol_SeparatorHovered] = rgba(214, 176, 76, 190);
+			colors[ImGuiCol_SeparatorActive] = rgba(214, 176, 76);
+			colors[ImGuiCol_TabHovered] = rgba(214, 176, 76, 90);
+			colors[ImGuiCol_Tab] = barColor;
+			colors[ImGuiCol_TabSelected] = childBackground;
+			colors[ImGuiCol_TabDimmed] = ImVec4(barColor.x, barColor.y, barColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_TabDimmedSelected] = ImVec4(childBackground.x, childBackground.y, childBackground.z, 240.0f / 255.0f);
+			colors[ImGuiCol_DockingPreview] = rgba(214, 176, 76, 70);
+			colors[ImGuiCol_DockingEmptyBg] = windowBackground;
+			colors[ImGuiCol_TextSelectedBg] = rgba(214, 176, 76, 70);
+			return style;
+		}()},
+		{UIPreset::NECROTIC, []() {
+
+			ImGuiStyle style{};
+			constexpr ImVec4 windowBackground{ rgba(18, 22, 18) };
+			constexpr ImVec4 childBackground{ rgba(24, 29, 24) };
+			constexpr ImVec4 borderColor{ rgba(56, 66, 52) };
+			constexpr ImVec4 barColor{ rgba(13, 16, 13) };
+			ImVec4* colors{ style.Colors };
+
+			colors[ImGuiCol_Text] = rgba(226, 228, 210);
+			colors[ImGuiCol_TextDisabled] = rgba(146, 154, 136, 160);
+			colors[ImGuiCol_WindowBg] = windowBackground;
+			colors[ImGuiCol_ChildBg] = childBackground;
+			colors[ImGuiCol_PopupBg] = childBackground;
+			colors[ImGuiCol_Border] = borderColor;
+			colors[ImGuiCol_FrameBg] = rgba(26, 32, 26);
+			colors[ImGuiCol_FrameBgHovered] = rgba(33, 40, 32);
+			colors[ImGuiCol_FrameBgActive] = rgba(40, 48, 38);
+			colors[ImGuiCol_TitleBg] = barColor;
+			colors[ImGuiCol_TitleBgActive] = barColor;
+			colors[ImGuiCol_MenuBarBg] = barColor;
+			colors[ImGuiCol_ScrollbarBg] = barColor;
+			colors[ImGuiCol_ScrollbarGrab] = ImVec4(borderColor.x, borderColor.y, borderColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_ScrollbarGrabHovered] = borderColor;
+			colors[ImGuiCol_ScrollbarGrabActive] = rgba(68, 80, 64);
+			colors[ImGuiCol_CheckMark] = rgba(124, 168, 54);
+			colors[ImGuiCol_SliderGrab] = rgba(178, 196, 92);
+			colors[ImGuiCol_SliderGrabActive] = rgba(178, 196, 92);
+			colors[ImGuiCol_Button] = rgba(96, 134, 40);
+			colors[ImGuiCol_ButtonHovered] = rgba(124, 168, 54);
+			colors[ImGuiCol_ButtonActive] = rgba(70, 100, 28);
+			colors[ImGuiCol_Header] = rgba(124, 168, 54, 28);
+			colors[ImGuiCol_HeaderHovered] = rgba(124, 168, 54, 52);
+			colors[ImGuiCol_HeaderActive] = rgba(124, 168, 54, 78);
+			colors[ImGuiCol_Separator] = borderColor;
+			colors[ImGuiCol_SeparatorHovered] = rgba(124, 168, 54, 190);
+			colors[ImGuiCol_SeparatorActive] = rgba(124, 168, 54);
+			colors[ImGuiCol_TabHovered] = rgba(124, 168, 54, 90);
+			colors[ImGuiCol_Tab] = barColor;
+			colors[ImGuiCol_TabSelected] = childBackground;
+			colors[ImGuiCol_TabDimmed] = ImVec4(barColor.x, barColor.y, barColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_TabDimmedSelected] = ImVec4(childBackground.x, childBackground.y, childBackground.z, 240.0f / 255.0f);
+			colors[ImGuiCol_DockingPreview] = rgba(124, 168, 54, 70);
+			colors[ImGuiCol_DockingEmptyBg] = windowBackground;
+			colors[ImGuiCol_TextSelectedBg] = rgba(124, 168, 54, 70);
+			return style;
+		}()},
+		{UIPreset::BLOOD_MOON, []() {
+
+			ImGuiStyle style{};
+			constexpr ImVec4 windowBackground{ rgba(22, 10, 12) };
+			constexpr ImVec4 childBackground{ rgba(30, 15, 18) };
+			constexpr ImVec4 borderColor{ rgba(78, 28, 34) };
+			constexpr ImVec4 barColor{ rgba(15, 7, 9) };
+			ImVec4* colors{ style.Colors };
+
+			colors[ImGuiCol_Text] = rgba(236, 220, 220);
+			colors[ImGuiCol_TextDisabled] = rgba(158, 130, 132, 160);
+			colors[ImGuiCol_WindowBg] = windowBackground;
+			colors[ImGuiCol_ChildBg] = childBackground;
+			colors[ImGuiCol_PopupBg] = childBackground;
+			colors[ImGuiCol_Border] = borderColor;
+			colors[ImGuiCol_FrameBg] = rgba(36, 17, 21);
+			colors[ImGuiCol_FrameBgHovered] = rgba(46, 22, 27);
+			colors[ImGuiCol_FrameBgActive] = rgba(56, 27, 33);
+			colors[ImGuiCol_TitleBg] = barColor;
+			colors[ImGuiCol_TitleBgActive] = barColor;
+			colors[ImGuiCol_MenuBarBg] = barColor;
+			colors[ImGuiCol_ScrollbarBg] = barColor;
+			colors[ImGuiCol_ScrollbarGrab] = ImVec4(borderColor.x, borderColor.y, borderColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_ScrollbarGrabHovered] = borderColor;
+			colors[ImGuiCol_ScrollbarGrabActive] = rgba(98, 38, 46);
+			colors[ImGuiCol_CheckMark] = rgba(214, 66, 82);
+			colors[ImGuiCol_SliderGrab] = rgba(222, 214, 224);
+			colors[ImGuiCol_SliderGrabActive] = rgba(222, 214, 224);
+			colors[ImGuiCol_Button] = rgba(168, 32, 48);
+			colors[ImGuiCol_ButtonHovered] = rgba(200, 48, 66);
+			colors[ImGuiCol_ButtonActive] = rgba(128, 22, 36);
+			colors[ImGuiCol_Header] = rgba(200, 48, 66, 28);
+			colors[ImGuiCol_HeaderHovered] = rgba(200, 48, 66, 52);
+			colors[ImGuiCol_HeaderActive] = rgba(200, 48, 66, 78);
+			colors[ImGuiCol_Separator] = borderColor;
+			colors[ImGuiCol_SeparatorHovered] = rgba(200, 48, 66, 190);
+			colors[ImGuiCol_SeparatorActive] = rgba(200, 48, 66);
+			colors[ImGuiCol_TabHovered] = rgba(200, 48, 66, 90);
+			colors[ImGuiCol_Tab] = barColor;
+			colors[ImGuiCol_TabSelected] = childBackground;
+			colors[ImGuiCol_TabDimmed] = ImVec4(barColor.x, barColor.y, barColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_TabDimmedSelected] = ImVec4(childBackground.x, childBackground.y, childBackground.z, 240.0f / 255.0f);
+			colors[ImGuiCol_DockingPreview] = rgba(200, 48, 66, 70);
+			colors[ImGuiCol_DockingEmptyBg] = windowBackground;
+			colors[ImGuiCol_TextSelectedBg] = rgba(200, 48, 66, 70);
+			return style;
+		}()},
+		{UIPreset::FEYWILD, []() {
+
+			ImGuiStyle style{};
+			constexpr ImVec4 windowBackground{ rgba(12, 28, 26) };
+			constexpr ImVec4 childBackground{ rgba(17, 36, 34) };
+			constexpr ImVec4 borderColor{ rgba(46, 78, 74) };
+			constexpr ImVec4 barColor{ rgba(9, 21, 20) };
+			ImVec4* colors{ style.Colors };
+
+			colors[ImGuiCol_Text] = rgba(230, 232, 236);
+			colors[ImGuiCol_TextDisabled] = rgba(148, 158, 158, 160);
+			colors[ImGuiCol_WindowBg] = windowBackground;
+			colors[ImGuiCol_ChildBg] = childBackground;
+			colors[ImGuiCol_PopupBg] = childBackground;
+			colors[ImGuiCol_Border] = borderColor;
+			colors[ImGuiCol_FrameBg] = rgba(20, 40, 38);
+			colors[ImGuiCol_FrameBgHovered] = rgba(26, 48, 46);
+			colors[ImGuiCol_FrameBgActive] = rgba(32, 56, 54);
+			colors[ImGuiCol_TitleBg] = barColor;
+			colors[ImGuiCol_TitleBgActive] = barColor;
+			colors[ImGuiCol_MenuBarBg] = barColor;
+			colors[ImGuiCol_ScrollbarBg] = barColor;
+			colors[ImGuiCol_ScrollbarGrab] = ImVec4(borderColor.x, borderColor.y, borderColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_ScrollbarGrabHovered] = borderColor;
+			colors[ImGuiCol_ScrollbarGrabActive] = rgba(58, 94, 90);
+			colors[ImGuiCol_CheckMark] = rgba(226, 96, 168);
+			colors[ImGuiCol_SliderGrab] = rgba(120, 226, 196);
+			colors[ImGuiCol_SliderGrabActive] = rgba(120, 226, 196);
+			colors[ImGuiCol_Button] = rgba(176, 58, 130);
+			colors[ImGuiCol_ButtonHovered] = rgba(206, 84, 158);
+			colors[ImGuiCol_ButtonActive] = rgba(138, 40, 100);
+			colors[ImGuiCol_Header] = rgba(226, 96, 168, 28);
+			colors[ImGuiCol_HeaderHovered] = rgba(226, 96, 168, 52);
+			colors[ImGuiCol_HeaderActive] = rgba(226, 96, 168, 78);
+			colors[ImGuiCol_Separator] = borderColor;
+			colors[ImGuiCol_SeparatorHovered] = rgba(226, 96, 168, 190);
+			colors[ImGuiCol_SeparatorActive] = rgba(226, 96, 168);
+			colors[ImGuiCol_TabHovered] = rgba(226, 96, 168, 90);
+			colors[ImGuiCol_Tab] = barColor;
+			colors[ImGuiCol_TabSelected] = childBackground;
+			colors[ImGuiCol_TabDimmed] = ImVec4(barColor.x, barColor.y, barColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_TabDimmedSelected] = ImVec4(childBackground.x, childBackground.y, childBackground.z, 240.0f / 255.0f);
+			colors[ImGuiCol_DockingPreview] = rgba(226, 96, 168, 70);
+			colors[ImGuiCol_DockingEmptyBg] = windowBackground;
+			colors[ImGuiCol_TextSelectedBg] = rgba(226, 96, 168, 70);
+			return style;
+		}()},
+		{UIPreset::STORM, []() {
+
+			ImGuiStyle style{};
+			constexpr ImVec4 windowBackground{ rgba(26, 28, 34) };
+			constexpr ImVec4 childBackground{ rgba(33, 36, 43) };
+			constexpr ImVec4 borderColor{ rgba(66, 72, 84) };
+			constexpr ImVec4 barColor{ rgba(19, 21, 26) };
+			ImVec4* colors{ style.Colors };
+
+			colors[ImGuiCol_Text] = rgba(226, 230, 238);
+			colors[ImGuiCol_TextDisabled] = rgba(150, 156, 168, 160);
+			colors[ImGuiCol_WindowBg] = windowBackground;
+			colors[ImGuiCol_ChildBg] = childBackground;
+			colors[ImGuiCol_PopupBg] = childBackground;
+			colors[ImGuiCol_Border] = borderColor;
+			colors[ImGuiCol_FrameBg] = rgba(35, 38, 46);
+			colors[ImGuiCol_FrameBgHovered] = rgba(43, 47, 56);
+			colors[ImGuiCol_FrameBgActive] = rgba(51, 56, 66);
+			colors[ImGuiCol_TitleBg] = barColor;
+			colors[ImGuiCol_TitleBgActive] = barColor;
+			colors[ImGuiCol_MenuBarBg] = barColor;
+			colors[ImGuiCol_ScrollbarBg] = barColor;
+			colors[ImGuiCol_ScrollbarGrab] = ImVec4(borderColor.x, borderColor.y, borderColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_ScrollbarGrabHovered] = borderColor;
+			colors[ImGuiCol_ScrollbarGrabActive] = rgba(80, 88, 102);
+			colors[ImGuiCol_CheckMark] = rgba(240, 216, 96);
+			colors[ImGuiCol_SliderGrab] = rgba(240, 216, 96);
+			colors[ImGuiCol_SliderGrabActive] = rgba(240, 216, 96);
+			colors[ImGuiCol_Button] = rgba(70, 88, 190);
+			colors[ImGuiCol_ButtonHovered] = rgba(96, 116, 224);
+			colors[ImGuiCol_ButtonActive] = rgba(52, 66, 148);
+			colors[ImGuiCol_Header] = rgba(120, 140, 240, 28);
+			colors[ImGuiCol_HeaderHovered] = rgba(120, 140, 240, 52);
+			colors[ImGuiCol_HeaderActive] = rgba(120, 140, 240, 78);
+			colors[ImGuiCol_Separator] = borderColor;
+			colors[ImGuiCol_SeparatorHovered] = rgba(120, 140, 240, 190);
+			colors[ImGuiCol_SeparatorActive] = rgba(120, 140, 240);
+			colors[ImGuiCol_TabHovered] = rgba(120, 140, 240, 90);
+			colors[ImGuiCol_Tab] = barColor;
+			colors[ImGuiCol_TabSelected] = childBackground;
+			colors[ImGuiCol_TabDimmed] = ImVec4(barColor.x, barColor.y, barColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_TabDimmedSelected] = ImVec4(childBackground.x, childBackground.y, childBackground.z, 240.0f / 255.0f);
+			colors[ImGuiCol_DockingPreview] = rgba(120, 140, 240, 70);
+			colors[ImGuiCol_DockingEmptyBg] = windowBackground;
+			colors[ImGuiCol_TextSelectedBg] = rgba(120, 140, 240, 70);
+			return style;
+		}()},
+		{UIPreset::SANDS, []() {
+
+			ImGuiStyle style{};
+			ImGui::StyleColorsLight(&style);
+			constexpr ImVec4 windowBackground{ rgba(240, 228, 202) };
+			constexpr ImVec4 childBackground{ rgba(248, 239, 219) };
+			constexpr ImVec4 borderColor{ rgba(206, 186, 148) };
+			constexpr ImVec4 barColor{ rgba(222, 205, 172) };
+			constexpr ImVec4 frameColor{ rgba(252, 246, 232) };
+			ImVec4* colors{ style.Colors };
+
+			colors[ImGuiCol_Text] = rgba(78, 66, 46);
+			colors[ImGuiCol_TextDisabled] = rgba(126, 112, 88, 160);
+			colors[ImGuiCol_WindowBg] = windowBackground;
+			colors[ImGuiCol_ChildBg] = childBackground;
+			colors[ImGuiCol_PopupBg] = childBackground;
+			colors[ImGuiCol_Border] = borderColor;
+			colors[ImGuiCol_FrameBg] = frameColor;
+			colors[ImGuiCol_FrameBgHovered] = ImVec4(frameColor.x, frameColor.y - 0.02f, frameColor.z - 0.03f, 1.0f);
+			colors[ImGuiCol_FrameBgActive] = ImVec4(frameColor.x, frameColor.y - 0.04f, frameColor.z - 0.06f, 1.0f);
+			colors[ImGuiCol_TitleBg] = barColor;
+			colors[ImGuiCol_TitleBgActive] = barColor;
+			colors[ImGuiCol_MenuBarBg] = barColor;
+			colors[ImGuiCol_ScrollbarBg] = barColor;
+			colors[ImGuiCol_ScrollbarGrab] = ImVec4(borderColor.x, borderColor.y, borderColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_ScrollbarGrabHovered] = borderColor;
+			colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(borderColor.x * 0.95f, borderColor.y * 0.95f, borderColor.z * 0.95f, 1.0f);
+			colors[ImGuiCol_CheckMark] = rgba(30, 122, 116);
+			colors[ImGuiCol_SliderGrab] = rgba(214, 158, 62);
+			colors[ImGuiCol_SliderGrabActive] = rgba(214, 158, 62);
+			colors[ImGuiCol_Button] = rgba(46, 150, 142);
+			colors[ImGuiCol_ButtonHovered] = rgba(64, 172, 162);
+			colors[ImGuiCol_ButtonActive] = rgba(30, 118, 112);
+			colors[ImGuiCol_Header] = rgba(46, 150, 142, 28);
+			colors[ImGuiCol_HeaderHovered] = rgba(46, 150, 142, 52);
+			colors[ImGuiCol_HeaderActive] = rgba(46, 150, 142, 78);
+			colors[ImGuiCol_Separator] = rgba(210, 190, 152);
+			colors[ImGuiCol_SeparatorHovered] = rgba(46, 150, 142, 190);
+			colors[ImGuiCol_SeparatorActive] = rgba(46, 150, 142);
+			colors[ImGuiCol_TabHovered] = rgba(46, 150, 142, 90);
+			colors[ImGuiCol_Tab] = barColor;
+			colors[ImGuiCol_TabSelected] = childBackground;
+			colors[ImGuiCol_TabDimmed] = ImVec4(barColor.x, barColor.y, barColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_TabDimmedSelected] = ImVec4(childBackground.x, childBackground.y, childBackground.z, 240.0f / 255.0f);
+			colors[ImGuiCol_DockingPreview] = rgba(46, 150, 142, 60);
+			colors[ImGuiCol_DockingEmptyBg] = windowBackground;
+			colors[ImGuiCol_TextSelectedBg] = rgba(46, 150, 142, 70);
+			return style;
+		}()},
+		{UIPreset::MOONLIT, []() {
+
+			ImGuiStyle style{};
+			ImGui::StyleColorsLight(&style);
+			constexpr ImVec4 windowBackground{ rgba(234, 238, 245) };
+			constexpr ImVec4 childBackground{ rgba(244, 247, 252) };
+			constexpr ImVec4 borderColor{ rgba(190, 200, 214) };
+			constexpr ImVec4 barColor{ rgba(214, 222, 234) };
+			constexpr ImVec4 frameColor{ rgba(250, 252, 255) };
+			ImVec4* colors{ style.Colors };
+
+			colors[ImGuiCol_Text] = rgba(52, 62, 78);
+			colors[ImGuiCol_TextDisabled] = rgba(112, 124, 142, 160);
+			colors[ImGuiCol_WindowBg] = windowBackground;
+			colors[ImGuiCol_ChildBg] = childBackground;
+			colors[ImGuiCol_PopupBg] = childBackground;
+			colors[ImGuiCol_Border] = borderColor;
+			colors[ImGuiCol_FrameBg] = frameColor;
+			colors[ImGuiCol_FrameBgHovered] = ImVec4(frameColor.x - 0.02f, frameColor.y - 0.02f, frameColor.z, 1.0f);
+			colors[ImGuiCol_FrameBgActive] = ImVec4(frameColor.x - 0.04f, frameColor.y - 0.04f, frameColor.z, 1.0f);
+			colors[ImGuiCol_TitleBg] = barColor;
+			colors[ImGuiCol_TitleBgActive] = barColor;
+			colors[ImGuiCol_MenuBarBg] = barColor;
+			colors[ImGuiCol_ScrollbarBg] = barColor;
+			colors[ImGuiCol_ScrollbarGrab] = ImVec4(borderColor.x, borderColor.y, borderColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_ScrollbarGrabHovered] = borderColor;
+			colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(borderColor.x * 0.95f, borderColor.y * 0.95f, borderColor.z * 0.95f, 1.0f);
+			colors[ImGuiCol_CheckMark] = rgba(78, 108, 168);
+			colors[ImGuiCol_SliderGrab] = rgba(140, 160, 200);
+			colors[ImGuiCol_SliderGrabActive] = rgba(140, 160, 200);
+			colors[ImGuiCol_Button] = rgba(78, 108, 168);
+			colors[ImGuiCol_ButtonHovered] = rgba(98, 130, 190);
+			colors[ImGuiCol_ButtonActive] = rgba(58, 84, 136);
+			colors[ImGuiCol_Header] = rgba(78, 108, 168, 28);
+			colors[ImGuiCol_HeaderHovered] = rgba(78, 108, 168, 52);
+			colors[ImGuiCol_HeaderActive] = rgba(78, 108, 168, 78);
+			colors[ImGuiCol_Separator] = rgba(196, 206, 220);
+			colors[ImGuiCol_SeparatorHovered] = rgba(78, 108, 168, 190);
+			colors[ImGuiCol_SeparatorActive] = rgba(78, 108, 168);
+			colors[ImGuiCol_TabHovered] = rgba(78, 108, 168, 90);
+			colors[ImGuiCol_Tab] = barColor;
+			colors[ImGuiCol_TabSelected] = childBackground;
+			colors[ImGuiCol_TabDimmed] = ImVec4(barColor.x, barColor.y, barColor.z, 220.0f / 255.0f);
+			colors[ImGuiCol_TabDimmedSelected] = ImVec4(childBackground.x, childBackground.y, childBackground.z, 240.0f / 255.0f);
+			colors[ImGuiCol_DockingPreview] = rgba(78, 108, 168, 60);
+			colors[ImGuiCol_DockingEmptyBg] = windowBackground;
+			colors[ImGuiCol_TextSelectedBg] = rgba(78, 108, 168, 70);
+			return style;
+		}()},
+	};
+	inline void UITheme::setUITheme(UIPreset newPreset) {
+		if (preset == newPreset) {
+			return;
+		}
+		preset = newPreset;
+		ImGui::GetStyle() = PRESET_TO_CONFIG.at(preset);
+	}
+}

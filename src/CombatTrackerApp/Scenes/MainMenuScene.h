@@ -6,12 +6,11 @@ namespace CombatTrackerApp {
 	class MainMenuScene : public CombatTrackerLib::Scene {
 	public:
 		explicit MainMenuScene(CombatTrackerLib::App* app);
-		~MainMenuScene();
 
-		virtual void notifyScene(const ImGuiIO& imguiIO) override;
-		virtual void updateScene(double timeInterval) override;
-		virtual void renderUI() override;
-		virtual void renderScene() override;
+		void notifyScene(const ImGuiIO& imguiIO) override;
+		void updateScene(double timeInterval) override;
+		void renderUI() override;
+		void renderScene() override;
 
 	private:
 

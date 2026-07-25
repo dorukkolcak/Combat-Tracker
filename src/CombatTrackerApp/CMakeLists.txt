@@ -30,7 +30,7 @@ add_executable(Combat-Tracker-App
     Scenes/MainMenuScene.cpp
     Scenes/OverlayScene.h
     Scenes/OverlayScene.cpp
-)
+ )
 
 # Link the static library we created earlier to the application.
 target_link_libraries(Combat-Tracker-App PRIVATE

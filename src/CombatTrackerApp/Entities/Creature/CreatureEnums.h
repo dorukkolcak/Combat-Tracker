@@ -11,7 +11,7 @@ namespace CombatTrackerApp {
 		SMALL,
 		MEDIUM,
 		LARGE,
-		HUGE_SIZE, // Not HUGE: <math.h> defines that as a macro on macOS/BSD.
+		HUGE_SIZE, // Not HUGE: <math.h> defines that as a macro on macOS/BSD. Funny bug I discovered through Github Workflows.
 		GARGANTUAN,
 	};
 	enum class Alignment {

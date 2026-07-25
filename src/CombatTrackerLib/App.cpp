@@ -10,7 +10,7 @@
 #include <ranges>
 
 namespace CombatTrackerLib {
-	App::App(const Specification& specification) : m_applicationSpecification{ specification }
+	App::App(const Specification& specification) : m_applicationSpecification{ specification }, m_theme{}
 	{
 		glfwInit();
 		m_mainWindow = std::make_unique<Window>(m_applicationSpecification.mainWindowSpecification);
@@ -21,26 +21,11 @@ namespace CombatTrackerLib {
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 
-		/*
-		Pay attention to the UI ordering here:
-		Because we set the Imgui::Style in either dark or light theme, if the common colors are initialized before them, the common colors get overridden.
-		So initialize the common colors after dark or light theme initialization.
-		Ideally we should have an options section that dynamically changes the color scheme.
-		With the way I create the themes this should already be possible, just needs UI support.
-		*/
-		setupLayout();
-		if (m_applicationSpecification.isDarkModeEnabled) {
-			createImguiDarkTheme();
-		}
-		else {
-			createImguiLightTheme();
-		}
-		initializeCommonColors();
-
 		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForOpenGL(m_mainWindow->getGLFWwindow(), true);
 		const char* glsl_version = "#version 150";
 		ImGui_ImplOpenGL3_Init(glsl_version);
+		m_theme.setUITheme(specification.initialPreset);
 	}
 	// Destructor should be empty as we can explicitly call app.stop() to free all resources.
 	App::~App() {}
@@ -56,6 +41,7 @@ namespace CombatTrackerLib {
 		glClearColor(0.858824f, 0.576471f, 0.439216f, 1.0f);
 
 		double lastFrameTime{ glfwGetTime() };
+
 		// Main application loop
 		while (!App::m_mainWindow->getWindowShouldClose()) {
 

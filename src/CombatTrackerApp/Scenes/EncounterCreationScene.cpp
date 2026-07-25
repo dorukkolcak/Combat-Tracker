@@ -48,7 +48,6 @@ namespace CombatTrackerApp {
 			m_skillModifiersOverride[skill.first] = false;
 		}
 	}
-	EncounterCreationScene::~EncounterCreationScene() {}
 
 	void EncounterCreationScene::notifyScene(const ImGuiIO& imguiIO) {}
 	void EncounterCreationScene::updateScene(double timeInterval) {}

@@ -5,7 +5,7 @@ add_library(Combat-Tracker-Lib STATIC
     App.cpp
     Scene.h
     Scene.cpp
-    Styling.h
+    Themes.h
     Window.h
     Window.cpp
     Utils.h
@@ -13,7 +13,7 @@ add_library(Combat-Tracker-Lib STATIC
     Shader.cpp 
     ShaderProgram.h 
     ShaderProgram.cpp
-)
+ )
 target_include_directories(Combat-Tracker-Lib PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )

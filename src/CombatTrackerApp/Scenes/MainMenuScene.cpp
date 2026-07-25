@@ -24,10 +24,10 @@ namespace CombatTrackerApp {
       
         m_mainMenuWindowClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
 	}
-	MainMenuScene::~MainMenuScene() {}
     void MainMenuScene::notifyScene(const ImGuiIO& imguiIO) {}
     void MainMenuScene::updateScene(double timeInterval) {}
 
+    // TODO: Add an options panel.
     void MainMenuScene::renderUI()  {
 
         // Set configurations of the host window of the scene on initial render pass.
@@ -124,6 +124,4 @@ namespace CombatTrackerApp {
         ImGui::End();
     }
 	void MainMenuScene::renderScene() {}
-
-
 }

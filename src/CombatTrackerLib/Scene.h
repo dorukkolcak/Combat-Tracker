@@ -18,7 +18,6 @@ namespace CombatTrackerLib {
 		When imguiIO.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
 		Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
 		*/
-
 		virtual void notifyScene(const ImGuiIO& imguiIO) = 0;
 		virtual void updateScene(double timeInterval) = 0;
 		virtual void renderUI() = 0;

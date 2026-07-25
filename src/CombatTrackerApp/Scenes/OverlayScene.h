@@ -7,20 +7,10 @@ namespace CombatTrackerApp {
 	class OverlayScene : public CombatTrackerLib::Scene {
 	public:
 		explicit OverlayScene(CombatTrackerLib::App* app);
-		virtual ~OverlayScene();
 
-		virtual void notifyScene(const ImGuiIO& imguiIO) override;
-		virtual void updateScene(double timeInterval) override;
-		virtual void renderUI() override;
-		virtual void renderScene() override;
-	private:
-
-		// UI IDs.
-		ImGuiID m_overlayDockspaceID{};
-		ImGuiID m_generalID{};
-		ImGuiID m_viewID{};
-
-		// Dockspace layout flag.
-		bool m_isOverlayDockspaceInitialized{};
+		void notifyScene(const ImGuiIO& imguiIO) override;
+		void updateScene(double timeInterval) override;
+		void renderUI() override;
+		void renderScene() override;
 	};
 }

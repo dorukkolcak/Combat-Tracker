@@ -6,6 +6,7 @@
 namespace CombatTrackerApp {
 
 	// These should be ordered for UI purposes.
+	// We process them in sequential order for monster creation widgets.
 	inline const std::map<double, int> MAPPED_CR_TO_XP {
 		{0.0, 10},
 		{0.125, 25},

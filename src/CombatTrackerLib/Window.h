@@ -22,7 +22,6 @@ namespace CombatTrackerLib {
 	class Window {
 	public:
 		explicit Window(const WindowSpecification& specification);
-		~Window();
 
 		void update();
 		void destroy();

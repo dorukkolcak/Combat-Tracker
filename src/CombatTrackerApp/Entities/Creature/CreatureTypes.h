@@ -3,7 +3,6 @@
 #include "CreatureEnums.h"
 
 // The types here shouldn't be nested types as they are used by the builders.
-
 namespace CombatTrackerApp {
 	struct CreatureAction {
 		std::string name{};
