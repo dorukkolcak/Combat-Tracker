@@ -12,3 +12,10 @@ add_subdirectory(src/CombatTrackerLib)
 add_subdirectory(src/CombatTrackerApp)
 add_subdirectory(tests/CombatTrackerLib)
 add_subdirectory(tests/CombatTrackerApp)
+
+# Suppress character conversion warning in Google Test for macOS with C++23
+# This was captured via Github Workflows
+if(APPLE AND CMAKE_CXX_STANDARD GREATER_EQUAL 23)
+  target_compile_options(gtest PRIVATE -Wno-character-conversion)
+  target_compile_options(gtest_main PRIVATE -Wno-character-conversion)
+endif()
