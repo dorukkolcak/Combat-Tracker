@@ -1,7 +1,7 @@
 add_executable(Combat-Tracker-App
     main.cpp
-    JSONUtils.h
-    JSONUtils.cpp
+    "../CombatTrackerLib/Utilities/JSONUtils.h"
+    
 
     Entities/Creature/Creature.h
     Entities/Creature/Creature.cpp
@@ -35,7 +35,6 @@ add_executable(Combat-Tracker-App
 # Link the static library we created earlier to the application.
 target_link_libraries(
     Combat-Tracker-App PRIVATE
-    nlohmann_json::nlohmann_json
     Combat-Tracker-Lib
 )
 

@@ -36,6 +36,10 @@ namespace CombatTrackerLib {
 		void queueDeleteScene(Scene* sceneToBeDeleted);
 		void queueSceneTransition(Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo);
 
+		void signalApplicationClose();
+
+		UITheme& getUITheme();
+
 	private:
 		Specification m_applicationSpecification{};
 		UITheme m_theme{};
@@ -46,6 +50,7 @@ namespace CombatTrackerLib {
 		std::vector<std::unique_ptr<Scene>> m_sceneAdditionQueue{};
 		std::vector<Scene*> m_sceneDeletionQueue{};
 		std::unordered_map<Scene*, std::unique_ptr<Scene>> m_sceneTransitionQueue{};
+		bool m_applicationCloseSignalled{}; 
 
 		/*
 		So here is the rough idea of how scenes work:

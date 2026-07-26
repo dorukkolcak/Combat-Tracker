@@ -1,8 +1,8 @@
 #include "EncounterCreationScene.h"
 #include "MainMenuScene.h"
-#include "../JSONUtils.h"
 #include "../Entities/Creature/CreatureConstants.h"
 #include "../Entities/Monster/MonsterConstants.h"
+#include "../CombatTrackerLib/Utilities/UIUtils.h"
 
 #include "imgui_internal.h"
 
@@ -477,7 +477,8 @@ namespace CombatTrackerApp {
 			renderMutuallyExclusiveCheckboxCluster(
 				m_currentCreatureStatBlock.conditionImmunities,
 				CONDITTON_NAMES, 
-				"Condition Immunities"
+				"Condition Immunities",
+				3
 			);
 
 			ImGui::Spacing();
@@ -485,7 +486,8 @@ namespace CombatTrackerApp {
 			renderMutuallyExclusiveCheckboxCluster(
 				m_currentCreatureStatBlock.languages,
 				LANGUAGE_NAMES, 
-				"Languages"
+				"Languages",
+				3
 			);
 			renderSenses();
 
@@ -1040,15 +1042,15 @@ namespace CombatTrackerApp {
 			ImGui::BeginChild("##AddActionScroll", ImVec2{ 0, -ImGui::GetFrameHeightWithSpacing() * 2.0f }, true);
 
 			// Again, fine for these to be static as they are reset after each addition of actions.
-			static ListBoxParameters s_actionParameters{ -1, -1, false };
+			static CombatTrackerLib::ListBoxParameters s_actionParameters{ -1, -1, false };
 			static ActionType s_type{};
 
 			// Important logic to prevent PCs from creating Legendary Actions and Lair Actions.
 			if (isMonster) {
-				renderListBox(s_actionParameters, s_type, "Action Type", ACTION_NAMES);
+				CombatTrackerLib::renderListBox(s_actionParameters, s_type, "Action Type", ACTION_NAMES);
 			}
 			else {
-				renderListBox(s_actionParameters, s_type, "Action Type", PLAYER_ACTION_NAMES);
+				CombatTrackerLib::renderListBox(s_actionParameters, s_type, "Action Type", PLAYER_ACTION_NAMES);
 			}
 
 			static std::string s_name{};
@@ -1074,10 +1076,10 @@ namespace CombatTrackerApp {
 	void EncounterCreationScene::renderPlayerCharacterSpecificInfo() {
 		renderListBox(m_speciesParameters, m_currentPlayerStatBlock.species, "Species", SPECIES_NAMES);
 		renderListBox(m_originParameters, m_currentPlayerStatBlock.origin, "Origin", ORIGIN_NAMES);
-		renderMutuallyExclusiveCheckboxCluster(m_currentPlayerStatBlock.weaponProficiencies, WEAPON_TYPE_NAMES, "Weapon Proficiencies");
-		renderMutuallyExclusiveCheckboxCluster(m_currentPlayerStatBlock.armorProficiencies, ARMOR_TYPE_NAMES, "Armor Proficiencies");
-		renderMutuallyExclusiveCheckboxCluster(m_currentPlayerStatBlock.toolProficiencies, TOOL_NAMES, "Tool Proficiencies");
-		renderMutuallyExclusiveCheckboxCluster(m_currentPlayerStatBlock.weaponMasteries, WEAPON_MASTERY_NAMES, "Weapon Masteries");
+		renderMutuallyExclusiveCheckboxCluster(m_currentPlayerStatBlock.weaponProficiencies, WEAPON_TYPE_NAMES, "Weapon Proficiencies", 3);
+		renderMutuallyExclusiveCheckboxCluster(m_currentPlayerStatBlock.armorProficiencies, ARMOR_TYPE_NAMES, "Armor Proficiencies", 3);
+		renderMutuallyExclusiveCheckboxCluster(m_currentPlayerStatBlock.toolProficiencies, TOOL_NAMES, "Tool Proficiencies", 3);
+		renderMutuallyExclusiveCheckboxCluster(m_currentPlayerStatBlock.weaponMasteries, WEAPON_MASTERY_NAMES, "Weapon Masteries", 3);
 	}
 	void EncounterCreationScene::renderPlayerClassAndSubclasses() {
 		if (ImGui::BeginTable("Classes and Subclasses", 1, ImGuiTableFlags_SizingStretchSame)) {

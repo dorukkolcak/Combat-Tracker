@@ -2,14 +2,41 @@
 
 #include "imgui.h"
 
-#include <filesystem>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-
 #include "Texture2D.h"
 
 namespace CombatTrackerLib {
+
+	struct ListBoxParameters {
+		int chosenIndex{};
+		int highlightedIndex{};
+		bool isHighlighted{};
+	};
+
+	// Generic helper for single selectable listbox layouts.
+	template <typename T, typename M>
+	void renderListBox(
+		ListBoxParameters& parameters,
+		T& type,
+		const char* listBoxLabel,
+		const M& items
+	) {
+		int counter{};
+		const float height{ ImGui::GetTextLineHeightWithSpacing() * 8.0f };
+		if (ImGui::BeginListBox(listBoxLabel, ImVec2{ 0, height })) {
+			for (const auto& item : items) {
+				const bool isSelected{ counter == parameters.chosenIndex };
+				if (ImGui::Selectable(item.second.c_str(), isSelected)) {
+					parameters.chosenIndex = counter;
+					type = item.first;
+				}
+				if (parameters.isHighlighted && ImGui::IsItemHovered()) {
+					parameters.highlightedIndex = counter;
+				}
+				++counter;
+			}
+			ImGui::EndListBox();
+		}
+	}
 
 	// Taken from https://github.com/ocornut/imgui/discussions/3862.
 	// I would love to make the label's type std::string_view but the Imgui API requires to pass const char* as an argument.
@@ -46,18 +73,5 @@ namespace CombatTrackerLib {
 		// The tint is multiplied with the texel in the ImGui shader, so a white texture comes out as exactly the tint colour. 
 		ImGui::ImageWithBg(static_cast<ImTextureID>(texture.getTextureID()), displaySize,
 			ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tint);
-	}
-	inline std::string readFileToString(const std::filesystem::path& filePath) {
-
-		std::ifstream file(filePath);
-		if (!file.is_open()) {
-			std::cerr << " Can't open file: " << filePath.string() << "\n";
-			return "";
-		}
-
-		std::ostringstream fileStream;
-		fileStream << file.rdbuf();
-		file.close();
-		return std::move(fileStream.str());
 	}
 }

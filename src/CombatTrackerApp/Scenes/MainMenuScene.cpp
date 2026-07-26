@@ -1,15 +1,19 @@
 #include "MainMenuScene.h"
 #include "EncounterCreationScene.h"
-#include "Utils.h"
+#include "../CombatTrackerLib/Utilities/UIUtils.h"
 
 #include "imgui.h"
 #include "imgui_internal.h"
 
 namespace CombatTrackerApp {
+
     MainMenuScene::MainMenuScene(CombatTrackerLib::App* app) :
-        m_titleTexture{"assets/Title.png"},
+        m_titleTexture{ "assets/Title.png" },
         CombatTrackerLib::Scene{ app },
-        m_isMainMenuDockspaceInitialized{ false }
+        m_isMainMenuDockspaceInitialized{ false },
+        m_UIThemeParameters{ -1, -1, false },
+        m_chosenUIPreset{ m_applicationReference->getUITheme().preset },
+        m_selectedOptionsCategory{}
 	{   
         m_mainMenuDockspaceFlags =
             ImGuiDockNodeFlags_NoResize |
@@ -80,10 +84,68 @@ namespace CombatTrackerApp {
         // Title window.
         ImGui::SetNextWindowClass(&m_mainMenuWindowClass);
         ImGui::Begin("CombatTracker");
+        if (CombatTrackerLib::alignedButton("Options", 0.96f)) {
+            ImGui::OpenPopup("Options Popup");
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Exit")) {
+            // This signal should be deferred and handled by the application instance at the start of the frame.
+            m_applicationReference->signalApplicationClose();
+        }
 
         // Tinting with a style colour makes the logo follow the active UI preset.
         // So we don't need a title asset for every UI Preset.
-        centeredImage(m_titleTexture, ImGui::GetStyle().Colors[ImGuiCol_Text]);
+        CombatTrackerLib::centeredImage(m_titleTexture, ImGui::GetStyle().Colors[ImGuiCol_Text]);
+
+        // Options popup for application wide settings.
+        // TODO: One thing to do is actually save these settings somewhere so they are preserved between runs.
+        ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowSize(ImVec2(640.0f, 420.0f), ImGuiCond_Appearing);
+
+        // The title bar is hidden so the panel can draw its own header.
+        if (ImGui::BeginPopupModal("Options Popup", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
+
+            ImGui::PushFont(nullptr, ImGui::GetStyle().FontSizeBase * 1.35f);
+            ImGui::TextUnformatted("Options");
+            ImGui::PopFont();
+            ImGui::Separator();
+
+            const auto footerHeight{ ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y };
+            const auto bodyHeight{ ImGui::GetContentRegionAvail().y - footerHeight };
+
+            // Category list.
+            ImGui::BeginChild("Options Categories", ImVec2(150.0f, bodyHeight), ImGuiChildFlags_Borders);
+            for (const auto& optionsCategory : OPTIONS_CATEGORY_NAMES) {
+                if (ImGui::Selectable(optionsCategory.second.data(), m_selectedOptionsCategory == optionsCategory.first)) {
+                    m_selectedOptionsCategory = optionsCategory.first;
+                }
+            }
+            ImGui::EndChild();
+
+            // Keeps the content pane beside the category list instead of under it.
+            // Both panes are bodyHeight tall, so stacking them would overflow the footer.
+            ImGui::SameLine();
+
+            // Controls belonging to the selected category.
+            ImGui::BeginChild("Options Content", ImVec2(0.0f, bodyHeight), ImGuiChildFlags_Borders);
+            if (m_selectedOptionsCategory == OptionsCategory::Appearance) {
+                ImGui::SeparatorText("Theme");
+                auto& applicationUITheme{ m_applicationReference->getUITheme() };
+                CombatTrackerLib::renderListBox(m_UIThemeParameters, m_chosenUIPreset, "Choose Theme", CombatTrackerLib::PRESET_NAMES);
+                applicationUITheme.setUITheme(m_chosenUIPreset); // This function early returns already so this is fine.
+            }
+            //...
+            ImGui::EndChild();
+
+            ImGui::Separator();
+
+            // A modal ignores both outside clicks and Escape, so this is the only way out.
+            if (CombatTrackerLib::alignedButton("Close", 1.0f)) {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
         ImGui::End();
 
         // Encounter Creation window.
@@ -126,6 +188,7 @@ namespace CombatTrackerApp {
         
         }
         ImGui::End();
+
     }
 	void MainMenuScene::renderScene() {}
 }

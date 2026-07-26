@@ -1,5 +1,4 @@
 #include "App.h"
-#include "Utils.h"
 
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -10,7 +9,7 @@
 #include <ranges>
 
 namespace CombatTrackerLib {
-	App::App(const Specification& specification) : m_applicationSpecification{ specification }, m_theme{}
+	App::App(const Specification& specification) : m_applicationSpecification{ specification }, m_theme{}, m_applicationCloseSignalled{false}
 	{
 		glfwInit();
 		m_mainWindow = std::make_unique<Window>(m_applicationSpecification.mainWindowSpecification);
@@ -38,7 +37,7 @@ namespace CombatTrackerLib {
 		double lastFrameTime{ glfwGetTime() };
 
 		// Main application loop
-		while (!App::m_mainWindow->getWindowShouldClose()) {
+		while (!m_mainWindow->getWindowShouldClose() && !m_applicationCloseSignalled) {
 
 			// Get the delta time between frames, in seconds.
 			double currentTime{ glfwGetTime() };
@@ -96,7 +95,6 @@ namespace CombatTrackerLib {
 		ImGui::DestroyContext();
 		m_mainWindow->destroy();
 		glfwTerminate();
-
 	}
 	void App::queueAddScene(std::unique_ptr<Scene> scene) {
 		m_sceneAdditionQueue.push_back(std::move(scene));
@@ -152,5 +150,11 @@ namespace CombatTrackerLib {
 			m_sceneStack.push_back(std::move(addedScene));
 		}
 		m_sceneAdditionQueue.clear();
+	}
+	void App::signalApplicationClose() {
+		m_applicationCloseSignalled = true;
+	}
+	UITheme& App::getUITheme() {
+		return m_theme;
 	}
 }

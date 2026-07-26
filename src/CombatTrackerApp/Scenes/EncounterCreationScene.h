@@ -4,7 +4,7 @@
 #include <string>
 #include <utility>
 
-#include "../../CombatTrackerLib/Utils.h"
+#include "../../CombatTrackerLib/Utilities/UIUtils.h"
 #include "../../CombatTrackerLib/Scene.h"
 #include "../Entities/Creature/CreatureEnums.h"
 #include "../Entities/Creature/CreatureTypes.h"
@@ -37,13 +37,6 @@ namespace CombatTrackerApp {
 			ENCOUNTER_BROWSER,
 		};
 
-		// Consider changing this struct to be a namespace-wide type if other UI components need these parameters.
-		struct ListBoxParameters {
-			int chosenIndex{};
-			int highlightedIndex{};
-			bool isHighlighted{};
-		};
-
 		ImGuiWindowFlags m_encounterCreationWindowFlags{};
 		ImGuiDockNodeFlags m_encounterCreationDockFlags{};
 		ImGuiWindowFlags m_popupWindowFlags{};
@@ -67,12 +60,12 @@ namespace CombatTrackerApp {
 		double m_currentMonsterCR{};
 		int m_currentMonsterXP{};
 
-		ListBoxParameters m_monsterCRParameters{};
-		ListBoxParameters m_sizeListBoxParameters{};
-		ListBoxParameters m_creatureTypeParameters{};
-		ListBoxParameters m_alignmentParameters{};
-		ListBoxParameters m_speciesParameters{};
-		ListBoxParameters m_originParameters{};
+		CombatTrackerLib::ListBoxParameters m_monsterCRParameters{};
+		CombatTrackerLib::ListBoxParameters m_sizeListBoxParameters{};
+		CombatTrackerLib::ListBoxParameters m_creatureTypeParameters{};
+		CombatTrackerLib::ListBoxParameters m_alignmentParameters{};
+		CombatTrackerLib::ListBoxParameters m_speciesParameters{};
+		CombatTrackerLib::ListBoxParameters m_originParameters{};
 
 		bool m_isInitiativeOverridden{};
 		bool m_isPassivePerceptionOverridden{};
@@ -148,8 +141,12 @@ namespace CombatTrackerApp {
 			{PlayerClass::WIZARD, false}
 		};
 
-		
-		// Constant UI labels. These should be static as they shouldn't be instantiated per object/scene.
+		/*
+		Constant UI labels. These should be static as they shouldn't be instantiated per object/scene.
+		The reason the type is string not string_view for most of the UI labels in this class is that I frequently do concatenation with them.
+		So I need an underlying string type to work with, which is annoying to access with a string_view.
+		Probably can make it work at some point and be more efficient but this is fine for now.
+		*/
 		inline static const std::unordered_map<Subwindow, std::string> MAPPED_WINDOW_NAMES{
 			{Subwindow::ENCOUNTER_CREATOR, "Encounter Creator"},
 			{Subwindow::ENCOUNTER_MANAGER, "Encounter Manager"},
@@ -191,10 +188,11 @@ namespace CombatTrackerApp {
 		void renderSavingThrowModifiers();
 		void renderSkillModifiers();
 		void renderDmgVulnResAndImm();
-
-		template <typename M, typename N>
-		void renderMutuallyExclusiveCheckboxCluster(M& items, const N& names, const char* label);
 		void renderSenses();
+
+		// Simple helper method for rendering multi-selectable parameters.
+		template <typename M, typename N>
+		void renderMutuallyExclusiveCheckboxCluster(M& items, const N& names, const char* label, int columnCount);
 
 		template <typename I>
 		void renderAddables(std::vector<I>& currentItems, const std::string& label);
@@ -203,10 +201,6 @@ namespace CombatTrackerApp {
 		void renderPlayerClassAndSubclasses();
 		void renderPlayerCharacterSpecificInfo();
 		void initializeSubBrowserDockspace(Subwindow windowType);
-
-		// We change the value of the type in this function so pass it as non-const lvalue reference.
-		template <typename T, typename M>
-		void renderListBox(ListBoxParameters& parameters, T& type, const char* listBoxLabel, const M& items);
 		void renderNonOverridableInputInt(int& value, const char* label);
 
 		// Pass the value as non-const lvalue reference as we need to modify its value in this function.
@@ -223,33 +217,6 @@ namespace CombatTrackerApp {
 		);
 		void resetParametersAndOverrides();
 	};
-
-	// Generic helper for single selectable listbox layouts.
-	// Used for creature type, alignment, size, monster CR, action type during action creation.
-	template <typename T, typename M>
-	void EncounterCreationScene::renderListBox(
-		ListBoxParameters& parameters,
-		T& type,
-		const char* listBoxLabel,
-		const M& items
-	) {
-		int counter{};
-		const float height{ ImGui::GetTextLineHeightWithSpacing() * 8.0f };
-		if (ImGui::BeginListBox(listBoxLabel, ImVec2{ 0, height })) {
-			for (const auto& item : items) {
-				const bool isSelected{ counter == parameters.chosenIndex };
-				if (ImGui::Selectable(item.second.c_str(), isSelected)) {
-					parameters.chosenIndex = counter;
-					type = item.first;
-				}
-				if (parameters.isHighlighted && ImGui::IsItemHovered()) {
-					parameters.highlightedIndex = counter;
-				}
-				++counter;
-			}
-			ImGui::EndListBox();
-		}
-	}
 
 	/*
 	A slightly more complicated helper used for user input of monster XP and PB.
@@ -279,6 +246,19 @@ namespace CombatTrackerApp {
 		ImGui::SameLine();
 		if (ImGui::Button(overrideLabel)) {
 			overrideFlag = false;
+		}
+	}
+	template <typename M, typename N>
+	void EncounterCreationScene::renderMutuallyExclusiveCheckboxCluster(M& items, const N& names, const char* label, int columnCount) {
+		ImGui::TextWrapped("%s", label);
+		if (ImGui::BeginTable(label, columnCount, ImGuiTableFlags_SizingStretchSame)) {
+			int counter{};
+			for (const auto& item : names) {
+				ImGui::TableNextColumn();
+				ImGui::Checkbox(item.second.c_str(), &items.at(item.first));
+				++counter;
+			}
+			ImGui::EndTable();
 		}
 	}
 
@@ -321,22 +301,6 @@ namespace CombatTrackerApp {
 						proficiencyItems.at(item.first) = false;
 					}
 				}
-			}
-			ImGui::EndTable();
-		}
-	}
-
-	// Simple helper method for rendering multi-selectable creature parameters.
-	// Used in condition immunities and languages.
-	template <typename M, typename N>
-	void EncounterCreationScene::renderMutuallyExclusiveCheckboxCluster(M& items, const N& names, const char* label) {
-		ImGui::TextWrapped("%s", label);
-		if (ImGui::BeginTable(label, 3, ImGuiTableFlags_SizingStretchSame)) {
-			int counter{};
-			for (const auto& item : names) {
-				ImGui::TableNextColumn();
-				ImGui::Checkbox(item.second.c_str(), &items.at(item.first));
-				++counter;
 			}
 			ImGui::EndTable();
 		}
