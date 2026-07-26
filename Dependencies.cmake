@@ -89,6 +89,16 @@ target_include_directories(imgui PUBLIC
     ${IMGUI_DIR}/misc/cpp
 )
 
+# stb_image.h
+add_library(stb_image STATIC
+    ${PROJECT_SOURCE_DIR}/external/stb/stb_image.cpp
+    ${PROJECT_SOURCE_DIR}/external/stb/stb_image.h
+)
+target_include_directories(
+    stb_image PUBLIC
+    ${PROJECT_SOURCE_DIR}/external/stb
+)
+
 # Link all external libraries
 target_link_libraries(imgui PUBLIC
     glfw_target
