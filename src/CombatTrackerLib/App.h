@@ -21,7 +21,14 @@ namespace CombatTrackerLib {
 			std::string_view applicationName{};
 		};
 		explicit App(const Specification& specification);
-		~App();
+		
+		// An App object exists as a singleton so it should be non-copiable and non-movable.
+		App(const App& other) = delete;
+		App& operator=(const App& other)  = delete;
+		App(App&& other) = delete;
+		App& operator=(App& other) = delete;
+		~App() = default;
+
 		void run();
 		void stop();
 

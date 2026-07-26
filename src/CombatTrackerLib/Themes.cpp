@@ -681,4 +681,11 @@ namespace CombatTrackerLib {
 		}());
 		return instance;
 	}
+	void UITheme::setUITheme(UIPreset newPreset) {
+		if (preset == newPreset) {
+			return;
+		}
+		preset = newPreset;
+		ImGui::GetStyle() = PRESET_TO_CONFIG.at(preset);
+	}
 }

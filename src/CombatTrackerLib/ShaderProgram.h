@@ -9,7 +9,14 @@
 class ShaderProgram {
 public:
 	explicit ShaderProgram(std::vector<unsigned int> shaders);
-	ShaderProgram();
+
+	ShaderProgram(const ShaderProgram& program) = delete;
+	ShaderProgram& operator=(const ShaderProgram& program) = delete;
+
+	ShaderProgram(ShaderProgram&& program) noexcept;
+	ShaderProgram& operator=(ShaderProgram&& program) noexcept;
+
+	~ShaderProgram() = default;
 
 	// These functions mostly serve as simpler abstractions over the OpenGL API.
 	void activate();

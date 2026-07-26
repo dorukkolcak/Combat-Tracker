@@ -38,7 +38,23 @@ ShaderProgram::ShaderProgram(std::vector<unsigned int> shaderIDs) :
 		glDeleteShader(shaderID);
 	}
 }
-ShaderProgram::ShaderProgram() {}
+ShaderProgram::ShaderProgram(ShaderProgram&& program) noexcept {
+	this->m_programID = program.m_programID;
+	this->m_shaders = std::move(program.m_shaders);
+	program.m_programID = 0;
+	program.m_shaders.clear();
+}
+ShaderProgram& ShaderProgram::operator=(ShaderProgram&& program) noexcept {
+	if (&program == this) {
+		return *this;
+	}
+	this->deleteProgram();
+	this->m_programID = program.m_programID;
+	this->m_shaders = std::move(program.m_shaders);
+	program.m_programID = 0;
+	program.m_shaders.clear();
+	return *this;
+}
 void ShaderProgram::activate() {
 	glUseProgram(m_programID);
 }

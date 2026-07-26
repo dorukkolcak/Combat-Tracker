@@ -44,7 +44,7 @@ namespace CombatTrackerLib {
 	public:
 		UIPreset preset{};
 		ImGuiStyle config{};
-		inline void setUITheme(UIPreset newPreset);
+		void setUITheme(UIPreset newPreset);
 	private:
 
 		// Helper to simplify color representation.
@@ -69,11 +69,4 @@ namespace CombatTrackerLib {
 	*/
 	inline const std::unordered_map<UIPreset, ImGuiStyle> UITheme::PRESET_TO_CONFIG = UITheme::buildPresetConfigs();
 		
-	inline void UITheme::setUITheme(UIPreset newPreset) {
-		if (preset == newPreset) {
-			return;
-		}
-		preset = newPreset;
-		ImGui::GetStyle() = PRESET_TO_CONFIG.at(preset);
-	}
 }

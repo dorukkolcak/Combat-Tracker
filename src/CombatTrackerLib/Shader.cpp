@@ -10,7 +10,7 @@
 namespace CombatTrackerLib {
 	Shader::Shader(const std::filesystem::path& shaderPath, Type type) {
 
-		std::string shaderCodeTemp{ readFile(shaderPath) };
+		std::string shaderCodeTemp{ readFileToString(shaderPath) };
 		if (shaderCodeTemp.empty()) {
 			std::cerr << "Failed to read shader file: " << shaderPath << '\n';
 			return;

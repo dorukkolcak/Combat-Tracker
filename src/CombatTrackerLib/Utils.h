@@ -23,7 +23,7 @@ namespace CombatTrackerLib {
 		}
 		return ImGui::Button(label);
 	}
-	inline std::string readFile(const std::filesystem::path& filePath) {
+	inline std::string readFileToString(const std::filesystem::path& filePath) {
 
 		std::ifstream file(filePath);
 		if (!file.is_open()) {

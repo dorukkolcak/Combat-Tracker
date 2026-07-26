@@ -27,8 +27,6 @@ namespace CombatTrackerLib {
 		ImGui_ImplOpenGL3_Init(glsl_version);
 		m_theme.setUITheme(specification.initialPreset);
 	}
-	// Destructor should be empty as we can explicitly call app.stop() to free all resources.
-	App::~App() {}
 	void App::run() {
 
 		// Setup IO.
