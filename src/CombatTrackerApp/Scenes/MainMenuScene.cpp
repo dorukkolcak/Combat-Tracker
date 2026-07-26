@@ -7,28 +7,33 @@
 
 namespace CombatTrackerApp {
     MainMenuScene::MainMenuScene(CombatTrackerLib::App* app) :
+        m_titleTexture{"../assets/Title.png"},
         CombatTrackerLib::Scene{ app },
         m_isMainMenuDockspaceInitialized{ false }
 	{   
         m_mainMenuDockspaceFlags =
             ImGuiDockNodeFlags_NoResize |
-            ImGuiDockNodeFlags_NoSplit;
-        m_hostWindowFlags = 
-        ImGuiWindowFlags_NoDocking |
+            ImGuiDockNodeFlags_NoSplit | 
+            ImGuiDockNodeFlags_NoWindowMenuButton;
+        m_hostWindowFlags =
+            ImGuiWindowFlags_NoDocking |
             ImGuiWindowFlags_NoTitleBar |
             ImGuiWindowFlags_NoCollapse |
             ImGuiWindowFlags_NoResize |
             ImGuiWindowFlags_NoMove |
             ImGuiWindowFlags_NoBringToFrontOnFocus |
-            ImGuiWindowFlags_NoNavFocus;
-      
-        m_mainMenuWindowClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
+            ImGuiWindowFlags_NoNavFocus |
+            ImGuiWindowFlags_NoScrollbar | 
+            ImGuiWindowFlags_NoScrollWithMouse;
+        m_mainMenuWindowClass.DockNodeFlagsOverrideSet =
+            ImGuiDockNodeFlags_NoResize |
+            ImGuiDockNodeFlags_NoSplit |
+            ImGuiDockNodeFlags_NoTabBar;
 	}
     void MainMenuScene::notifyScene(const ImGuiIO& imguiIO) {}
     void MainMenuScene::updateScene(double timeInterval) {}
 
-    // TODO: Add an options panel.
-    void MainMenuScene::renderUI()  {
+    void MainMenuScene::renderUI() {
 
         // Set configurations of the host window of the scene on initial render pass.
         if (!m_isMainMenuDockspaceInitialized) {
@@ -71,15 +76,11 @@ namespace CombatTrackerApp {
         // Render the dockspace of the host window.
         ImGui::DockSpace(m_mainMenuDockspaceID, ImGui::GetWindowSize(), m_mainMenuDockspaceFlags);
         ImGui::End();
-        
-        /*
-        TODO: Title screen window. This should ideally render an OpenGL texture.
-        Rather add the texture to be added to the draw list of the window. 
-        So that it can be rendered during renderScene call.
-        */
-        ImGui::SetNextWindowClass(static_cast<const ImGuiWindowClass*> (&m_mainMenuWindowClass));
+
+        // Title window.
+        ImGui::SetNextWindowClass(&m_mainMenuWindowClass);
         ImGui::Begin("CombatTracker");
-        //ImGui::GetWindowDrawList()->AddImage();
+        ImGui::Image(static_cast<ImTextureID>(m_titleTexture.getTextureID()), ImVec2(m_titleTexture.getTextureWidth(), m_titleTexture.getTextureHeight()));
         ImGui::End();
 
         // Encounter Creation window.
@@ -110,7 +111,7 @@ namespace CombatTrackerApp {
         ImGui::TextWrapped("Finishing Encounters");
         ImGui::Bullet(); ImGui::TextWrapped("Finish the current encounter and save the results.");
         if (CombatTrackerLib::alignedButton("Select Encounter", 0.5f)) {
-            //applicationReference->queueSceneTransition(this, std::make_unique<EncounterRunningScene>(applicationReference));
+        
         }
         ImGui::End();
 
@@ -119,7 +120,7 @@ namespace CombatTrackerApp {
         ImGui::Bullet(); ImGui::TextWrapped("Browse the list of your completed encounters and analyze their results.");
         ImGui::Bullet(); ImGui::TextWrapped("Remember what happened exactly in each turn.");
         if (CombatTrackerLib::alignedButton("Browse Encounters", 0.5f)) {
-            //applicationReference->queueSceneTransition(this, std::make_unique<CompletedEncountersScene>(applicationReference));
+        
         }
         ImGui::End();
     }

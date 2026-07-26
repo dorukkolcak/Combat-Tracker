@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../CombatTrackerLib/Scene.h"
+#include "../../CombatTrackerLib/Texture2D.h"
 
 namespace CombatTrackerApp {
 	class MainMenuScene : public CombatTrackerLib::Scene {
@@ -14,13 +15,15 @@ namespace CombatTrackerApp {
 
 	private:
 
-		// Flags.
-		ImGuiDockNodeFlags m_mainMenuDockspaceFlags{};
-		ImGuiWindowFlags m_hostWindowFlags{};
+		CombatTrackerLib::Texture2D m_titleTexture;
 
 		// Sort of a flag that overrides some options that are enforced on every window.
 		// Used for the window that hosts our application art.
 		ImGuiWindowClass m_mainMenuWindowClass{};
+
+		// Flags.
+		ImGuiDockNodeFlags m_mainMenuDockspaceFlags{};
+		ImGuiWindowFlags m_hostWindowFlags{};
 
 		// UI IDs.
 		ImGuiID m_mainMenuDockspaceID{};
@@ -31,6 +34,7 @@ namespace CombatTrackerApp {
 
 		// Dockspace layout flag.
 		bool m_isMainMenuDockspaceInitialized{};
+		
 	};
 
 }
