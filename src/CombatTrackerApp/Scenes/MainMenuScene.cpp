@@ -7,7 +7,7 @@
 
 namespace CombatTrackerApp {
     MainMenuScene::MainMenuScene(CombatTrackerLib::App* app) :
-        m_titleTexture{"../assets/Title.png"},
+        m_titleTexture{"assets/Title.png"},
         CombatTrackerLib::Scene{ app },
         m_isMainMenuDockspaceInitialized{ false }
 	{   
@@ -80,7 +80,10 @@ namespace CombatTrackerApp {
         // Title window.
         ImGui::SetNextWindowClass(&m_mainMenuWindowClass);
         ImGui::Begin("CombatTracker");
-        ImGui::Image(static_cast<ImTextureID>(m_titleTexture.getTextureID()), ImVec2(m_titleTexture.getTextureWidth(), m_titleTexture.getTextureHeight()));
+
+        // Tinting with a style colour makes the logo follow the active UI preset.
+        // So we don't need a title asset for every UI Preset.
+        centeredImage(m_titleTexture, ImGui::GetStyle().Colors[ImGuiCol_Text]);
         ImGui::End();
 
         // Encounter Creation window.

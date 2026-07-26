@@ -38,3 +38,10 @@ target_link_libraries(
     nlohmann_json::nlohmann_json
     Combat-Tracker-Lib
 )
+
+# This is needed so that the assets can be accessed from the build directory.
+add_custom_command(TARGET Combat-Tracker-App POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${PROJECT_SOURCE_DIR}/assets $<TARGET_FILE_DIR:Combat-Tracker-App>/assets
+    COMMENT "Copying assets to the output directory"
+)
