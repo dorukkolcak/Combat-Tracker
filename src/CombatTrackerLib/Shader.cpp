@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <iostream>
-#include <fstream>
 
 namespace CombatTrackerLib {
 	Shader::Shader(const std::filesystem::path& shaderPath, Type type) {

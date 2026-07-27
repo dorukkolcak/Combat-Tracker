@@ -1,9 +1,4 @@
-#include <iostream>
-
 #include "OverlayScene.h"
-
-#include "imgui_impl_opengl3.h"
-#include "imgui_internal.h"
 
 namespace CombatTrackerApp {
 	OverlayScene::OverlayScene(CombatTrackerLib::App* app) : 
@@ -11,7 +6,7 @@ namespace CombatTrackerApp {
 	{
 	}
 
-	void OverlayScene::notifyScene(const ImGuiIO& imguiIO) {}
+	void OverlayScene::notifyScene(const ImGuiIO& imguiIO) {} 
 	void OverlayScene::updateScene(double timeInterval) {}
 	void OverlayScene::renderUI() {
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "CreatureEnums.h"
 
 // The types here shouldn't be nested types as they are used by the builders.

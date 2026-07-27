@@ -7,6 +7,9 @@
 #include "../../CombatTrackerLib/Texture2D.h"
 #include "../../CombatTrackerLib/Utilities/UIUtils.h"
 
+// ImGuiDockNodeFlags_NoWindowMenuButton below is a private flag, so the internal header is needed here.
+#include "imgui_internal.h"
+
 namespace CombatTrackerApp {
 	class MainMenuScene : public CombatTrackerLib::Scene {
 	public:
@@ -15,34 +18,46 @@ namespace CombatTrackerApp {
 		void updateScene(double timeInterval) override;
 		void renderUI() override;
 		void renderScene() override;
-
 	private:
 
 		enum OptionsCategory {
 			Appearance,
+			// TODO: Expand the categories.
+		};
+
+		inline static const std::unordered_map<OptionsCategory, std::string_view> OPTIONS_CATEGORY_NAMES{
+			{OptionsCategory::Appearance, "Appearance"},
 			//...
 		};
 
-		CombatTrackerLib::Texture2D m_titleTexture;
+		inline static constexpr ImGuiDockNodeFlags MAIN_MENU_DOCKSPACE_FLAGS{
+			ImGuiDockNodeFlags_NoResize |
+			ImGuiDockNodeFlags_NoSplit |
+			ImGuiDockNodeFlags_NoWindowMenuButton
+		};
+		inline static constexpr ImGuiWindowFlags MAIN_MENU_HOST_WINDOW_FLAGS{
+			ImGuiWindowFlags_NoDocking |
+			ImGuiWindowFlags_NoTitleBar |
+			ImGuiWindowFlags_NoCollapse |
+			ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoBringToFrontOnFocus |
+			ImGuiWindowFlags_NoNavFocus |
+			ImGuiWindowFlags_NoScrollbar |
+			ImGuiWindowFlags_NoScrollWithMouse
+		};
+
+		CombatTrackerLib::Texture2D m_titleTexture{};
 
 		// Sort of a flag that overrides some options that are enforced on every window.
 		// Used for the window that hosts our application art.
 		ImGuiWindowClass m_mainMenuWindowClass{};
-
-		inline static const std::unordered_map<OptionsCategory, std::string_view> OPTIONS_CATEGORY_NAMES{ 
-			{OptionsCategory::Appearance, "Appearance"},
-			//...
-		};
 
 		CombatTrackerLib::ListBoxParameters m_UIThemeParameters{};
 		CombatTrackerLib::UIPreset m_chosenUIPreset{};
 
 		// Which category the options panel is currently showing.
 		OptionsCategory m_selectedOptionsCategory{};
-
-		// Flags.
-		ImGuiDockNodeFlags m_mainMenuDockspaceFlags{};
-		ImGuiWindowFlags m_hostWindowFlags{};
 
 		// UI IDs.
 		ImGuiID m_mainMenuDockspaceID{};

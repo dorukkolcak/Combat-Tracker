@@ -3,7 +3,6 @@
 #include "../CombatTrackerLib/Utilities/UIUtils.h"
 
 #include "imgui.h"
-#include "imgui_internal.h"
 
 namespace CombatTrackerApp {
 
@@ -15,20 +14,6 @@ namespace CombatTrackerApp {
         m_chosenUIPreset{ m_applicationReference->getUITheme().preset },
         m_selectedOptionsCategory{}
 	{   
-        m_mainMenuDockspaceFlags =
-            ImGuiDockNodeFlags_NoResize |
-            ImGuiDockNodeFlags_NoSplit | 
-            ImGuiDockNodeFlags_NoWindowMenuButton;
-        m_hostWindowFlags =
-            ImGuiWindowFlags_NoDocking |
-            ImGuiWindowFlags_NoTitleBar |
-            ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoBringToFrontOnFocus |
-            ImGuiWindowFlags_NoNavFocus |
-            ImGuiWindowFlags_NoScrollbar | 
-            ImGuiWindowFlags_NoScrollWithMouse;
         m_mainMenuWindowClass.DockNodeFlagsOverrideSet =
             ImGuiDockNodeFlags_NoResize |
             ImGuiDockNodeFlags_NoSplit |
@@ -47,9 +32,6 @@ namespace CombatTrackerApp {
             ImGui::SetNextWindowViewport(m_mainViewport->ID);
         }
 
-        // Render the host window.
-        ImGui::Begin("Host Window", nullptr, m_hostWindowFlags);
-
         // Create the dockplace settings and layout on initial render pass.
         if (!m_isMainMenuDockspaceInitialized) {
 
@@ -65,20 +47,24 @@ namespace CombatTrackerApp {
             ImGui::DockBuilderSplitNode(m_mainMenuDockspaceID, ImGuiDir_Up, 0.60f, &m_mainMenuTitleWindowID, &bottom);
             ImGui::DockBuilderSplitNode(bottom, ImGuiDir_Left, 0.33f, &m_encounterCreationWindowID, &m_encounterRunningWindowID);
             ImGui::DockBuilderSplitNode(m_encounterRunningWindowID, ImGuiDir_Right, 0.50f, &m_completedEncountersWindowID, &m_encounterRunningWindowID);
-       
+
             // Dock windows.
             ImGui::DockBuilderDockWindow("CombatTracker", m_mainMenuTitleWindowID);
             ImGui::DockBuilderDockWindow("Encounter Creation", m_encounterCreationWindowID);
             ImGui::DockBuilderDockWindow("Run Encounter", m_encounterRunningWindowID);
             ImGui::DockBuilderDockWindow("View Completed Encounters", m_completedEncountersWindowID);
-       
+
             // Finish dockspace creation.
             ImGui::DockBuilderFinish(m_mainMenuDockspaceID);
             m_isMainMenuDockspaceInitialized = true;
 
         }
+
+        // Render the host window.
+        ImGui::Begin("Host Window", nullptr, MAIN_MENU_HOST_WINDOW_FLAGS);
+
         // Render the dockspace of the host window.
-        ImGui::DockSpace(m_mainMenuDockspaceID, ImGui::GetWindowSize(), m_mainMenuDockspaceFlags);
+        ImGui::DockSpace(m_mainMenuDockspaceID, ImGui::GetWindowSize(), MAIN_MENU_DOCKSPACE_FLAGS);
         ImGui::End();
 
         // Title window.
@@ -89,6 +75,7 @@ namespace CombatTrackerApp {
         }
         ImGui::SameLine();
         if (ImGui::Button("Exit")) {
+
             // This signal should be deferred and handled by the application instance at the start of the frame.
             m_applicationReference->signalApplicationClose();
         }
@@ -97,7 +84,7 @@ namespace CombatTrackerApp {
         // So we don't need a title asset for every UI Preset.
         CombatTrackerLib::centeredImage(m_titleTexture, ImGui::GetStyle().Colors[ImGuiCol_Text]);
 
-        // Options popup for application wide settings.
+        // Options popup for application-wide settings.
         // TODO: One thing to do is actually save these settings somewhere so they are preserved between runs.
         ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
         ImGui::SetNextWindowSize(ImVec2(640.0f, 420.0f), ImGuiCond_Appearing);
@@ -122,8 +109,6 @@ namespace CombatTrackerApp {
             }
             ImGui::EndChild();
 
-            // Keeps the content pane beside the category list instead of under it.
-            // Both panes are bodyHeight tall, so stacking them would overflow the footer.
             ImGui::SameLine();
 
             // Controls belonging to the selected category.
@@ -134,7 +119,8 @@ namespace CombatTrackerApp {
                 CombatTrackerLib::renderListBox(m_UIThemeParameters, m_chosenUIPreset, "Choose Theme", CombatTrackerLib::PRESET_NAMES);
                 applicationUITheme.setUITheme(m_chosenUIPreset); // This function early returns already so this is fine.
             }
-            //...
+            // TODO: Update this when more categories get added.
+
             ImGui::EndChild();
 
             ImGui::Separator();
@@ -175,8 +161,10 @@ namespace CombatTrackerApp {
         ImGui::Bullet(); ImGui::TextWrapped("Move each creature in the battlemap with both 2D or 3D visualization options.");
         ImGui::TextWrapped("Finishing Encounters");
         ImGui::Bullet(); ImGui::TextWrapped("Finish the current encounter and save the results.");
-        if (CombatTrackerLib::alignedButton("Select Encounter", 0.5f)) {
         
+        // TODO: Complete the scene transition.
+        if (CombatTrackerLib::alignedButton("Select Encounter", 0.5f)) {
+           
         }
         ImGui::End();
 
@@ -184,6 +172,8 @@ namespace CombatTrackerApp {
         ImGui::Begin("View Completed Encounters");
         ImGui::Bullet(); ImGui::TextWrapped("Browse the list of your completed encounters and analyze their results.");
         ImGui::Bullet(); ImGui::TextWrapped("Remember what happened exactly in each turn.");
+
+        // TODO: Complete the scene transition.
         if (CombatTrackerLib::alignedButton("Browse Encounters", 0.5f)) {
         
         }

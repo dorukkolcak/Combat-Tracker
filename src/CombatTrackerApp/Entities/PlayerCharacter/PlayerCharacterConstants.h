@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <unordered_set>
 
 #include "../Creature/CreatureEnums.h"
 #include "PlayerCharacterEnums.h"

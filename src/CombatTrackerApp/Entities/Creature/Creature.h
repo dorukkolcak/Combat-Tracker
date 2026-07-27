@@ -3,7 +3,6 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
-#include <unordered_set>
 
 #include "CreatureEnums.h"
 #include "CreatureTypes.h"

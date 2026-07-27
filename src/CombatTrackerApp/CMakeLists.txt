@@ -1,6 +1,6 @@
 add_executable(Combat-Tracker-App
     main.cpp
-    "../CombatTrackerLib/Utilities/JSONUtils.h"
+    
     
 
     Entities/Creature/Creature.h
@@ -26,6 +26,12 @@ add_executable(Combat-Tracker-App
 
     Scenes/EncounterCreationScene.h
     Scenes/EncounterCreationScene.cpp
+    Scenes/EntityCreationScene.h
+    Scenes/EntityCreationScene.cpp
+    Scenes/MonsterCreationScene.h
+    Scenes/MonsterCreationScene.cpp
+    Scenes/PlayerCharacterCreationScene.h
+    Scenes/PlayerCharacterCreationScene.cpp
     Scenes/MainMenuScene.h
     Scenes/MainMenuScene.cpp
     Scenes/OverlayScene.h

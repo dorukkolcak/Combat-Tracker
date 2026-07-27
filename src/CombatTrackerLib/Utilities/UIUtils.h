@@ -2,6 +2,8 @@
 
 #include "imgui.h"
 
+#include <algorithm>
+
 #include "Texture2D.h"
 
 namespace CombatTrackerLib {

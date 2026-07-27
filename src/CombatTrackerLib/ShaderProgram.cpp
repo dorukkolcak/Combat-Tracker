@@ -2,6 +2,9 @@
 
 #include "glad/glad.h"
 
+// Only the uniform setters need this, so it stays out of the header.
+#include <glm/gtc/type_ptr.hpp>
+
 #include <algorithm>
 #include <iostream>
 
