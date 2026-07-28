@@ -22,9 +22,9 @@ namespace CombatTrackerApp {
 		}
 	}
 
-	void EntityCreationScene::notifyScene(const ImGuiIO& imguiIO) {}
-	void EntityCreationScene::updateScene(double timeInterval) {}
-	void EntityCreationScene::renderScene() {}
+	void EntityCreationScene::notifyScene(const ImGuiIO& imguiIO) {} // No non-ImGui based event handling should exist in this scene, I think.
+	void EntityCreationScene::updateScene(double timeInterval) {} // Purely input based scene so no updates necessary.
+	void EntityCreationScene::renderScene() {} // The scene consists of just UI widgets so no OpenGL side rendering work.
 
 	void EntityCreationScene::renderUI() {
 
@@ -44,10 +44,11 @@ namespace CombatTrackerApp {
 		ImGui::SeparatorText((getEntityLabel() + " Creation").c_str());
 
 		// Scrollable region for the entire scene.
-		const float footerHeight{ ImGui::GetFrameHeightWithSpacing() * 2.0f };
-		ImGui::BeginChild("EntityManagementScroll", ImVec2{ 0, -footerHeight });
+		// The footer below it is a separator plus the two completion buttons.
+		const float footerHeight{ CombatTrackerLib::reservedFooterHeight(2) };
+		ImGui::BeginChild("EntityManagementScroll", ImVec2{ 0.0f, -footerHeight });
 
-		// Top UI elements, which include are laid out as follow:
+		// Top UI elements, which are laid out as follow:
 		// Left: General Creature info + speed data.
 		// Right: Player character or monster specific info.
 		if (ImGui::BeginTable("TopEntitySplit", 2, ImGuiTableFlags_SizingStretchProp)) {
@@ -80,9 +81,7 @@ namespace CombatTrackerApp {
 			ImGui::TableNextRow();
 
 			// Compute a sensible dynamic height for the children so both columns match.
-			// We take most of the available content height, leaving a bit for separators/buttons.
-			const float availY{ ImGui::GetContentRegionAvail().y };
-			const float childHeight{ std::max(MIN_CHILD_HEIGHT, availY * 0.46f) };
+			const auto childHeight{ std::max(MIN_CHILD_HEIGHT, m_mainViewport->WorkSize.y * 0.28f) };
 
 			// Saving throw data as a separate collapsable header.
 			ImGui::TableSetColumnIndex(0);
@@ -148,12 +147,11 @@ namespace CombatTrackerApp {
 		);
 		renderSenses();
 
-		// Some parts of the player character specific info goes here.
 		ImGui::Spacing();
-		renderEntitySpecificSection();
+		renderEntitySpecificSection(); 	// Some parts of the player character specific info goes here.
 		ImGui::Spacing();
 		ImGui::SeparatorText("Actions, Traits, Equipment");
-		renderActions(isMonsterScene());
+		renderActions(isMonsterScene()); // This function needs to know the type of entity so that it can disable Lair/Legendary Actions.
 		renderAddables(m_currentCreatureStatBlock.traits, TRAIT_LABEL);
 		renderAddables(m_currentCreatureStatBlock.equipment, EQUIPMENT_LABEL);
 		ImGui::EndChild();
@@ -206,6 +204,7 @@ namespace CombatTrackerApp {
 				}
 
 				ImGui::TableSetColumnIndex(0);
+				ImGui::AlignTextToFramePadding();
 				ImGui::TextUnformatted(ABILITY_NAMES.at(item.first).c_str());
 
 				// General special value reserved for stretching items.
@@ -226,8 +225,9 @@ namespace CombatTrackerApp {
 					m_abilityModifiersOverride.at(item.first) = true;
 				}
 
+				// The reset buttons fill their column instead of auto sizing to their label, which would overflow the cell.
 				ImGui::TableSetColumnIndex(3);
-				if (ImGui::Button(("Reset " + ABILITY_NAMES.at(item.first) + " Modifier").c_str())) {
+				if (ImGui::Button(("Reset " + ABILITY_NAMES.at(item.first) + " Modifier").c_str(), ImVec2{ -1.0f, 0.0f })) {
 					m_abilityModifiersOverride.at(item.first) = false;
 				}
 			}
@@ -269,6 +269,7 @@ namespace CombatTrackerApp {
 				}
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
+				ImGui::AlignTextToFramePadding();
 				ImGui::TextUnformatted(item.second.c_str());
 
 				ImGui::TableSetColumnIndex(1);
@@ -276,15 +277,11 @@ namespace CombatTrackerApp {
 				if (ImGui::InputInt(("##" + item.second + "Saving Throw Modifiers").c_str(),
 					&m_currentCreatureStatBlock.savingThrowModifiers.at(item.first)
 				)) {
-
-					// Setup no bounds for saving throw modifiers as their values can get quite large, low depending upon expertise and proficiency.
-					// The "largeness" depends on PB. As the PB can be overridden to be quite large, the modifiers can bu quite large.
-					m_currentCreatureStatBlock.savingThrowModifiers.at(item.first) = m_currentCreatureStatBlock.savingThrowModifiers.at(item.first);
 					m_savingThrowsOverride.at(item.first) = true;
 				}
 
 				ImGui::TableSetColumnIndex(2);
-				if (ImGui::Button(("Reset " + item.second + " Saving Throw Modifier").c_str())) {
+				if (ImGui::Button(("Reset " + item.second + " Saving Throw Modifier").c_str(), ImVec2{ -1.0f, 0.0f })) {
 					m_savingThrowsOverride.at(item.first) = false;
 				}
 			}
@@ -327,6 +324,7 @@ namespace CombatTrackerApp {
 
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
+				ImGui::AlignTextToFramePadding();
 				ImGui::TextUnformatted(item.second.c_str());
 
 				ImGui::TableSetColumnIndex(1);
@@ -334,14 +332,11 @@ namespace CombatTrackerApp {
 				if (ImGui::InputInt(("##" + item.second + "Skill Modifier").c_str(),
 					&m_currentCreatureStatBlock.skillModifiers.at(item.first)
 				)) {
-
-					// Exact same reasoning as saving throw modifiers is applicable to here.
-					m_currentCreatureStatBlock.skillModifiers.at(item.first) = m_currentCreatureStatBlock.skillModifiers.at(item.first);
 					m_skillModifiersOverride.at(item.first) = true;
 				}
 
 				ImGui::TableSetColumnIndex(2);
-				if (ImGui::Button(("Reset " + item.second + " Skill Modifier").c_str())) {
+				if (ImGui::Button(("Reset " + item.second + " Skill Modifier").c_str(), ImVec2{ -1.0f, 0.0f })) {
 					m_skillModifiersOverride.at(item.first) = false;
 				}
 			}
@@ -363,7 +358,9 @@ namespace CombatTrackerApp {
 	void EntityCreationScene::renderGeneralCreatureInfo() {
 
 		if (ImGui::BeginTable("##GeneralCreatureInfo_NameRow", 2, ImGuiTableFlags_SizingStretchProp)) {
-			ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+
+			// The label column is measured from its own text so it follows the font instead of a magic pixel width.
+			ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthFixed, ImGui::CalcTextSize("Name").x + ImGui::GetStyle().ItemSpacing.x * 2.0f);
 			ImGui::TableSetupColumn("Field", ImGuiTableColumnFlags_WidthStretch);
 
 			ImGui::TableNextRow();
@@ -382,9 +379,9 @@ namespace CombatTrackerApp {
 
 		if (ImGui::BeginTable("##GeneralCreatureInfo_MainSplit", 2, ImGuiTableFlags_SizingStretchProp)) {
 
-			// Give right side a reasonable fixed width so it never spills into the Entity Specific column.
-			const float avail{ ImGui::GetContentRegionAvail().x };
-			const float rightW{ std::min(300.0f, std::max(240.0f, avail * 0.30f)) };
+			// Give right side a reasonable fixed width so it never expands into the Entity Specific column.
+			const auto avail{ ImGui::GetContentRegionAvail().x };
+			const auto rightW{ std::clamp(avail * 0.30f, std::min(240.0f, avail * 0.45f), 300.0f) };
 
 			ImGui::TableSetupColumn("Left", ImGuiTableColumnFlags_WidthStretch, 1.0f);
 			ImGui::TableSetupColumn("Right", ImGuiTableColumnFlags_WidthFixed, rightW);
@@ -399,16 +396,20 @@ namespace CombatTrackerApp {
 
 				ImGui::TableNextRow();
 
+				// The labels are hidden on the listboxes themselves, so each one can take its whole column.
 				ImGui::TableSetColumnIndex(0);
 				ImGui::TextUnformatted("Size");
+				ImGui::SetNextItemWidth(-1.0f);
 				renderListBox(m_sizeListBoxParameters, m_currentCreatureStatBlock.size, "##Size", SIZE_NAMES);
 
 				ImGui::TableSetColumnIndex(1);
 				ImGui::TextUnformatted("Creature Type");
+				ImGui::SetNextItemWidth(-1.0f);
 				renderListBox(m_creatureTypeParameters, m_currentCreatureStatBlock.type, "##CreatureType", CREATURE_TYPE_NAMES);
 
 				ImGui::TableSetColumnIndex(2);
 				ImGui::TextUnformatted("Alignment");
+				ImGui::SetNextItemWidth(-1.0f);
 				renderListBox(m_alignmentParameters, m_currentCreatureStatBlock.alignment, "##Alignment", ALIGNMENT_NAMES);
 
 				ImGui::EndTable();
@@ -464,7 +465,7 @@ namespace CombatTrackerApp {
 			// AC inner table.
 			ImGui::TableSetColumnIndex(0);
 			if (ImGui::BeginTable("##ACRow", 2, ImGuiTableFlags_SizingStretchProp)) {
-				ImGui::TableSetupColumn("ACLabel", ImGuiTableColumnFlags_WidthFixed, 30.0f);
+				ImGui::TableSetupColumn("ACLabel", ImGuiTableColumnFlags_WidthFixed, ImGui::CalcTextSize("AC").x + ImGui::GetStyle().ItemSpacing.x * 2.0f);
 				ImGui::TableSetupColumn("ACField", ImGuiTableColumnFlags_WidthStretch);
 				ImGui::TableNextRow();
 
@@ -482,7 +483,7 @@ namespace CombatTrackerApp {
 			// HP inner cell.
 			ImGui::TableSetColumnIndex(1);
 			if (ImGui::BeginTable("##HPRow", 2, ImGuiTableFlags_SizingStretchProp)) {
-				ImGui::TableSetupColumn("HPLabel", ImGuiTableColumnFlags_WidthFixed, 30.0f);
+				ImGui::TableSetupColumn("HPLabel", ImGuiTableColumnFlags_WidthFixed, ImGui::CalcTextSize("HP").x + ImGui::GetStyle().ItemSpacing.x * 2.0f);
 				ImGui::TableSetupColumn("HPField", ImGuiTableColumnFlags_WidthStretch);
 				ImGui::TableNextRow();
 
@@ -503,20 +504,31 @@ namespace CombatTrackerApp {
 		if (ImGui::BeginTable("SpeedGrid", 5, ImGuiTableFlags_SizingStretchSame)) {
 			ImGui::TableNextRow();
 
+			// An inline label plus the stepper buttons does not fit into a fifth of the column, so the labels go above the fields here too.
 			ImGui::TableSetColumnIndex(0);
-			renderNonOverridableInputInt(m_currentCreatureStatBlock.walkSpeed, "Walk");
+			ImGui::TextUnformatted("Walk");
+			ImGui::SetNextItemWidth(-1.0f);
+			renderNonOverridableInputInt(m_currentCreatureStatBlock.walkSpeed, "##Walk");
 
 			ImGui::TableSetColumnIndex(1);
-			renderNonOverridableInputInt(m_currentCreatureStatBlock.climbingSpeed, "Climb");
+			ImGui::TextUnformatted("Climb");
+			ImGui::SetNextItemWidth(-1.0f);
+			renderNonOverridableInputInt(m_currentCreatureStatBlock.climbingSpeed, "##Climb");
 
 			ImGui::TableSetColumnIndex(2);
-			renderNonOverridableInputInt(m_currentCreatureStatBlock.swimmingSpeed, "Swim");
+			ImGui::TextUnformatted("Swim");
+			ImGui::SetNextItemWidth(-1.0f);
+			renderNonOverridableInputInt(m_currentCreatureStatBlock.swimmingSpeed, "##Swim");
 
 			ImGui::TableSetColumnIndex(3);
-			renderNonOverridableInputInt(m_currentCreatureStatBlock.burrowSpeed, "Burrow");
+			ImGui::TextUnformatted("Burrow");
+			ImGui::SetNextItemWidth(-1.0f);
+			renderNonOverridableInputInt(m_currentCreatureStatBlock.burrowSpeed, "##Burrow");
 
 			ImGui::TableSetColumnIndex(4);
-			renderNonOverridableInputInt(m_currentCreatureStatBlock.flySpeed, "Fly");
+			ImGui::TextUnformatted("Fly");
+			ImGui::SetNextItemWidth(-1.0f);
+			renderNonOverridableInputInt(m_currentCreatureStatBlock.flySpeed, "##Fly");
 
 			ImGui::EndTable();
 		}
@@ -591,7 +603,11 @@ namespace CombatTrackerApp {
 			ImGui::TableNextRow();
 			for (auto& item : m_currentCreatureStatBlock.senses) {
 				ImGui::TableNextColumn();
-				renderNonOverridableInputInt(item.second, SENSE_NAMES.at(item.first).c_str());
+
+				// Same layout as the speed grid, the label sits above its field.
+				ImGui::TextUnformatted(SENSE_NAMES.at(item.first).c_str());
+				ImGui::SetNextItemWidth(-1.0f);
+				renderNonOverridableInputInt(item.second, ("##" + SENSE_NAMES.at(item.first)).c_str());
 			}
 			ImGui::EndTable();
 		}
@@ -605,9 +621,7 @@ namespace CombatTrackerApp {
 			ImGui::TableNextColumn();
 			ImGui::PushID(static_cast<int> (i));
 
-			ImGui::SetNextItemWidth(-1.0f);
-			ImGui::Button(m_currentCreatureStatBlock.actions[i].name.c_str());
-			ImGui::SameLine();
+			ImGui::Button(m_currentCreatureStatBlock.actions[i].name.c_str(), ImVec2{ -1.0f, 0.0f });
 			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				ImGui::SetTooltip("%s: %s", ACTION_NAMES.at(m_currentCreatureStatBlock.actions[i].type).c_str(), m_currentCreatureStatBlock.actions[i].description.c_str());
 			}
@@ -615,12 +629,13 @@ namespace CombatTrackerApp {
 				ImGui::OpenPopup(("Edit Action##" + std::to_string(i)).c_str());
 			}
 
-			ImVec2 center{ ImGui::GetMainViewport()->GetCenter() };
-			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2{ 0.5f, 0.5f });
-			ImVec2 vp{ ImGui::GetMainViewport()->Size };
-			ImGui::SetNextWindowSize(ImVec2{ vp.x * 0.70f, vp.y * 0.70f }, ImGuiCond_Appearing);
+			// The popup can neither be moved nor resized by hand, so it simply keeps following the viewport.
+			const auto center{ ImGui::GetMainViewport()->GetCenter() };
+			ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{ 0.5f, 0.5f });
+			const auto vp{ ImGui::GetMainViewport()->Size };
+			ImGui::SetNextWindowSize(ImVec2{ vp.x * 0.70f, vp.y * 0.70f }, ImGuiCond_Always);
 			if (ImGui::BeginPopupModal(("Edit Action##" + std::to_string(i)).c_str(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
-				ImGui::BeginChild("EditActionScroll", ImVec2{ 0, -ImGui::GetFrameHeightWithSpacing() * 2.0f }, true);
+				ImGui::BeginChild("EditActionScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(2) }, true);
 				ImGui::InputText("Action Name", &m_currentCreatureStatBlock.actions[i].name);
 				ImGui::InputText("Action Description", &m_currentCreatureStatBlock.actions[i].description);
 				ImGui::EndChild();
@@ -649,12 +664,12 @@ namespace CombatTrackerApp {
 		if (ImGui::Button("Add Action")) {
 			ImGui::OpenPopup("Action");
 		}
-		const ImVec2 center{ ImGui::GetMainViewport()->GetCenter() };
-		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2{ 0.5f, 0.5f });
-		const ImVec2 vp{ ImGui::GetMainViewport()->Size };
-		ImGui::SetNextWindowSize(ImVec2(vp.x * 0.70f, vp.y * 0.70f), ImGuiCond_Appearing);
+		const auto center{ ImGui::GetMainViewport()->GetCenter() };
+		ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{ 0.5f, 0.5f });
+		const auto vp{ ImGui::GetMainViewport()->Size };
+		ImGui::SetNextWindowSize(ImVec2(vp.x * 0.70f, vp.y * 0.70f), ImGuiCond_Always);
 		if (ImGui::BeginPopupModal("Action", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
-			ImGui::BeginChild("##AddActionScroll", ImVec2{ 0, -ImGui::GetFrameHeightWithSpacing() * 2.0f }, true);
+			ImGui::BeginChild("##AddActionScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(1) }, true);
 
 			// Again, fine for these to be static as they are reset after each addition of actions.
 			static CombatTrackerLib::ListBoxParameters s_actionParameters{ -1, -1, false };

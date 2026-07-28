@@ -35,13 +35,12 @@ namespace CombatTrackerApp {
 
 		using enum WindowType;
 
-		// Set configurations of the host window of the scene on first render pass.
-		if (!m_isEncounterCreatorDockspaceInitialized) {
-			m_mainViewport = ImGui::GetMainViewport();
-			ImGui::SetNextWindowPos(m_mainViewport->WorkPos);
-			ImGui::SetNextWindowSize(m_mainViewport->WorkSize);
-			ImGui::SetNextWindowViewport(m_mainViewport->ID);
-		}
+		// Set configurations of the host window of the scene.
+		// This has to happen on every pass and not just the initial one, otherwise the host stays at its old size once the OS window is resized.
+		m_mainViewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(m_mainViewport->WorkPos);
+		ImGui::SetNextWindowSize(m_mainViewport->WorkSize);
+		ImGui::SetNextWindowViewport(m_mainViewport->ID);
 
 		// Setup dockspace layout on first render pass.
 		if (!m_isEncounterCreatorDockspaceInitialized) {
@@ -81,12 +80,16 @@ namespace CombatTrackerApp {
 			m_isEncounterCreatorDockspaceInitialized = true;
 		}
 
-		// Render host window.
+		// Render host window. Like the other host windows, it is just for scaffolding.
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f, 0.0f });
 		ImGui::Begin(
 			MAPPED_WINDOW_NAMES.at(ENCOUNTER_CREATOR).c_str(),
 			nullptr,
 			ENCOUNTER_CREATION_WINDOW_FLAGS
 		);
+		ImGui::PopStyleVar(3);
 
 		// The menu bar of the host window. This should grant access to functionality such as returning to the main menu.
 		if (ImGui::BeginMenuBar()) {
@@ -94,7 +97,7 @@ namespace CombatTrackerApp {
 				if (ImGui::MenuItem("Return to Main Menu")) {
 					m_applicationReference->queueSceneTransition(this, std::make_unique<MainMenuScene>(m_applicationReference));
 				}
-				// Can be expanded from here.
+				// TODO: Expand the options from here.
 				ImGui::EndMenu();
 			}
 			ImGui::EndMenuBar();
@@ -159,6 +162,8 @@ namespace CombatTrackerApp {
 		if (ImGui::RadioButton("Compendium", source == EntitySource::COMPENDIUM)) {
 			source = EntitySource::COMPENDIUM;
 		}
+
+		ImGui::SetNextItemWidth(-1.0f); // The search field spans the tab so it grows with the browser instead of sitting at ImGui's default item width.
 		ImGui::InputTextWithHint("##Search", "Search by name", &searchQuery);
 		ImGui::PopID();
 	}

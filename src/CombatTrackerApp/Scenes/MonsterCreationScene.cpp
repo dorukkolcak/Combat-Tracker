@@ -25,20 +25,16 @@ namespace CombatTrackerApp {
 	}
 	void MonsterCreationScene::renderEntitySpecificInfo() {
 		ImGui::SeparatorText("Monster Specific Data");
-		renderMonsterSpecificInfo();
-	}
-
-	// Monsters have nothing to add below the senses, unlike player characters.
-	void MonsterCreationScene::renderEntitySpecificSection() {}
-
-	// Monster specific info includes CR, XP and PB.
-	// Even though PB isn't specific to monsters, how it is computed is different for monsters and player characters.
-	void MonsterCreationScene::renderMonsterSpecificInfo () {
 		if (ImGui::BeginTable("MonsterSpecificGrid", 1, ImGuiTableFlags_SizingStretchSame)) {
 
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
-			renderListBox(m_monsterCRParameters, m_currentMonsterCR, "CR", CR_NAMES);
+
+			// The label is hidden on the listbox itself so the widget can take the whole column, which is a narrow one here.
+			// The label is hidden by passing a ## prefix to the label name, which is something that is done extensively over the entire codebase.
+			ImGui::TextUnformatted("CR");
+			ImGui::SetNextItemWidth(-1.0f);
+			renderListBox(m_monsterCRParameters, m_currentMonsterCR, "##CR", CR_NAMES);
 
 			ImGui::Spacing();
 			renderOverriddableInputInt(m_currentMonsterXP, m_isXPOverridden, "XP", "Reset XP", MAPPED_CR_TO_XP, 0, INT_MAX, m_currentMonsterCR);
@@ -50,10 +46,10 @@ namespace CombatTrackerApp {
 		}
 	}
 
-	/*
-	TODO: The built monster is thrown away for now. Once JSON saving exists this is where it gets written out.
-	The block is edited in place by the base scene, so it only has to be handed to the builder here.
-	*/
+	// Monsters have nothing to add below the senses, unlike player characters.
+	void MonsterCreationScene::renderEntitySpecificSection() {}
+
+	// TODO: The built monster is thrown away for now. Once JSON saving exists this is where it should get written.
 	bool MonsterCreationScene::completeEntityCreation() {
 		m_monsterBuilder.getCreatureBlock() = m_currentCreatureStatBlock;
 		m_monsterBuilder.setCR(m_currentMonsterCR).setXP(m_currentMonsterXP);

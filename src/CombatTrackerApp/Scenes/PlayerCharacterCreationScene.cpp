@@ -26,8 +26,23 @@ namespace CombatTrackerApp {
 		renderPlayerCharacterSpecificInfo();
 	}
 	void PlayerCharacterCreationScene::renderPlayerCharacterSpecificInfo() {
-		renderListBox(m_speciesParameters, m_currentPlayerStatBlock.species, "Species", SPECIES_NAMES);
-		renderListBox(m_originParameters, m_currentPlayerStatBlock.origin, "Origin", ORIGIN_NAMES);
+
+		// The two listboxes sit side by side and split the section between them, instead of stacking at ImGui's default item width.
+		if (ImGui::BeginTable("##SpeciesAndOrigin", 2, ImGuiTableFlags_SizingStretchSame)) {
+			ImGui::TableNextRow();
+
+			ImGui::TableSetColumnIndex(0);
+			ImGui::TextUnformatted("Species");
+			ImGui::SetNextItemWidth(-1.0f);
+			renderListBox(m_speciesParameters, m_currentPlayerStatBlock.species, "##Species", SPECIES_NAMES);
+
+			ImGui::TableSetColumnIndex(1);
+			ImGui::TextUnformatted("Origin");
+			ImGui::SetNextItemWidth(-1.0f);
+			renderListBox(m_originParameters, m_currentPlayerStatBlock.origin, "##Origin", ORIGIN_NAMES);
+
+			ImGui::EndTable();
+		}
 		renderMutuallyExclusiveCheckboxCluster(m_currentPlayerStatBlock.weaponProficiencies, WEAPON_TYPE_NAMES, "Weapon Proficiencies", 3);
 		renderMutuallyExclusiveCheckboxCluster(m_currentPlayerStatBlock.armorProficiencies, ARMOR_TYPE_NAMES, "Armor Proficiencies", 3);
 		renderMutuallyExclusiveCheckboxCluster(m_currentPlayerStatBlock.toolProficiencies, TOOL_NAMES, "Tool Proficiencies", 3);
@@ -51,17 +66,26 @@ namespace CombatTrackerApp {
 			if (CombatTrackerLib::alignedButton("Configure Classes and Subclasses", 0.5f)) {
 				ImGui::OpenPopup("Configuration");
 			}
-			const ImVec2 center{ ImGui::GetMainViewport()->GetCenter() };
-			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2{ 0.5f, 0.5f });
-			const ImVec2 viewportSize{ ImGui::GetMainViewport()->Size };
-			ImGui::SetNextWindowSize(ImVec2{ viewportSize.x * 0.92f, viewportSize.y * 0.92f });
+			// The popup can neither be moved nor resized by hand, so both its position and its size keep following the viewport.
+			const auto center{ ImGui::GetMainViewport()->GetCenter() };
+			ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{ 0.5f, 0.5f });
+			const auto viewportSize{ ImGui::GetMainViewport()->Size };
+			ImGui::SetNextWindowSize(ImVec2{ viewportSize.x * 0.92f, viewportSize.y * 0.92f }, ImGuiCond_Always);
 			if (ImGui::BeginPopupModal("Configuration", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
-				ImGui::BeginChild("EditClassScroll", ImVec2{ 0, -ImGui::GetFrameHeightWithSpacing() * 2.0f }, true);
+				ImGui::BeginChild("EditClassScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(1) }, true);
 
 
 				ImGui::TextWrapped("Classes");
-				for (const auto& item : CLASS_NAMES) {
-					renderNonOverridableInputInt(m_currentPlayerStatBlock.levels.at(item.first), item.second.c_str());
+
+				// The level fields are laid out as a grid with the labels above them, so the twelve of them don't turn into twelve near empty rows.
+				if (ImGui::BeginTable("##ClassLevels", 4, ImGuiTableFlags_SizingStretchSame)) {
+					for (const auto& item : CLASS_NAMES) {
+						ImGui::TableNextColumn();
+						ImGui::TextUnformatted(item.second.c_str());
+						ImGui::SetNextItemWidth(-1.0f);
+						renderNonOverridableInputInt(m_currentPlayerStatBlock.levels.at(item.first), ("##" + item.second).c_str());
+					}
+					ImGui::EndTable();
 				}
 
 				static PlayerClass s_currentClass{};
@@ -114,10 +138,8 @@ namespace CombatTrackerApp {
 		}
 	}
 
-	/*
-	TODO: The built player character is thrown away for now. Once JSON saving exists this is where it gets written out.
-	Both blocks are edited in place by this scene and the base one, so they only have to be handed to the builder here.
-	*/
+	
+	// TODO: JSON saving functionality.
 	bool PlayerCharacterCreationScene::completeEntityCreation() {
 		m_playerCharacterBuilder.getCreatureBlock() = m_currentCreatureStatBlock;
 		m_playerCharacterBuilder.getPlayerCharacterBlock() = m_currentPlayerStatBlock;

@@ -49,23 +49,22 @@ namespace CombatTrackerApp {
 			ImGuiWindowFlags_NoDocking
 		};
 
-		// What the entity is called. Used for the header and for every footer button label.
+		/*
+		I kinda hate writing functions like this where it is a meaningless wrapper over a single return statement.
+		But in this case we actually need the polymorphic behaviour (both of the derived classes return a different value here.)
+		So I guess it is fine.
+		*/
 		virtual const std::string& getEntityLabel() const = 0;
-
-		// Legendary and lair actions are monster only, so the popup has to know which entity it serves.
 		virtual bool isMonsterScene() const = 0;
 
-		// Right hand column of the top split. Monster specific data for monsters, classes and subclasses for player characters.
+		// Right hand column of the top split (of the popup). Monster specific data for monsters, classes and subclasses for player characters.
 		virtual void renderEntitySpecificInfo() = 0;
 
 		// A specific section below the senses. Only player characters currently fill it.
+		// Monster provides an empty override in this case.
 		virtual void renderEntitySpecificSection() = 0;
 
-		// Returning true hands the scene back to the encounter creation scene.
-		// Returning false keeps this scene up, so that a derived scene can refuse an incomplete entity.
 		virtual bool completeEntityCreation() = 0;
-
-		// Called on the first render pass so that the scene always starts on a fresh entity.
 		virtual void resetEntity() = 0;
 
 		/*
@@ -153,12 +152,14 @@ namespace CombatTrackerApp {
 		if (!overrideFlag) {
 			value = items.at(key);
 		}
-		if (ImGui::InputInt(label, &value)) {
+
+		ImGui::TextUnformatted(label);
+		ImGui::SetNextItemWidth(-1.0f);
+		if (ImGui::InputInt(("##" + std::string{ label }).c_str(), &value)) {
 			value = std::min(std::max(lowerBound, value), upperBound);
 			overrideFlag = true;
 		}
-		ImGui::SameLine();
-		if (ImGui::Button(overrideLabel)) {
+		if (ImGui::Button(overrideLabel, ImVec2{ -1.0f, 0.0f })) {
 			overrideFlag = false;
 		}
 	}
@@ -237,10 +238,12 @@ namespace CombatTrackerApp {
 			// Push a separate id to the ID stack for each item.
 			ImGui::PushID(static_cast<int>(i));
 
-			// We should check separate IO events explicitly instead of generically checking for any IO events for these buttons.
-			// Unlike most of the widgets. This is because we need a tooltip for each button.
-			ImGui::Button(currentItems[i].name.c_str());
-			ImGui::SameLine();
+			/*
+			We should check separate IO events explicitly instead of generically checking for any IO events for these buttons.
+			Unlike most of the widgets. This is because we need a tooltip for each button.
+			The items are listed one per row, so the button takes the full width and no SameLine() follows it.
+			*/
+			ImGui::Button(currentItems[i].name.c_str(), ImVec2{ -1.0f, 0.0f });
 			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				ImGui::SetTooltip("%s", currentItems[i].description.c_str());
 			}
@@ -249,16 +252,17 @@ namespace CombatTrackerApp {
 			}
 
 			// Setup configs of the edit popup of items.
-			const ImVec2 center{ ImGui::GetMainViewport()->GetCenter() };
-			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2{ 0.5f, 0.5f });
-			const ImVec2 vp{ ImGui::GetMainViewport()->Size };
-			ImGui::SetNextWindowSize(ImVec2{ vp.x * 0.70f, vp.y * 0.70f }, ImGuiCond_Appearing);
+			// The popup can neither be moved nor resized by hand, so it simply keeps following the viewport.
+			const auto center{ ImGui::GetMainViewport()->GetCenter() };
+			ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{ 0.5f, 0.5f });
+			const auto vp{ ImGui::GetMainViewport()->Size };
+			ImGui::SetNextWindowSize(ImVec2{ vp.x * 0.70f, vp.y * 0.70f }, ImGuiCond_Always);
 
 			// Popup modal for editing/deleting items.
 			if (ImGui::BeginPopupModal(popupName.c_str(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
 
 				// The layouting is quite similar to the big entity creation popup modal.
-				ImGui::BeginChild("EditAddableScroll", ImVec2{ 0, -ImGui::GetFrameHeightWithSpacing() * 2.0f }, true);
+				ImGui::BeginChild("EditAddableScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(2) }, true);
 				ImGui::InputText((label + " Name").c_str(), &currentItems[i].name);
 				ImGui::InputText((label + " Description").c_str(), &currentItems[i].description);
 				ImGui::EndChild();
@@ -290,12 +294,12 @@ namespace CombatTrackerApp {
 		}
 
 		// Setup configs of the add item popup.
-		ImVec2 center{ ImGui::GetMainViewport()->GetCenter() };
-		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2{ 0.5f, 0.5f });
-		ImVec2 vp{ ImGui::GetMainViewport()->Size };
-		ImGui::SetNextWindowSize(ImVec2{ vp.x * 0.70f, vp.y * 0.70f }, ImGuiCond_Appearing);
+		const auto center{ ImGui::GetMainViewport()->GetCenter() };
+		ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{ 0.5f, 0.5f });
+		const auto vp{ ImGui::GetMainViewport()->Size };
+		ImGui::SetNextWindowSize(ImVec2{ vp.x * 0.70f, vp.y * 0.70f }, ImGuiCond_Always);
 		if (ImGui::BeginPopupModal(label.c_str(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
-			ImGui::BeginChild("AddAddableScroll", ImVec2{ 0, -ImGui::GetFrameHeightWithSpacing() * 2.0f }, true);
+			ImGui::BeginChild("AddAddableScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(1) }, true);
 
 			// Again it is fine for these to be static, we only use them here and reset them after adding the item.
 			static std::string s_name{};

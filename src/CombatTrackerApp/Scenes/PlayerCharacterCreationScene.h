@@ -1,4 +1,5 @@
 #pragma once
+
 #include <string>
 #include <unordered_map>
 
@@ -7,8 +8,7 @@
 
 namespace CombatTrackerApp {
 
-	// The player character half of entity creation. Classes, subclasses and the various proficiency
-	// clusters are what a monster does not have.
+	// The player character half of entity creation.
 	class PlayerCharacterCreationScene : public EntityCreationScene {
 	public:
 

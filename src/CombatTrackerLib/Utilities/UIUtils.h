@@ -76,4 +76,22 @@ namespace CombatTrackerLib {
 		ImGui::ImageWithBg(static_cast<ImTextureID>(texture.getTextureID()), displaySize,
 			ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tint);
 	}
+
+	// Vertical space to reserve at the bottom of a window or popup for a separator plus rowCount rows of full height widgets.
+	inline float reservedFooterHeight(int rowCount) {
+		return ImGui::GetFrameHeightWithSpacing() * static_cast<float>(rowCount) + ImGui::GetStyle().ItemSpacing.y * 2.0f;
+	}
+
+	// The width a button auto sizes to for the given label.
+	inline float buttonWidth(const char* label) {
+		return ImGui::CalcTextSize(label).x + ImGui::GetStyle().FramePadding.x * 2.0f;
+	}
+
+	// The same alignment math alignedButton() does, but for a row of widgets whose total width is known up front.
+	inline void alignCursorForWidth(float width, float alignmentFactor) {
+		const auto off{ (ImGui::GetContentRegionAvail().x - width) * alignmentFactor };
+		if (off > 0.0f) {
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
+		}
+	}
 }

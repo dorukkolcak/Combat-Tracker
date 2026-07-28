@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <string>
 #include <unordered_map>
@@ -71,6 +72,7 @@ namespace CombatTrackerApp {
 			ImGuiDockNodeFlags_NoResize |
 			ImGuiDockNodeFlags_NoSplit
 		};
+
 		inline static const std::array<std::string, 2> MONSTER_BROWSER_COLUMN_LABELS {
 			"CR",
 			"XP"
@@ -131,7 +133,22 @@ namespace CombatTrackerApp {
 	) {
 		renderBrowserFilters(source, searchQuery, typeLabel.c_str());
 
-		if (ImGui::BeginTable((typeLabel + " Listing").c_str(), static_cast<int>(N) + 2, BROWSER_TABLE_FLAGS)) {
+		/*
+		Split what is left of the tab between the entity listings and the details panel.
+		A scrolling table with no explicit height occupies every remaining pixel, which pushes the "functionality" buttons
+		out of the tab as soon as the window gets shorter. So both regions get a computed height.
+		*/
+		const auto functionalityButtonsHeight{ CombatTrackerLib::reservedFooterHeight(1) };
+		const auto createRowHeight{ ImGui::GetFrameHeightWithSpacing() };
+		const auto bodyHeight{ ImGui::GetContentRegionAvail().y - createRowHeight - functionalityButtonsHeight };
+		const auto listingHeight{ bodyHeight * 0.55f }; // Cpnsider playing around with the multiplier.
+
+		if (ImGui::BeginTable(
+			(typeLabel + " Listing").c_str(),
+			static_cast<int>(N) + 2,
+			BROWSER_TABLE_FLAGS,
+			ImVec2{ 0.0f, listingHeight }
+		)) {
 			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch, 0.30f);
 
 			for (size_t i{}; i < N; ++i) {
@@ -149,7 +166,12 @@ namespace CombatTrackerApp {
 			m_applicationReference->queueSceneTransition(this, std::make_unique<S>(m_applicationReference));
 		}
 
-		ImGui::BeginChild((typeLabel + " Details").c_str());
+		/*
+		The negative height keeps the action row below the panel visible at any window size.
+		The calculation is done by subtracting the absolute value of the negative height from the available height.
+		So these buttons span the remaining height, which is exactly what we want since they are the last UI elements to be rendered.
+		*/
+		ImGui::BeginChild((typeLabel + " Details").c_str(), ImVec2{ 0.0f, -functionalityButtonsHeight });
 		if (selectionIndex < 0) {
 			ImGui::TextWrapped("Select a %s to see its details.", typeLabel.c_str());
 		}

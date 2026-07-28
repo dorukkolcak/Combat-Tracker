@@ -4,6 +4,8 @@
 
 #include "imgui.h"
 
+#include <algorithm>
+
 namespace CombatTrackerApp {
 
     MainMenuScene::MainMenuScene(CombatTrackerLib::App* app) :
@@ -24,13 +26,12 @@ namespace CombatTrackerApp {
 
     void MainMenuScene::renderUI() {
 
-        // Set configurations of the host window of the scene on initial render pass.
-        if (!m_isMainMenuDockspaceInitialized) {
-            m_mainViewport = ImGui::GetMainViewport();
-            ImGui::SetNextWindowPos(m_mainViewport->WorkPos);
-            ImGui::SetNextWindowSize(m_mainViewport->WorkSize);
-            ImGui::SetNextWindowViewport(m_mainViewport->ID);
-        }
+        // Set configurations of the host window of the scene.
+        // This has to happen on every pass and not just the initial one, otherwise the host stays at its old size once the OS window is resized.
+        m_mainViewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(m_mainViewport->WorkPos);
+        ImGui::SetNextWindowSize(m_mainViewport->WorkSize);
+        ImGui::SetNextWindowViewport(m_mainViewport->ID);
 
         // Create the dockplace settings and layout on initial render pass.
         if (!m_isMainMenuDockspaceInitialized) {
@@ -60,17 +61,34 @@ namespace CombatTrackerApp {
 
         }
 
-        // Render the host window.
+        // Render the host window. The host window is pure scaffolding, so its padding and border are removed completely.
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         ImGui::Begin("Host Window", nullptr, MAIN_MENU_HOST_WINDOW_FLAGS);
+        ImGui::PopStyleVar(3);
 
         // Render the dockspace of the host window.
-        ImGui::DockSpace(m_mainMenuDockspaceID, ImGui::GetWindowSize(), MAIN_MENU_DOCKSPACE_FLAGS);
+        ImGui::DockSpace(m_mainMenuDockspaceID, ImGui::GetContentRegionAvail(), MAIN_MENU_DOCKSPACE_FLAGS);
         ImGui::End();
 
         // Title window.
         ImGui::SetNextWindowClass(&m_mainMenuWindowClass);
         ImGui::Begin("CombatTracker");
-        if (CombatTrackerLib::alignedButton("Options", 0.96f)) {
+
+        /*
+        The two buttons are aligned as one row instead of individually.
+        Aligning only the first one pushes the second one off the right edge once the window gets narrow.
+        I thought initially this should be a constexpr static variable as the width is set.
+        But the ImGui style can change during run time through changing the UI preset so this has to be calculated every render.
+        */
+        const auto buttonRowWidth{
+            CombatTrackerLib::buttonWidth("Options") +
+            CombatTrackerLib::buttonWidth("Exit") +
+            ImGui::GetStyle().ItemSpacing.x
+        };
+        CombatTrackerLib::alignCursorForWidth(buttonRowWidth, 1.0f);
+        if (ImGui::Button("Options")) {
             ImGui::OpenPopup("Options Popup");
         }
         ImGui::SameLine();
@@ -84,10 +102,20 @@ namespace CombatTrackerApp {
         // So we don't need a title asset for every UI Preset.
         CombatTrackerLib::centeredImage(m_titleTexture, ImGui::GetStyle().Colors[ImGuiCol_Text]);
 
-        // Options popup for application-wide settings.
-        // TODO: One thing to do is actually save these settings somewhere so they are preserved between runs.
+        /*
+        Options popup for application-wide settings.
+        This popup is one of the few that the user can resize by hand, so the viewport only clamps the size it opens with.
+        TODO: One thing to do is actually save these settings somewhere so they are preserved between runs.
+        */
+        const auto viewportSize{ ImGui::GetMainViewport()->Size };
         ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-        ImGui::SetNextWindowSize(ImVec2(640.0f, 420.0f), ImGuiCond_Appearing);
+
+        // Also default to a sensible minimum popup size.
+        ImGui::SetNextWindowSize(
+            ImVec2(std::min(640.0f, viewportSize.x * 0.80f), std::min(420.0f, viewportSize.y * 0.80f)),
+            ImGuiCond_Appearing
+        );
+        ImGui::SetNextWindowSizeConstraints(ImVec2(std::min(360.0f, viewportSize.x), std::min(240.0f, viewportSize.y)), viewportSize);
 
         // The title bar is hidden so the panel can draw its own header.
         if (ImGui::BeginPopupModal("Options Popup", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
@@ -97,11 +125,13 @@ namespace CombatTrackerApp {
             ImGui::PopFont();
             ImGui::Separator();
 
-            const auto footerHeight{ ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y };
+            // The footer holds a separator and the close button, the rest of the popup contains the two panels.
+            const auto footerHeight{ CombatTrackerLib::reservedFooterHeight(1) };
             const auto bodyHeight{ ImGui::GetContentRegionAvail().y - footerHeight };
 
             // Category list.
-            ImGui::BeginChild("Options Categories", ImVec2(150.0f, bodyHeight), ImGuiChildFlags_Borders);
+            const auto categoryWidth{ std::min(ImGui::GetFontSize() * 9.0f, ImGui::GetContentRegionAvail().x * 0.35f) };
+            ImGui::BeginChild("Options Categories", ImVec2(categoryWidth, bodyHeight), ImGuiChildFlags_Borders);
             for (const auto& optionsCategory : OPTIONS_CATEGORY_NAMES) {
                 if (ImGui::Selectable(optionsCategory.second.data(), m_selectedOptionsCategory == optionsCategory.first)) {
                     m_selectedOptionsCategory = optionsCategory.first;
@@ -116,7 +146,11 @@ namespace CombatTrackerApp {
             if (m_selectedOptionsCategory == OptionsCategory::Appearance) {
                 ImGui::SeparatorText("Theme");
                 auto& applicationUITheme{ m_applicationReference->getUITheme() };
-                CombatTrackerLib::renderListBox(m_UIThemeParameters, m_chosenUIPreset, "Choose Theme", CombatTrackerLib::PRESET_NAMES);
+
+                // Hide the label of the listbox and put it above the widget, so the listbox can take the full panel width.
+                ImGui::TextUnformatted("Choose Theme");
+                ImGui::SetNextItemWidth(-1.0f); // -1.0f passed to the function means that the item spans the entire width.
+                CombatTrackerLib::renderListBox(m_UIThemeParameters, m_chosenUIPreset, "##ChooseTheme", CombatTrackerLib::PRESET_NAMES);
                 applicationUITheme.setUITheme(m_chosenUIPreset); // This function early returns already so this is fine.
             }
             // TODO: Update this when more categories get added.

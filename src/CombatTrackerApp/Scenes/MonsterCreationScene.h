@@ -1,4 +1,5 @@
 #pragma once
+
 #include <string>
 
 #include "EntityCreationScene.h"
@@ -6,8 +7,8 @@
 
 namespace CombatTrackerApp {
 
-	// The monster half of entity creation. CR drives XP and PB, which is the only place monsters
-	// differ from player characters in the top split.
+	// The monster half of entity creation. 
+	// CR determines XP and PB, which is the only place monsters differ from player characters in the top split.
 	class MonsterCreationScene : public EntityCreationScene {
 	public:
 
@@ -37,8 +38,5 @@ namespace CombatTrackerApp {
 		bool m_isXPOverridden{};
 		bool m_isPBOverridden{};
 
-		// Monster specific info includes CR, XP and PB.
-		// Even though PB isn't specific to monsters, how it is computed is different for monsters and player characters.
-		void renderMonsterSpecificInfo();
 	};
 }
