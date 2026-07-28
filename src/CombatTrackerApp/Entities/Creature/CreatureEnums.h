@@ -6,13 +6,13 @@
 // This causes any zero-initialized enum types to be initialized to the default/invalid value.
 namespace CombatTrackerApp {
 	enum class Size {
-		NO_SIZE,
 		TINY,
 		SMALL,
 		MEDIUM,
 		LARGE,
 		HUGE_SIZE, // Not HUGE: <math.h> defines that as a macro on macOS/BSD. Funny bug I discovered through Github Workflows.
 		GARGANTUAN,
+		COUNT,
 	};
 	enum class Alignment {
 		UNALIGNED,
@@ -25,14 +25,15 @@ namespace CombatTrackerApp {
 		LAWFUL_EVIL,
 		NEUTRAL_EVIL,
 		CHAOTIC_EVIL,
+		COUNT,
 	};
 	enum class ActionType {
-		NO_ACTION,
 		ACTION,
 		BONUS_ACTION,
 		REACTION,
-		LEGENDARY_ACTION, // Should only be available to Monster. 
-		LAIR_ACTION, // Should only be available to Monster.
+		LEGENDARY_ACTION, 
+		LAIR_ACTION, 
+		COUNT,
 	};
 	enum class Skill {
 		ATHLETICS,
@@ -53,15 +54,16 @@ namespace CombatTrackerApp {
 		INTIMIDATION,
 		PERFORMANCE,
 		PERSUASION,
+		COUNT,
 	};
 	enum class Ability {
-		NO_ABILITY,
 		STRENGTH,
 		DEXTERITY,
 		CONSTITUTION,
 		WISDOM,
 		INTELLIGENCE,
 		CHARISMA,
+		COUNT,
 	};
 	enum class DamageType {
 		ACID,
@@ -77,6 +79,7 @@ namespace CombatTrackerApp {
 		RADIANT,
 		SLASHING,
 		THUNDER,
+		COUNT,
 	};
 	enum class Condition {
 		BLINDED,
@@ -94,6 +97,7 @@ namespace CombatTrackerApp {
 		STUNNED,
 		UNCONSCIOUS,
 		EXHAUSTION,
+		COUNT,
 	};
 	enum class Language {
 		COMMON,
@@ -114,9 +118,9 @@ namespace CombatTrackerApp {
 		SYLVAN,
 		THIEVES_CANT,
 		UNDERCOMMON,
+		COUNT,
 	};
 	enum class CreatureType {
-		NO_TYPE,
 		ABERRATION,
 		BEAST,
 		CELESTIAL,
@@ -131,11 +135,13 @@ namespace CombatTrackerApp {
 		OOZE,
 		PLANT,
 		UNDEAD,
+		COUNT,
 	};
 	enum class Sense {
 		BLINDSIGHT,
 		DARKVISION,
 		TREMORSENSE,
 		TRUESIGHT,
+		COUNT,
 	};
 }

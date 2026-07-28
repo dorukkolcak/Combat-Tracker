@@ -2,6 +2,7 @@
 #include "EncounterCreationScene.h"
 #include "../Entities/Creature/CreatureConstants.h"
 #include "../CombatTrackerLib/Utilities/UIUtils.h"
+#include "../Utilities/GenericUtils.h"
 
 namespace CombatTrackerApp {
 	EntityCreationScene::EntityCreationScene(CombatTrackerLib::App* app) :
@@ -9,17 +10,8 @@ namespace CombatTrackerApp {
 		m_currentCreatureStatBlock{},
 		m_sizeListBoxParameters{ -1, -1, false },
 		m_creatureTypeParameters{ -1, -1, false },
-		m_alignmentParameters{ -1, -1, false },
-		m_isInitiativeOverridden{ false },
-		m_isPassivePerceptionOverridden{ false }
+		m_alignmentParameters{ -1, -1, false }
 	{
-		for (const auto& ability : ABILITY_NAMES) {
-			m_abilityModifiersOverride[ability.first] = false;
-			m_savingThrowsOverride[ability.first] = false;
-		}
-		for (const auto& skill : SKILL_NAMES) {
-			m_skillModifiersOverride[skill.first] = false;
-		}
 	}
 
 	void EntityCreationScene::notifyScene(const ImGuiIO& imguiIO) {} // No non-ImGui based event handling should exist in this scene, I think.
@@ -34,14 +26,14 @@ namespace CombatTrackerApp {
 		ImGui::SetNextWindowSize(m_mainViewport->WorkSize);
 		ImGui::SetNextWindowViewport(m_mainViewport->ID);
 
-		ImGui::Begin((getEntityLabel() + " Creation").c_str(), nullptr, ENTITY_CREATION_WINDOW_FLAGS);
+		ImGui::Begin(std::format("{} Creation", getEntityLabel()).c_str(), nullptr, ENTITY_CREATION_WINDOW_FLAGS);
 
 		// TODO: Properly setup initial values of the entity that is being created/edited.
 		if (ImGui::IsWindowAppearing()) {
-			resetEntity();
+			resetParametersAndOverrides();
 		}
 
-		ImGui::SeparatorText((getEntityLabel() + " Creation").c_str());
+		ImGui::SeparatorText(std::format("{} Creation", getEntityLabel()).c_str());
 
 		// Scrollable region for the entire scene.
 		// The footer below it is a separator plus the two completion buttons.
@@ -151,26 +143,26 @@ namespace CombatTrackerApp {
 		renderEntitySpecificSection(); 	// Some parts of the player character specific info goes here.
 		ImGui::Spacing();
 		ImGui::SeparatorText("Actions, Traits, Equipment");
-		renderActions(isMonsterScene()); // This function needs to know the type of entity so that it can disable Lair/Legendary Actions.
+		renderActions();
 		renderAddables(m_currentCreatureStatBlock.traits, TRAIT_LABEL);
 		renderAddables(m_currentCreatureStatBlock.equipment, EQUIPMENT_LABEL);
 		ImGui::EndChild();
 
 		ImGui::Separator();
-		if (CombatTrackerLib::alignedButton(("Complete " + getEntityLabel() + " Creation").c_str(), 0.5f)) {
+		if (CombatTrackerLib::alignedButton(std::format("Complete {} Creation", getEntityLabel()).c_str(), 0.5f)) {
 			if (completeEntityCreation()) {
 				m_applicationReference->queueSceneTransition(this, std::make_unique<EncounterCreationScene>(m_applicationReference));
 			}
 		}
-		if (CombatTrackerLib::alignedButton(("Cancel " + getEntityLabel() + " Creation").c_str(), 0.5f)) {
+		if (CombatTrackerLib::alignedButton(std::format("Cancel {} Creation", getEntityLabel()).c_str(), 0.5f)) {
 			m_applicationReference->queueSceneTransition(this, std::make_unique<EncounterCreationScene>(m_applicationReference));
 		}
 		ImGui::End();
 	}
 
 	// Simple helper method used for user input of HP, AC, movement speed and sense distances.
-	void EntityCreationScene::renderNonOverridableInputInt(int& value, const char* label) {
-		if (ImGui::InputInt(label, &value)) {
+	void EntityCreationScene::renderNonOverridableInputInt(int& value, std::string_view label) {
+		if (ImGui::InputInt(label.data(), &value)) {
 			value = std::max(0, value);
 		}
 	}
@@ -195,40 +187,47 @@ namespace CombatTrackerApp {
 			ImGui::TableSetupColumn("Override", ImGuiTableColumnFlags_WidthStretch, 0.35f);
 
 			// Render each column of the table for each ability.
-			for (auto& item : m_currentCreatureStatBlock.abilityScores) {
+			// Every ability keyed array is the same length, so one index walks the names, the scores and the modifiers together.
+			for (size_t i{}; i < ABILITY_NAMES.size(); ++i) {
+				const auto abilityName{ ABILITY_NAMES[i] };
 				ImGui::TableNextRow();
 
 				// Compute and show default ability score modifiers.
-				if (!m_abilityModifiersOverride.at(item.first)) {
-					m_currentCreatureStatBlock.abilityScoreModifiers.at(item.first) = Creature::findAbilityScoreModifier(item.second);
+				if (!m_currentCreatureStatBlock.abilityScoreModifiers[i].isOverridden) {
+					m_currentCreatureStatBlock.abilityScoreModifiers[i].value =
+						Creature::findAbilityScoreModifier(m_currentCreatureStatBlock.abilityScores[i]);
 				}
 
 				ImGui::TableSetColumnIndex(0);
 				ImGui::AlignTextToFramePadding();
-				ImGui::TextUnformatted(ABILITY_NAMES.at(item.first).c_str());
+				ImGui::TextUnformatted(abilityName.data());
 
 				// General special value reserved for stretching items.
 				ImGui::SetNextItemWidth(-1);
 				ImGui::TableSetColumnIndex(1);
-				if (ImGui::InputInt(("##" + ABILITY_NAMES.at(item.first) + " Ability Score").c_str(), &item.second)) {
-					item.second = std::max(std::min(item.second, ABILITY_SCORE_UPPER_BOUND), ABILITY_SCORE_LOWER_BOUND);
+				if (ImGui::InputInt(std::format("##{} Ability Score", abilityName).c_str(),
+					&m_currentCreatureStatBlock.abilityScores[i])
+					) {
+					m_currentCreatureStatBlock.abilityScores[i] =
+						std::max(std::min(m_currentCreatureStatBlock.abilityScores[i],
+							ABILITY_SCORE_UPPER_BOUND), ABILITY_SCORE_LOWER_BOUND);
 				}
 
 				ImGui::TableSetColumnIndex(2);
 				ImGui::SetNextItemWidth(-1);
-				if (ImGui::InputInt(("##" + ABILITY_NAMES.at(item.first) + " Ability Modifier").c_str(),
-					&m_currentCreatureStatBlock.abilityScoreModifiers.at(item.first))
+				if (ImGui::InputInt(std::format("##{} Ability Modifier", abilityName).c_str(),
+					&m_currentCreatureStatBlock.abilityScoreModifiers[i].value)
 					) {
-					m_currentCreatureStatBlock.abilityScoreModifiers.at(item.first) =
-						std::max(std::min(m_currentCreatureStatBlock.abilityScoreModifiers.at(item.first),
+					m_currentCreatureStatBlock.abilityScoreModifiers[i].value =
+						std::max(std::min(m_currentCreatureStatBlock.abilityScoreModifiers[i].value,
 							ABILITY_MODIFIERS_UPPER_BOUND), ABILITY_MODIFIERS_LOWER_BOUND);
-					m_abilityModifiersOverride.at(item.first) = true;
+					m_currentCreatureStatBlock.abilityScoreModifiers[i].isOverridden = true;
 				}
 
 				// The reset buttons fill their column instead of auto sizing to their label, which would overflow the cell.
 				ImGui::TableSetColumnIndex(3);
-				if (ImGui::Button(("Reset " + ABILITY_NAMES.at(item.first) + " Modifier").c_str(), ImVec2{ -1.0f, 0.0f })) {
-					m_abilityModifiersOverride.at(item.first) = false;
+				if (ImGui::Button(std::format("Reset {} Modifier", abilityName).c_str(), ImVec2{ -1.0f, 0.0f })) {
+					m_currentCreatureStatBlock.abilityScoreModifiers[i].isOverridden = false;
 				}
 			}
 			ImGui::EndTable();
@@ -248,41 +247,43 @@ namespace CombatTrackerApp {
 			ImGui::TableSetupColumn("Modifier##Save", ImGuiTableColumnFlags_WidthStretch, 0.25f);
 			ImGui::TableSetupColumn("Reset##Save", ImGuiTableColumnFlags_WidthStretch, 0.40f);
 
-			for (auto& item : ABILITY_NAMES) {
+			// Saving throws are keyed by ability as well, so this walks the same arrays by index that the ability table does.
+			for (size_t i{}; i < ABILITY_NAMES.size(); ++i) {
+				const auto abilityName{ ABILITY_NAMES[i] };
 
 				// Saving throw modifier calculations.
-				if (!m_savingThrowsOverride.at(item.first)) {
-					if (m_currentCreatureStatBlock.savingThrowExpertise.at(item.first)) {
-						m_currentCreatureStatBlock.savingThrowModifiers.at(item.first) =
-							m_currentCreatureStatBlock.abilityScoreModifiers.at(item.first) +
-							2 * m_currentCreatureStatBlock.proficiencyBonus;
+				if (!m_currentCreatureStatBlock.savingThrowModifiers[i].isOverridden) {
+					if (m_currentCreatureStatBlock.savingThrowExpertise[i]) {
+						m_currentCreatureStatBlock.savingThrowModifiers[i].value =
+							m_currentCreatureStatBlock.abilityScoreModifiers[i].value +
+							2 * m_currentCreatureStatBlock.proficiencyBonus.value;
 					}
-					else if (m_currentCreatureStatBlock.savingThrowProficiencies.at(item.first)) {
-						m_currentCreatureStatBlock.savingThrowModifiers.at(item.first) =
-							m_currentCreatureStatBlock.abilityScoreModifiers.at(item.first) +
-							m_currentCreatureStatBlock.proficiencyBonus;
+					else if (m_currentCreatureStatBlock.savingThrowProficiencies[i]) {
+						m_currentCreatureStatBlock.savingThrowModifiers[i].value =
+							m_currentCreatureStatBlock.abilityScoreModifiers[i].value +
+							m_currentCreatureStatBlock.proficiencyBonus.value;
 					}
 					else {
-						m_currentCreatureStatBlock.savingThrowModifiers.at(item.first) =
-							m_currentCreatureStatBlock.abilityScoreModifiers.at(item.first);
+						m_currentCreatureStatBlock.savingThrowModifiers[i].value =
+							m_currentCreatureStatBlock.abilityScoreModifiers[i].value;
 					}
 				}
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
 				ImGui::AlignTextToFramePadding();
-				ImGui::TextUnformatted(item.second.c_str());
+				ImGui::TextUnformatted(abilityName.data());
 
 				ImGui::TableSetColumnIndex(1);
 				ImGui::SetNextItemWidth(-1);
-				if (ImGui::InputInt(("##" + item.second + "Saving Throw Modifiers").c_str(),
-					&m_currentCreatureStatBlock.savingThrowModifiers.at(item.first)
+				if (ImGui::InputInt(std::format("##{}Saving Throw Modifiers", abilityName).c_str(),
+					&m_currentCreatureStatBlock.savingThrowModifiers[i].value
 				)) {
-					m_savingThrowsOverride.at(item.first) = true;
+					m_currentCreatureStatBlock.savingThrowModifiers[i].isOverridden = true;
 				}
 
 				ImGui::TableSetColumnIndex(2);
-				if (ImGui::Button(("Reset " + item.second + " Saving Throw Modifier").c_str(), ImVec2{ -1.0f, 0.0f })) {
-					m_savingThrowsOverride.at(item.first) = false;
+				if (ImGui::Button(std::format("Reset {} Saving Throw Modifier", abilityName).c_str(), ImVec2{ -1.0f, 0.0f })) {
+					m_currentCreatureStatBlock.savingThrowModifiers[i].isOverridden = false;
 				}
 			}
 			ImGui::EndTable();
@@ -304,40 +305,45 @@ namespace CombatTrackerApp {
 			ImGui::TableSetupColumn("Reset", ImGuiTableColumnFlags_WidthStretch, 0.35f);
 
 			// Default skill modifier calculations.
-			for (const auto& item : SKILL_NAMES) {
-				if (!m_skillModifiersOverride.at(item.first)) {
-					if (m_currentCreatureStatBlock.skillExpertise.at(item.first)) {
-						m_currentCreatureStatBlock.skillModifiers.at(item.first) =
-							m_currentCreatureStatBlock.abilityScoreModifiers.at(MAPPED_SKILLS.at(item.first)) +
-							2 * m_currentCreatureStatBlock.proficiencyBonus;
+			for (size_t i{}; i < SKILL_NAMES.size(); ++i) {
+				const auto skillName{ SKILL_NAMES[i] };
+
+
+				const auto correspondingAbility{ MAPPED_SKILLS.at(static_cast<Skill>(i)) };
+
+				if (!m_currentCreatureStatBlock.skillModifiers[i].isOverridden) {
+					if (m_currentCreatureStatBlock.skillExpertise[i]) {
+						m_currentCreatureStatBlock.skillModifiers[i].value =
+							m_currentCreatureStatBlock.abilityScoreModifiers[enumToSizeT(correspondingAbility)].value +
+							2 * m_currentCreatureStatBlock.proficiencyBonus.value;
 					}
-					else if (m_currentCreatureStatBlock.skillProficiencies.at(item.first)) {
-						m_currentCreatureStatBlock.skillModifiers.at(item.first) =
-							m_currentCreatureStatBlock.abilityScoreModifiers.at(MAPPED_SKILLS.at(item.first))
-							+ m_currentCreatureStatBlock.proficiencyBonus;
+					else if (m_currentCreatureStatBlock.skillProficiencies[i]) {
+						m_currentCreatureStatBlock.skillModifiers[i].value =
+							m_currentCreatureStatBlock.abilityScoreModifiers[enumToSizeT(correspondingAbility)].value
+							+ m_currentCreatureStatBlock.proficiencyBonus.value;
 					}
 					else {
-						m_currentCreatureStatBlock.skillModifiers.at(item.first) =
-							m_currentCreatureStatBlock.abilityScoreModifiers.at(MAPPED_SKILLS.at(item.first));
+						m_currentCreatureStatBlock.skillModifiers[i].value =
+							m_currentCreatureStatBlock.abilityScoreModifiers[enumToSizeT(correspondingAbility)].value;
 					}
 				}
 
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
 				ImGui::AlignTextToFramePadding();
-				ImGui::TextUnformatted(item.second.c_str());
+				ImGui::TextUnformatted(skillName.data());
 
 				ImGui::TableSetColumnIndex(1);
 				ImGui::SetNextItemWidth(-1);
-				if (ImGui::InputInt(("##" + item.second + "Skill Modifier").c_str(),
-					&m_currentCreatureStatBlock.skillModifiers.at(item.first)
+				if (ImGui::InputInt(std::format("##{}Skill Modifier", skillName).c_str(),
+					&m_currentCreatureStatBlock.skillModifiers[i].value
 				)) {
-					m_skillModifiersOverride.at(item.first) = true;
+					m_currentCreatureStatBlock.skillModifiers[i].isOverridden = true;
 				}
 
 				ImGui::TableSetColumnIndex(2);
-				if (ImGui::Button(("Reset " + item.second + " Skill Modifier").c_str(), ImVec2{ -1.0f, 0.0f })) {
-					m_skillModifiersOverride.at(item.first) = false;
+				if (ImGui::Button(std::format("Reset {} Skill Modifier", skillName).c_str(), ImVec2{ -1.0f, 0.0f })) {
+					m_currentCreatureStatBlock.skillModifiers[i].isOverridden = false;
 				}
 			}
 			ImGui::EndTable();
@@ -417,41 +423,39 @@ namespace CombatTrackerApp {
 
 			ImGui::TableSetColumnIndex(1);
 
-			if (!m_isInitiativeOverridden) {
-				m_currentCreatureStatBlock.initiativeBonus = m_currentCreatureStatBlock.abilityScoreModifiers.at(Ability::DEXTERITY);
+			if (!m_currentCreatureStatBlock.initiativeBonus.isOverridden) {
+				m_currentCreatureStatBlock.initiativeBonus.value = m_currentCreatureStatBlock.abilityScoreModifiers[enumToSizeT(Ability::DEXTERITY)].value;
 			}
 
 			// Hide the label of the input field. Instead use text field for the label for better layout.
 			ImGui::TextUnformatted("Initiative Bonus");
 			ImGui::SetNextItemWidth(-1.0f);
-			if (ImGui::InputInt("##InitiativeBonus", &m_currentCreatureStatBlock.initiativeBonus, 0, 0)) {
-				m_currentCreatureStatBlock.initiativeBonus =
-					std::min(std::max(ABILITY_SCORE_LOWER_BOUND, m_currentCreatureStatBlock.initiativeBonus),
+			if (ImGui::InputInt("##InitiativeBonus", &m_currentCreatureStatBlock.initiativeBonus.value, 0, 0)) {
+				m_currentCreatureStatBlock.initiativeBonus.value =
+					std::min(std::max(ABILITY_MODIFIERS_LOWER_BOUND, m_currentCreatureStatBlock.initiativeBonus.value),
 						ABILITY_MODIFIERS_UPPER_BOUND);
-				m_isInitiativeOverridden = true;
+				m_currentCreatureStatBlock.initiativeBonus.isOverridden = true;
 			}
-			ImGui::SetNextItemWidth(-1.0f);
 			if (ImGui::Button("Reset Initiative Bonus", ImVec2{ -1.0f, 0.0f })) {
-				m_isInitiativeOverridden = false;
+				m_currentCreatureStatBlock.initiativeBonus.isOverridden = false;
 			}
 
 			ImGui::Spacing();
-			if (!m_isPassivePerceptionOverridden) {
-				m_currentCreatureStatBlock.passivePerception = m_currentCreatureStatBlock.skillModifiers.at(Skill::PERCEPTION) + 10;
+			if (!m_currentCreatureStatBlock.passivePerception.isOverridden) {
+				m_currentCreatureStatBlock.passivePerception.value = m_currentCreatureStatBlock.skillModifiers[enumToSizeT(Skill::PERCEPTION)].value + 10;
 			}
 
 			// Same thing here.
 			ImGui::TextUnformatted("Passive Perception");
 			ImGui::SetNextItemWidth(-1.0f);
-			if (ImGui::InputInt("##PassivePerception", &m_currentCreatureStatBlock.passivePerception, 0, 0)) {
-				m_currentCreatureStatBlock.passivePerception =
-					std::min(std::max(10 + ABILITY_MODIFIERS_UPPER_BOUND, m_currentCreatureStatBlock.passivePerception),
-						10 + ABILITY_MODIFIERS_LOWER_BOUND);
-				m_isPassivePerceptionOverridden = true;
+			if (ImGui::InputInt("##PassivePerception", &m_currentCreatureStatBlock.passivePerception.value, 0, 0)) {
+				m_currentCreatureStatBlock.passivePerception.value =
+					std::min(std::max(10 + ABILITY_MODIFIERS_LOWER_BOUND, m_currentCreatureStatBlock.passivePerception.value),
+						10 + ABILITY_MODIFIERS_UPPER_BOUND);
+				m_currentCreatureStatBlock.passivePerception.isOverridden = true;
 			}
-			ImGui::SetNextItemWidth(-1.0f);
 			if (ImGui::Button("Reset Passive Perception", ImVec2{ -1.0f, 0.0f })) {
-				m_isPassivePerceptionOverridden = false;
+				m_currentCreatureStatBlock.passivePerception.isOverridden = false;
 			}
 			ImGui::EndTable();
 		}
@@ -537,59 +541,60 @@ namespace CombatTrackerApp {
 		if (ImGui::BeginTable("DmgTri", 3, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_BordersInnerV)) {
 			ImGui::TableNextRow();
 
+			// The three flag arrays and the name table all line up, so one index covers a damage type across all four.
 			ImGui::TableSetColumnIndex(0);
 			ImGui::TextWrapped("Vulnerabilities");
-			for (const auto& item : DAMAGE_TYPE_NAMES) {
-				if (ImGui::Checkbox((item.second + " ##Vuln").c_str(),
-					&m_currentCreatureStatBlock.damageVulnerabilities.at(item.first)
+			for (size_t i{}; i < DAMAGE_TYPE_NAMES.size(); ++i) {
+				if (ImGui::Checkbox(std::format("{} ##Vuln", DAMAGE_TYPE_NAMES[i]).c_str(),
+					&m_currentCreatureStatBlock.damageVulnerabilities[i]
 				)) {
 
 					// Triple simple deduping logic.
-					if (m_currentCreatureStatBlock.damageVulnerabilities.at(item.first)
-						&& m_currentCreatureStatBlock.damageResistances.at(item.first)) {
-						m_currentCreatureStatBlock.damageResistances.at(item.first) = false;
+					if (m_currentCreatureStatBlock.damageVulnerabilities[i]
+						&& m_currentCreatureStatBlock.damageResistances[i]) {
+						m_currentCreatureStatBlock.damageResistances[i] = false;
 					}
-					if (m_currentCreatureStatBlock.damageVulnerabilities.at(item.first)
-						&& m_currentCreatureStatBlock.damageImmunities.at(item.first)) {
-						m_currentCreatureStatBlock.damageImmunities.at(item.first) = false;
+					if (m_currentCreatureStatBlock.damageVulnerabilities[i]
+						&& m_currentCreatureStatBlock.damageImmunities[i]) {
+						m_currentCreatureStatBlock.damageImmunities[i] = false;
 					}
 				}
 			}
 
 			ImGui::TableSetColumnIndex(1);
 			ImGui::TextWrapped("Resistances");
-			for (const auto& item : DAMAGE_TYPE_NAMES) {
-				if (ImGui::Checkbox((item.second + " ##Res").c_str(),
-					&m_currentCreatureStatBlock.damageResistances.at(item.first)
+			for (size_t i{}; i < DAMAGE_TYPE_NAMES.size(); ++i) {
+				if (ImGui::Checkbox(std::format("{} ##Res", DAMAGE_TYPE_NAMES[i]).c_str(),
+					&m_currentCreatureStatBlock.damageResistances[i]
 				)) {
 
 					// Exact same logic here.
-					if (m_currentCreatureStatBlock.damageVulnerabilities.at(item.first)
-						&& m_currentCreatureStatBlock.damageResistances.at(item.first)) {
-						m_currentCreatureStatBlock.damageVulnerabilities.at(item.first) = false;
+					if (m_currentCreatureStatBlock.damageVulnerabilities[i]
+						&& m_currentCreatureStatBlock.damageResistances[i]) {
+						m_currentCreatureStatBlock.damageVulnerabilities[i] = false;
 					}
-					if (m_currentCreatureStatBlock.damageResistances.at(item.first)
-						&& m_currentCreatureStatBlock.damageImmunities.at(item.first)) {
-						m_currentCreatureStatBlock.damageImmunities.at(item.first) = false;
+					if (m_currentCreatureStatBlock.damageResistances[i]
+						&& m_currentCreatureStatBlock.damageImmunities[i]) {
+						m_currentCreatureStatBlock.damageImmunities[i] = false;
 					}
 				}
 			}
 
 			ImGui::TableSetColumnIndex(2);
 			ImGui::TextWrapped("Immunities");
-			for (auto& item : DAMAGE_TYPE_NAMES) {
-				if (ImGui::Checkbox((item.second + " ##Imm").c_str(),
-					&m_currentCreatureStatBlock.damageImmunities.at(item.first)
+			for (size_t i{}; i < DAMAGE_TYPE_NAMES.size(); ++i) {
+				if (ImGui::Checkbox(std::format("{} ##Imm", DAMAGE_TYPE_NAMES[i]).c_str(),
+					&m_currentCreatureStatBlock.damageImmunities[i]
 				)) {
 
 					// Same here.
-					if (m_currentCreatureStatBlock.damageVulnerabilities.at(item.first)
-						&& m_currentCreatureStatBlock.damageImmunities.at(item.first)) {
-						m_currentCreatureStatBlock.damageVulnerabilities.at(item.first) = false;
+					if (m_currentCreatureStatBlock.damageVulnerabilities[i]
+						&& m_currentCreatureStatBlock.damageImmunities[i]) {
+						m_currentCreatureStatBlock.damageVulnerabilities[i] = false;
 					}
-					if (m_currentCreatureStatBlock.damageResistances.at(item.first)
-						&& m_currentCreatureStatBlock.damageImmunities.at(item.first)) {
-						m_currentCreatureStatBlock.damageResistances.at(item.first) = false;
+					if (m_currentCreatureStatBlock.damageResistances[i]
+						&& m_currentCreatureStatBlock.damageImmunities[i]) {
+						m_currentCreatureStatBlock.damageResistances[i] = false;
 					}
 				}
 			}
@@ -601,32 +606,36 @@ namespace CombatTrackerApp {
 	void EntityCreationScene::renderSenses() {
 		if (ImGui::BeginTable("SensesGrid", 4, ImGuiTableFlags_SizingStretchSame)) {
 			ImGui::TableNextRow();
-			for (auto& item : m_currentCreatureStatBlock.senses) {
+			for (size_t i{}; i < SENSE_NAMES.size(); ++i) {
+				const auto senseName{ SENSE_NAMES[i] };
 				ImGui::TableNextColumn();
 
 				// Same layout as the speed grid, the label sits above its field.
-				ImGui::TextUnformatted(SENSE_NAMES.at(item.first).c_str());
+				ImGui::TextUnformatted(senseName.data());
 				ImGui::SetNextItemWidth(-1.0f);
-				renderNonOverridableInputInt(item.second, ("##" + SENSE_NAMES.at(item.first)).c_str());
+				renderNonOverridableInputInt(m_currentCreatureStatBlock.senses[i], std::format("##{}", senseName).c_str());
 			}
 			ImGui::EndTable();
 		}
 	}
 
 	// Really similar to renderAddables() just adds actionType as a separate parameter.
-	void EntityCreationScene::renderActions(bool isMonster) {
+	void EntityCreationScene::renderActions() {
 		ImGui::TextWrapped("Actions");
 		static std::vector<size_t> s_actionsMarkedForDeletion{};
 		for (size_t i{}; i < m_currentCreatureStatBlock.actions.size(); ++i) {
-			ImGui::TableNextColumn();
 			ImGui::PushID(static_cast<int> (i));
 
 			ImGui::Button(m_currentCreatureStatBlock.actions[i].name.c_str(), ImVec2{ -1.0f, 0.0f });
 			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
-				ImGui::SetTooltip("%s: %s", ACTION_NAMES.at(m_currentCreatureStatBlock.actions[i].type).c_str(), m_currentCreatureStatBlock.actions[i].description.c_str());
+				ImGui::SetTooltip(
+					"%s: %s", 
+					ACTION_NAMES[enumToSizeT(m_currentCreatureStatBlock.actions[i].type)].data(), 
+					m_currentCreatureStatBlock.actions[i].description.c_str()
+				);
 			}
 			if (ImGui::IsItemClicked()) {
-				ImGui::OpenPopup(("Edit Action##" + std::to_string(i)).c_str());
+				ImGui::OpenPopup(std::format("Edit Action##{}", i).c_str());
 			}
 
 			// The popup can neither be moved nor resized by hand, so it simply keeps following the viewport.
@@ -634,7 +643,7 @@ namespace CombatTrackerApp {
 			ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{ 0.5f, 0.5f });
 			const auto vp{ ImGui::GetMainViewport()->Size };
 			ImGui::SetNextWindowSize(ImVec2{ vp.x * 0.70f, vp.y * 0.70f }, ImGuiCond_Always);
-			if (ImGui::BeginPopupModal(("Edit Action##" + std::to_string(i)).c_str(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
+			if (ImGui::BeginPopupModal(std::format("Edit Action##{}", i).c_str(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
 				ImGui::BeginChild("EditActionScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(2) }, true);
 				ImGui::InputText("Action Name", &m_currentCreatureStatBlock.actions[i].name);
 				ImGui::InputText("Action Description", &m_currentCreatureStatBlock.actions[i].description);
@@ -675,13 +684,7 @@ namespace CombatTrackerApp {
 			static CombatTrackerLib::ListBoxParameters s_actionParameters{ -1, -1, false };
 			static ActionType s_type{};
 
-			// Important logic to prevent PCs from creating Legendary Actions and Lair Actions.
-			if (isMonster) {
-				CombatTrackerLib::renderListBox(s_actionParameters, s_type, "Action Type", ACTION_NAMES);
-			}
-			else {
-				CombatTrackerLib::renderListBox(s_actionParameters, s_type, "Action Type", PLAYER_ACTION_NAMES);
-			}
+			CombatTrackerLib::renderListBox(s_actionParameters, s_type, "Action Type", ACTION_NAMES);
 
 			static std::string s_name{};
 			static std::string s_description{};
@@ -690,12 +693,15 @@ namespace CombatTrackerApp {
 			ImGui::EndChild();
 
 			ImGui::Separator();
+
+			// There is no longer an enumerator standing for "no action", so the listbox itself reports whether a type was picked.
+			// Its chosen index is negative until a row is clicked, and it is put back to that state after the action is added.
 			if (CombatTrackerLib::alignedButton("Finish Action Creation", 0.5f) &&
-				!s_name.empty() && !s_description.empty() && s_type != ActionType::NO_ACTION) {
+				!s_name.empty() && !s_description.empty() && s_actionParameters.chosenIndex >= 0) {
 				CreatureAction action{ s_name, s_description, s_type };
 				m_currentCreatureStatBlock.actions.push_back(action);
 				s_actionParameters = { -1, -1, false };
-				s_type = { ActionType::NO_ACTION };
+				s_type = {};
 				s_name.clear();
 				s_description.clear();
 				ImGui::CloseCurrentPopup();
@@ -705,17 +711,9 @@ namespace CombatTrackerApp {
 	}
 
 	void EntityCreationScene::resetParametersAndOverrides() {
+		m_currentCreatureStatBlock = CreatureStatBlock{};
 		m_sizeListBoxParameters = { -1, -1, false };
 		m_creatureTypeParameters = { -1, -1, false };
 		m_alignmentParameters = { -1, -1, false };
-		m_isInitiativeOverridden = false;
-		m_isPassivePerceptionOverridden = false;
-		for (const auto& ability : ABILITY_NAMES) {
-			m_abilityModifiersOverride[ability.first] = false;
-			m_savingThrowsOverride[ability.first] = false;
-		}
-		for (const auto& skill : SKILL_NAMES) {
-			m_skillModifiersOverride[skill.first] = false;
-		}
 	}
 }

@@ -6,6 +6,14 @@
 
 // The types here shouldn't be nested types as they are used by the builders.
 namespace CombatTrackerApp {
+
+	// An integer that is normally computed from other stat block data, but can also be set by hand.
+	// This is to essentially communicate that a value has been overridden to the saved data format.
+	struct OverridableInt {
+		int value{};
+		bool isOverridden{};
+	};
+
 	struct CreatureAction {
 		std::string name{};
 		std::string description{};

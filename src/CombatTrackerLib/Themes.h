@@ -2,13 +2,14 @@
 
 #include "imgui.h"
 
+#include <array>
+#include <cstddef>
 #include <unordered_map>
-#include <string>
+#include <string_view>
 
 namespace CombatTrackerLib {
 
 	enum class UIPreset {
-		NONE, // Used mostly for value-initialization.
 		DARK,
 		LIGHT,
 		HIGH_CONTRAST,
@@ -23,29 +24,34 @@ namespace CombatTrackerLib {
 		STORM,
 		SANDS,
 		MOONLIT,
+		COUNT,
 	};
-	inline const std::unordered_map<UIPreset, std::string> PRESET_NAMES{
-		{UIPreset::DARK, "Dark"},
-		{UIPreset::LIGHT, "Light"},
-		{UIPreset::HIGH_CONTRAST, "High Contrast"},
-		{UIPreset::ARCANE, "Arcane"},
-		{UIPreset::FOREST, "Forest"},
-		{UIPreset::INFERNAL, "Infernal"},
-		{UIPreset::GLACIAL, "Glacial"},
-		{UIPreset::CELESTIAL, "Celestial"},
-		{UIPreset::NECROTIC, "Necrotic"},
-		{UIPreset::BLOOD_MOON, "Blood Moon"},
-		{UIPreset::FEYWILD, "Feywild"},
-		{UIPreset::STORM, "Storm"},
-		{UIPreset::SANDS, "Sands"},
-		{UIPreset::MOONLIT, "Moonlit"},
-	};
+
+	// Notice double brace initialization for using initializer list.
+	inline constexpr std::array<std::string_view, static_cast<std::size_t>(UIPreset::COUNT)> PRESET_NAMES { {
+		"Dark",
+		"Light",
+		"High Contrast",
+		"Arcane",
+		"Forest",
+		"Infernal",
+		"Glacial",
+		"Celestial",
+		"Necrotic",
+		"Blood Moon",
+		"Feywild",
+		"Storm",
+		"Sands",
+		"Moonlit"
+	} };
 	struct UITheme {
 	public:
 		UIPreset preset{};
-		ImGuiStyle config{};
 		void setUITheme(UIPreset newPreset);
 	private:
+
+		// The preset member defaults to the first enumerator, so without this the very first call looks like a switch to the theme we are already on.
+		bool m_isPresetApplied{};
 
 		// Helper to simplify color representation.
 		static constexpr ImVec4 rgba(float red, float green, float blue, float alpha = 255.0f) {

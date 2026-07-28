@@ -7,7 +7,8 @@
 #include <iostream>
 
 namespace CombatTrackerLib {
-	Shader::Shader(const std::filesystem::path& shaderPath, Type type) {
+	Shader::Shader(const std::filesystem::path& shaderPath, Type type) : m_shaderType{type} 
+	{
 
 		std::string shaderCodeTemp{ readFileToString(shaderPath) };
 		if (shaderCodeTemp.empty()) {
@@ -43,6 +44,23 @@ namespace CombatTrackerLib {
 			glDeleteShader(m_shaderID);
 			return;
 		}
+	}
+	Shader::Shader(Shader&& shader) noexcept {
+		this->m_shaderID = shader.m_shaderID;
+		this->m_shaderType = shader.m_shaderType;
+		shader.m_shaderID = 0;
+		shader.m_shaderType = Type::INVALID;
+	}
+	Shader& Shader::operator=(Shader&& shader) noexcept {
+		if (this == &shader) {
+			return;
+		}
+		glDeleteShader(m_shaderID); // This might actually be dangerous to do, considering the fact a shader program already calls this for each shader it owns.
+		this->m_shaderID = shader.m_shaderID;
+		this->m_shaderType = shader.m_shaderType;
+		shader.m_shaderID = 0;
+		shader.m_shaderType = Type::INVALID;
+		return *this;
 	}
 	unsigned int Shader::getShaderID() const {
 		return m_shaderID;

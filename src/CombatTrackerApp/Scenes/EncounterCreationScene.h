@@ -1,9 +1,10 @@
 #pragma once
 
-#include <algorithm>
 #include <array>
+#include <cstddef>
+#include <format>
 #include <string>
-#include <unordered_map>
+#include <string_view>
 
 #include "../../CombatTrackerLib/Utilities/UIUtils.h"
 #include "../../CombatTrackerLib/Scene.h"
@@ -28,6 +29,7 @@ namespace CombatTrackerApp {
 			MONSTER_BROWSER,
 			PLAYER_CHARACTER_BROWSER,
 			ENCOUNTER_BROWSER,
+			COUNT,
 		};
 		enum class EntitySource {
 			ALL,
@@ -37,19 +39,18 @@ namespace CombatTrackerApp {
 
 		/*
 		Constant UI labels. These should be static as they shouldn't be instantiated per object/scene.
-		The reason the type is string not string_view for most of the UI labels in this class is that I frequently do concatenation with them.
-		So I need an underlying string type to work with, which is annoying to access with a string_view.
-		Probably can make it work at some point and be more efficient but this is fine for now.
+		They are string_views, so they cost nothing to hold and they are usable at compile time.
+		The concatenation these are used in goes through std::format, since a string_view has no operator+ to chain with.
 		*/
-		inline static const std::unordered_map<WindowType, std::string> MAPPED_WINDOW_NAMES{
-			{WindowType::ENCOUNTER_CREATOR, "Encounter Creator"},
-			{WindowType::ENCOUNTER_MANAGER, "Encounter Manager"},
-			{WindowType::MENU, "Menu"},
-			{WindowType::ENTITY_BROWSER, "Entity Browser"},
-			{WindowType::MONSTER_BROWSER, "Monster Browser"},
-			{WindowType::PLAYER_CHARACTER_BROWSER, "Player Character Browser"},
-			{WindowType::ENCOUNTER_BROWSER, "Encounter Browser"}
-		};
+		inline static constexpr std::array<std::string_view, static_cast<std::size_t>(WindowType::COUNT)> MAPPED_WINDOW_NAMES { {
+			"Encounter Creator",
+			"Menu",
+			"Entity Browser",
+			"Encounter Manager",
+			"Monster Browser",
+			"Player Character Browser",
+			"Encounter Browser"
+		} };
 
 		// These flags are shared between browser tabs.
 		inline static constexpr ImGuiTableFlags BROWSER_TABLE_FLAGS{
@@ -73,11 +74,11 @@ namespace CombatTrackerApp {
 			ImGuiDockNodeFlags_NoSplit
 		};
 
-		inline static const std::array<std::string, 2> MONSTER_BROWSER_COLUMN_LABELS {
+		inline static constexpr std::array<std::string_view, 2> MONSTER_BROWSER_COLUMN_LABELS {
 			"CR",
 			"XP"
 		};
-		inline static const std::array<std::string, 3> PLAYER_CHARACTER_BROWSER_COLUMN_LABELS {
+		inline static constexpr std::array<std::string_view, 3> PLAYER_CHARACTER_BROWSER_COLUMN_LABELS {
 			"Level",
 			"Species",
 			"Origin"
@@ -111,8 +112,8 @@ namespace CombatTrackerApp {
 
 		template<size_t N, typename S>
 		void renderEntityBrowserWindow(
-			const std::string& typeLabel,
-			const std::array<std::string, N>& columnLabels,
+			std::string_view typeLabel,
+			const std::array<std::string_view, N>& columnLabels,
 			EntitySource& source,
 			std::string& searchQuery,
 			int& selectionIndex
@@ -125,13 +126,13 @@ namespace CombatTrackerApp {
 	// TODO: Finish this function when JSON functionality is implemented.
 	template<size_t N, typename S>
 	void EncounterCreationScene::renderEntityBrowserWindow(
-		const std::string& typeLabel,
-		const std::array<std::string, N>& columnLabels,
+		std::string_view typeLabel,
+		const std::array<std::string_view, N>& columnLabels,
 		EntitySource& source,
 		std::string& searchQuery,
 		int& selectionIndex
 	) {
-		renderBrowserFilters(source, searchQuery, typeLabel.c_str());
+		renderBrowserFilters(source, searchQuery, typeLabel.data());
 
 		/*
 		Split what is left of the tab between the entity listings and the details panel.
@@ -144,7 +145,7 @@ namespace CombatTrackerApp {
 		const auto listingHeight{ bodyHeight * 0.55f }; // Cpnsider playing around with the multiplier.
 
 		if (ImGui::BeginTable(
-			(typeLabel + " Listing").c_str(),
+			std::format("{} Listing", typeLabel).c_str(), // Use std::format to easily concatenate std::string_view to string literals.
 			static_cast<int>(N) + 2,
 			BROWSER_TABLE_FLAGS,
 			ImVec2{ 0.0f, listingHeight }
@@ -152,7 +153,7 @@ namespace CombatTrackerApp {
 			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch, 0.30f);
 
 			for (size_t i{}; i < N; ++i) {
-				ImGui::TableSetupColumn(columnLabels[i].c_str(), ImGuiTableColumnFlags_WidthStretch, 0.6f / static_cast<float>(N));
+				ImGui::TableSetupColumn(columnLabels[i].data(), ImGuiTableColumnFlags_WidthStretch, 0.6f / static_cast<float>(N));
 			}
 			ImGui::TableSetupColumn("Source", ImGuiTableColumnFlags_WidthStretch, 0.10f);
 
@@ -162,7 +163,7 @@ namespace CombatTrackerApp {
 			ImGui::EndTable();
 		}
 
-		if (CombatTrackerLib::alignedButton(("Create " + typeLabel).c_str(), 0.5f)) {
+		if (CombatTrackerLib::alignedButton(std::format("Create {}", typeLabel).c_str(), 0.5f)) {
 			m_applicationReference->queueSceneTransition(this, std::make_unique<S>(m_applicationReference));
 		}
 
@@ -171,9 +172,9 @@ namespace CombatTrackerApp {
 		The calculation is done by subtracting the absolute value of the negative height from the available height.
 		So these buttons span the remaining height, which is exactly what we want since they are the last UI elements to be rendered.
 		*/
-		ImGui::BeginChild((typeLabel + " Details").c_str(), ImVec2{ 0.0f, -functionalityButtonsHeight });
+		ImGui::BeginChild(std::format("{} Details", typeLabel).c_str(), ImVec2{ 0.0f, -functionalityButtonsHeight });
 		if (selectionIndex < 0) {
-			ImGui::TextWrapped("Select a %s to see its details.", typeLabel.c_str());
+			ImGui::TextWrapped("Select a %s to see its details.", typeLabel.data());
 		}
 		ImGui::EndChild();
 
@@ -182,11 +183,11 @@ namespace CombatTrackerApp {
 
 		}
 		ImGui::SameLine();
-		if (ImGui::Button(("Edit " + typeLabel).c_str())) {
+		if (ImGui::Button(std::format("Edit {}", typeLabel).c_str())) {
 
 		}
 		ImGui::SameLine();
-		if (ImGui::Button(("Delete " + typeLabel).c_str())) {
+		if (ImGui::Button(std::format("Delete {}", typeLabel).c_str())) {
 
 		}
 		ImGui::EndDisabled();

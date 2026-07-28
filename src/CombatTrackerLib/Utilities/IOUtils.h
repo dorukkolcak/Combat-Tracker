@@ -16,7 +16,6 @@ namespace CombatTrackerLib {
 
 		std::ostringstream fileStream;
 		fileStream << file.rdbuf();
-		file.close();
-		return std::move(fileStream.str());
+		return fileStream.str();
 	}
 }

@@ -1,11 +1,12 @@
 #pragma once
 
+#include <array>
+#include <cstddef>
 #include <unordered_map>
-#include <string>
+#include <string_view>
 
 #include "CreatureEnums.h"
 
-// Unfortunately, none of the unordered_map's can be constexpr (in C++23) which is kinda annoying, as there is no reason for them to not be constexpr.
 namespace CombatTrackerApp {
 	inline const std::unordered_map<Skill, Ability> MAPPED_SKILLS {
 		{Skill::ATHLETICS, Ability::STRENGTH},
@@ -32,140 +33,143 @@ namespace CombatTrackerApp {
 	inline constexpr int ABILITY_SCORE_LOWER_BOUND{};
 	inline constexpr int ABILITY_MODIFIERS_UPPER_BOUND{ 10 };
 	inline constexpr int ABILITY_MODIFIERS_LOWER_BOUND{ -5 };
-
-	// We can also just have a function that returns the names of the enumerators but I like the mapping approach better.
-	inline const std::unordered_map<Size, std::string> SIZE_NAMES {
-		{Size::TINY, "Tiny"},
-		{Size::SMALL, "Small"},
-		{Size::MEDIUM, "Medium"},
-		{Size::LARGE, "Large"},
-		{Size::HUGE_SIZE, "Huge"},
-		{Size::GARGANTUAN, "Gargantuan"}
-	};
-	inline const std::unordered_map<CreatureType, std::string> CREATURE_TYPE_NAMES{
-		{CreatureType::ABERRATION, "Aberration"},
-		{CreatureType::BEAST, "Beast"},
-		{CreatureType::CELESTIAL, "Celestial"},
-		{CreatureType::CONSTRUCT, "Construct"},
-		{CreatureType::DRAGON, "Dragon"},
-		{CreatureType::ELEMENTAL, "Elemental"},
-		{CreatureType::FEY, "Fey"},
-		{CreatureType::FIEND, "Fiend"},
-		{CreatureType::GIANT, "Giant"},
-		{CreatureType::HUMANOID, "Humanoid"},
-		{CreatureType::MONSTROSITY, "Monstrosity"},
-		{CreatureType::OOZE, "Ooze"},
-		{CreatureType::PLANT, "Plant"},
-		{CreatureType::UNDEAD, "Undead"}
-	};
-	inline const std::unordered_map<Alignment, std::string> ALIGNMENT_NAMES {
-		{Alignment::LAWFUL_GOOD, "Lawful Good"},
-		{Alignment::NEUTRAL_GOOD, "Neutral Good"},
-		{Alignment::CHAOTIC_GOOD, "Chaotic Good"},
-		{Alignment::LAWFUL_NEUTRAL, "Lawful Neutral"},
-		{Alignment::NEUTRAL, "Neutral"},
-		{Alignment::CHAOTIC_NEUTRAL, "Chaotic Neutral"},
-		{Alignment::LAWFUL_EVIL, "Lawful Evil"},
-		{Alignment::NEUTRAL_EVIL, "Neutral Evil"},
-		{Alignment::CHAOTIC_EVIL, "Chaotic Evil"},
-		{Alignment::UNALIGNED, "Unaligned"},
-	};
-	inline const std::unordered_map<Ability, std::string> ABILITY_NAMES {
-		{Ability::STRENGTH, "Strength"},
-		{Ability::DEXTERITY, "Dexterity"},
-		{Ability::CONSTITUTION, "Constitution"},
-		{Ability::WISDOM, "Wisdom"},
-		{Ability::INTELLIGENCE, "Intelligence"},
-		{Ability::CHARISMA, "Charisma"}
-	};
-	inline const std::unordered_map<Skill, std::string> SKILL_NAMES{
-		{Skill::ATHLETICS, "Athletics"},
-		{Skill::ACROBATICS, "Acrobatics"},
-		{Skill::SLEIGHT_OF_HAND, "Sleight of Hand"},
-		{Skill::STEALTH, "Stealth"},
-		{Skill::ARCANA, "Arcana"},
-		{Skill::HISTORY, "History"},
-		{Skill::INVESTIGATION, "Investigation"},
-		{Skill::NATURE, "Nature"},
-		{Skill::RELIGION, "Religion"},
-		{Skill::ANIMAL_HANDLING, "Animal Handling"},
-		{Skill::INSIGHT, "Insight"},
-		{Skill::MEDICINE, "Medicine"},
-		{Skill::PERCEPTION, "Perception"},
-		{Skill::SURVIVAL, "Survival"},
-		{Skill::DECEPTION, "Deception"},
-		{Skill::INTIMIDATION, "Intimidation"},
-		{Skill::PERFORMANCE, "Performance"},
-		{Skill::PERSUASION, "Persuasion"}
-	};
-	inline const std::unordered_map<DamageType, std::string> DAMAGE_TYPE_NAMES {
-		{DamageType::ACID, "Acid"},
-		{DamageType::BLUDGEONING, "Bludgeoning"},
-		{DamageType::COLD, "Cold"},
-		{DamageType::FIRE, "Fire"},
-		{DamageType::FORCE, "Force"},
-		{DamageType::LIGHTNING, "Lightning"},
-		{DamageType::NECROTIC, "Necrotic"},
-		{DamageType::PIERCING, "Piercing"},
-		{DamageType::POISON, "Poison"},
-		{DamageType::PSYCHIC, "Psychic"},
-		{DamageType::RADIANT, "Radiant"},
-		{DamageType::SLASHING, "Slashing"},
-		{DamageType::THUNDER, "Thunder"}
-	};
-	inline const std::unordered_map<Condition, std::string> CONDITTON_NAMES {
-		{Condition::BLINDED, "Blinded"},
-		{Condition::CHARMED, "Charmed"},
-		{Condition::DEAFENED, "Deafened"},
-		{Condition::FRIGHTENED, "Frightened"},
-		{Condition::GRAPPLED, "Grappled"},
-		{Condition::INCAPACITATED, "Incapacitated"},
-		{Condition::INVISIBLE, "Invisible"},
-		{Condition::PARALYZED, "Paralyzed"},
-		{Condition::PETRIFIED, "Petrified"},
-		{Condition::POISONED, "Poisoned"},
-		{Condition::PRONE, "Prone"},
-		{Condition::RESTRAINED, "Restrained"},
-		{Condition::STUNNED, "Stunned"},
-		{Condition::UNCONSCIOUS, "Unconscious"},
-		{Condition::EXHAUSTION, "Exhaustion"}
-	};
-	inline const std::unordered_map<Language, std::string> LANGUAGE_NAMES {
-		{Language::COMMON, "Common"},
-		{Language::COMMON_SIGN_LANGUAGE, "Common Sign Language"},
-		{Language::DWARVISH, "Dwarvish"},
-		{Language::ELVISH, "Elvish"},
-		{Language::GIANT, "Giant"},
-		{Language::GNOMISH, "Gnomish"},
-		{Language::GOBLIN, "Goblin"},
-		{Language::HALFLING, "Halfling"},
-		{Language::ORC, "Orc"},
-		{Language::ABYSSAL, "Abyssal"},
-		{Language::CELESTIAL, "Celestial"},
-		{Language::DEEP_SPEECH, "Deep Speech"},
-		{Language::DRUIDIC, "Druidic"},
-		{Language::INFERNAL, "Infernal"},
-		{Language::PRIMORDIAL, "Primordial"},
-		{Language::SYLVAN, "Sylvan"},
-		{Language::THIEVES_CANT, "Thieves' Cant"},
-		{Language::UNDERCOMMON, "Undercommon"}
-	};
-	inline const std::unordered_map<Sense, std::string> SENSE_NAMES {
-		{Sense::BLINDSIGHT, "Blindsight"},
-		{Sense::DARKVISION, "Darkvision"},
-		{Sense::TREMORSENSE, "Tremorsense"},
-		{Sense::TRUESIGHT, "Truesight"}
-	};
-	inline const std::unordered_map<ActionType, std::string> ACTION_NAMES {
-		{ActionType::ACTION, "Action"},
-		{ActionType::BONUS_ACTION, "Bonus Action"},
-		{ActionType::REACTION, "Reaction"},
-		{ActionType::LEGENDARY_ACTION, "Legendary Action"},
-		{ActionType::LAIR_ACTION, "Lair Action"}
-	};
-	inline const std::unordered_map<ActionType, std::string> PLAYER_ACTION_NAMES{
-		{ActionType::ACTION, "Action"},
-		{ActionType::BONUS_ACTION, "Bonus Action"},
-		{ActionType::REACTION, "Reaction"}
-	};
+	
+	/*
+	The ordering for all name constants is EXTREMELY important. They should be the same order as the enum order.
+	This allows us to achive multiple things:
+	1) Constexpr support so performance gain (should be VERY, VERY minimal but it is good practice nonetheless).
+	2) Constant time element access using enumerators as indices. This was mostly the reason why I used unordered_map's in the first place.
+	3) Labels are actually ordered. The ordering within unordered_map was completely arbitrary and could actually change during runs.
+	We can just use a map for the same purpose but we get logaritmic access time in that case.
+	So I am pretty sure this is the best of every world.
+	*/
+	inline constexpr std::array<std::string_view, static_cast<std::size_t>(Size::COUNT)> SIZE_NAMES { {
+		"Tiny",
+		"Small",
+		"Medium",
+		"Large",
+		"Huge",
+		"Gargantuan"
+	} };
+	inline constexpr std::array<std::string_view, static_cast<std::size_t>(CreatureType::COUNT)> CREATURE_TYPE_NAMES { {
+		"Aberration",
+		"Beast",
+		"Celestial",
+		"Construct",
+		"Dragon",
+		"Elemental",
+		"Fey",
+		"Fiend",
+		"Giant",
+		"Humanoid",
+		"Monstrosity",
+		"Ooze",
+		"Plant",
+		"Undead"
+	} };
+	inline constexpr std::array<std::string_view, static_cast<std::size_t>(Alignment::COUNT)> ALIGNMENT_NAMES { {
+		"Unaligned",
+		"Lawful Good",
+		"Neutral Good",
+		"Chaotic Good",
+		"Lawful Neutral",
+		"Neutral",
+		"Chaotic Neutral",
+		"Lawful Evil",
+		"Neutral Evil",
+		"Chaotic Evil"
+	} };
+	inline constexpr std::array<std::string_view, static_cast<std::size_t>(Ability::COUNT)> ABILITY_NAMES { {
+		"Strength",
+		"Dexterity",
+		"Constitution",
+		"Wisdom",
+		"Intelligence",
+		"Charisma"
+	} };
+	inline constexpr std::array<std::string_view, static_cast<std::size_t>(Skill::COUNT)> SKILL_NAMES { {
+		"Athletics",
+		"Acrobatics",
+		"Sleight of Hand",
+		"Stealth",
+		"Arcana",
+		"History",
+		"Investigation",
+		"Nature",
+		"Religion",
+		"Animal Handling",
+		"Insight",
+		"Medicine",
+		"Perception",
+		"Survival",
+		"Deception",
+		"Intimidation",
+		"Performance",
+		"Persuasion"
+	} };
+	inline constexpr std::array<std::string_view, static_cast<std::size_t>(DamageType::COUNT)> DAMAGE_TYPE_NAMES { {
+		"Acid",
+		"Bludgeoning",
+		"Cold",
+		"Fire",
+		"Force",
+		"Lightning",
+		"Necrotic",
+		"Piercing",
+		"Poison",
+		"Psychic",
+		"Radiant",
+		"Slashing",
+		"Thunder"
+	} };
+	inline constexpr std::array<std::string_view, static_cast<std::size_t>(Condition::COUNT)> CONDITTON_NAMES { {
+		"Blinded",
+		"Charmed",
+		"Deafened",
+		"Frightened",
+		"Grappled",
+		"Incapacitated",
+		"Invisible",
+		"Paralyzed",
+		"Petrified",
+		"Poisoned",
+		"Prone",
+		"Restrained",
+		"Stunned",
+		"Unconscious",
+		"Exhaustion"
+	} };
+	inline constexpr std::array<std::string_view, static_cast<std::size_t>(Language::COUNT)> LANGUAGE_NAMES { {
+		"Common",
+		"Common Sign Language",
+		"Dwarvish",
+		"Elvish",
+		"Giant",
+		"Gnomish",
+		"Goblin",
+		"Halfling",
+		"Orc",
+		"Abyssal",
+		"Celestial",
+		"Deep Speech",
+		"Druidic",
+		"Infernal",
+		"Primordial",
+		"Sylvan",
+		"Thieves' Cant",
+		"Undercommon"
+	} };
+	inline constexpr std::array<std::string_view, static_cast<std::size_t>(Sense::COUNT)> SENSE_NAMES { {
+		"Blindsight",
+		"Darkvision",
+		"Tremorsense",
+		"Truesight"
+	} };
+	inline constexpr std::array<std::string_view, static_cast<std::size_t>(ActionType::COUNT)> ACTION_NAMES { {
+		"Action",
+		"Bonus Action",
+		"Reaction",
+		"Legendary Action",
+		"Lair Action"
+	} };
 }

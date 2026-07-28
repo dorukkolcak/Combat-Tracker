@@ -7,25 +7,11 @@ namespace CombatTrackerApp {
 	public:
 
 		// Stat block is moved so pass it by value.
-		Monster(CreatureStatBlock statBlock, double creatureCR, int creatureXP);
+		Monster(CreatureStatBlock statBlock, double creatureCR, OverridableInt creatureXP);
 
 		int getXP() const;
 	private:
 		double m_CR{};
-		int m_XP{};
-	};
-	class MonsterBuilder : public CreatureBuilder<MonsterBuilder> {
-	public:
-		MonsterBuilder& setCR(double creatureCR);
-		MonsterBuilder& setXP(int XP);
-
-		// Hides CreatureBuilder::reset to also clear the monster-specific fields.
-		MonsterBuilder& reset();
-		double getCR() const;
-		int getXP() const;
-		Monster moveMonster();
-	private:
-		double m_CR{};
-		int m_XP{};
+		OverridableInt m_XP{};
 	};
 }

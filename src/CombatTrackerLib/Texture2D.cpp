@@ -86,9 +86,6 @@ namespace CombatTrackerLib {
     void Texture2D::unbindTexture() const {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-    bool Texture2D::isTextureValid() const {
-        return m_textureID != 0;
-    }
     GLuint Texture2D::getTextureID() const {
         return m_textureID;
     }

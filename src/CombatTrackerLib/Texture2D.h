@@ -21,7 +21,6 @@ namespace CombatTrackerLib {
 
         void bindTexture() const;
         void unbindTexture() const;
-        bool isTextureValid() const;
 
         GLuint getTextureID() const;
         int getTextureWidth() const;

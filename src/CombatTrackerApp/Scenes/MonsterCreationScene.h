@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <string_view>
 
 #include "EntityCreationScene.h"
 #include "../Entities/Monster/Monster.h"
@@ -16,27 +16,26 @@ namespace CombatTrackerApp {
 
 	protected:
 
-		const std::string& getEntityLabel() const override;
-		bool isMonsterScene() const override;
+		std::string_view getEntityLabel() const override;
 		void renderEntitySpecificInfo() override;
 		void renderEntitySpecificSection() override;
 		bool completeEntityCreation() override;
-		void resetEntity() override;
 		void resetParametersAndOverrides() override;
 
 	private:
 
-		inline static const std::string ENTITY_LABEL{ "Monster" };
-
-		MonsterBuilder m_monsterBuilder{};
+		inline static constexpr std::string_view ENTITY_LABEL{ "Monster" };
 
 		double m_currentMonsterCR{};
-		int m_currentMonsterXP{};
+		OverridableInt m_currentMonsterXP{};
 
 		CombatTrackerLib::ListBoxParameters m_monsterCRParameters{};
 
-		bool m_isXPOverridden{};
-		bool m_isPBOverridden{};
-
+		/*
+		CR is the one selectable list in the application that is not backed by an enum.
+		Its table pairs each CR value with its label, because the value itself is what keys the XP and PB tables.
+		So the generic listbox helper, which turns a row position into an enumerator, does not fit and this does the job instead.
+		*/
+		void renderCRListBox();
 	};
 }

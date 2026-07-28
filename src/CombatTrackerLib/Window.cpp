@@ -34,7 +34,7 @@ namespace CombatTrackerLib {
 	int Window::getWindowShouldClose() {
 		return glfwWindowShouldClose(m_window);
 	}
-	GLFWwindow*& Window::getGLFWwindow() {
+	GLFWwindow* Window::getGLFWwindow() {
 		return m_window;
 	}
 }

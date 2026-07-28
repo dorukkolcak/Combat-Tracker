@@ -3,6 +3,10 @@
 #include "imgui.h"
 
 #include <algorithm>
+#include <array>
+#include <cstddef>
+#include <string_view>
+#include <type_traits>
 
 #include "Texture2D.h"
 
@@ -15,26 +19,27 @@ namespace CombatTrackerLib {
 	};
 
 	// Generic helper for single selectable listbox layouts.
-	template <typename T, typename M>
+	template <typename T> requires std::is_enum_v<T> // Use C++20 concepts to guarentee the passed type is an enum type.
 	void renderListBox(
 		ListBoxParameters& parameters,
 		T& type,
 		const char* listBoxLabel,
-		const M& items
+		const std::array<std::string_view, static_cast<size_t>(T::COUNT)>& names // We can't really check whether the enum type has a COUNT enumerator but this will only occur if I am stupid.
 	) {
-		int counter{};
 		const float height{ ImGui::GetTextLineHeightWithSpacing() * 8.0f };
 		if (ImGui::BeginListBox(listBoxLabel, ImVec2{ 0, height })) {
-			for (const auto& item : items) {
-				const bool isSelected{ counter == parameters.chosenIndex };
-				if (ImGui::Selectable(item.second.c_str(), isSelected)) {
-					parameters.chosenIndex = counter;
-					type = item.first;
+
+			// Every entry is drawn, so the row index doubles as the index that the parameters keep track of.
+			for (std::size_t i{}; i < names.size(); ++i) {
+				const int rowIndex{ static_cast<int>(i) };
+				const bool isSelected{ rowIndex == parameters.chosenIndex };
+				if (ImGui::Selectable(names[i].data(), isSelected)) {
+					parameters.chosenIndex = rowIndex;
+					type = static_cast<T>(i);
 				}
 				if (parameters.isHighlighted && ImGui::IsItemHovered()) {
-					parameters.highlightedIndex = counter;
+					parameters.highlightedIndex = rowIndex;
 				}
-				++counter;
 			}
 			ImGui::EndListBox();
 		}

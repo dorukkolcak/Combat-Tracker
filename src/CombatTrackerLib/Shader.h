@@ -14,9 +14,17 @@ namespace CombatTrackerLib {
 		};
 
 		Shader(const std::filesystem::path& shaderPath, Type type);
+
+		Shader(const Shader& shader) = delete;
+		Shader& operator=(const Shader& shader) = delete;
+
+		Shader(Shader&& shader) noexcept;
+		Shader& operator=(Shader&& shader) noexcept;
+
 		unsigned int getShaderID() const;
 
 	private:
 		unsigned int m_shaderID{};
+		Type m_shaderType{};
 	};
 }

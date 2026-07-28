@@ -8,7 +8,8 @@ add_library(Combat-Tracker-Lib STATIC
     Themes.h
     Window.h
     Window.cpp
-    "Utilities/UIUtils.h"
+    Utilities/UIUtils.h
+    Utilities/IOUtils.h
     Shader.h 
     Shader.cpp 
     ShaderProgram.h 
@@ -23,7 +24,6 @@ target_include_directories(Combat-Tracker-Lib PUBLIC
 
 # Link external dependencies to the static library.
 target_link_libraries(Combat-Tracker-Lib PUBLIC
-    nlohmann_json::nlohmann_json
     glad
     glfw_target
     OpenGL::GL

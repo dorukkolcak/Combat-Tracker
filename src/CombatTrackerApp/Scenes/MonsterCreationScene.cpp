@@ -8,20 +8,14 @@
 namespace CombatTrackerApp {
 	MonsterCreationScene::MonsterCreationScene(CombatTrackerLib::App* app) :
 		EntityCreationScene{ app },
-		m_monsterBuilder{},
 		m_currentMonsterCR{},
 		m_currentMonsterXP{},
-		m_monsterCRParameters{ -1, -1, false },
-		m_isXPOverridden{ false },
-		m_isPBOverridden{ false }
+		m_monsterCRParameters{ -1, -1, false }
 	{
 	}
 
-	const std::string& MonsterCreationScene::getEntityLabel() const {
+	std::string_view MonsterCreationScene::getEntityLabel() const {
 		return ENTITY_LABEL;
-	}
-	bool MonsterCreationScene::isMonsterScene() const {
-		return true;
 	}
 	void MonsterCreationScene::renderEntitySpecificInfo() {
 		ImGui::SeparatorText("Monster Specific Data");
@@ -34,15 +28,43 @@ namespace CombatTrackerApp {
 			// The label is hidden by passing a ## prefix to the label name, which is something that is done extensively over the entire codebase.
 			ImGui::TextUnformatted("CR");
 			ImGui::SetNextItemWidth(-1.0f);
-			renderListBox(m_monsterCRParameters, m_currentMonsterCR, "##CR", CR_NAMES);
+			renderCRListBox();
 
 			ImGui::Spacing();
-			renderOverriddableInputInt(m_currentMonsterXP, m_isXPOverridden, "XP", "Reset XP", MAPPED_CR_TO_XP, 0, INT_MAX, m_currentMonsterCR);
+			renderOverriddableInputInt(m_currentMonsterXP, "XP", "Reset XP", MAPPED_CR_TO_XP, 0, INT_MAX, m_currentMonsterCR);
 
 			ImGui::Spacing();
-			renderOverriddableInputInt(m_currentCreatureStatBlock.proficiencyBonus, m_isPBOverridden, "PB", "Reset PB", MAPPED_CR_TO_PB, PB_LOWER_BOUND, INT_MAX, m_currentMonsterCR);
+			renderOverriddableInputInt(
+				m_currentCreatureStatBlock.proficiencyBonus, 
+				"PB", 
+				"Reset PB", 
+				MAPPED_CR_TO_PB, 
+				PB_LOWER_BOUND, 
+				INT_MAX, 
+				m_currentMonsterCR
+			);
 
 			ImGui::EndTable();
+		}
+	}
+
+	// The CR table carries its own keys, so the row is read straight out of it instead of being derived from the row position.
+	void MonsterCreationScene::renderCRListBox() {
+		int counter{};
+		const float height{ ImGui::GetTextLineHeightWithSpacing() * 8.0f };
+		if (ImGui::BeginListBox("##CR", ImVec2{ 0, height })) {
+			for (const auto& item: CR_NAMES) {
+				const bool isSelected{ counter == m_monsterCRParameters.chosenIndex };
+				if (ImGui::Selectable(item.second.data(), isSelected)) {
+					m_monsterCRParameters.chosenIndex = counter;
+					m_currentMonsterCR = item.first;
+				}
+				if (m_monsterCRParameters.isHighlighted && ImGui::IsItemHovered()) {
+					m_monsterCRParameters.highlightedIndex = counter;
+				}
+				++counter;
+			}
+			ImGui::EndListBox();
 		}
 	}
 
@@ -51,24 +73,13 @@ namespace CombatTrackerApp {
 
 	// TODO: The built monster is thrown away for now. Once JSON saving exists this is where it should get written.
 	bool MonsterCreationScene::completeEntityCreation() {
-		m_monsterBuilder.getCreatureBlock() = m_currentCreatureStatBlock;
-		m_monsterBuilder.setCR(m_currentMonsterCR).setXP(m_currentMonsterXP);
-		Monster monster{ m_monsterBuilder.moveMonster() };
+		Monster monster{ std::move(m_currentCreatureStatBlock), m_currentMonsterCR, m_currentMonsterXP};
 		return true;
-	}
-
-	// TODO: Properly setup initial values of the entity that is being edited, once editing exists.
-	void MonsterCreationScene::resetEntity() {
-		m_monsterBuilder.reset();
-		m_currentCreatureStatBlock = m_monsterBuilder.getCreatureBlock();
-		m_currentMonsterCR = m_monsterBuilder.getCR();
-		m_currentMonsterXP = m_monsterBuilder.getXP();
-		resetParametersAndOverrides();
 	}
 	void MonsterCreationScene::resetParametersAndOverrides() {
 		EntityCreationScene::resetParametersAndOverrides();
+		m_currentMonsterCR = 0.0;
+		m_currentMonsterXP = OverridableInt{};
 		m_monsterCRParameters = { -1, -1, false };
-		m_isXPOverridden = false;
-		m_isPBOverridden = false;
 	}
 }

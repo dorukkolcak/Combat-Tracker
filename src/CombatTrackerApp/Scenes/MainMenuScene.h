@@ -1,6 +1,7 @@
 #pragma once
 
-#include <unordered_map>
+#include <array>
+#include <cstddef>
 #include <string_view>
 
 #include "../../CombatTrackerLib/Scene.h"
@@ -20,15 +21,16 @@ namespace CombatTrackerApp {
 		void renderScene() override;
 	private:
 
-		enum OptionsCategory {
-			Appearance,
+		enum class OptionsCategory {
+			APPEARANCE,
 			// TODO: Expand the categories.
+			COUNT,
 		};
 
-		inline static const std::unordered_map<OptionsCategory, std::string_view> OPTIONS_CATEGORY_NAMES{
-			{OptionsCategory::Appearance, "Appearance"},
+		inline static constexpr std::array<std::string_view, static_cast<std::size_t>(OptionsCategory::COUNT)> OPTIONS_CATEGORY_NAMES { {
+			"Appearance",
 			//...
-		};
+		} };
 
 		inline static constexpr ImGuiDockNodeFlags MAIN_MENU_DOCKSPACE_FLAGS{
 			ImGuiDockNodeFlags_NoResize |

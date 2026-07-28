@@ -27,7 +27,7 @@ namespace CombatTrackerApp {
     void MainMenuScene::renderUI() {
 
         // Set configurations of the host window of the scene.
-        // This has to happen on every pass and not just the initial one, otherwise the host stays at its old size once the OS window is resized.
+        // This has to happen on every pass and not just the initial one, otherwise the host stays at its old size.
         m_mainViewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(m_mainViewport->WorkPos);
         ImGui::SetNextWindowSize(m_mainViewport->WorkSize);
@@ -104,7 +104,6 @@ namespace CombatTrackerApp {
 
         /*
         Options popup for application-wide settings.
-        This popup is one of the few that the user can resize by hand, so the viewport only clamps the size it opens with.
         TODO: One thing to do is actually save these settings somewhere so they are preserved between runs.
         */
         const auto viewportSize{ ImGui::GetMainViewport()->Size };
@@ -132,9 +131,10 @@ namespace CombatTrackerApp {
             // Category list.
             const auto categoryWidth{ std::min(ImGui::GetFontSize() * 9.0f, ImGui::GetContentRegionAvail().x * 0.35f) };
             ImGui::BeginChild("Options Categories", ImVec2(categoryWidth, bodyHeight), ImGuiChildFlags_Borders);
-            for (const auto& optionsCategory : OPTIONS_CATEGORY_NAMES) {
-                if (ImGui::Selectable(optionsCategory.second.data(), m_selectedOptionsCategory == optionsCategory.first)) {
-                    m_selectedOptionsCategory = optionsCategory.first;
+            for (size_t i{}; i < OPTIONS_CATEGORY_NAMES.size(); ++i) {
+                const auto category{ static_cast<OptionsCategory>(i) }; // Cast is needed here so that we actually store the enumerator type.
+                if (ImGui::Selectable(OPTIONS_CATEGORY_NAMES[i].data(), m_selectedOptionsCategory == category)) {
+                    m_selectedOptionsCategory = category;
                 }
             }
             ImGui::EndChild();
@@ -143,7 +143,7 @@ namespace CombatTrackerApp {
 
             // Controls belonging to the selected category.
             ImGui::BeginChild("Options Content", ImVec2(0.0f, bodyHeight), ImGuiChildFlags_Borders);
-            if (m_selectedOptionsCategory == OptionsCategory::Appearance) {
+            if (m_selectedOptionsCategory == OptionsCategory::APPEARANCE) {
                 ImGui::SeparatorText("Theme");
                 auto& applicationUITheme{ m_applicationReference->getUITheme() };
 

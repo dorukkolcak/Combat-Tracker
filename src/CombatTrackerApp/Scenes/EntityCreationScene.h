@@ -2,8 +2,9 @@
 
 #include <vector>
 #include <algorithm>
+#include <format>
 #include <string>
-#include <unordered_map>
+#include <string_view>
 
 #include "../../CombatTrackerLib/Utilities/UIUtils.h"
 #include "../../CombatTrackerLib/Scene.h"
@@ -30,14 +31,13 @@ namespace CombatTrackerApp {
 
 		/*
 		Constant UI labels. These should be static as they shouldn't be instantiated per object/scene.
-		The reason the type is string not string_view for most of the UI labels in this class is that I frequently do concatenation with them.
-		So I need an underlying string type to work with, which is annoying to access with a string_view.
-		Probably can make it work at some point and be more efficient but this is fine for now.
+		They are string_views, so they cost nothing to hold and they are usable at compile time.
+		The concatenation these are used in goes through std::format, since a string_view has no operator+ to chain with.
 		*/
-		inline static const std::string PROFICIENCY_SUFFIX{ " Proficiency" };
-		inline static const std::string EXPERTISE_SUFFIX{ " Expertise" };
-		inline static const std::string TRAIT_LABEL{ "Trait" };
-		inline static const std::string EQUIPMENT_LABEL{ "Gear" };
+		inline static constexpr std::string_view PROFICIENCY_SUFFIX{ " Proficiency" };
+		inline static constexpr std::string_view EXPERTISE_SUFFIX{ " Expertise" };
+		inline static constexpr std::string_view TRAIT_LABEL{ "Trait" };
+		inline static constexpr std::string_view EQUIPMENT_LABEL{ "Gear" };
 		inline static constexpr float MIN_CHILD_HEIGHT{ 180.f };
 		inline static constexpr ImGuiWindowFlags ENTITY_CREATION_WINDOW_FLAGS{
 			ImGuiWindowFlags_NoTitleBar |
@@ -54,8 +54,7 @@ namespace CombatTrackerApp {
 		But in this case we actually need the polymorphic behaviour (both of the derived classes return a different value here.)
 		So I guess it is fine.
 		*/
-		virtual const std::string& getEntityLabel() const = 0;
-		virtual bool isMonsterScene() const = 0;
+		virtual std::string_view getEntityLabel() const = 0;
 
 		// Right hand column of the top split (of the popup). Monster specific data for monsters, classes and subclasses for player characters.
 		virtual void renderEntitySpecificInfo() = 0;
@@ -65,13 +64,11 @@ namespace CombatTrackerApp {
 		virtual void renderEntitySpecificSection() = 0;
 
 		virtual bool completeEntityCreation() = 0;
-		virtual void resetEntity() = 0;
 
 		/*
-		The block is owned by value here instead of being a reference into a builder.
-		The builders belong to the derived scenes, which are constructed after this base runs,
-		so a reference member would have to bind to a member that does not exist yet.
-		The derived scene moves this block into its own builder once creation is completed.
+		The block is edited in place by this base scene and by the derived ones alike.
+		The derived scene moves it into the entity it builds once creation is completed,
+		which is why resetParametersAndOverrides() puts a fresh block back in its place.
 		*/
 		CreatureStatBlock m_currentCreatureStatBlock{};
 
@@ -79,21 +76,14 @@ namespace CombatTrackerApp {
 		CombatTrackerLib::ListBoxParameters m_creatureTypeParameters{};
 		CombatTrackerLib::ListBoxParameters m_alignmentParameters{};
 
-		bool m_isInitiativeOverridden{};
-		bool m_isPassivePerceptionOverridden{};
-
-		std::unordered_map<Ability, bool> m_abilityModifiersOverride{};
-		std::unordered_map<Ability, bool> m_savingThrowsOverride{};
-		std::unordered_map<Skill, bool> m_skillModifiersOverride{};
-
 		void renderGeneralCreatureInfo();
 		void renderSpeedInfo();
 
 		// Proficiency and expertise items get changed in this function so pass them as non-const lvalue reference.
 		template <typename M, typename N>
 		void renderProficiencyAndExpertiseCluster(
-			const char* proficiencyLabel,
-			const char* expertiseLabel,
+			std::string_view proficiencyLabel,
+			std::string_view expertiseLabel,
 			M& proficiencyItems,
 			M& expertiseItems,
 			const N& itemNames
@@ -106,20 +96,19 @@ namespace CombatTrackerApp {
 
 		// Simple helper method for rendering multi-selectable parameters.
 		template <typename M, typename N>
-		void renderMutuallyExclusiveCheckboxCluster(M& items, const N& names, const char* label, int columnCount);
+		void renderMutuallyExclusiveCheckboxCluster(M& items, const N& names, std::string_view label, int columnCount);
 
 		template <typename I>
-		void renderAddables(std::vector<I>& currentItems, const std::string& label);
-		void renderActions(bool isMonster);
-		void renderNonOverridableInputInt(int& value, const char* label);
+		void renderAddables(std::vector<I>& currentItems, std::string_view label);
+		void renderActions();
+		void renderNonOverridableInputInt(int& value, std::string_view label);
 
 		// Pass the value as non-const lvalue reference as we need to modify its value in this function.
 		template <typename T, typename M>
 		void renderOverriddableInputInt (
-			int& value,
-			bool& overrideFlag,
-			const char* label,
-			const char* overrideLabel,
+			OverridableInt& value,
+			std::string_view label,
+			std::string_view overrideLabel,
 			const M& items,
 			const int lowerBound,
 			const int upperBound,
@@ -140,38 +129,37 @@ namespace CombatTrackerApp {
 	*/
 	template <typename T, typename M>
 	void EntityCreationScene::renderOverriddableInputInt(
-		int& value,
-		bool& overrideFlag,
-		const char* label,
-		const char* overrideLabel,
+		OverridableInt& value,
+		std::string_view label,
+		std::string_view overrideLabel,
 		const M& items,
 		const int lowerBound,
 		const int upperBound,
 		const T key
 	) {
-		if (!overrideFlag) {
-			value = items.at(key);
+		if (!value.isOverridden) {
+			value.value = items.at(key);
 		}
 
-		ImGui::TextUnformatted(label);
+		ImGui::TextUnformatted(label.data());
 		ImGui::SetNextItemWidth(-1.0f);
-		if (ImGui::InputInt(("##" + std::string{ label }).c_str(), &value)) {
-			value = std::min(std::max(lowerBound, value), upperBound);
-			overrideFlag = true;
+		if (ImGui::InputInt(std::format("##{}", label).c_str(), &value.value)) {
+			value.value = std::min(std::max(lowerBound, value.value), upperBound);
+			value.isOverridden = true;
 		}
-		if (ImGui::Button(overrideLabel, ImVec2{ -1.0f, 0.0f })) {
-			overrideFlag = false;
+		if (ImGui::Button(overrideLabel.data(), ImVec2{-1.0f, 0.0f})) {
+			value.isOverridden = false;
 		}
 	}
 	template <typename M, typename N>
-	void EntityCreationScene::renderMutuallyExclusiveCheckboxCluster(M& items, const N& names, const char* label, int columnCount) {
-		ImGui::TextWrapped("%s", label);
-		if (ImGui::BeginTable(label, columnCount, ImGuiTableFlags_SizingStretchSame)) {
-			int counter{};
-			for (const auto& item : names) {
+	void EntityCreationScene::renderMutuallyExclusiveCheckboxCluster(M& items, const N& names, std::string_view label, int columnCount) {
+		ImGui::TextWrapped("%s", label.data());
+		if (ImGui::BeginTable(label.data(), columnCount, ImGuiTableFlags_SizingStretchSame)) {
+
+			// The whole table is drawn and the flags sit in an array of the same length, so one index walks both plain arrays.
+			for (size_t i{}; i < names.size(); ++i) {
 				ImGui::TableNextColumn();
-				ImGui::Checkbox(item.second.c_str(), &items.at(item.first));
-				++counter;
+				ImGui::Checkbox(names[i].data(), &items[i]);
 			}
 			ImGui::EndTable();
 		}
@@ -184,8 +172,8 @@ namespace CombatTrackerApp {
 	*/
 	template <typename M, typename N>
 	void EntityCreationScene::renderProficiencyAndExpertiseCluster(
-		const char* proficiencyLabel,
-		const char* expertiseLabel,
+		std::string_view proficiencyLabel,
+		std::string_view expertiseLabel,
 		M& proficiencyItems,
 		M& expertiseItems,
 		const N& itemNames
@@ -197,23 +185,25 @@ namespace CombatTrackerApp {
 			ImGui::TableNextRow();
 
 			// Proficiency checkboxes.
+			// The names and both flag arrays are the same length, so a single index walks all three plain arrays.
+			// This is also why the helper works for abilities and skills alike, as nothing here is tied to one enum.
 			ImGui::TableSetColumnIndex(0);
-			ImGui::TextWrapped("%s", proficiencyLabel);
-			for (const auto& item : itemNames) {
-				if (ImGui::Checkbox((item.second + "##" + PROFICIENCY_SUFFIX).c_str(), &proficiencyItems.at(item.first))) {
-					if (proficiencyItems.at(item.first) && expertiseItems.at(item.first)) {
-						expertiseItems.at(item.first) = false;
+			ImGui::TextWrapped("%s", proficiencyLabel.data());
+			for (size_t i{}; i < itemNames.size(); ++i) {
+				if (ImGui::Checkbox(std::format("{}##{}", itemNames[i], PROFICIENCY_SUFFIX).c_str(), &proficiencyItems[i])) {
+					if (proficiencyItems[i] && expertiseItems[i]) {
+						expertiseItems[i] = false;
 					}
 				}
 			}
 
 			// Expertise checkboxes.
 			ImGui::TableSetColumnIndex(1);
-			ImGui::TextWrapped("%s", expertiseLabel);
-			for (const auto& item : itemNames) {
-				if (ImGui::Checkbox((item.second + "##" + EXPERTISE_SUFFIX).c_str(), &expertiseItems.at(item.first))) {
-					if (expertiseItems.at(item.first) && proficiencyItems.at(item.first)) {
-						proficiencyItems.at(item.first) = false;
+			ImGui::TextWrapped("%s", expertiseLabel.data());
+			for (size_t i{}; i < itemNames.size(); ++i) {
+				if (ImGui::Checkbox(std::format("{}##{}", itemNames[i], EXPERTISE_SUFFIX).c_str(), &expertiseItems[i])) {
+					if (expertiseItems[i] && proficiencyItems[i]) {
+						proficiencyItems[i] = false;
 					}
 				}
 			}
@@ -223,17 +213,16 @@ namespace CombatTrackerApp {
 
 	// Chunky helper used for rendering traits and gear items.
 	template <typename I>
-	void EntityCreationScene::renderAddables(std::vector<I>& currentItems, const std::string& label) {
-		ImGui::TextWrapped("%s", label.c_str());
+	void EntityCreationScene::renderAddables(std::vector<I>& currentItems, std::string_view label) {
+		ImGui::TextWrapped("%s", label.data());
 
 		// It is fine for this to be actually static as we clear it on each render pass anyways.
 		// Furthermore, this vector is only used in this function and nowhere else.
 		static std::vector<size_t> s_markedForDeletion{};
 		for (size_t i{}; i < currentItems.size(); ++i) {
-			ImGui::TableNextColumn();
 
 			// Cache the string to prevent recomputing it.
-			std::string popupName{ ("Edit " + label + "##" + std::to_string(i)).c_str() };
+			const std::string popupName{ std::format("Edit {}##{}", label, i) };
 
 			// Push a separate id to the ID stack for each item.
 			ImGui::PushID(static_cast<int>(i));
@@ -263,15 +252,15 @@ namespace CombatTrackerApp {
 
 				// The layouting is quite similar to the big entity creation popup modal.
 				ImGui::BeginChild("EditAddableScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(2) }, true);
-				ImGui::InputText((label + " Name").c_str(), &currentItems[i].name);
-				ImGui::InputText((label + " Description").c_str(), &currentItems[i].description);
+				ImGui::InputText(std::format("{} Name", label).c_str(), &currentItems[i].name);
+				ImGui::InputText(std::format("{} Description", label).c_str(), &currentItems[i].description);
 				ImGui::EndChild();
 
 				ImGui::Separator();
-				if (CombatTrackerLib::alignedButton(("Finish " + label + " Editing").c_str(), 0.5f)) {
+				if (CombatTrackerLib::alignedButton(std::format("Finish {} Editing", label).c_str(), 0.5f)) {
 					ImGui::CloseCurrentPopup();
 				}
-				if (CombatTrackerLib::alignedButton(("Delete " + label).c_str(), 0.5f)) {
+				if (CombatTrackerLib::alignedButton(std::format("Delete {}", label).c_str(), 0.5f)) {
 					s_markedForDeletion.push_back(i);
 					ImGui::CloseCurrentPopup();
 				}
@@ -289,8 +278,8 @@ namespace CombatTrackerApp {
 
 		// Add item section.
 		ImGui::Spacing();
-		if (ImGui::Button(("Add " + label).c_str())) {
-			ImGui::OpenPopup(label.c_str());
+		if (ImGui::Button(std::format("Add {}", label).c_str())) {
+			ImGui::OpenPopup(label.data());
 		}
 
 		// Setup configs of the add item popup.
@@ -298,19 +287,19 @@ namespace CombatTrackerApp {
 		ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{ 0.5f, 0.5f });
 		const auto vp{ ImGui::GetMainViewport()->Size };
 		ImGui::SetNextWindowSize(ImVec2{ vp.x * 0.70f, vp.y * 0.70f }, ImGuiCond_Always);
-		if (ImGui::BeginPopupModal(label.c_str(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
+		if (ImGui::BeginPopupModal(label.data(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
 			ImGui::BeginChild("AddAddableScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(1) }, true);
 
 			// Again it is fine for these to be static, we only use them here and reset them after adding the item.
 			static std::string s_name{};
 			static std::string s_description{};
-			ImGui::InputText((label + " Name").c_str(), &s_name);
-			ImGui::InputText((label + " Description").c_str(), &s_description);
+			ImGui::InputText(std::format("{} Name", label).c_str(), &s_name);
+			ImGui::InputText(std::format("{} Description", label).c_str(), &s_description);
 			ImGui::EndChild();
 
 			// Button and cleanup section.
 			ImGui::Separator();
-			if (CombatTrackerLib::alignedButton(("Finish " + label + " Creation").c_str(), 0.5f) &&
+			if (CombatTrackerLib::alignedButton(std::format("Finish {} Creation", label).c_str(), 0.5f) &&
 				!s_name.empty() && !s_description.empty()) {
 				I item(s_name, s_description);
 				currentItems.push_back(item);

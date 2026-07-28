@@ -1,21 +1,18 @@
 #include "PlayerCharacterCreationScene.h"
 #include "../CombatTrackerLib/Utilities/UIUtils.h"
+#include "../Utilities/GenericUtils.h"
 
 namespace CombatTrackerApp {
 	PlayerCharacterCreationScene::PlayerCharacterCreationScene(CombatTrackerLib::App* app) :
 		EntityCreationScene{ app },
-		m_playerCharacterBuilder{},
 		m_currentPlayerStatBlock{},
 		m_speciesParameters{ -1, -1, false },
 		m_originParameters{ -1, -1, false }
 	{
 	}
 
-	const std::string& PlayerCharacterCreationScene::getEntityLabel() const {
+	std::string_view PlayerCharacterCreationScene::getEntityLabel() const {
 		return ENTITY_LABEL;
-	}
-	bool PlayerCharacterCreationScene::isMonsterScene() const {
-		return false;
 	}
 	void PlayerCharacterCreationScene::renderEntitySpecificInfo() {
 		ImGui::SeparatorText("Classes and Subclasses");
@@ -54,14 +51,15 @@ namespace CombatTrackerApp {
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
 
-			for (const auto& item : m_currentPlayerStatBlock.levels) {
-				if (item.second == 0) {
+			// The names and the levels are two arrays of the same length, so one index reads both.
+			for (size_t i{}; i < CLASS_NAMES.size(); ++i) {
+				if (m_currentPlayerStatBlock.levels[i] == 0) {
 					continue;
 				}
-				ImGui::TextWrapped("%s %d", CLASS_NAMES.at(item.first).c_str(), item.second);
+				ImGui::TextWrapped("%s %d", CLASS_NAMES[i].data(), m_currentPlayerStatBlock.levels[i]);
 			}
 			for (const auto& item : m_currentPlayerStatBlock.subclasses) {
-				ImGui::TextWrapped("%s", SUBCLASS_NAMES.at(item.second).c_str() );
+				ImGui::TextWrapped("%s", SUBCLASS_NAMES[enumToSizeT(item.second)].data() );
 			}
 			if (CombatTrackerLib::alignedButton("Configure Classes and Subclasses", 0.5f)) {
 				ImGui::OpenPopup("Configuration");
@@ -79,37 +77,49 @@ namespace CombatTrackerApp {
 
 				// The level fields are laid out as a grid with the labels above them, so the twelve of them don't turn into twelve near empty rows.
 				if (ImGui::BeginTable("##ClassLevels", 4, ImGuiTableFlags_SizingStretchSame)) {
-					for (const auto& item : CLASS_NAMES) {
+					for (size_t i{}; i < CLASS_NAMES.size(); ++i) {
+						const auto className{ CLASS_NAMES[i] };
 						ImGui::TableNextColumn();
-						ImGui::TextUnformatted(item.second.c_str());
+						ImGui::TextUnformatted(className.data());
 						ImGui::SetNextItemWidth(-1.0f);
-						renderNonOverridableInputInt(m_currentPlayerStatBlock.levels.at(item.first), ("##" + item.second).c_str());
+						renderNonOverridableInputInt(m_currentPlayerStatBlock.levels[i], std::format("##{}", className).c_str());
 					}
 					ImGui::EndTable();
 				}
 
 				static PlayerClass s_currentClass{};
 				ImGui::SeparatorText("Subclasses");
-				for (const auto& item : SUBCLASS_NAMES) {
-					if (s_currentClass != MAPPED_SUBCLASSES.at(item.first)) {
-						ImGui::SeparatorText(CLASS_NAMES.at(MAPPED_SUBCLASSES.at(item.first)).c_str());
+
+				for (size_t i{}; i < SUBCLASS_NAMES.size(); ++i) {
+					const auto subclass{ static_cast<PlayerSubclass>(i) };
+					const auto correspondingClass{ MAPPED_SUBCLASSES.at(subclass) };
+					const auto classIndex{ enumToSizeT(correspondingClass) };
+
+					if (s_currentClass != correspondingClass) {
+						ImGui::SeparatorText(CLASS_NAMES[classIndex].data());
 					}
-					if (m_currentPlayerStatBlock.levels.at(MAPPED_SUBCLASSES.at(item.first)) < SUBCLASS_LEVEL_THRESHOLD) {
-						m_chosenSubclasses.at(item.first) = false;
-						m_currentPlayerStatBlock.subclasses.erase(MAPPED_SUBCLASSES.at(item.first));
+					if (m_currentPlayerStatBlock.levels[classIndex] < SUBCLASS_LEVEL_THRESHOLD) {
+						m_chosenSubclasses[i] = false;
+						m_currentPlayerStatBlock.subclasses.erase(correspondingClass);
 					}
-					if (ImGui::Checkbox(item.second.c_str(), &m_chosenSubclasses.at(item.first))) {
-						m_hasCorrespondingSubclass.at(MAPPED_SUBCLASSES.at(item.first)) = true;
-						m_currentPlayerStatBlock.subclasses[MAPPED_SUBCLASSES.at(item.first)] = item.first;
-						for (const auto& secondItem : MAPPED_CLASSES.at(MAPPED_SUBCLASSES.at(item.first))) {
-							if ((m_chosenSubclasses.at(secondItem) && secondItem != item.first)
-								|| m_currentPlayerStatBlock.levels.at(MAPPED_SUBCLASSES.at(secondItem)) < SUBCLASS_LEVEL_THRESHOLD )
-							{
-								m_chosenSubclasses.at(secondItem) = false;
+					// The checkbox reports both directions of the change, so unchecking has to take the subclass back out of the map.
+					if (ImGui::Checkbox(SUBCLASS_NAMES[i].data(), &m_chosenSubclasses[i])) {
+						if (!m_chosenSubclasses[i]) {
+							m_currentPlayerStatBlock.subclasses.erase(correspondingClass);
+						}
+						else {
+							m_currentPlayerStatBlock.subclasses[correspondingClass] = subclass;
+							for (const auto& correspondingSubclass : MAPPED_CLASSES.at(correspondingClass)) {
+								const auto subclassIndex{ enumToSizeT(correspondingSubclass) };
+								if ((m_chosenSubclasses[subclassIndex] && correspondingSubclass != subclass)
+									|| m_currentPlayerStatBlock.levels[classIndex] < SUBCLASS_LEVEL_THRESHOLD )
+								{
+									m_chosenSubclasses[subclassIndex] = false;
+								}
 							}
 						}
 					}
-					s_currentClass = MAPPED_SUBCLASSES.at(item.first);
+					s_currentClass = correspondingClass;
 				}
 				ImGui::EndChild();
 
@@ -118,11 +128,11 @@ namespace CombatTrackerApp {
 					// Lengthy but necessary validation.
 					int sum{};
 					bool isValid{ false };
-					for (auto& item : m_currentPlayerStatBlock.levels) {
-						if (item.second > MIN_CLASS_LEVEL) {
+					for (const auto& level : m_currentPlayerStatBlock.levels) {
+						if (level > MIN_CLASS_LEVEL) {
 							isValid = true;
 						}
-						sum += item.second;
+						sum += level;
 						if (sum > MAX_TOTAL_CLASS_LEVEL) {
 							isValid = false;
 							break;
@@ -138,31 +148,18 @@ namespace CombatTrackerApp {
 		}
 	}
 
-	
 	// TODO: JSON saving functionality.
 	bool PlayerCharacterCreationScene::completeEntityCreation() {
-		m_playerCharacterBuilder.getCreatureBlock() = m_currentCreatureStatBlock;
-		m_playerCharacterBuilder.getPlayerCharacterBlock() = m_currentPlayerStatBlock;
-		PlayerCharacter playerCharacter{ m_playerCharacterBuilder.movePlayerCharacter() };
+		PlayerCharacter playerCharacter{std::move(m_currentCreatureStatBlock), std::move(m_currentPlayerStatBlock)};
 		return true;
 	}
 
 	// TODO: Properly setup initial values of the entity that is being edited, once editing exists.
-	void PlayerCharacterCreationScene::resetEntity() {
-		m_playerCharacterBuilder.reset();
-		m_currentCreatureStatBlock = m_playerCharacterBuilder.getCreatureBlock();
-		m_currentPlayerStatBlock = m_playerCharacterBuilder.getPlayerCharacterBlock();
-		resetParametersAndOverrides();
-	}
 	void PlayerCharacterCreationScene::resetParametersAndOverrides() {
 		EntityCreationScene::resetParametersAndOverrides();
+		m_currentPlayerStatBlock = PlayerStatBlock{};
 		m_speciesParameters = { -1, -1, false };
 		m_originParameters = { -1, -1, false };
-		for (auto& subclass : m_chosenSubclasses) {
-			subclass.second = false;
-		}
-		for (auto& playerClass : m_hasCorrespondingSubclass) {
-			playerClass.second = false;
-		}
+		m_chosenSubclasses.fill(false);
 	}
 }

@@ -1,7 +1,9 @@
 #pragma once
 
+#include <array>
 #include <map>
-#include <string>
+#include <string_view>
+#include <utility>
 
 namespace CombatTrackerApp {
 
@@ -79,8 +81,7 @@ namespace CombatTrackerApp {
 		{29.0, 9},
 		{30.0, 9}
 	};
-
-	inline const std::map<double, std::string> CR_NAMES {
+	inline constexpr std::array<std::pair<double, std::string_view>, 34> CR_NAMES { {
 		{0.0,  "0.0"},
 		{0.125, "0.125"},
 		{0.25, "0.25"},
@@ -115,5 +116,5 @@ namespace CombatTrackerApp {
 		{28.0, "28.0"},
 		{29.0, "29.0"},
 		{30.0, "30.0"}
-	};
+	} };
 }
