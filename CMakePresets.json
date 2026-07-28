@@ -104,6 +104,51 @@
       }
     }
   ],
+  "testPresets": [
+    {
+      "name": "test-base",
+      "hidden": true,
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-debug",
+      "displayName": "Windows x64 Debug",
+      "inherits": "test-base",
+      "configurePreset": "windows-debug"
+    },
+    {
+      "name": "windows-release",
+      "displayName": "Windows x64 Release",
+      "inherits": "test-base",
+      "configurePreset": "windows-release"
+    },
+    {
+      "name": "linux-debug",
+      "displayName": "Linux Debug",
+      "inherits": "test-base",
+      "configurePreset": "linux-debug"
+    },
+    {
+      "name": "linux-release",
+      "displayName": "Linux Release",
+      "inherits": "test-base",
+      "configurePreset": "linux-release"
+    },
+    {
+      "name": "macos-debug",
+      "displayName": "macOS Debug",
+      "inherits": "test-base",
+      "configurePreset": "macos-debug"
+    },
+    {
+      "name": "macos-release",
+      "displayName": "macOS Release",
+      "inherits": "test-base",
+      "configurePreset": "macos-release"
+    }
+  ],
   "buildPresets": [
     {
       "name": "windows-debug",

@@ -8,6 +8,8 @@ set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies.cmake)
 
+enable_testing()
+
 add_subdirectory(src/CombatTrackerLib)
 add_subdirectory(src/CombatTrackerApp)
 add_subdirectory(tests/CombatTrackerLib)
