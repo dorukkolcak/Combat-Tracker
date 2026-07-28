@@ -53,7 +53,7 @@ namespace CombatTrackerLib {
 	}
 	Shader& Shader::operator=(Shader&& shader) noexcept {
 		if (this == &shader) {
-			return;
+			return *this;
 		}
 		glDeleteShader(m_shaderID); // This might actually be dangerous to do, considering the fact a shader program already calls this for each shader it owns.
 		this->m_shaderID = shader.m_shaderID;
