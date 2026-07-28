@@ -65,7 +65,14 @@ namespace CombatTrackerApp {
 	class Creature {
 	public:
 		static constexpr int findAbilityScoreModifier(int abilityScore) {
-			return (abilityScore - 10) / 2;
+
+			// The modifier is the difference from ten, halved and rounded down.
+			// Integer division truncates towards zero instead, so a negative odd difference has to be decremented by one first.
+			const auto difference{ abilityScore - 10 };
+			if (difference < 0 && difference % 2 != 0) {
+				return (difference - 1) / 2;
+			}
+			return difference / 2;
 		}
 	protected:
 
