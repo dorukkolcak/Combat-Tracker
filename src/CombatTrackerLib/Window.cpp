@@ -17,7 +17,13 @@ namespace CombatTrackerLib {
 			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		}
 		float mainScale{ ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()) };
-		m_window = glfwCreateWindow( static_cast<int> (mainScale * specification.width), static_cast<int> (mainScale * specification.height), specification.title.data(), NULL, NULL);
+		m_window = glfwCreateWindow(
+			static_cast<int> (mainScale * specification.width),
+			static_cast<int> (mainScale * specification.height),
+			specification.title.data(),
+			nullptr,
+			nullptr
+		);
 		assert(m_window != nullptr);
 		glfwSetWindowUserPointer(m_window, this);
 		glfwMakeContextCurrent(m_window);
@@ -25,16 +31,11 @@ namespace CombatTrackerLib {
 			glfwSwapInterval(1);
 		}
 	}
-	void Window::update() {
-		glfwSwapBuffers(m_window);
-	}
-	void Window::destroy() {
+	Window::~Window() {
 		glfwDestroyWindow(m_window);
 	}
-	int Window::getWindowShouldClose() {
-		return glfwWindowShouldClose(m_window);
-	}
-	GLFWwindow* Window::getGLFWwindow() {
-		return m_window;
+	void Window::update() {
+		glfwSwapBuffers(m_window);
+		glfwPollEvents();
 	}
 }

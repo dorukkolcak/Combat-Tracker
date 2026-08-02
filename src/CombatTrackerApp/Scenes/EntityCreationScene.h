@@ -63,7 +63,7 @@ namespace CombatTrackerApp {
 		// Monster provides an empty override in this case.
 		virtual void renderEntitySpecificSection() = 0;
 
-		virtual bool completeEntityCreation() = 0;
+		virtual bool completeEntityCreation() = 0; 
 
 		/*
 		The block is edited in place by this base scene and by the derived ones alike.

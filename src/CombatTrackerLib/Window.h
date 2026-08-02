@@ -3,7 +3,7 @@
 #include <string_view>
 
 // Pay attention to the ordering here.
-#include "glad/glad.h"
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 namespace CombatTrackerLib {
@@ -21,19 +21,19 @@ namespace CombatTrackerLib {
 
 	class Window {
 	public:
+		Window() = default;
 		explicit Window(const WindowSpecification& specification);
 
 		// A Window object exists as a singleton so it should be non-copiable and non-movable.
 		Window(const Window& other) = delete;
 		Window& operator=(const Window& other) = delete;
+
 		Window(Window&& other) = delete;
 		Window& operator=(Window&& other) = delete;
-		~Window() = default;
+
+		~Window();
 
 		void update();
-		void destroy();
-		int getWindowShouldClose();
-		GLFWwindow* getGLFWwindow();
 	private:
 		WindowSpecification m_windowSpecification{};
 		GLFWwindow* m_window{};

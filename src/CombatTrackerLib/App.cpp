@@ -21,7 +21,7 @@ namespace CombatTrackerLib {
 		ImGui::CreateContext();
 
 		// Setup Platform/Renderer backends
-		ImGui_ImplGlfw_InitForOpenGL(m_mainWindow->getGLFWwindow(), true);
+		ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
 		const char* glsl_version = "#version 150";
 		ImGui_ImplOpenGL3_Init(glsl_version);
 		m_theme.setUITheme(specification.initialPreset);
@@ -37,7 +37,7 @@ namespace CombatTrackerLib {
 		double lastFrameTime{ glfwGetTime() };
 
 		// Main application loop
-		while (!m_mainWindow->getWindowShouldClose() && !m_applicationCloseSignalled) {
+		while (!glfwWindowShouldClose(glfwGetCurrentContext()) && !m_applicationCloseSignalled) {
 
 			// Get the delta time between frames, in seconds.
 			double currentTime{ glfwGetTime() };
@@ -48,7 +48,6 @@ namespace CombatTrackerLib {
 			std::ranges::reverse_view reverseView{ m_sceneStack };
 
 			// Scene event handling occurs here.
-			glfwPollEvents();
 			for (const auto& scene : reverseView) {
 				scene->notifyScene(imguiIO);
 			}
@@ -87,13 +86,11 @@ namespace CombatTrackerLib {
 			dequeueSceneOperations();
 
 		}
-		App::stop();
 	}
-	void App::stop() {
+	App::~App() {
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
-		m_mainWindow->destroy();
 		glfwTerminate();
 	}
 	void App::queueAddScene(std::unique_ptr<Scene> scene) {

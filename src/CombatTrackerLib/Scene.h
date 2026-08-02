@@ -9,7 +9,9 @@ namespace CombatTrackerLib {
 	class App;
 	class Scene {
 	public:
+		Scene() = default;
 		explicit Scene(App* app);
+
 		virtual ~Scene() = default;
 
 		/*

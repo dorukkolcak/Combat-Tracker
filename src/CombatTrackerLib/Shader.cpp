@@ -1,25 +1,27 @@
 #include "Shader.h"
-#include "./Utilities/IOUtils.h"
-
-#include "glad/glad.h"
 
 #include <algorithm>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 namespace CombatTrackerLib {
-	Shader::Shader(const std::filesystem::path& shaderPath, Type type) : m_shaderType{type} 
-	{
+	Shader::Shader(const std::filesystem::path& shaderPath, Shader::Type type) : m_isLinkedToProgram{ false } {
 
-		std::string shaderCodeTemp{ readFileToString(shaderPath) };
-		if (shaderCodeTemp.empty()) {
+		// Read the shader file.
+		auto shaderCode{ readShaderCode(shaderPath) };
+		if (shaderCode.empty()) {
 			std::cerr << "Failed to read shader file: " << shaderPath << '\n';
 			return;
 		}
 
-		const char* shaderCode{ shaderCodeTemp.c_str() };
+		// Create and compile the shader. 
 		switch (type) {
 		case Type::VERTEX:
 			m_shaderID = glCreateShader(GL_VERTEX_SHADER);
+			break;
+		case Type::GEOMETRY:
+			m_shaderID = glCreateShader(GL_GEOMETRY_SHADER);
 			break;
 		case Type::FRAGMENT:
 			m_shaderID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -28,41 +30,73 @@ namespace CombatTrackerLib {
 			std::cerr << "No corresponding shader type: \n";
 			return;
 		}
-
-		glShaderSource(m_shaderID, 1, &shaderCode, NULL);
+		auto shaderCodePointer{ shaderCode.c_str() };
+		glShaderSource(m_shaderID, 1, &shaderCodePointer, nullptr);
 		glCompileShader(m_shaderID);
 
-		// Error handling.
-		int isCompiled{};
+		// Error handling: Check whether the shader is actually compiled.
+		GLint isCompiled{};
 		glGetShaderiv(m_shaderID, GL_COMPILE_STATUS, &isCompiled);
 		if (isCompiled == GL_FALSE) {
-			int logLength = 0;
+			GLint logLength{};
 			glGetShaderiv(m_shaderID, GL_INFO_LOG_LENGTH, &logLength);
+
+			// Create a string with logLength characters. Basically an empty char buffer.
 			std::string infoLog(static_cast<size_t>(std::max(logLength, 1)), '\0');
 			glGetShaderInfoLog(m_shaderID, logLength, nullptr, infoLog.data());
 			std::cerr << "Shader compilation failed: " << infoLog << std::endl;
 			glDeleteShader(m_shaderID);
-			return;
 		}
 	}
 	Shader::Shader(Shader&& shader) noexcept {
 		this->m_shaderID = shader.m_shaderID;
-		this->m_shaderType = shader.m_shaderType;
+		this->m_isLinkedToProgram = shader.m_isLinkedToProgram;
+
+		// Set the moved from object to a default state.
 		shader.m_shaderID = 0;
-		shader.m_shaderType = Type::INVALID;
+		shader.m_isLinkedToProgram = false;
 	}
 	Shader& Shader::operator=(Shader&& shader) noexcept {
+
+		// Prevent self move.
 		if (this == &shader) {
 			return *this;
 		}
-		glDeleteShader(m_shaderID); // This might actually be dangerous to do, considering the fact a shader program already calls this for each shader it owns.
+
+		// Free resources from the object that is being moved to.
+		if (!m_isLinkedToProgram) {
+			glDeleteShader(m_shaderID);
+		}
 		this->m_shaderID = shader.m_shaderID;
-		this->m_shaderType = shader.m_shaderType;
+		this->m_isLinkedToProgram = shader.m_isLinkedToProgram;
 		shader.m_shaderID = 0;
-		shader.m_shaderType = Type::INVALID;
+		shader.m_isLinkedToProgram = false;
 		return *this;
+	}
+	Shader::~Shader() {
+
+		// A linked shader shoudn't call glDeleteShader from its destructor, 
+		// as its shader program will have already called this.
+		if (!m_isLinkedToProgram) {
+			glDeleteShader(m_shaderID);
+		}
 	}
 	unsigned int Shader::getShaderID() const {
 		return m_shaderID;
+	}
+	void Shader::setAsLinked() {
+		m_isLinkedToProgram = true;
+	}
+	std::string Shader::readShaderCode(const std::filesystem::path& filePath) {
+
+		std::ifstream file(filePath);
+		if (!file.is_open()) {
+			std::cerr << " Can't open file: " << filePath.string() << "\n";
+			return "";
+		}
+
+		std::ostringstream fileStream;
+		fileStream << file.rdbuf();
+		return fileStream.str();
 	}
 }

@@ -2,6 +2,7 @@
 #include "../Entities/Creature/CreatureConstants.h"
 #include "../Entities/Monster/MonsterConstants.h"
 #include "../CombatTrackerLib/Utilities/UIUtils.h"
+#include "../Utilities/JSONUtils.h"
 
 #include <climits>
 
@@ -71,10 +72,13 @@ namespace CombatTrackerApp {
 	// Monsters have nothing to add below the senses, unlike player characters.
 	void MonsterCreationScene::renderEntitySpecificSection() {}
 
-	// TODO: The built monster is thrown away for now. Once JSON saving exists this is where it should get written.
 	bool MonsterCreationScene::completeEntityCreation() {
-		Monster monster{ std::move(m_currentCreatureStatBlock), m_currentMonsterCR, m_currentMonsterXP};
-		return true;
+		bool isSavingSuccessful{ saveEntity<Monster>(m_currentCreatureStatBlock, m_currentMonsterCR, m_currentMonsterXP, std::nullopt) };
+		if (isSavingSuccessful) {
+			resetParametersAndOverrides();
+			return true;
+		}
+		return false;
 	}
 	void MonsterCreationScene::resetParametersAndOverrides() {
 		EntityCreationScene::resetParametersAndOverrides();

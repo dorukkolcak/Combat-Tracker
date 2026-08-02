@@ -64,12 +64,12 @@ namespace CombatTrackerLib {
 		// Scale down the image size in case the available container is smaller than the texture itself.
 		// This scaling should be done uniformly.
 		const auto availableSize{ ImGui::GetContentRegionAvail() };
-		const auto scaleX{ availableSize.x / texture.getTextureWidth() };
-		const auto scaleY{ availableSize.y / texture.getTextureHeight() };
+		const auto scaleX{ availableSize.x / texture.getWidth() };
+		const auto scaleY{ availableSize.y / texture.getHeight() };
 
 		// The scale is defaulted to 1.0 in case the region size is larger than the image size.
 		const auto finalScale{ std::min(std::min(scaleX, scaleY), 1.0f) };
-		const auto displaySize{ ImVec2(texture.getTextureWidth() * finalScale, texture.getTextureHeight() * finalScale) };
+		const auto displaySize{ ImVec2(texture.getWidth() * finalScale, texture.getHeight() * finalScale) };
 
 		// Center the cursor position so that the image renders at the center of the content region.
 		auto cursorPos{ ImGui::GetCursorPos() };
@@ -78,7 +78,7 @@ namespace CombatTrackerLib {
 		ImGui::SetCursorPos(cursorPos);
 
 		// The tint is multiplied with the texel in the ImGui shader, so a white texture comes out as exactly the tint colour. 
-		ImGui::ImageWithBg(static_cast<ImTextureID>(texture.getTextureID()), displaySize,
+		ImGui::ImageWithBg(static_cast<ImTextureID>(texture.getID()), displaySize,
 			ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tint);
 	}
 

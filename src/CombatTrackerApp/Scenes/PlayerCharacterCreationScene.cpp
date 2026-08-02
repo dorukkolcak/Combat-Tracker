@@ -1,6 +1,7 @@
 #include "PlayerCharacterCreationScene.h"
 #include "../CombatTrackerLib/Utilities/UIUtils.h"
 #include "../Utilities/GenericUtils.h"
+#include "../Utilities/JSONUtils.h"
 
 namespace CombatTrackerApp {
 	PlayerCharacterCreationScene::PlayerCharacterCreationScene(CombatTrackerLib::App* app) :
@@ -148,10 +149,13 @@ namespace CombatTrackerApp {
 		}
 	}
 
-	// TODO: JSON saving functionality.
 	bool PlayerCharacterCreationScene::completeEntityCreation() {
-		PlayerCharacter playerCharacter{std::move(m_currentCreatureStatBlock), std::move(m_currentPlayerStatBlock)};
-		return true;
+		bool isSavingSuccessful{ saveEntity<PlayerCharacter>(m_currentCreatureStatBlock, std::nullopt, std::nullopt, m_currentPlayerStatBlock)};
+		if (isSavingSuccessful) {
+			resetParametersAndOverrides();
+			return true;
+		}
+		return false;
 	}
 
 	// TODO: Properly setup initial values of the entity that is being edited, once editing exists.

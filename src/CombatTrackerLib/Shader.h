@@ -1,30 +1,37 @@
 #pragma once
 
+#include <string>
 #include <filesystem>
+#include <glad/glad.h>
 
 namespace CombatTrackerLib {
 	class Shader {
 	public:
-
-		// Should be public to allow for proper object instantiation.
 		enum class Type {
 			INVALID,
 			VERTEX,
-			FRAGMENT,
+			GEOMETRY,
+			FRAGMENT
 		};
 
+		Shader() = default;
 		Shader(const std::filesystem::path& shaderPath, Type type);
 
+		// Shouldn't be copiable as a copy might result in double delete, double call to glDeleteShader(shaderID).
 		Shader(const Shader& shader) = delete;
 		Shader& operator=(const Shader& shader) = delete;
 
+		// Can be movable, the moved from object should have an id of zero.
 		Shader(Shader&& shader) noexcept;
 		Shader& operator=(Shader&& shader) noexcept;
 
-		unsigned int getShaderID() const;
+		~Shader();
 
+		unsigned int getShaderID() const;
+		void setAsLinked();
 	private:
 		unsigned int m_shaderID{};
-		Type m_shaderType{};
+		bool m_isLinkedToProgram{};
+		static std::string readShaderCode(const std::filesystem::path& shaderPath);
 	};
 }

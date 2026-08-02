@@ -5,11 +5,12 @@
 #include "imgui.h"
 
 #include <algorithm>
+#include <glad/glad.h>
 
 namespace CombatTrackerApp {
 
     MainMenuScene::MainMenuScene(CombatTrackerLib::App* app) :
-        m_titleTexture{ "assets/Title.png" },
+        m_titleTexture{ "assets/Title.png", 4, false, GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR},
         CombatTrackerLib::Scene{ app },
         m_isMainMenuDockspaceInitialized{ false },
         m_UIThemeParameters{ -1, -1, false },

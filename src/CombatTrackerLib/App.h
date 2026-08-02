@@ -20,17 +20,19 @@ namespace CombatTrackerLib {
 			CombatTrackerLib::WindowSpecification mainWindowSpecification{};
 			std::string_view applicationName{};
 		};
+		App() = default;
 		explicit App(const Specification& specification);
 		
 		// An App object exists as a singleton so it should be non-copiable and non-movable.
 		App(const App& other) = delete;
 		App& operator=(const App& other)  = delete;
+
 		App(App&& other) = delete;
 		App& operator=(App& other) = delete;
-		~App() = default;
+
+		~App();
 
 		void run();
-		void stop();
 
 		void queueAddScene(std::unique_ptr<Scene> scene);
 		void queueDeleteScene(Scene* sceneToBeDeleted);

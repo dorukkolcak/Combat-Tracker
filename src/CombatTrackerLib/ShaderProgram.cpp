@@ -1,34 +1,20 @@
 #include "ShaderProgram.h"
 
-#include "glad/glad.h"
-
-#include <glm/gtc/type_ptr.hpp>
-
-#include <algorithm>
-#include <iostream>
-
 namespace CombatTrackerLib {
+	ShaderProgram::ShaderProgram(std::vector<Shader>& shaders) {
 
-	// Constructed with std::move as the ShaderProgram should have "ownership" over the set of IDs given in the vector.
-	ShaderProgram::ShaderProgram(std::vector<unsigned int> shaderIDs) :
-		m_shaders{ std::move(shaderIDs) }
-	{
+		// Create the shader program, attach and link shaders.
 		m_programID = glCreateProgram();
-		for (const auto& shaderID : m_shaders) {
-			if (shaderID == 0) {
-				std::cerr << "Cannot link program: invalid shader ID.\n";
-				glDeleteProgram(m_programID);
-				return;
-			}
-			glAttachShader(m_programID, shaderID);
+		for (const auto& shader : shaders) {
+			glAttachShader(m_programID, shader.getShaderID());
 		}
 		glLinkProgram(m_programID);
 
-		// Error handling.
-		int isLinked{};
+		// Check for linker errors.
+		GLint isLinked{};
 		glGetProgramiv(m_programID, GL_LINK_STATUS, &isLinked);
 		if (isLinked == GL_FALSE) {
-			int logLength{};
+			GLint logLength{};
 			glGetProgramiv(m_programID, GL_INFO_LOG_LENGTH, &logLength);
 			std::string infoLog(static_cast<size_t>(std::max(logLength, 1)), '\0');
 			glGetProgramInfoLog(m_programID, logLength, nullptr, infoLog.data());
@@ -37,44 +23,37 @@ namespace CombatTrackerLib {
 			return;
 		}
 
-		// Delete the shaders after the program is constructed as we don't need them anymore.
-		for (const auto& shaderID : m_shaders) {
-			glDeleteShader(shaderID);
+		// Delete the shaders after the program is properly constructed as we don't need them anymore.
+		// Also set the linked member variable to true so that the shaders can be properly destructed/moved.
+		for (auto& shader : shaders) {
+			glDeleteShader(shader.getShaderID());
+			shader.setAsLinked();
 		}
 	}
 	ShaderProgram::ShaderProgram(ShaderProgram&& program) noexcept {
 		this->m_programID = program.m_programID;
-		this->m_shaders = std::move(program.m_shaders);
 		program.m_programID = 0;
-		program.m_shaders.clear();
 	}
 	ShaderProgram& ShaderProgram::operator=(ShaderProgram&& program) noexcept {
-		if (&program == this) {
+
+		// Prevent self move.
+		if (this == &program) {
 			return *this;
 		}
-		this->deleteProgram();
+
+		// Free resources from the object that is being moved to.
+		glDeleteProgram(m_programID);
 		this->m_programID = program.m_programID;
-		this->m_shaders = std::move(program.m_shaders);
 		program.m_programID = 0;
-		program.m_shaders.clear();
 		return *this;
 	}
-	void ShaderProgram::activate() {
-		glUseProgram(m_programID);
-	}
-	void ShaderProgram::deleteProgram() {
+	ShaderProgram::~ShaderProgram() {
 		glDeleteProgram(m_programID);
 	}
-	void ShaderProgram::setMatrix4(const std::string& uniformName, glm::mat4 transformation) {
-		glUniformMatrix4fv(glGetUniformLocation(m_programID, uniformName.c_str()), 1, GL_FALSE, glm::value_ptr(transformation));
+	void ShaderProgram::use() const {
+		glUseProgram(m_programID);
 	}
-	void ShaderProgram::setVec4(const std::string& uniformName, glm::vec4 vector) {
-		glUniform4f(glGetUniformLocation(m_programID, uniformName.c_str()), vector.x, vector.y, vector.z, vector.w);
-	}
-	void ShaderProgram::setFloat(const std::string& uniformName, float val) {
-		glUniform1f(glGetUniformLocation(m_programID, uniformName.c_str()), val);
-	}
-	unsigned int ShaderProgram::getProgramID() const {
-		return m_programID;
+	void ShaderProgram::unbind() const {
+		glUseProgram(0);
 	}
 }

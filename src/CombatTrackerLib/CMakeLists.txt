@@ -9,7 +9,6 @@ add_library(Combat-Tracker-Lib STATIC
     Window.h
     Window.cpp
     Utilities/UIUtils.h
-    Utilities/IOUtils.h
     Shader.h 
     Shader.cpp 
     ShaderProgram.h 
