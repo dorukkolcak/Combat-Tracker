@@ -172,7 +172,7 @@ namespace CombatTrackerApp {
 			return CreatureStatBlock{};
 		}
 		CreatureStatBlock creatureBlock{};
-		creatureBlock = contents->at("creatureBlock").get<CreatureStatBlock>();
+		creatureBlock = contents->at("creatureBlock").get_to(creatureBlock);
 		if constexpr (std::same_as<T, Monster>) {
 			outCR->get() = contents->value("CR", 0.0);
 			outXP->get() = contents->value("XP", OverridableInt{});
