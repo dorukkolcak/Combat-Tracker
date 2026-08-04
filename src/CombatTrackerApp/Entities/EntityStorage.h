@@ -143,15 +143,17 @@ namespace CombatTrackerApp {
 		if (!contents.has_value()) {
 			return CreatureStatBlock{};
 		}
-		auto creatureBlock{ contents["creatureBlock"].get<CreatureStatBlock>() };
+		auto creatureBlock{ contents->at("creatureBlock").get<CreatureStatBlock>() };
 		if constexpr (std::same_as<T, Monster>) {
 
 			// Access specified JSON value with a default through the use of ->value().
-			outCR.value() = contents->value("CR", 0.0);
-			outXP.value() = contents->value("XP", OverridableInt{});
+			// The out parameters hold reference wrappers, so ->get() is needed to reach the referenced object.
+			// Assigning to the optional's own value() would try to rebind the wrapper instead, which does not compile.
+			outCR->get() = contents->value("CR", 0.0);
+			outXP->get() = contents->value("XP", OverridableInt{});
 		}
 		else {
-			outPlayerBlock.value() = contents->value("playerBlock", PlayerStatBlock{});
+			outPlayerBlock->get() = contents->value("playerBlock", PlayerStatBlock{});
 		}
 		return creatureBlock; // Should internally use NRVO so no need for explicit std::move().
 	}
