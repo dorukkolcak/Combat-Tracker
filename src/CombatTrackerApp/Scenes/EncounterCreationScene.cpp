@@ -2,7 +2,7 @@
 #include "MainMenuScene.h"
 #include "MonsterCreationScene.h"
 #include "PlayerCharacterCreationScene.h"
-#include "../Utilities/GenericUtils.h"
+#include "../CombatTrackerLib/Utilities/GenericUtils.h"
 
 #include "imgui_internal.h"
 
@@ -48,7 +48,7 @@ namespace CombatTrackerApp {
 
 			m_encounterCreatorDockspaceID =
 				ImGui::GetID(
-					std::format("{} - Dockspace", MAPPED_WINDOW_NAMES[enumToSizeT(ENCOUNTER_CREATOR)])
+					std::format("{} - Dockspace", MAPPED_WINDOW_NAMES[CombatTrackerLib::enumToSizeT(ENCOUNTER_CREATOR)])
 					.c_str()
 				);
 			ImGui::DockBuilderRemoveNode(m_encounterCreatorDockspaceID);
@@ -68,11 +68,11 @@ namespace CombatTrackerApp {
 
 			// Dock windows.
 			ImGui::DockBuilderDockWindow(
-				MAPPED_WINDOW_NAMES[enumToSizeT(ENTITY_BROWSER)].data(),
+				MAPPED_WINDOW_NAMES[CombatTrackerLib::enumToSizeT(ENTITY_BROWSER)].data(),
 				m_entityBrowserWindowID
 			);
 			ImGui::DockBuilderDockWindow(
-				MAPPED_WINDOW_NAMES[enumToSizeT(ENCOUNTER_MANAGER)].data(),
+				MAPPED_WINDOW_NAMES[CombatTrackerLib::enumToSizeT(ENCOUNTER_MANAGER)].data(),
 				m_encounterManagerWindowID
 			);
 
@@ -86,7 +86,7 @@ namespace CombatTrackerApp {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f, 0.0f });
 		ImGui::Begin(
-			MAPPED_WINDOW_NAMES[enumToSizeT(ENCOUNTER_CREATOR)].data(),
+			MAPPED_WINDOW_NAMES[CombatTrackerLib::enumToSizeT(ENCOUNTER_CREATOR)].data(),
 			nullptr,
 			ENCOUNTER_CREATION_WINDOW_FLAGS
 		);
@@ -94,7 +94,7 @@ namespace CombatTrackerApp {
 
 		// The menu bar of the host window. This should grant access to functionality such as returning to the main menu.
 		if (ImGui::BeginMenuBar()) {
-			if (ImGui::BeginMenu(MAPPED_WINDOW_NAMES[enumToSizeT(MENU)].data())) {
+			if (ImGui::BeginMenu(MAPPED_WINDOW_NAMES[CombatTrackerLib::enumToSizeT(MENU)].data())) {
 				if (ImGui::MenuItem("Return to Main Menu")) {
 					m_applicationReference->queueSceneTransition(this, std::make_unique<MainMenuScene>(m_applicationReference));
 				}
@@ -117,11 +117,11 @@ namespace CombatTrackerApp {
 
 		// This window hosts each entity's seperate subbrowser window.
 		// These subbrowser windows are accessed via a tab bar.
-		ImGui::Begin(MAPPED_WINDOW_NAMES[enumToSizeT(ENTITY_BROWSER)].data(), nullptr, ImGuiWindowFlags_NoTitleBar);
+		ImGui::Begin(MAPPED_WINDOW_NAMES[CombatTrackerLib::enumToSizeT(ENTITY_BROWSER)].data(), nullptr, ImGuiWindowFlags_NoTitleBar);
 
 		// Tabs of the window host other windows for each entity (Monster and PlayerCharacter).
 		if (ImGui::BeginTabBar("##EntityBrowserTabs")) {
-			if (ImGui::BeginTabItem(MAPPED_WINDOW_NAMES[enumToSizeT(MONSTER_BROWSER)].data())) {
+			if (ImGui::BeginTabItem(MAPPED_WINDOW_NAMES[CombatTrackerLib::enumToSizeT(MONSTER_BROWSER)].data())) {
 				renderEntityBrowserWindow<2, MonsterCreationScene>(
 					"Monster",
 					MONSTER_BROWSER_COLUMN_LABELS,
@@ -131,7 +131,7 @@ namespace CombatTrackerApp {
 				);
 				ImGui::EndTabItem();
 			}
-			if (ImGui::BeginTabItem(MAPPED_WINDOW_NAMES[enumToSizeT(PLAYER_CHARACTER_BROWSER)].data())) {
+			if (ImGui::BeginTabItem(MAPPED_WINDOW_NAMES[CombatTrackerLib::enumToSizeT(PLAYER_CHARACTER_BROWSER)].data())) {
 				renderEntityBrowserWindow<3, PlayerCharacterCreationScene>(
 					"Player Character",
 					PLAYER_CHARACTER_BROWSER_COLUMN_LABELS,
@@ -175,7 +175,7 @@ namespace CombatTrackerApp {
 
 		using enum WindowType;
 
-		ImGui::Begin(MAPPED_WINDOW_NAMES[enumToSizeT(ENCOUNTER_MANAGER)].data());
+		ImGui::Begin(MAPPED_WINDOW_NAMES[CombatTrackerLib::enumToSizeT(ENCOUNTER_MANAGER)].data());
 		ImGui::End();
 	}
 }

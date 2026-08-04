@@ -1,7 +1,7 @@
 #include "PlayerCharacterCreationScene.h"
 #include "../CombatTrackerLib/Utilities/UIUtils.h"
-#include "../Utilities/GenericUtils.h"
-#include "../Utilities/JSONUtils.h"
+#include "../CombatTrackerLib/Utilities/GenericUtils.h"
+#include "../Entities/EntityStorage.h"
 
 namespace CombatTrackerApp {
 	PlayerCharacterCreationScene::PlayerCharacterCreationScene(CombatTrackerLib::App* app) :
@@ -60,7 +60,7 @@ namespace CombatTrackerApp {
 				ImGui::TextWrapped("%s %d", CLASS_NAMES[i].data(), m_currentPlayerStatBlock.levels[i]);
 			}
 			for (const auto& item : m_currentPlayerStatBlock.subclasses) {
-				ImGui::TextWrapped("%s", SUBCLASS_NAMES[enumToSizeT(item.second)].data() );
+				ImGui::TextWrapped("%s", SUBCLASS_NAMES[CombatTrackerLib::enumToSizeT(item.second)].data() );
 			}
 			if (CombatTrackerLib::alignedButton("Configure Classes and Subclasses", 0.5f)) {
 				ImGui::OpenPopup("Configuration");
@@ -94,7 +94,7 @@ namespace CombatTrackerApp {
 				for (size_t i{}; i < SUBCLASS_NAMES.size(); ++i) {
 					const auto subclass{ static_cast<PlayerSubclass>(i) };
 					const auto correspondingClass{ MAPPED_SUBCLASSES.at(subclass) };
-					const auto classIndex{ enumToSizeT(correspondingClass) };
+					const auto classIndex{ CombatTrackerLib::enumToSizeT(correspondingClass) };
 
 					if (s_currentClass != correspondingClass) {
 						ImGui::SeparatorText(CLASS_NAMES[classIndex].data());
@@ -111,7 +111,7 @@ namespace CombatTrackerApp {
 						else {
 							m_currentPlayerStatBlock.subclasses[correspondingClass] = subclass;
 							for (const auto& correspondingSubclass : MAPPED_CLASSES.at(correspondingClass)) {
-								const auto subclassIndex{ enumToSizeT(correspondingSubclass) };
+								const auto subclassIndex{ CombatTrackerLib::enumToSizeT(correspondingSubclass) };
 								if ((m_chosenSubclasses[subclassIndex] && correspondingSubclass != subclass)
 									|| m_currentPlayerStatBlock.levels[classIndex] < SUBCLASS_LEVEL_THRESHOLD )
 								{

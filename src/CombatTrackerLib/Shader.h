@@ -32,6 +32,5 @@ namespace CombatTrackerLib {
 	private:
 		unsigned int m_shaderID{};
 		bool m_isLinkedToProgram{};
-		static std::string readShaderCode(const std::filesystem::path& shaderPath);
 	};
 }

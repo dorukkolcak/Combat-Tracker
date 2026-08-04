@@ -16,6 +16,8 @@ add_executable(Combat-Tracker-App
     Entities/PlayerCharacter/PlayerCharacterConstants.h
     Entities/PlayerCharacter/PlayerCharacterEnums.h
 
+    Entities/EntityStorage.h
+
     Scenes/EncounterCreationScene.h
     Scenes/EncounterCreationScene.cpp
     Scenes/EntityCreationScene.h
@@ -28,15 +30,12 @@ add_executable(Combat-Tracker-App
     Scenes/MainMenuScene.cpp
     Scenes/OverlayScene.h
     Scenes/OverlayScene.cpp
-    
-    Utilities/JSONUtils.h 
-    Utilities/GenericUtils.h)
+)
 
 # Link the static library we created earlier to the application.
 target_link_libraries(
     Combat-Tracker-App PRIVATE
     Combat-Tracker-Lib
-    nlohmann_json::nlohmann_json
 )
 
 # This is needed so that the assets can be accessed from the build directory.

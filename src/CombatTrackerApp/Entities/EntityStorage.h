@@ -2,8 +2,6 @@
 
 #include <concepts>
 #include <filesystem>
-#include <fstream>
-#include <string>
 #include <string_view>
 #include <type_traits>
 #include <optional>
@@ -16,7 +14,9 @@
 #include "../Entities/Creature/CreatureTypes.h"
 #include "../Entities/Monster/Monster.h"
 #include "../Entities/PlayerCharacter/PlayerCharacter.h"
+#include "../CombatTrackerLib/Utilities/GenericUtils.h"
 
+// The utilities here are application specific and use the library-provided JSON reading/writing functionality.
 namespace CombatTrackerApp {
 	
 	// Use Nlohmann's macros to serialize structs/types/classes to json easily.
@@ -68,35 +68,9 @@ namespace CombatTrackerApp {
 		species, 
 		origin
 	)
-
 	inline constexpr std::string_view MONSTER_DIRECTORY{ "data/Monsters" };
 	inline constexpr std::string_view PLAYER_DIRECTORY{ "data/PlayerCharacters" };
 
-	inline std::optional<nlohmann::json> readJSONFile(const std::filesystem::path& path) {
-		std::ifstream file{ path };
-		if (!file.is_open()) {
-			return std::nullopt;
-		}
-
-		// Passing false as the last argument hands back a discarded value on malformed input instead of throwing an error.
-		auto contents{ nlohmann::json::parse(file, nullptr, false) };
-		if (contents.is_discarded()) {
-			file.close();
-			return std::nullopt;
-		}
-		file.close();
-		return contents;
-	}
-	inline bool writeJSONFile(const std::filesystem::path& path, const nlohmann::json& contents) {
-
-		std::ofstream file{ path };
-		if (!file.is_open()) {
-			return false;
-		}
-		file << contents;
-		file.close();
-		return true;
-	}
 	inline bool isValidEntityName(std::string_view entityName) {
 		if (entityName.empty() || entityName == "." || entityName == "..") {
 			return false;
@@ -130,18 +104,16 @@ namespace CombatTrackerApp {
 		nlohmann::json contents{};
 		contents["creatureBlock"] = creatureBlock;
 		if constexpr (std::same_as<T, Monster>) {
-
-			// The optionals are unwrapped here, otherwise a disengaged one writes a null that then fails to convert on the way back in.
 			contents["CR"] = CR.value_or(0.0);
 			contents["XP"] = XP.value_or(OverridableInt{});
 		}
 		else {
-			if (playerBlock == std::nullopt) {
+			if (!playerBlock.has_value()) {
 				return false;
 			}
-			contents["playerBlock"] = playerBlock->get();
+			contents["playerBlock"] = playerBlock.value();
 		}
-		return writeJSONFile(findCreatureFilePath<T>(creatureBlock.name), contents);
+		return CombatTrackerLib::writeJSONFile(findCreatureFilePath<T>(creatureBlock.name), contents);
 	}
 	template <typename T> requires std::derived_from<T, Creature>
 	inline bool deleteEntity(std::string_view entityName) {
@@ -167,18 +139,19 @@ namespace CombatTrackerApp {
 		}
 
 		// Retrieve the creature's contents.
-		const auto contents{ readJSONFile(findCreatureFilePath<T>(entityName)) };
-		if (contents == std::nullopt) {
+		const std::optional<nlohmann::json> contents{ CombatTrackerLib::readJSONFile(findCreatureFilePath<T>(entityName)) };
+		if (!contents.has_value()) {
 			return CreatureStatBlock{};
 		}
-		CreatureStatBlock creatureBlock{};
-		creatureBlock = contents->at("creatureBlock").get_to(creatureBlock);
+		auto creatureBlock{ contents["creatureBlock"].get<CreatureStatBlock>() };
 		if constexpr (std::same_as<T, Monster>) {
-			outCR->get() = contents->value("CR", 0.0);
-			outXP->get() = contents->value("XP", OverridableInt{});
+
+			// Access specified JSON value with a default through the use of ->value().
+			outCR.value() = contents->value("CR", 0.0);
+			outXP.value() = contents->value("XP", OverridableInt{});
 		}
 		else {
-			outPlayerBlock->get() = contents->value("playerBlock", PlayerStatBlock{});
+			outPlayerBlock.value() = contents->value("playerBlock", PlayerStatBlock{});
 		}
 		return creatureBlock; // Should internally use NRVO so no need for explicit std::move().
 	}

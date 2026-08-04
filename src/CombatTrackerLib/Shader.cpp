@@ -1,15 +1,13 @@
 #include "Shader.h"
+#include "./Utilities/GenericUtils.h"
 
 #include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <sstream>
 
 namespace CombatTrackerLib {
 	Shader::Shader(const std::filesystem::path& shaderPath, Shader::Type type) : m_isLinkedToProgram{ false } {
 
 		// Read the shader file.
-		auto shaderCode{ readShaderCode(shaderPath) };
+		auto shaderCode{ readFileToString(shaderPath) };
 		if (shaderCode.empty()) {
 			std::cerr << "Failed to read shader file: " << shaderPath << '\n';
 			return;
@@ -86,17 +84,5 @@ namespace CombatTrackerLib {
 	}
 	void Shader::setAsLinked() {
 		m_isLinkedToProgram = true;
-	}
-	std::string Shader::readShaderCode(const std::filesystem::path& filePath) {
-
-		std::ifstream file(filePath);
-		if (!file.is_open()) {
-			std::cerr << " Can't open file: " << filePath.string() << "\n";
-			return "";
-		}
-
-		std::ostringstream fileStream;
-		fileStream << file.rdbuf();
-		return fileStream.str();
 	}
 }

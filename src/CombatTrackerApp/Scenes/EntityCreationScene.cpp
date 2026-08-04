@@ -2,7 +2,7 @@
 #include "EncounterCreationScene.h"
 #include "../Entities/Creature/CreatureConstants.h"
 #include "../CombatTrackerLib/Utilities/UIUtils.h"
-#include "../Utilities/GenericUtils.h"
+#include "../CombatTrackerLib/Utilities/GenericUtils.h"
 
 namespace CombatTrackerApp {
 	EntityCreationScene::EntityCreationScene(CombatTrackerLib::App* app) :
@@ -314,17 +314,17 @@ namespace CombatTrackerApp {
 				if (!m_currentCreatureStatBlock.skillModifiers[i].isOverridden) {
 					if (m_currentCreatureStatBlock.skillExpertise[i]) {
 						m_currentCreatureStatBlock.skillModifiers[i].value =
-							m_currentCreatureStatBlock.abilityScoreModifiers[enumToSizeT(correspondingAbility)].value +
+							m_currentCreatureStatBlock.abilityScoreModifiers[CombatTrackerLib::enumToSizeT(correspondingAbility)].value +
 							2 * m_currentCreatureStatBlock.proficiencyBonus.value;
 					}
 					else if (m_currentCreatureStatBlock.skillProficiencies[i]) {
 						m_currentCreatureStatBlock.skillModifiers[i].value =
-							m_currentCreatureStatBlock.abilityScoreModifiers[enumToSizeT(correspondingAbility)].value
+							m_currentCreatureStatBlock.abilityScoreModifiers[CombatTrackerLib::enumToSizeT(correspondingAbility)].value
 							+ m_currentCreatureStatBlock.proficiencyBonus.value;
 					}
 					else {
 						m_currentCreatureStatBlock.skillModifiers[i].value =
-							m_currentCreatureStatBlock.abilityScoreModifiers[enumToSizeT(correspondingAbility)].value;
+							m_currentCreatureStatBlock.abilityScoreModifiers[CombatTrackerLib::enumToSizeT(correspondingAbility)].value;
 					}
 				}
 
@@ -424,7 +424,7 @@ namespace CombatTrackerApp {
 			ImGui::TableSetColumnIndex(1);
 
 			if (!m_currentCreatureStatBlock.initiativeBonus.isOverridden) {
-				m_currentCreatureStatBlock.initiativeBonus.value = m_currentCreatureStatBlock.abilityScoreModifiers[enumToSizeT(Ability::DEXTERITY)].value;
+				m_currentCreatureStatBlock.initiativeBonus.value = m_currentCreatureStatBlock.abilityScoreModifiers[CombatTrackerLib::enumToSizeT(Ability::DEXTERITY)].value;
 			}
 
 			// Hide the label of the input field. Instead use text field for the label for better layout.
@@ -442,7 +442,7 @@ namespace CombatTrackerApp {
 
 			ImGui::Spacing();
 			if (!m_currentCreatureStatBlock.passivePerception.isOverridden) {
-				m_currentCreatureStatBlock.passivePerception.value = m_currentCreatureStatBlock.skillModifiers[enumToSizeT(Skill::PERCEPTION)].value + 10;
+				m_currentCreatureStatBlock.passivePerception.value = m_currentCreatureStatBlock.skillModifiers[CombatTrackerLib::enumToSizeT(Skill::PERCEPTION)].value + 10;
 			}
 
 			// Same thing here.
@@ -630,7 +630,7 @@ namespace CombatTrackerApp {
 			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				ImGui::SetTooltip(
 					"%s: %s", 
-					ACTION_NAMES[enumToSizeT(m_currentCreatureStatBlock.actions[i].type)].data(), 
+					ACTION_NAMES[CombatTrackerLib::enumToSizeT(m_currentCreatureStatBlock.actions[i].type)].data(),
 					m_currentCreatureStatBlock.actions[i].description.c_str()
 				);
 			}

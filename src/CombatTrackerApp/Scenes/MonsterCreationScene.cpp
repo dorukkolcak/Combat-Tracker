@@ -2,7 +2,7 @@
 #include "../Entities/Creature/CreatureConstants.h"
 #include "../Entities/Monster/MonsterConstants.h"
 #include "../CombatTrackerLib/Utilities/UIUtils.h"
-#include "../Utilities/JSONUtils.h"
+#include "../Entities/EntityStorage.h"
 
 #include <climits>
 

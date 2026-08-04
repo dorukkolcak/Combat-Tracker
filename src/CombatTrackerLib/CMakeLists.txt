@@ -8,7 +8,6 @@ add_library(Combat-Tracker-Lib STATIC
     Themes.h
     Window.h
     Window.cpp
-    Utilities/UIUtils.h
     Shader.h 
     Shader.cpp 
     ShaderProgram.h 
@@ -16,6 +15,8 @@ add_library(Combat-Tracker-Lib STATIC
     Themes.cpp
     Texture2D.h
     Texture2D.cpp
+    Utilities/UIUtils.h
+    Utilities/GenericUtils.h
 )
 target_include_directories(Combat-Tracker-Lib PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -29,4 +30,5 @@ target_link_libraries(Combat-Tracker-Lib PUBLIC
     imgui
     glm::glm
     stb_image
+    nlohmann_json::nlohmann_json
 )
