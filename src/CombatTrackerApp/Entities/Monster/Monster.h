@@ -9,6 +9,7 @@ namespace CombatTrackerApp {
 		// Stat block is moved so pass it by value.
 		Monster(CreatureStatBlock statBlock, double creatureCR, OverridableInt creatureXP);
 
+		double getCR() const;
 		int getXP() const;
 	private:
 		double m_CR{};

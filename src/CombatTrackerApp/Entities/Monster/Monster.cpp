@@ -7,6 +7,9 @@ namespace CombatTrackerApp {
 		m_XP{ creatureXP }
 	{
 	}
+	double Monster::getCR() const {
+		return m_CR;
+	}
 	int Monster::getXP() const {
 		return m_XP.value;
 	}
