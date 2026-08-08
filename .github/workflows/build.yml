@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # GLFW builds both its X11 and Wayland backends on Linux, so both sets of
       # headers have to be present or the configure step fails.
@@ -71,7 +71,7 @@ jobs:
         with:
           arch: x64
       - name: Cache fetched dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/.deps
           key: deps-${{ runner.os }}-${{ hashFiles('Dependencies.cmake') }}
@@ -91,7 +91,7 @@ jobs:
       # The two paths cover both naming conventions, and only one of them matches on any given runner.
       - name: Upload application binary
         if: contains(matrix.preset, 'release')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Combat-Tracker-${{ matrix.preset }}
           path: |
