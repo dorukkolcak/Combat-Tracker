@@ -86,3 +86,16 @@ jobs:
 
       - name: Test
         run: ctest --preset ${{ matrix.preset }}
+
+      # Only the release presets are kept. Debug binaries are large and rarely what you want to hand to someone.
+      # The two paths cover both naming conventions, and only one of them matches on any given runner.
+      - name: Upload application binary
+        if: contains(matrix.preset, 'release')
+        uses: actions/upload-artifact@v4
+        with:
+          name: Combat-Tracker-${{ matrix.preset }}
+          path: |
+            out/build/${{ matrix.preset }}/src/CombatTrackerApp/Combat-Tracker-App
+            out/build/${{ matrix.preset }}/src/CombatTrackerApp/Combat-Tracker-App.exe
+          if-no-files-found: error
+          retention-days: 14
