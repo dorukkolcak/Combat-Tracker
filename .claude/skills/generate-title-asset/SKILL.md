@@ -3,7 +3,7 @@ name: generate-title-asset
 description: Regenerate assets/Title.png, the CombatTracker wordmark, using scripts/MakeTitle.ps1. Use when the title texture is missing from the working tree, or when the wordmark's text, font, size or layout should change.
 ---
 
-# Generating The Title Asset
+# Generating the Asset
 
 `assets/Title.png` is the wordmark drawn by `MainMenuScene`. It is generated rather than hand-drawn so it stays
 reproducible instead of being an opaque binary that nobody can edit. `scripts/MakeTitle.ps1` is the generator.
@@ -15,7 +15,7 @@ powershell -ExecutionPolicy Bypass -File scripts/MakeTitle.ps1
 The output path resolves from the script's own location rather than the working directory, so this writes to
 `assets/Title.png` from anywhere, and it creates `assets/` if it is not there.
 
-## The Asset Is A White Mask
+## Asset Specifications
 
 Everything the script draws is pure white, and the shape lives entirely in the alpha channel. That is because
 `MainMenuScene::renderUI` tints it at draw time:
@@ -27,16 +27,7 @@ CombatTrackerLib::centeredImage(m_titleTexture, ImGui::GetStyle().Colors[ImGuiCo
 ImGui multiplies the texture by that tint, and white multiplied by a tint is the tint, so the logo comes out in
 the active theme's text colour and follows the UI preset for free. Any colour baked into the PNG would instead
 multiply with the tint and produce something that is neither the baked colour nor the theme colour.
-
 The script has no colour parameters, so this is not something that can be got wrong by passing the wrong flag.
-It only matters when changing the script or the draw call:
-
-- Do not reintroduce colour or a drop shadow into the generator. A black shadow multiplied by any tint stays
-  black and would ignore the theme.
-- The tint is uniform across the whole image, so the wordmark is necessarily one colour. Restoring the old
-  two-tone split, the red rule or the gold diamond is not a generator change: one multiply cannot produce two
-  hues from one source. It needs separate textures tinted separately, or a mask channel and a small shader.
-  That is a design decision for the developer, so raise it rather than acting on it.
 
 ## Parameters
 
@@ -54,7 +45,7 @@ committed to the repository precisely so the other two platforms never need to g
 regenerating on a non-Windows machine, say so rather than substituting ImageMagick or another tool, because the
 output would no longer match.
 
-## Verifying The Result
+## Verifying the Result
 
 The script prints the resolved path, the canvas dimensions, the measured text width, the font it actually used
 and the font size. Two things there are worth checking:
