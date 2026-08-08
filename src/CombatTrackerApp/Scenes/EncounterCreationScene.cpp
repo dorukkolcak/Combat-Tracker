@@ -14,7 +14,7 @@ namespace CombatTrackerApp {
 		m_playerCharacterSource{ EntitySource::ALL },
 		m_selectedMonsterIndex{ -1 },
 		m_selectedPlayerCharacterIndex{ -1 },
-		m_isEncounterCreatorDockspaceInitialized{ false }
+		m_isdockspaceInitialized{ false }
 	{}
 
 	void EncounterCreationScene::notifyScene(const ImGuiIO&) {}
@@ -37,28 +37,28 @@ namespace CombatTrackerApp {
 
 		// Set configurations of the host window of the scene.
 		// This has to happen on every pass and not just the initial one, otherwise the host stays at its old size once the OS window is resized.
-		m_mainViewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(m_mainViewport->WorkPos);
-		ImGui::SetNextWindowSize(m_mainViewport->WorkSize);
-		ImGui::SetNextWindowViewport(m_mainViewport->ID);
+		const auto viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGui::SetNextWindowViewport(viewport->ID);
 
 		// Setup dockspace layout on first render pass.
-		if (!m_isEncounterCreatorDockspaceInitialized) {
+		if (!m_isdockspaceInitialized) {
 
-			m_encounterCreatorDockspaceID =
+			m_dockspaceID =
 				ImGui::GetID(
 					std::format("{} - Dockspace", MAPPED_WINDOW_NAMES[CombatTrackerLib::enumToSizeT(ENCOUNTER_CREATOR)])
 					.c_str()
 				);
-			ImGui::DockBuilderRemoveNode(m_encounterCreatorDockspaceID);
+			ImGui::DockBuilderRemoveNode(m_dockspaceID);
 
 			// Add dockspace nodes.
-			ImGui::DockBuilderAddNode(m_encounterCreatorDockspaceID, ImGuiDockNodeFlags_DockSpace);
-			ImGui::DockBuilderSetNodeSize(m_encounterCreatorDockspaceID, m_mainViewport->WorkSize);
+			ImGui::DockBuilderAddNode(m_dockspaceID, ImGuiDockNodeFlags_DockSpace);
+			ImGui::DockBuilderSetNodeSize(m_dockspaceID, viewport->WorkSize);
 
 			// Configure dockspace nodes.
 			ImGui::DockBuilderSplitNode(
-				m_encounterCreatorDockspaceID,
+				m_dockspaceID,
 				ImGuiDir_Left,
 				0.38f,
 				&m_entityBrowserWindowID,
@@ -76,8 +76,8 @@ namespace CombatTrackerApp {
 			);
 
 			// Finish dockspace creation.
-			ImGui::DockBuilderFinish(m_encounterCreatorDockspaceID);
-			m_isEncounterCreatorDockspaceInitialized = true;
+			ImGui::DockBuilderFinish(m_dockspaceID);
+			m_isdockspaceInitialized = true;
 		}
 
 		// Render host window. Like the other host windows, it is just for scaffolding.
@@ -95,7 +95,7 @@ namespace CombatTrackerApp {
 		if (ImGui::BeginMenuBar()) {
 			if (ImGui::BeginMenu(MAPPED_WINDOW_NAMES[CombatTrackerLib::enumToSizeT(MENU)].data())) {
 				if (ImGui::MenuItem("Return to Main Menu")) {
-					m_applicationReference->queueSceneTransition(this, std::make_unique<MainMenuScene>(m_applicationReference));
+					m_applicationPointer->queueSceneTransition(this, std::make_unique<MainMenuScene>(m_applicationPointer));
 				}
 				// TODO: Expand the options from here.
 				ImGui::EndMenu();
@@ -104,9 +104,9 @@ namespace CombatTrackerApp {
 		}
 
 		ImGui::DockSpace(
-			m_encounterCreatorDockspaceID,
+			m_dockspaceID,
 			ImGui::GetContentRegionAvail(),
-			ENCOUNTER_CREATION_DOCKSPACE_FLAGS
+			DOCKSPACE_FLAGS
 		);
 		ImGui::End();
 	}

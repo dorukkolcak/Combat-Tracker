@@ -21,10 +21,10 @@ namespace CombatTrackerApp {
 	void EntityCreationScene::renderUI() {
 
 		// Take over the whole viewport, the same way the other scene hosts do.
-		m_mainViewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(m_mainViewport->WorkPos);
-		ImGui::SetNextWindowSize(m_mainViewport->WorkSize);
-		ImGui::SetNextWindowViewport(m_mainViewport->ID);
+		const auto viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGui::SetNextWindowViewport(viewport->ID);
 
 		ImGui::Begin(std::format("{} Creation", getEntityLabel()).c_str(), nullptr, ENTITY_CREATION_WINDOW_FLAGS);
 
@@ -73,7 +73,7 @@ namespace CombatTrackerApp {
 			ImGui::TableNextRow();
 
 			// Compute a sensible dynamic height for the children so both columns match.
-			const auto childHeight{ std::max(MIN_CHILD_HEIGHT, m_mainViewport->WorkSize.y * 0.28f) };
+			const auto childHeight{ std::max(MIN_CHILD_HEIGHT, viewport->WorkSize.y * 0.28f) };
 
 			// Saving throw data as a separate collapsable header.
 			ImGui::TableSetColumnIndex(0);
@@ -151,11 +151,11 @@ namespace CombatTrackerApp {
 		ImGui::Separator();
 		if (CombatTrackerLib::alignedButton(std::format("Complete {} Creation", getEntityLabel()).c_str(), 0.5f)) {
 			if (completeEntityCreation()) {
-				m_applicationReference->queueSceneTransition(this, std::make_unique<EncounterCreationScene>(m_applicationReference));
+				m_applicationPointer->queueSceneTransition(this, std::make_unique<EncounterCreationScene>(m_applicationPointer));
 			}
 		}
 		if (CombatTrackerLib::alignedButton(std::format("Cancel {} Creation", getEntityLabel()).c_str(), 0.5f)) {
-			m_applicationReference->queueSceneTransition(this, std::make_unique<EncounterCreationScene>(m_applicationReference));
+			m_applicationPointer->queueSceneTransition(this, std::make_unique<EncounterCreationScene>(m_applicationPointer));
 		}
 		ImGui::End();
 	}

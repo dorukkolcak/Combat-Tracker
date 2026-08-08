@@ -35,12 +35,12 @@ namespace CombatTrackerLib {
 		template <typename T>
 		void setUniform(std::string_view uniformName, T value) const;
 	private:
-		unsigned int m_programID{};
+		unsigned int m_ID{};
 	};
 
 	template <typename T>
 	void ShaderProgram::setUniform(std::string_view uniformName, T value) const {
-		const auto uniformLocation{ glGetUniformLocation(m_programID, uniformName.data()) };
+		const auto uniformLocation{ glGetUniformLocation(m_ID, uniformName.data()) };
 		if constexpr (std::is_same_v<T, bool>) {
 			glUniform1i(uniformLocation, value);
 		}

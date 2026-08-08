@@ -69,7 +69,7 @@ namespace CombatTrackerApp {
 			ImGuiWindowFlags_NoNavFocus |
 			ImGuiWindowFlags_MenuBar // This flag allows us to append a menu bar to this window by immediately calling the appropriate ImGui function.
 		};
-		inline static constexpr ImGuiDockNodeFlags ENCOUNTER_CREATION_DOCKSPACE_FLAGS{
+		inline static constexpr ImGuiDockNodeFlags DOCKSPACE_FLAGS{
 			ImGuiDockNodeFlags_NoResize |
 			ImGuiDockNodeFlags_NoSplit
 		};
@@ -84,7 +84,7 @@ namespace CombatTrackerApp {
 			"Origin"
 		};
 
-		ImGuiID m_encounterCreatorDockspaceID{};
+		ImGuiID m_dockspaceID{};
 		ImGuiID m_entityBrowserWindowID{};
 		ImGuiID m_encounterManagerWindowID{};
 
@@ -98,7 +98,7 @@ namespace CombatTrackerApp {
 		int m_selectedMonsterIndex{-1};
 		int m_selectedPlayerCharacterIndex{-1};
 
-		bool m_isEncounterCreatorDockspaceInitialized{};
+		bool m_isdockspaceInitialized{};
 
 		void renderHostWindow();
 
@@ -164,7 +164,7 @@ namespace CombatTrackerApp {
 		}
 
 		if (CombatTrackerLib::alignedButton(std::format("Create {}", typeLabel).c_str(), 0.5f)) {
-			m_applicationReference->queueSceneTransition(this, std::make_unique<S>(m_applicationReference));
+			m_applicationPointer->queueSceneTransition(this, std::make_unique<S>(m_applicationPointer));
 		}
 
 		/*

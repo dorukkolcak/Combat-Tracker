@@ -7,22 +7,16 @@
 #include <GLFW/glfw3.h>
 
 namespace CombatTrackerLib {
-
-	// The App class also needs to see the struct definition so we don't nest this struct inside Window's definition.
 	struct WindowSpecification {
-		std::string_view title{};
-
 		unsigned int width{};
 		unsigned int height{};
-
 		bool isResizable{};
 		bool isVsyncEnabled{};
 	};
-
 	class Window {
 	public:
 		Window() = default;
-		explicit Window(const WindowSpecification& specification);
+		Window(WindowSpecification* specification, std::string_view applicationName);
 
 		// A Window object exists as a singleton so it should be non-copiable and non-movable.
 		Window(const Window& other) = delete;
@@ -35,7 +29,7 @@ namespace CombatTrackerLib {
 
 		void update();
 	private:
-		WindowSpecification m_windowSpecification{};
+		WindowSpecification* m_specificationPointer{};
 		GLFWwindow* m_window{};
 	};
 }

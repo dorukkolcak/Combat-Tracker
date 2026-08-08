@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string_view>
+#include <filesystem>
 
 namespace CombatTrackerLib {
 	class Texture2D {
@@ -10,7 +10,7 @@ namespace CombatTrackerLib {
 
 		// TODO: Ideally we would like to limit the texture parameters to a set of valid options instead of any arbitrary value.
 		Texture2D(
-			std::string_view texturePath,
+			const std::filesystem::path& texturePath,
 			unsigned int numberOfDesiredChannels,
 			bool isOriginAtTop,
 			int sAxisWrap,
@@ -19,14 +19,15 @@ namespace CombatTrackerLib {
 			int minifyingMipmapFilter
 		);
 		Texture2D(
-			std::string_view texturePath,
+			const std::filesystem::path& texturePath,
 			unsigned int numberOfDesiredChannels,
 			bool isOriginAtTop,
 			int sAxisWrap,
 			int tAxisWrap,
 			int magnifyingFilter,
 			int minifyingMipmapFilter,
-			unsigned int unit
+			unsigned int glUnit,
+			int integerUnit
 		);
 
 		// Should be non-copiable because of double delete cases.
@@ -41,16 +42,18 @@ namespace CombatTrackerLib {
 		void use() const;
 		void unbind() const;
 
-		void setTextureUnit(unsigned int unit);
+		void setUnit(unsigned int glUnit, int integerUnit);
 
+		int getIntUnit() const;
 		int getWidth() const;
 		int getHeight() const;
 		unsigned int getID() const;
 	private:
-		unsigned int m_textureID{};
-		unsigned int m_textureUnit{};
-		int m_textureWidth{};
-		int m_textureHeight{};
+		unsigned int m_ID{};
+		unsigned int m_glUnit{};
+		int m_integerUnit{};
+		int m_width{};
+		int m_height{};
 		int m_numberOfColorChannels{};
 	};
 }

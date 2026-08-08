@@ -4,22 +4,22 @@ namespace CombatTrackerLib {
 	ShaderProgram::ShaderProgram(std::vector<Shader>& shaders) {
 
 		// Create the shader program, attach and link shaders.
-		m_programID = glCreateProgram();
+		m_ID = glCreateProgram();
 		for (const auto& shader : shaders) {
-			glAttachShader(m_programID, shader.getShaderID());
+			glAttachShader(m_ID, shader.getShaderID());
 		}
-		glLinkProgram(m_programID);
+		glLinkProgram(m_ID);
 
 		// Check for linker errors.
 		GLint isLinked{};
-		glGetProgramiv(m_programID, GL_LINK_STATUS, &isLinked);
+		glGetProgramiv(m_ID, GL_LINK_STATUS, &isLinked);
 		if (isLinked == GL_FALSE) {
 			GLint logLength{};
-			glGetProgramiv(m_programID, GL_INFO_LOG_LENGTH, &logLength);
+			glGetProgramiv(m_ID, GL_INFO_LOG_LENGTH, &logLength);
 			std::string infoLog(static_cast<size_t>(std::max(logLength, 1)), '\0');
-			glGetProgramInfoLog(m_programID, logLength, nullptr, infoLog.data());
+			glGetProgramInfoLog(m_ID, logLength, nullptr, infoLog.data());
 			std::cerr << "Program link failed: " << infoLog << std::endl;
-			glDeleteProgram(m_programID);
+			glDeleteProgram(m_ID);
 			return;
 		}
 
@@ -31,8 +31,8 @@ namespace CombatTrackerLib {
 		}
 	}
 	ShaderProgram::ShaderProgram(ShaderProgram&& program) noexcept {
-		this->m_programID = program.m_programID;
-		program.m_programID = 0;
+		this->m_ID = program.m_ID;
+		program.m_ID = 0;
 	}
 	ShaderProgram& ShaderProgram::operator=(ShaderProgram&& program) noexcept {
 
@@ -42,16 +42,16 @@ namespace CombatTrackerLib {
 		}
 
 		// Free resources from the object that is being moved to.
-		glDeleteProgram(m_programID);
-		this->m_programID = program.m_programID;
-		program.m_programID = 0;
+		glDeleteProgram(m_ID);
+		this->m_ID = program.m_ID;
+		program.m_ID = 0;
 		return *this;
 	}
 	ShaderProgram::~ShaderProgram() {
-		glDeleteProgram(m_programID);
+		glDeleteProgram(m_ID);
 	}
 	void ShaderProgram::use() const {
-		glUseProgram(m_programID);
+		glUseProgram(m_ID);
 	}
 	void ShaderProgram::unbind() const {
 		glUseProgram(0);

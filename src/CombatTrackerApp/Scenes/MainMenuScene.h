@@ -30,12 +30,12 @@ namespace CombatTrackerApp {
 			//...
 		} };
 
-		inline static constexpr ImGuiDockNodeFlags MAIN_MENU_DOCKSPACE_FLAGS{
+		inline static constexpr ImGuiDockNodeFlags DOCKSPACE_FLAGS{
 			ImGuiDockNodeFlags_NoResize |
 			ImGuiDockNodeFlags_NoSplit |
 			ImGuiDockNodeFlags_NoWindowMenuButton
 		};
-		inline static constexpr ImGuiWindowFlags MAIN_MENU_HOST_WINDOW_FLAGS{
+		inline static constexpr ImGuiWindowFlags HOST_WINDOW_FLAGS{
 			ImGuiWindowFlags_NoDocking |
 			ImGuiWindowFlags_NoTitleBar |
 			ImGuiWindowFlags_NoCollapse |
@@ -51,7 +51,7 @@ namespace CombatTrackerApp {
 
 		// Sort of a flag that overrides some options that are enforced on every window.
 		// Used for the window that hosts our application art.
-		ImGuiWindowClass m_mainMenuWindowClass{};
+		ImGuiWindowClass m_titleWindowClass{};
 
 		CombatTrackerLib::ListBoxParameters m_UIThemeParameters{};
 		CombatTrackerLib::UIPreset m_chosenUIPreset{};
@@ -60,14 +60,14 @@ namespace CombatTrackerApp {
 		OptionsCategory m_selectedOptionsCategory{};
 
 		// UI IDs.
-		ImGuiID m_mainMenuDockspaceID{};
+		ImGuiID m_dockspaceID{};
 		ImGuiID m_encounterCreationWindowID{};
 		ImGuiID m_encounterRunningWindowID{};
 		ImGuiID m_completedEncountersWindowID{};
-		ImGuiID m_mainMenuTitleWindowID{};
+		ImGuiID m_titleWindowID{};
 
 		// Dockspace layout flag.
-		bool m_isMainMenuDockspaceInitialized{};
+		bool m_isDockspaceInitialized{};
 		
 	};
 

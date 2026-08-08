@@ -45,7 +45,6 @@ namespace CombatTrackerLib {
 	}
 
 	// Taken from https://github.com/ocornut/imgui/discussions/3862.
-	// I would love to make the label's type std::string_view but the Imgui API requires to pass const char* as an argument.
 	inline bool alignedButton(const char* label, float alignmentFactor) {
 
 		auto& style{ ImGui::GetStyle() };

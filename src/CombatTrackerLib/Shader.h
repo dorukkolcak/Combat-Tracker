@@ -30,7 +30,7 @@ namespace CombatTrackerLib {
 		unsigned int getShaderID() const;
 		void setAsLinked();
 	private:
-		unsigned int m_shaderID{};
+		unsigned int m_ID{};
 		bool m_isLinkedToProgram{};
 	};
 }

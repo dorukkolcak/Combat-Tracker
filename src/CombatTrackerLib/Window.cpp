@@ -4,8 +4,8 @@
 #include <cassert>
 
 namespace CombatTrackerLib {
-	Window::Window(const WindowSpecification& specification) : 
-		m_windowSpecification{ specification } 
+	Window::Window(WindowSpecification* specification, std::string_view applicationName) : 
+		m_specificationPointer{ specification } 
 	{
 
 		// Window is created for OpenGL 3.3 Core Profile.
@@ -13,21 +13,21 @@ namespace CombatTrackerLib {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-		if (specification.isResizable) {
+		if (m_specificationPointer->isResizable) {
 			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		}
-		float mainScale{ ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()) };
+		auto mainScale{ ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()) };
 		m_window = glfwCreateWindow(
-			static_cast<int> (mainScale * specification.width),
-			static_cast<int> (mainScale * specification.height),
-			specification.title.data(),
+			static_cast<int> (mainScale * m_specificationPointer->width),
+			static_cast<int> (mainScale * m_specificationPointer->height),
+			applicationName.data(),
 			nullptr,
 			nullptr
 		);
 		assert(m_window != nullptr);
 		glfwSetWindowUserPointer(m_window, this);
 		glfwMakeContextCurrent(m_window);
-		if (specification.isVsyncEnabled) {
+		if (m_specificationPointer->isVsyncEnabled) {
 			glfwSwapInterval(1);
 		}
 	}

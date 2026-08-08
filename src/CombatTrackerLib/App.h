@@ -4,24 +4,23 @@
 #include "CombatTrackerLib/Scene.h"
 #include "CombatTrackerLib/Themes.h"
 
+#include <string>
 #include <memory>
 #include <vector>
 #include <unordered_map>
-#include <string_view>
+#include <filesystem>
 
 namespace CombatTrackerLib {
 	class Scene;
 	class App {
 	public:
-
-		// Unlike WindowSpecification, AppSpecification is used only for this class. So make it a public nested type.
 		struct Specification {
-			UIPreset initialPreset{};
-			CombatTrackerLib::WindowSpecification mainWindowSpecification{};
-			std::string_view applicationName{};
+			UIPreset uiPreset{};
+			CombatTrackerLib::WindowSpecification windowSpecification{};
+			std::string name{};
 		};
 		App() = default;
-		explicit App(const Specification& specification);
+		explicit App(Specification specification);
 		
 		// An App object exists as a singleton so it should be non-copiable and non-movable.
 		App(const App& other) = delete;
@@ -40,19 +39,27 @@ namespace CombatTrackerLib {
 
 		void signalApplicationClose();
 
-		UITheme& getUITheme();
+		void setUIPreset(UIPreset newPreset);
+		UIPreset getUIPreset() const;
+		
+		const std::filesystem::path& getResourceDirectory() const;
+		const std::filesystem::path& getUserDataDirectory() const;
 
 	private:
-		Specification m_applicationSpecification{};
-		UITheme m_theme{};
-		std::unique_ptr<Window> m_mainWindow{};
+		Specification m_specfication{};
+		std::unique_ptr<Window> m_windowPointer{};
 
 		// I prefer using vector as sort of a stack because it is much better at resizing, compared to a pure stack data structure.
 		std::vector<std::unique_ptr<Scene>> m_sceneStack{};
 		std::vector<std::unique_ptr<Scene>> m_sceneAdditionQueue{};
 		std::vector<Scene*> m_sceneDeletionQueue{};
 		std::unordered_map<Scene*, std::unique_ptr<Scene>> m_sceneTransitionQueue{};
-		bool m_applicationCloseSignalled{}; 
+
+		std::filesystem::path m_resourceDirectory;
+		std::filesystem::path m_userDataDirectory;
+
+		bool m_isCloseSignalled{}; 
+		bool m_isUIPresetApplied{};
 
 		/*
 		So here is the rough idea of how scenes work:
@@ -84,5 +91,17 @@ namespace CombatTrackerLib {
 		You might notice that scene transitions are simply deletion + addition consecutively.
 		*/
 		void dequeueSceneOperations();
+
+		// Both of the functions below should use NRVO so no expensive copies are made.
+		
+		// Finds the path for read only files that ship alongside the application, such as textures and shaders.
+		// This is derived from the executable's own location instead of the working directory.
+		// Falls back to the working directory if the platform call fails.
+		std::filesystem::path findResourceDirectory();
+
+		// Finds the path for writable per user location for files the application creates.
+		// The application name is a parameter so the library half keeps no knowledge of a particular application.
+		// Returns an empty path when the location cannot be determined, which callers should treat as a failure to save.
+		std::filesystem::path findUserDataDirectory(std::string_view applicationName);
 	};
 }
