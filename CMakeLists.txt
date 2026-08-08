@@ -16,7 +16,7 @@ set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 add_library(Combat-Tracker-Options INTERFACE)
 target_compile_features(Combat-Tracker-Options INTERFACE cxx_std_23)
 target_compile_options(Combat-Tracker-Options INTERFACE
-    $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/W4;/utf-8>
+    $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/W4;/utf-8;/w15038>
     $<$<COMPILE_LANG_AND_ID:CXX,GNU,Clang,AppleClang>:-Wall;-Wextra>
 )
 
