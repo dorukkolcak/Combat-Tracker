@@ -10,7 +10,7 @@ namespace CombatTrackerApp {
 
     MainMenuScene::MainMenuScene(CombatTrackerLib::App* app) :
         CombatTrackerLib::Scene{ app },
-        m_titleTexture{ "assets/Title.png", 4, false, GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR},
+        m_titleTexture{ m_applicationPointer->getResourceDirectory() / "assets" / "Title.png", 4, false, GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR},
         m_UIThemeParameters{ -1, -1, false },
         m_chosenUIPreset{ m_applicationPointer->getUIPreset()},
         m_selectedOptionsCategory{},

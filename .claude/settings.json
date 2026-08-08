@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(powershell -ExecutionPolicy Bypass -File scripts/MakeTitle.ps1*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File scripts/MakeTitle.ps1*)"
+    ]
+  }
+}

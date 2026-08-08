@@ -9,3 +9,10 @@ target_link_libraries(
     Combat-Tracker-Lib
     Combat-Tracker-Options
 )
+
+# Copy assets to the build directory.
+add_custom_command(TARGET Combat-Tracker-App POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${PROJECT_SOURCE_DIR}/assets
+        $<TARGET_FILE_DIR:Combat-Tracker-App>/assets
+)

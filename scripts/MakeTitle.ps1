@@ -5,41 +5,22 @@
     Also for disclosure this script is completely AI generated as I only needed the script's output.
 
 .DESCRIPTION
-    Renders a two-tone wordmark on a transparent background, optionally underlined
+    Renders a wordmark on a transparent background, optionally underlined
     by a rule broken with a diamond (the divider motif from a 5e stat block).
-
-    Defaults match the DARK preset in src/CombatTrackerLib/Themes.cpp, so the logo
-    stays in the UI palette instead of sitting next to it.
 
     Windows-only: System.Drawing wraps GDI+. Run it whenever the wordmark needs to
     change so the asset stays reproducible rather than being an opaque binary.
 
 .EXAMPLE
-    .\make_title.ps1
+    .\MakeTitle.ps1
     Regenerates assets/Title.png with the shipped defaults.
-
-.EXAMPLE
-    .\make_title.ps1 -PrimaryText "Encounter" -AccentText "Builder" -FontSize 72 -OutFile ..\assets\Builder.png
-
-.EXAMPLE
-    .\make_title.ps1 -AccentColor "#D4AF37" -NoRule -Autosize
-    Gold accent, no divider, canvas cropped to the text.
 #>
 [CmdletBinding()]
 param(
-    # The wordmark is split into two runs so the camelCase boundary can be coloured.
-    [string] $PrimaryText   = "Combat",
-    [string] $AccentText    = "Tracker",
-
-    [string] $PrimaryColor  = "#DCE2E8",   # ImGuiCol_Text
-    [string] $AccentColor   = "#C85554",   # ImGuiCol_Button
-    [string] $RuleColor     = "#C85554",   # matches the accent by default
-    [string] $DiamondColor  = "#D4AF37",   # ImGuiCol_SliderGrab
-    [int]    $ShadowAlpha   = 150,         # 0 disables the drop shadow
+    [string] $Text          = "CombatTracker",
 
     # Optional tagline under the wordmark. Empty means no subtitle at all.
     [string] $SubtitleText      = "",
-    [string] $SubtitleColor     = "#DCE2E8",   # ImGuiCol_Text
     [int]    $SubtitleFontSize  = 30,
 
     [string] $FontName      = "Bookman Old Style",
@@ -54,24 +35,15 @@ param(
 
     [switch] $NoRule,
 
-    [string] $OutFile = (Join-Path $PSScriptRoot "..\assets\Title.png")
+    [string] $OutFile
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 Add-Type -AssemblyName System.Drawing
 
-function ConvertTo-Color {
-    param([string] $Hex, [int] $Alpha = 255)
-
-    $h = $Hex.TrimStart('#')
-    if ($h.Length -ne 6) {
-        throw "Colour '$Hex' must be 6 hex digits, e.g. '#C85554'."
-    }
-    $r = [Convert]::ToInt32($h.Substring(0, 2), 16)
-    $g = [Convert]::ToInt32($h.Substring(2, 2), 16)
-    $b = [Convert]::ToInt32($h.Substring(4, 2), 16)
-    return [System.Drawing.Color]::FromArgb($Alpha, $r, $g, $b)
+if ([string]::IsNullOrEmpty($OutFile)) {
+    $OutFile = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "..\assets\Title.png"
 }
 
 # GDI+ resources are unmanaged; collect them so a single finally can release them all.
@@ -105,10 +77,8 @@ try {
     $probe    = Track ([System.Drawing.Graphics]::FromImage($probeBmp))
     $probe.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::AntiAlias
 
-    $wPrimary = $probe.MeasureString($PrimaryText, $font, [int]::MaxValue, $fmt).Width
-    $wAccent  = $probe.MeasureString($AccentText,  $font, [int]::MaxValue, $fmt).Width
-    $wTotal   = $wPrimary + $wAccent
-    $hText    = $probe.MeasureString("$PrimaryText$AccentText", $font, [int]::MaxValue, $fmt).Height
+    $wText = $probe.MeasureString($Text, $font, [int]::MaxValue, $fmt).Width
+    $hText = $probe.MeasureString($Text, $font, [int]::MaxValue, $fmt).Height
 
     $wSubtitle = 0.0
     $hSubtitle = 0.0
@@ -124,7 +94,7 @@ try {
     if ($hasSubtitle) { $subtitleBlock = $hSubtitle + 20.0 }
 
     # A long tagline can be wider than the wordmark, so fit to whichever dominates.
-    $wWidest = [math]::Max($wTotal, $wSubtitle)
+    $wWidest = [math]::Max($wText, $wSubtitle)
 
     if ($Autosize) {
         $Width  = [int][math]::Ceiling($wWidest + (2 * $Padding))
@@ -143,28 +113,21 @@ try {
     # magenta/green haloes once the image is composited over an arbitrary background.
     $g.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::AntiAlias
 
-    $x = ($Width - $wTotal) / 2.0
+    $white = Track (New-Object System.Drawing.SolidBrush([System.Drawing.Color]::White))
+
+    $x = ($Width - $wText) / 2.0
     $y = ($Height - $hText - $ruleBlock - $subtitleBlock) / 2.0
 
-    if ($ShadowAlpha -gt 0) {
-        $brShadow = Track (New-Object System.Drawing.SolidBrush((ConvertTo-Color "#000000" $ShadowAlpha)))
-        $g.DrawString($PrimaryText, $font, $brShadow, ($x + 4), ($y + 4), $fmt)
-        $g.DrawString($AccentText,  $font, $brShadow, ($x + $wPrimary + 4), ($y + 4), $fmt)
-    }
-
-    $brPrimary = Track (New-Object System.Drawing.SolidBrush((ConvertTo-Color $PrimaryColor)))
-    $brAccent  = Track (New-Object System.Drawing.SolidBrush((ConvertTo-Color $AccentColor)))
-    $g.DrawString($PrimaryText, $font, $brPrimary, $x, $y, $fmt)
-    $g.DrawString($AccentText,  $font, $brAccent, ($x + $wPrimary), $y, $fmt)
+    $g.DrawString($Text, $font, $white, $x, $y, $fmt)
 
     if (-not $NoRule) {
         $ruleY = $y + $hText + 18.0
         $xL    = $x - 18.0
-        $xR    = $x + $wTotal + 18.0
+        $xR    = $x + $wText + 18.0
         $mid   = ($xL + $xR) / 2.0
         $gap   = 22.0
 
-        $pen = Track (New-Object System.Drawing.Pen((ConvertTo-Color $RuleColor), 5))
+        $pen = Track (New-Object System.Drawing.Pen([System.Drawing.Color]::White, 5))
         $pen.StartCap = [System.Drawing.Drawing2D.LineCap]::Round
         $pen.EndCap   = [System.Drawing.Drawing2D.LineCap]::Round
         $g.DrawLine($pen, $xL, $ruleY, ($mid - $gap), $ruleY)
@@ -177,8 +140,7 @@ try {
             (New-Object System.Drawing.PointF($mid, ($ruleY + $d))),
             (New-Object System.Drawing.PointF(($mid - $d), $ruleY))
         )
-        $brDiamond = Track (New-Object System.Drawing.SolidBrush((ConvertTo-Color $DiamondColor)))
-        $g.FillPolygon($brDiamond, $diamond)
+        $g.FillPolygon($white, $diamond)
     }
 
     if ($hasSubtitle) {
@@ -190,8 +152,7 @@ try {
         # Centred on its own width: the tagline rarely matches the wordmark's width.
         $subtitleX = ($Width - $wSubtitle) / 2.0
 
-        $brSubtitle = Track (New-Object System.Drawing.SolidBrush((ConvertTo-Color $SubtitleColor)))
-        $g.DrawString($SubtitleText, $subtitleFont, $brSubtitle, $subtitleX, $subtitleY, $fmt)
+        $g.DrawString($SubtitleText, $subtitleFont, $white, $subtitleX, $subtitleY, $fmt)
     }
 
     $outDir = Split-Path -Parent $OutFile
@@ -211,7 +172,7 @@ try {
     $bmp.Save($resolved, [System.Drawing.Imaging.ImageFormat]::Png)
 
     Write-Output ("Wrote {0} ({1}x{2}, text {3}px wide, font '{4}' @ {5}px)" -f `
-                  $resolved, $Width, $Height, [math]::Round($wTotal), $font.Name, $FontSize)
+                  $resolved, $Width, $Height, [math]::Round($wText), $font.Name, $FontSize)
 }
 finally {
     # Reverse order: Graphics before the Bitmap it draws into.
