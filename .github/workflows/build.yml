@@ -91,7 +91,7 @@ jobs:
       # The two paths cover both naming conventions, and only one of them matches on any given runner.
       - name: Upload application binary
         if: contains(matrix.preset, 'release')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Combat-Tracker-${{ matrix.preset }}
           path: |
