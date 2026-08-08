@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # GLFW builds both its X11 and Wayland backends on Linux, so both sets of
       # headers have to be present or the configure step fails.
