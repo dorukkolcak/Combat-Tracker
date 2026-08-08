@@ -1,8 +1,8 @@
-#include "EntityCreationScene.h"
-#include "EncounterCreationScene.h"
-#include "../Entities/Creature/CreatureConstants.h"
-#include "../CombatTrackerLib/Utilities/UIUtils.h"
-#include "../CombatTrackerLib/Utilities/GenericUtils.h"
+#include "CombatTrackerApp/Scenes/EntityCreationScene.h"
+#include "CombatTrackerApp/Scenes/EncounterCreationScene.h"
+#include "CombatTrackerApp/Entities/Creature/CreatureConstants.h"
+#include "CombatTrackerLib/Utilities/UIUtils.h"
+#include "CombatTrackerLib/Utilities/GenericUtils.h"
 
 namespace CombatTrackerApp {
 	EntityCreationScene::EntityCreationScene(CombatTrackerLib::App* app) :
@@ -14,8 +14,8 @@ namespace CombatTrackerApp {
 	{
 	}
 
-	void EntityCreationScene::notifyScene(const ImGuiIO& imguiIO) {} // No non-ImGui based event handling should exist in this scene, I think.
-	void EntityCreationScene::updateScene(double timeInterval) {} // Purely input based scene so no updates necessary.
+	void EntityCreationScene::notifyScene(const ImGuiIO&) {} // No non-ImGui based event handling should exist in this scene, I think.
+	void EntityCreationScene::updateScene(double) {} // Purely input based scene so no updates necessary.
 	void EntityCreationScene::renderScene() {} // The scene consists of just UI widgets so no OpenGL side rendering work.
 
 	void EntityCreationScene::renderUI() {

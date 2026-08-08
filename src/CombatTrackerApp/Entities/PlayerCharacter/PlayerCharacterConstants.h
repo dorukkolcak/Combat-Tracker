@@ -1,13 +1,13 @@
 #pragma once
 
+#include "CombatTrackerApp/Entities/Creature/CreatureEnums.h"
+#include "CombatTrackerApp/Entities/PlayerCharacter/PlayerCharacterEnums.h"
+
 #include <array>
 #include <cstddef>
 #include <unordered_map>
 #include <unordered_set>
 #include <string_view>
-
-#include "../Creature/CreatureEnums.h"
-#include "PlayerCharacterEnums.h"
 
 namespace CombatTrackerApp {
 	inline const std::unordered_map<PlayerSubclass, PlayerClass> MAPPED_SUBCLASSES {

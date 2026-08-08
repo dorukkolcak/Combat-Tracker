@@ -1,7 +1,7 @@
-#include "imgui_impl_glfw.h"
-#include <cassert>
+#include "CombatTrackerLib/Window.h"
 
-#include "Window.h"
+#include <imgui_impl_glfw.h>
+#include <cassert>
 
 namespace CombatTrackerLib {
 	Window::Window(const WindowSpecification& specification) : 

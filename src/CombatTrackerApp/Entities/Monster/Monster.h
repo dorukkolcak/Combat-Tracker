@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Creature/Creature.h"
+#include "CombatTrackerApp/Entities/Creature/Creature.h"
 
 namespace CombatTrackerApp {
 	class Monster : public Creature {

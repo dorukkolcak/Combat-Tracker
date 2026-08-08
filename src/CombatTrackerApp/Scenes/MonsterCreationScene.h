@@ -1,9 +1,9 @@
 #pragma once
 
-#include <string_view>
+#include "CombatTrackerApp/Scenes/EntityCreationScene.h"
+#include "CombatTrackerApp/Entities/Monster/Monster.h"
 
-#include "EntityCreationScene.h"
-#include "../Entities/Monster/Monster.h"
+#include <string_view>
 
 namespace CombatTrackerApp {
 

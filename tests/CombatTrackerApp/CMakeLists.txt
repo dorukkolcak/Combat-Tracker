@@ -1,12 +1,14 @@
 # Tests for the application half of the project.
+set(APP_TEST_SOURCES
 
-target_include_directories(Combat-Tracker-App-Tests PRIVATE
-    ${PROJECT_SOURCE_DIR}/src/CombatTrackerApp
 )
-
-target_link_libraries(Combat-Tracker-App-Tests PRIVATE
-    GTest::gtest_main
-)
-
-include(GoogleTest)
-gtest_discover_tests(Combat-Tracker-App-Tests)
+if(APP_TEST_SOURCES)
+    add_executable(Combat-Tracker-App-Tests ${APP_TEST_SOURCES})
+    target_link_libraries(Combat-Tracker-App-Tests PRIVATE
+        Combat-Tracker-Lib
+        Combat-Tracker-Options
+        GTest::gtest_main
+    )
+    include(GoogleTest)
+    gtest_discover_tests(Combat-Tracker-App-Tests)
+endif()

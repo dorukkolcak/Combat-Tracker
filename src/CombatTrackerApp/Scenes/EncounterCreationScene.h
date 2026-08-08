@@ -1,13 +1,13 @@
 #pragma once
 
+#include "CombatTrackerLib/Utilities/UIUtils.h"
+#include "CombatTrackerLib/Scene.h"
+
 #include <array>
 #include <cstddef>
 #include <format>
 #include <string>
 #include <string_view>
-
-#include "../../CombatTrackerLib/Utilities/UIUtils.h"
-#include "../../CombatTrackerLib/Scene.h"
 
 namespace CombatTrackerApp {
 	class EncounterCreationScene : public CombatTrackerLib::Scene {

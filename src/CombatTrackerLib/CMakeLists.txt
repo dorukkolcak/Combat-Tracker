@@ -1,34 +1,23 @@
-
 # Create staticly linked library for the application.
-add_library(Combat-Tracker-Lib STATIC
-    App.h
-    App.cpp
-    Scene.h
-    Scene.cpp
-    Themes.h
-    Window.h
-    Window.cpp
-    Shader.h 
-    Shader.cpp 
-    ShaderProgram.h 
-    ShaderProgram.cpp
-    Themes.cpp
-    Texture2D.h
-    Texture2D.cpp
-    Utilities/UIUtils.h
-    Utilities/GenericUtils.h
-)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/CombatTrackerLib/*.cpp)
+file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/CombatTrackerLib/*.h)
+add_library(Combat-Tracker-Lib STATIC ${SOURCES} ${HEADERS})
+
+# src/ is the only include root, so every library header has exactly one spelling: CombatTrackerLib/...
 target_include_directories(Combat-Tracker-Lib PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/src
 )
 
 # Link external dependencies to the static library.
-target_link_libraries(Combat-Tracker-Lib PUBLIC
-    glad
-    glfw_target
-    OpenGL::GL
-    imgui
-    glm::glm
-    stb_image
-    nlohmann_json::nlohmann_json
+target_link_libraries(Combat-Tracker-Lib
+    PRIVATE
+        Combat-Tracker-Options
+    PUBLIC
+        glad
+        glfw_target
+        OpenGL::GL
+        imgui
+        glm::glm
+        stb_image
+        nlohmann_json::nlohmann_json
 )

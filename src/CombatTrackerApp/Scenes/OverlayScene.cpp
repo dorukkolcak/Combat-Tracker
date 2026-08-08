@@ -1,4 +1,4 @@
-#include "OverlayScene.h"
+#include "CombatTrackerApp/Scenes/OverlayScene.h"
 
 namespace CombatTrackerApp {
 	OverlayScene::OverlayScene(CombatTrackerLib::App* app) : 
@@ -6,8 +6,8 @@ namespace CombatTrackerApp {
 	{
 	}
 
-	void OverlayScene::notifyScene(const ImGuiIO& imguiIO) {} 
-	void OverlayScene::updateScene(double timeInterval) {}
+	void OverlayScene::notifyScene(const ImGuiIO&) {} 
+	void OverlayScene::updateScene(double) {}
 	void OverlayScene::renderUI() {
 
 		/*

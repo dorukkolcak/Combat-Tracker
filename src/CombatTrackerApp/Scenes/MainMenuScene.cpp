@@ -1,29 +1,28 @@
-#include "MainMenuScene.h"
-#include "EncounterCreationScene.h"
-#include "../CombatTrackerLib/Utilities/UIUtils.h"
+#include "CombatTrackerApp/Scenes/MainMenuScene.h"
+#include "CombatTrackerApp/Scenes/EncounterCreationScene.h"
+#include "CombatTrackerLib/Utilities/UIUtils.h"
 
-#include "imgui.h"
-
+#include <imgui.h>
 #include <algorithm>
 #include <glad/glad.h>
 
 namespace CombatTrackerApp {
 
     MainMenuScene::MainMenuScene(CombatTrackerLib::App* app) :
-        m_titleTexture{ "assets/Title.png", 4, false, GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR},
         CombatTrackerLib::Scene{ app },
-        m_isMainMenuDockspaceInitialized{ false },
+        m_titleTexture{ "assets/Title.png", 4, false, GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR},
         m_UIThemeParameters{ -1, -1, false },
         m_chosenUIPreset{ m_applicationReference->getUITheme().preset },
-        m_selectedOptionsCategory{}
+        m_selectedOptionsCategory{},
+        m_isMainMenuDockspaceInitialized{ false }
 	{   
         m_mainMenuWindowClass.DockNodeFlagsOverrideSet =
             ImGuiDockNodeFlags_NoResize |
             ImGuiDockNodeFlags_NoSplit |
             ImGuiDockNodeFlags_NoTabBar;
 	}
-    void MainMenuScene::notifyScene(const ImGuiIO& imguiIO) {}
-    void MainMenuScene::updateScene(double timeInterval) {}
+    void MainMenuScene::notifyScene(const ImGuiIO&) {}
+    void MainMenuScene::updateScene(double) {}
 
     void MainMenuScene::renderUI() {
 

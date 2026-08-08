@@ -7,8 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <optional>
-
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace CombatTrackerLib {
 	template<typename E> requires std::is_enum_v<E>

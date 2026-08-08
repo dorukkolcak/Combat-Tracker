@@ -1,5 +1,11 @@
 #pragma once
 
+#include "CombatTrackerApp/Entities/Creature/Creature.h"
+#include "CombatTrackerApp/Entities/Creature/CreatureTypes.h"
+#include "CombatTrackerApp/Entities/Monster/Monster.h"
+#include "CombatTrackerApp/Entities/PlayerCharacter/PlayerCharacter.h"
+#include "CombatTrackerLib/Utilities/GenericUtils.h"
+
 #include <concepts>
 #include <filesystem>
 #include <string_view>
@@ -7,14 +13,7 @@
 #include <optional>
 #include <functional>
 #include <format>
-
-#include "nlohmann/json.hpp"
-
-#include "../Entities/Creature/Creature.h"
-#include "../Entities/Creature/CreatureTypes.h"
-#include "../Entities/Monster/Monster.h"
-#include "../Entities/PlayerCharacter/PlayerCharacter.h"
-#include "../CombatTrackerLib/Utilities/GenericUtils.h"
+#include <nlohmann/json.hpp>
 
 // The utilities here are application specific and use the library-provided JSON reading/writing functionality.
 namespace CombatTrackerApp {

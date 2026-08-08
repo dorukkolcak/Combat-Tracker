@@ -1,17 +1,16 @@
 #pragma once
 
+#include "CombatTrackerLib/Utilities/UIUtils.h"
+#include "CombatTrackerLib/Scene.h"
+#include "CombatTrackerApp/Entities/Creature/CreatureEnums.h"
+#include "CombatTrackerApp/Entities/Creature/Creature.h"
+
 #include <vector>
 #include <algorithm>
 #include <format>
 #include <string>
 #include <string_view>
-
-#include "../../CombatTrackerLib/Utilities/UIUtils.h"
-#include "../../CombatTrackerLib/Scene.h"
-#include "../Entities/Creature/CreatureEnums.h"
-#include "../Entities/Creature/Creature.h"
-
-#include "imgui_stdlib.h"
+#include <imgui_stdlib.h>
 
 namespace CombatTrackerApp {
 

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Window.h"
-#include "Scene.h"
-#include "Themes.h"
+#include "CombatTrackerLib/Window.h"
+#include "CombatTrackerLib/Scene.h"
+#include "CombatTrackerLib/Themes.h"
 
 #include <memory>
-#include <unordered_map>
 #include <vector>
+#include <unordered_map>
 #include <string_view>
 
 namespace CombatTrackerLib {

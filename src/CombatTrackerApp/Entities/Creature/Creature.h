@@ -1,13 +1,12 @@
 #pragma once
 
+#include "CombatTrackerApp/Entities/Creature/CreatureEnums.h"
+#include "CombatTrackerApp/Entities/Creature/CreatureTypes.h"
+
 #include <array>
 #include <cstddef>
 #include <string>
 #include <vector>
-
-#include "CreatureEnums.h"
-#include "CreatureTypes.h"
-
 
 namespace CombatTrackerApp {
 

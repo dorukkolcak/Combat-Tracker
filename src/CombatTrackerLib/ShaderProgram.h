@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Shader.h"
+#include "CombatTrackerLib/Shader.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/glm.hpp>

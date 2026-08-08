@@ -1,5 +1,5 @@
-#include "Shader.h"
-#include "./Utilities/GenericUtils.h"
+#include "CombatTrackerLib/Shader.h"
+#include "CombatTrackerLib/Utilities/GenericUtils.h"
 
 #include <algorithm>
 

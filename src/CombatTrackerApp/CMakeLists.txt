@@ -1,46 +1,11 @@
-add_executable(Combat-Tracker-App
-    main.cpp
-    
-    Entities/Creature/Creature.h
-    Entities/Creature/Creature.cpp
-    Entities/Creature/CreatureConstants.h
-    Entities/Creature/CreatureEnums.h
-    Entities/Creature/CreatureTypes.h
-
-    Entities/Monster/Monster.h
-    Entities/Monster/Monster.cpp
-    Entities/Monster/MonsterConstants.h
-
-    Entities/PlayerCharacter/PlayerCharacter.h
-    Entities/PlayerCharacter/PlayerCharacter.cpp
-    Entities/PlayerCharacter/PlayerCharacterConstants.h
-    Entities/PlayerCharacter/PlayerCharacterEnums.h
-
-    Entities/EntityStorage.h
-
-    Scenes/EncounterCreationScene.h
-    Scenes/EncounterCreationScene.cpp
-    Scenes/EntityCreationScene.h
-    Scenes/EntityCreationScene.cpp
-    Scenes/MonsterCreationScene.h
-    Scenes/MonsterCreationScene.cpp
-    Scenes/PlayerCharacterCreationScene.h
-    Scenes/PlayerCharacterCreationScene.cpp
-    Scenes/MainMenuScene.h
-    Scenes/MainMenuScene.cpp
-    Scenes/OverlayScene.h
-    Scenes/OverlayScene.cpp
-)
+# Create executable for the application.
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/CombatTrackerApp/*.cpp)
+file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/CombatTrackerApp/*.h)
+add_executable(Combat-Tracker-App ${SOURCES} ${HEADERS})
 
 # Link the static library we created earlier to the application.
 target_link_libraries(
     Combat-Tracker-App PRIVATE
     Combat-Tracker-Lib
-)
-
-# This is needed so that the assets can be accessed from the build directory.
-add_custom_command(TARGET Combat-Tracker-App POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${PROJECT_SOURCE_DIR}/assets $<TARGET_FILE_DIR:Combat-Tracker-App>/assets
-    COMMENT "Copying assets to the output directory"
+    Combat-Tracker-Options
 )

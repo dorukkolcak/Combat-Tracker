@@ -1,11 +1,11 @@
 #pragma once
 
+#include "CombatTrackerApp/Entities/Creature/CreatureEnums.h"
+
 #include <array>
 #include <cstddef>
 #include <unordered_map>
 #include <string_view>
-
-#include "CreatureEnums.h"
 
 namespace CombatTrackerApp {
 	inline const std::unordered_map<Skill, Ability> MAPPED_SKILLS {

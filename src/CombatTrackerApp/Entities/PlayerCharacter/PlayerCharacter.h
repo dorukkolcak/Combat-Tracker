@@ -1,12 +1,12 @@
 #pragma once
 
+#include "CombatTrackerApp/Entities/Creature/Creature.h"
+#include "CombatTrackerApp/Entities/PlayerCharacter/PlayerCharacterEnums.h"
+#include "CombatTrackerApp/Entities/PlayerCharacter/PlayerCharacterConstants.h"
+
 #include <array>
 #include <cstddef>
 #include <unordered_map>
-
-#include "../Creature/Creature.h"
-#include "PlayerCharacterEnums.h"
-#include "PlayerCharacterConstants.h"
 
 namespace CombatTrackerApp {
 

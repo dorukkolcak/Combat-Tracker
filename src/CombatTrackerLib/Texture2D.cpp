@@ -1,7 +1,7 @@
+#include "CombatTrackerLib/Texture2D.h"
+
 #include <stb_image.h>
 #include <glad/glad.h>
-
-#include "Texture2D.h"
 
 namespace CombatTrackerLib {
 	Texture2D::Texture2D(

@@ -1,4 +1,4 @@
-#include "ShaderProgram.h"
+#include "CombatTrackerLib/ShaderProgram.h"
 
 namespace CombatTrackerLib {
 	ShaderProgram::ShaderProgram(std::vector<Shader>& shaders) {

@@ -1,4 +1,4 @@
-#include "Monster.h"
+#include "CombatTrackerApp/Entities/Monster/Monster.h"
 
 namespace CombatTrackerApp {
 	Monster::Monster(CreatureStatBlock creatureStatBlock, double creatureCR, OverridableInt creatureXP) :

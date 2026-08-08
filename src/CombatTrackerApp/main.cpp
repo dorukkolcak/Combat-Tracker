@@ -1,6 +1,6 @@
-#include "../CombatTrackerLib/App.h"
-#include "./Scenes/OverlayScene.h"
-#include "./Scenes/MainMenuScene.h"
+#include "CombatTrackerLib/App.h"
+#include "CombatTrackerApp/Scenes/OverlayScene.h"
+#include "CombatTrackerApp/Scenes/MainMenuScene.h"
 
 int main() {
 	CombatTrackerLib::WindowSpecification windowSpec{ "CombatTrackerMainWindow", 1920, 1080, true, true };

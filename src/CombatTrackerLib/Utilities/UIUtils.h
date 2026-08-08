@@ -1,14 +1,13 @@
 #pragma once
 
-#include "imgui.h"
+#include "CombatTrackerLib/Texture2D.h"
 
+#include <imgui.h>
 #include <algorithm>
 #include <array>
 #include <cstddef>
 #include <string_view>
 #include <type_traits>
-
-#include "Texture2D.h"
 
 namespace CombatTrackerLib {
 
@@ -73,8 +72,8 @@ namespace CombatTrackerLib {
 
 		// Center the cursor position so that the image renders at the center of the content region.
 		auto cursorPos{ ImGui::GetCursorPos() };
-		cursorPos.x += std::max(0.0, (availableSize.x - displaySize.x) * 0.5);
-		cursorPos.y += std::max(0.0, (availableSize.y - displaySize.y) * 0.5);
+		cursorPos.x += std::max(0.0f, (availableSize.x - displaySize.x) * 0.5f);
+		cursorPos.y += std::max(0.0f, (availableSize.y - displaySize.y) * 0.5f);
 		ImGui::SetCursorPos(cursorPos);
 
 		// The tint is multiplied with the texel in the ImGui shader, so a white texture comes out as exactly the tint colour. 

@@ -1,12 +1,11 @@
-#include "EncounterCreationScene.h"
-#include "MainMenuScene.h"
-#include "MonsterCreationScene.h"
-#include "PlayerCharacterCreationScene.h"
-#include "../CombatTrackerLib/Utilities/GenericUtils.h"
+#include "CombatTrackerApp/Scenes/EncounterCreationScene.h"
+#include "CombatTrackerApp/Scenes/MainMenuScene.h"
+#include "CombatTrackerApp/Scenes/MonsterCreationScene.h"
+#include "CombatTrackerApp/Scenes/PlayerCharacterCreationScene.h"
+#include "CombatTrackerLib/Utilities/GenericUtils.h"
 
-#include "imgui_internal.h"
-
-#include "imgui_stdlib.h"
+#include <imgui_internal.h>
+#include <imgui_stdlib.h>
 
 namespace CombatTrackerApp {
 	EncounterCreationScene::EncounterCreationScene(CombatTrackerLib::App* app) :
@@ -18,8 +17,8 @@ namespace CombatTrackerApp {
 		m_isEncounterCreatorDockspaceInitialized{ false }
 	{}
 
-	void EncounterCreationScene::notifyScene(const ImGuiIO& imguiIO) {}
-	void EncounterCreationScene::updateScene(double timeInterval) {}
+	void EncounterCreationScene::notifyScene(const ImGuiIO&) {}
+	void EncounterCreationScene::updateScene(double) {}
 
 	void EncounterCreationScene::renderUI() {
 

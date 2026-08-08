@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string>
+#include "CombatTrackerApp/Entities/Creature/CreatureEnums.h"
 
-#include "CreatureEnums.h"
+#include <string>
 
 // The types here shouldn't be nested types as they are used by the builders.
 namespace CombatTrackerApp {

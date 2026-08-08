@@ -1,11 +1,11 @@
 #pragma once
 
+#include "CombatTrackerApp/Scenes/EntityCreationScene.h"
+#include "CombatTrackerApp/Entities/PlayerCharacter/PlayerCharacter.h"
+
 #include <array>
 #include <cstddef>
 #include <string_view>
-
-#include "EntityCreationScene.h"
-#include "../Entities/PlayerCharacter/PlayerCharacter.h"
 
 namespace CombatTrackerApp {
 

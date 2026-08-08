@@ -1,4 +1,4 @@
-#include "Creature.h"
+#include "CombatTrackerApp/Entities/Creature/Creature.h"
 
 namespace CombatTrackerApp {
 

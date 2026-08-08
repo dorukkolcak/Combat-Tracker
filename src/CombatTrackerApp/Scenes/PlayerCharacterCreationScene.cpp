@@ -1,7 +1,7 @@
-#include "PlayerCharacterCreationScene.h"
-#include "../CombatTrackerLib/Utilities/UIUtils.h"
-#include "../CombatTrackerLib/Utilities/GenericUtils.h"
-#include "../Entities/EntityStorage.h"
+#include "CombatTrackerApp/Scenes/PlayerCharacterCreationScene.h"
+#include "CombatTrackerLib/Utilities/UIUtils.h"
+#include "CombatTrackerLib/Utilities/GenericUtils.h"
+#include "CombatTrackerApp/Entities/EntityStorage.h"
 
 namespace CombatTrackerApp {
 	PlayerCharacterCreationScene::PlayerCharacterCreationScene(CombatTrackerLib::App* app) :

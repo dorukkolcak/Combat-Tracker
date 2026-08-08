@@ -1,8 +1,8 @@
-#include "MonsterCreationScene.h"
-#include "../Entities/Creature/CreatureConstants.h"
-#include "../Entities/Monster/MonsterConstants.h"
-#include "../CombatTrackerLib/Utilities/UIUtils.h"
-#include "../Entities/EntityStorage.h"
+#include "CombatTrackerApp/Scenes/MonsterCreationScene.h"
+#include "CombatTrackerApp/Entities/Creature/CreatureConstants.h"
+#include "CombatTrackerApp/Entities/Monster/MonsterConstants.h"
+#include "CombatTrackerLib/Utilities/UIUtils.h"
+#include "CombatTrackerApp/Entities/EntityStorage.h"
 
 #include <climits>
 

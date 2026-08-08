@@ -1,15 +1,13 @@
 #pragma once
 
+#include "CombatTrackerLib/Scene.h"
+#include "CombatTrackerLib/Texture2D.h"
+#include "CombatTrackerLib/Utilities/UIUtils.h"
+
 #include <array>
 #include <cstddef>
 #include <string_view>
-
-#include "../../CombatTrackerLib/Scene.h"
-#include "../../CombatTrackerLib/Texture2D.h"
-#include "../../CombatTrackerLib/Utilities/UIUtils.h"
-
-// ImGuiDockNodeFlags_NoWindowMenuButton below is a private flag, so the internal header is needed here.
-#include "imgui_internal.h"
+#include <imgui_internal.h>
 
 namespace CombatTrackerApp {
 	class MainMenuScene : public CombatTrackerLib::Scene {

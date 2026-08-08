@@ -1,7 +1,8 @@
 #pragma once
 
-#include "App.h"
-#include "imgui.h"
+#include "CombatTrackerLib/App.h"
+
+#include <imgui.h>
 
 namespace CombatTrackerLib {
 
