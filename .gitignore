@@ -42,6 +42,5 @@
 
 .vs
 build
-out
 imgui.ini
 CMakeUserPresets.json

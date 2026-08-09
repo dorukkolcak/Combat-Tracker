@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.25)
 project(Combat-Tracker LANGUAGES C CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -10,15 +10,45 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies.cmake)
 # so setting it after the dependencies are declared leaves every fetched and vendored target out of it and covers only ours.
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 
+# This conditional tries to mimic the "treat all informational warnings as errors" behaviour across all compilers.
+# Feel free to play around with the options here.
+# Modern, robust warning flags for pure C++ production environments
+if(MSVC)
+    set(CXX_WARNINGS 
+        /W4          # Baseline strict warnings
+        /utf-8       # Enforce UTF-8 source/execution character sets
+        /w15038      # Warn about out-of-order initializer lists
+        /w14265      # Warn about classes with virtual functions but non-virtual destructors
+        /w14242      # Warn about conversions with possible data loss
+        /w14287      # Warn about unsigned/negative constant mismatches
+        /permissive- # Enforce strict standards-conforming C++ conformance
+    )
+else()
+    set(CXX_WARNINGS 
+        -Wall 
+        -Wextra 
+        -Wpedantic
+        -Wshadow            # Local variables shadowing outer scopes
+        -Wnon-virtual-dtor  # Missing virtual destructors (match /w14265)
+        -Wold-style-cast    # Force static_cast / reinterpret_cast over C-casts
+        -Wconversion        # Explicitly flag implicit type truncation/coercion
+        -Wunused            # Catch forgotten dead code/variables
+    )
+endif()
+
 # One place to keep the language standard and the warning flags, linked privately into each of our own targets.
 # An INTERFACE library is used because it carries no sources or build output of its own, it only hands its usage
 # requirements to whatever links it, which keeps the four targets from repeating the same generator expressions.
 add_library(Combat-Tracker-Options INTERFACE)
 target_compile_features(Combat-Tracker-Options INTERFACE cxx_std_23)
 target_compile_options(Combat-Tracker-Options INTERFACE
-    $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/W4;/utf-8;/w15038>
-    $<$<COMPILE_LANG_AND_ID:CXX,GNU,Clang,AppleClang>:-Wall;-Wextra>
+    $<$<COMPILE_LANGUAGE:CXX>:${CXX_WARNINGS}>
 )
+
+# This forces us to not include third-party dependencies using double braces. We should include them using angle brackets.
+if(MSVC)
+    target_compile_options(Combat-Tracker-Options INTERFACE /external:W0 /external:anglebrackets)
+endif()
 
 # Setup directories.
 add_subdirectory(src/CombatTrackerLib)

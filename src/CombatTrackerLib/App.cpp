@@ -252,19 +252,19 @@ namespace CombatTrackerLib {
 		}
 		#if defined(_WIN32)
 
-			// Get the value of the "APPDATA" environment variable. 
+			// Get the value of the "APPDATA" environment variable.
 			// The reason we don't use std::getenv() here is because it doesn't work with wide characters, particularly a windows issue.
-			wchar_t* applicationData{};
-			std::size_t length{};
-			const auto error{ _wdupenv_s(&applicationData, &length, L"APPDATA") };
-			if (error != 0 || applicationData == nullptr) {
+			const auto required{ GetEnvironmentVariableW(L"APPDATA", nullptr, 0) };
+			if (required == 0) {
 				return {};
 			}
-
-			// We need to use a C-style memory management scheme here. Which frankly I got kinda unfamiliar with after using smart pointers, lol.
-			const std::filesystem::path root{ applicationData };
-			std::free(applicationData);
-			return root / applicationName;
+			std::wstring applicationData(required, L'\0');
+			const auto written{ GetEnvironmentVariableW(L"APPDATA", applicationData.data(), required) };
+			if (written == 0 || written >= required) {
+				return {};
+			}
+			applicationData.resize(written);
+			return std::filesystem::path{ applicationData } / applicationName;
 		#elif defined(__APPLE__)
 			const auto* home{ std::getenv("HOME") };
 			if (home == nullptr || home[0] == '\0') {

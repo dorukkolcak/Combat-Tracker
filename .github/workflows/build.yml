@@ -16,32 +16,49 @@ concurrency:
 
 jobs:
   build:
-    name: ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.toolchain.name }} ${{ matrix.preset }}
+    runs-on: ${{ matrix.toolchain.os }}
     strategy:
       # Never cancel the other platforms just because one failed: the point of
       # this matrix is to see every platform's result on a single run.
       fail-fast: false
       matrix:
-        include:
-          - name: Windows x64 Debug
+        preset: [release, debug]
+        toolchain:
+          - id: windows-msvc
+            name: Windows MSVC
             os: windows-latest
-            preset: windows-debug
-          - name: Windows x64 Release
+            c: cl
+            cxx: cl
+          - id: windows-clang
+            name: Windows Clang
             os: windows-latest
-            preset: windows-release
-          - name: Linux Debug
+            c: clang-cl
+            cxx: clang-cl
+          - id: windows-gcc
+            name: Windows GCC
+            os: windows-latest
+            c: gcc
+            cxx: g++
+          - id: linux-gcc
+            name: Linux GCC
             os: ubuntu-latest
-            preset: linux-debug
-          - name: Linux Release
+            c: gcc
+            cxx: g++
+          - id: linux-clang
+            name: Linux Clang
             os: ubuntu-latest
-            preset: linux-release
-          - name: macOS Debug
+            c: clang
+            cxx: clang++
+          - id: macos-clang
+            name: macOS Clang
             os: macos-latest
-            preset: macos-debug
-          - name: macOS Release
-            os: macos-latest
-            preset: macos-release
+            c: clang
+            cxx: clang++
+
+    env:
+      CC: ${{ matrix.toolchain.c }}
+      CXX: ${{ matrix.toolchain.cxx }}
 
     steps:
       - name: Check out repository
@@ -63,39 +80,40 @@ jobs:
 
       - name: Install Ninja (macOS)
         if: runner.os == 'macOS'
-        run: brew install ninja
+        run: brew install ninja || true
 
+      # cl and clang-cl both need the MSVC headers, libraries and linker on PATH.
+      # The MinGW leg deliberately skips this so that it resolves its own toolchain.
       - name: Set up MSVC developer environment
-        if: runner.os == 'Windows'
+        if: matrix.toolchain.id == 'windows-msvc' || matrix.toolchain.id == 'windows-clang'
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
+
+      - name: Install MinGW-w64 and Ninja
+        if: matrix.toolchain.id == 'windows-gcc'
+        run: choco install mingw ninja -y --no-progress
+
       - name: Cache fetched dependencies
         uses: actions/cache@v6
         with:
-          path: ${{ github.workspace }}/.deps
-          key: deps-${{ runner.os }}-${{ hashFiles('Dependencies.cmake') }}
+          path: build/${{ matrix.preset }}/_deps
+          key: deps-${{ matrix.toolchain.id }}-${{ matrix.preset }}-${{ hashFiles('Dependencies.cmake') }}
           restore-keys: |
-            deps-${{ runner.os }}-
+            deps-${{ matrix.toolchain.id }}-${{ matrix.preset }}-
 
-      - name: Configure
-        run: cmake --preset ${{ matrix.preset }} -D FETCHCONTENT_BASE_DIR=${{ github.workspace }}/.deps
+      - name: Configure, build and test
+        run: cmake --workflow --preset ${{ matrix.preset }}
 
-      - name: Build
-        run: cmake --build --preset ${{ matrix.preset }}
-
-      - name: Test
-        run: ctest --preset ${{ matrix.preset }}
-
-      # Only the release presets are kept. Debug binaries are large and rarely what you want to hand to someone.
+      # Only the release builds are kept. Debug binaries are large and rarely what you want to hand to someone.
       # The two paths cover both naming conventions, and only one of them matches on any given runner.
       - name: Upload application binary
-        if: contains(matrix.preset, 'release')
+        if: matrix.preset == 'release'
         uses: actions/upload-artifact@v7
         with:
-          name: Combat-Tracker-${{ matrix.preset }}
+          name: Combat-Tracker-${{ matrix.toolchain.id }}
           path: |
-            out/build/${{ matrix.preset }}/src/CombatTrackerApp/Combat-Tracker-App
-            out/build/${{ matrix.preset }}/src/CombatTrackerApp/Combat-Tracker-App.exe
+            build/release/src/CombatTrackerApp/Combat-Tracker-App
+            build/release/src/CombatTrackerApp/Combat-Tracker-App.exe
           if-no-files-found: error
           retention-days: 14

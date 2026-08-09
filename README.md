@@ -41,53 +41,64 @@ The project is in early development, so the list above should be taken as a plan
 - stb_image
 - GoogleTest
 
+## Prerequisites
+
+- A C++23 compiler
+- OpenGL 3.3+
+- CMake 3.25+
+- Ninja
+- Git
+
+On Linux, GLFW needs the system windowing headers:
+
+```bash
+sudo apt install xorg-dev libwayland-dev libxkbcommon-dev wayland-protocols extra-cmake-modules
+```
+
 ## Building
 
-The build uses CMake presets with the Ninja generator, and requires CMake 3.24 or newer.
+Clone the repository:
 
-### Prerequisites
-
-**Windows:** Visual Studio 2022 with the C++ toolchain, plus Ninja (it ships with the VS installer). The
-Windows presets pin `cl.exe`, so **every CMake command has to run from a Developer shell**. Either launch a
-"x64 Native Tools Command Prompt for VS 2022" or run `vcvars64.bat` in the shell first. Without this, the
-configure step fails to find the compiler, which is easily the most common way to have the build not work.
-
-**Linux.** A C++23 capable GCC or Clang, Ninja, and the development headers GLFW needs. GLFW builds both its
-X11 and Wayland backends, so both sets have to be present:
-
-```
-sudo apt-get install -y ninja-build xorg-dev libwayland-dev libxkbcommon-dev wayland-protocols extra-cmake-modules
+```bash
+git clone https://github.com/dorukkolcak/CombatTracker.git
+cd CombatTracker
 ```
 
-**macOS.** The Xcode command line tools and Ninja (`brew install ninja`).
+Configure, build and test, all in one command:
 
-### Configure, Build And Test
-
-There are six presets, one per platform and configuration: `windows-debug`, `windows-release`, `linux-debug`,
-`linux-release`, `macos-debug` and `macos-release`. Each configure preset has a matching build and test preset
-under the same name.
-
+```bash
+cmake --workflow --preset release
 ```
-cmake --preset windows-debug            # configure
-cmake --build --preset windows-debug    # build
-ctest --preset windows-debug            # test
+
+Use `--preset debug` for a debug build.
+
+To build with a specific compiler, set `CXX` first:
+
+```bash
+CXX=clang++ cmake --workflow --preset release           # bash
+$env:CXX="clang++"; cmake --workflow --preset release   # PowerShell
 ```
+
+On Windows, every compiler that targets the MSVC ABI needs the MSVC headers and libraries on `PATH`, which
+covers `cl`, `clang-cl` and `clang++`. Run the command from a Developer Command Prompt when you pick one of
+those. MinGW GCC needs no special shell, and neither does any compiler on Linux or macOS.
 
 ## Running
 
-```
-out/build/windows-debug/src/CombatTrackerApp/Combat-Tracker-App.exe
+```bash
+./build/release/src/CombatTrackerApp/Combat-Tracker-App
 ```
 
-Dear ImGui writes an `imgui.ini` next to the working directory to remember window positions. It is ignored by
-git and can be deleted at any point to get the default layout back.
+Dear ImGui writes an `imgui.ini` in the working directory to remember window positions. It is ignored by git
+and can be deleted at any point to get the default layout back.
 
 ## Configuring
 
-- `-D BUILD_TESTING=OFF` skips fetching GoogleTest entirely, which is worth doing for a faster first configure
-  if you are not going to run the tests.
+- `cmake --workflow` takes no `-D` options, so configure and build separately when you need one:
+  `cmake --preset release -D BUILD_TESTING=OFF` followed by `cmake --build --preset release`.
+- `-D BUILD_TESTING=OFF` skips fetching and building GoogleTest, which is worth doing for a faster first
+  configure if you are not going to run the tests.
 - `-D FETCHCONTENT_BASE_DIR=<path>` moves the fetched dependencies somewhere shared, so several build
-  directories do not each download their own copy. CI uses this to cache them between runs.
-- `CMAKE_EXPORT_COMPILE_COMMANDS` is on, so a `compile_commands.json` lands in the build directory for clangd
-  and similar tooling.
+  directories do not each download their own copy.
+- `compile_commands.json` is written to the build directory for clangd and similar tooling.
 - Personal preset overrides belong in `CMakeUserPresets.json`, which is ignored by git.
