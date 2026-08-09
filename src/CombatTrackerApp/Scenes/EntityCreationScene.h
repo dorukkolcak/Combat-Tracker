@@ -10,6 +10,7 @@
 #include <format>
 #include <string>
 #include <string_view>
+#include <cstddef>
 #include <imgui_stdlib.h>
 
 namespace CombatTrackerApp {
@@ -271,7 +272,7 @@ namespace CombatTrackerApp {
 		// Delete marked items safely, starting from the largest index to the smallest index.
 		std::sort(s_markedForDeletion.begin(), s_markedForDeletion.end());
 		for (size_t i = s_markedForDeletion.size(); i-- > 0;) {
-			currentItems.erase(currentItems.begin() + s_markedForDeletion[i]);
+			currentItems.erase(currentItems.begin() + static_cast<std::ptrdiff_t>(s_markedForDeletion[i]));
 		}
 		s_markedForDeletion.clear();
 

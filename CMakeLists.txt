@@ -8,7 +8,10 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies.cmake)
 # CMAKE_COMPILE_WARNING_AS_ERROR is deliberately set here rather than at the top of the file.
 # The COMPILE_WARNING_AS_ERROR property of a target is initialized from this variable at the moment the target is created,
 # so setting it after the dependencies are declared leaves every fetched and vendored target out of it and covers only ours.
-set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
+# We only set this during the CI builds as it makes testing things locally really cumbersome.
+if(DEFINED ENV{CI})
+    set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
+endif()
 
 # This conditional tries to mimic the "treat all informational warnings as errors" behaviour across all compilers.
 # I don't think it is possible to have a direct reflection of all warnings for all compilers. 
@@ -20,6 +23,8 @@ if(MSVC)
         /utf-8       # Enforce UTF-8 source/execution character sets
         /w15038      # Warn about out-of-order initializer lists
         /w14265      # Warn about classes with virtual functions but non-virtual destructors
+        /w14263      # Member function hides base class virtual function without overriding it
+        /w14266      # No override available for virtual function overload; function is hidden
         /w14242      # Warn about conversions with possible data loss
         /w14287      # Warn about unsigned/negative constant mismatches
         /permissive- # Enforce strict standards-conforming C++ conformance
@@ -31,11 +36,14 @@ else()
         -Wpedantic
         -Wshadow            # Local variables shadowing outer scopes
         -Wnon-virtual-dtor  # Missing virtual destructors (match /w14265)
+        -Woverloaded-virtual# Overloaded virtual functions hide base variants (match /w14263 & /w14266)
+        -Wcast-align        # Warn about pointer casts that increase alignment requirements
         -Wold-style-cast    # Force static_cast / reinterpret_cast over C-casts
         -Wconversion        # Explicitly flag implicit type truncation/coercion
         -Wunused            # Catch forgotten dead code/variables
     )
 endif()
+
 
 # One place to keep the language standard and the warning flags, linked privately into each of our own targets.
 # An INTERFACE library is used because it carries no sources or build output of its own, it only hands its usage

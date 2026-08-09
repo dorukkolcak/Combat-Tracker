@@ -664,7 +664,7 @@ namespace CombatTrackerApp {
 
 		std::sort(s_actionsMarkedForDeletion.begin(), s_actionsMarkedForDeletion.end());
 		for (size_t i{ s_actionsMarkedForDeletion.size() }; i-- > 0;) {
-			m_currentCreatureStatBlock.actions.erase(m_currentCreatureStatBlock.actions.begin() + s_actionsMarkedForDeletion[i]);
+			m_currentCreatureStatBlock.actions.erase(m_currentCreatureStatBlock.actions.begin() + static_cast<std::ptrdiff_t>(s_actionsMarkedForDeletion[i]));
 		}
 		s_actionsMarkedForDeletion.clear();
 

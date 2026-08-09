@@ -15,7 +15,7 @@ namespace CombatTrackerApp {
 		COUNT,
 	};
 	enum class Alignment {
-		UNALIGNED,
+		UNALIGNED_ALIGNMENT, // Same class of bug as above, found through CI.
 		LAWFUL_GOOD,
 		NEUTRAL_GOOD,
 		CHAOTIC_GOOD,

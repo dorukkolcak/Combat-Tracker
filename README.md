@@ -100,5 +100,8 @@ and can be deleted at any point to get the default layout back.
   configure if you are not going to run the tests.
 - `-D FETCHCONTENT_BASE_DIR=<path>` moves the fetched dependencies somewhere shared, so several build
   directories do not each download their own copy.
+- Warnings are always enabled, but only become errors when the `CI` environment variable is set, which every
+  CI provider does automatically. To reproduce that strictness locally, configure with
+  `-D CMAKE_COMPILE_WARNING_AS_ERROR=ON`.
 - `compile_commands.json` is written to the build directory for clangd and similar tooling.
 - Personal preset overrides belong in `CMakeUserPresets.json`, which is ignored by git.
