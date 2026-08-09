@@ -11,8 +11,9 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies.cmake)
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 
 # This conditional tries to mimic the "treat all informational warnings as errors" behaviour across all compilers.
+# I don't think it is possible to have a direct reflection of all warnings for all compilers. 
+# This is where Github Workflows should hopefully catch some erros.
 # Feel free to play around with the options here.
-# Modern, robust warning flags for pure C++ production environments
 if(MSVC)
     set(CXX_WARNINGS 
         /W4          # Baseline strict warnings

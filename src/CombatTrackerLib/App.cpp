@@ -40,7 +40,13 @@ namespace CombatTrackerLib {
 	{
 		glfwInit();
 		m_windowPointer = std::make_unique<Window>(&(m_specfication.windowSpecification), m_specfication.name);
-		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+		/*
+		Use reinterpret_cast here to treat expression as if it had the target type.
+		We are casting a function pointer here to another function pointer that returns a void pointer.
+		This is possibly an unsafe conversion so use reinterpret_cast.
+		See: https://computergraphics.stackexchange.com/questions/8639/this-function-syntax-is-confusing-me
+		*/
+		if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) { 
 			glfwTerminate();
 			assert(false);
 		}
