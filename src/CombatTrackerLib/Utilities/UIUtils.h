@@ -62,12 +62,14 @@ namespace CombatTrackerLib {
 		// Scale down the image size in case the available container is smaller than the texture itself.
 		// This scaling should be done uniformly.
 		const auto availableSize{ ImGui::GetContentRegionAvail() };
-		const auto scaleX{ availableSize.x / texture.getWidth() };
-		const auto scaleY{ availableSize.y / texture.getHeight() };
+		const auto width{ static_cast<float>(texture.getWidth()) };
+		const auto height{ static_cast<float>(texture.getHeight()) };
+		const auto scaleX{ availableSize.x / width };
+		const auto scaleY{ availableSize.y / height };
 
 		// The scale is defaulted to 1.0 in case the region size is larger than the image size.
 		const auto finalScale{ std::min(std::min(scaleX, scaleY), 1.0f) };
-		const auto displaySize{ ImVec2(texture.getWidth() * finalScale, texture.getHeight() * finalScale) };
+		const auto displaySize{ ImVec2(width * finalScale, height * finalScale) };
 
 		// Center the cursor position so that the image renders at the center of the content region.
 		auto cursorPos{ ImGui::GetCursorPos() };
