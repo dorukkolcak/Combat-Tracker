@@ -18,8 +18,8 @@ namespace CombatTrackerLib {
 		}
 		auto mainScale{ ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()) };
 		m_window = glfwCreateWindow(
-			static_cast<int> (mainScale * m_specificationPointer->width),
-			static_cast<int> (mainScale * m_specificationPointer->height),
+			static_cast<int> (mainScale * static_cast<float>(m_specificationPointer->width)),
+			static_cast<int> (mainScale * static_cast<float>(m_specificationPointer->height)),
 			applicationName.data(),
 			nullptr,
 			nullptr
