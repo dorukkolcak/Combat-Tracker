@@ -47,7 +47,7 @@ target_compile_options(Combat-Tracker-Options INTERFACE
 )
 
 # This forces us to not include third-party dependencies using double braces. We should include them using angle brackets.
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(Combat-Tracker-Options INTERFACE /external:W0 /external:anglebrackets)
 endif()
 

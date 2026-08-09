@@ -11,7 +11,7 @@ namespace CombatTrackerLib {
 		// TODO: Ideally we would like to limit the texture parameters to a set of valid options instead of any arbitrary value.
 		Texture2D(
 			const std::filesystem::path& texturePath,
-			unsigned int numberOfDesiredChannels,
+			int numberOfDesiredChannels,
 			bool isOriginAtTop,
 			int sAxisWrap,
 			int tAxisWrap,
@@ -20,7 +20,7 @@ namespace CombatTrackerLib {
 		);
 		Texture2D(
 			const std::filesystem::path& texturePath,
-			unsigned int numberOfDesiredChannels,
+			int numberOfDesiredChannels,
 			bool isOriginAtTop,
 			int sAxisWrap,
 			int tAxisWrap,

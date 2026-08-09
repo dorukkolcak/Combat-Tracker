@@ -6,7 +6,7 @@
 namespace CombatTrackerLib {
 	Texture2D::Texture2D(
 		const std::filesystem::path& texturePath,
-		unsigned int numberOfDesiredChannels,
+		int numberOfDesiredChannels,
 		bool isOriginAtTop,
 		int sAxisWrap,
 		int tAxisWrap,
@@ -28,7 +28,7 @@ namespace CombatTrackerLib {
 
 	Texture2D::Texture2D(
 		const std::filesystem::path& texturePath,
-		unsigned int numberOfDesiredChannels,
+		int numberOfDesiredChannels,
 		bool isOriginAtTop,
 		int sAxisWrap,
 		int tAxisWrap,

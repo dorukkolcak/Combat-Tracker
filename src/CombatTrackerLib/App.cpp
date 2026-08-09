@@ -5,8 +5,12 @@
 
 	// Windows.h defines min and max as macros, which collides with the std::min/std::max calls elsewhere in the library.
 	// NOMINMAX suppresses them and WIN32_LEAN_AND_MEAN drops the parts of the header we have no use for.
-	#define WIN32_LEAN_AND_MEAN
-	#define NOMINMAX
+	#ifndef WIN32_LEAN_AND_MEAN
+		#define WIN32_LEAN_AND_MEAN
+	#endif
+	#ifndef NOMINMAX
+		#define NOMINMAX
+	#endif
 	#include <Windows.h>
 	#include <string>
 #elif defined(__APPLE__)
