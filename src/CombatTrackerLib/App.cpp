@@ -35,12 +35,13 @@
 
 
 namespace CombatTrackerLib {
-	App::App(Specification specification) : 
+	App::App(Specification specification) :
 		m_specfication{ std::move(specification) }, // Specification should be owned by the application so move it.
-		m_resourceDirectory{ findResourceDirectory()},
-		m_userDataDirectory{findUserDataDirectory(m_specfication.name)},
+		m_resourceDirectory{ findResourceDirectory() },
+		m_userDataDirectory{ findUserDataDirectory(m_specfication.name) },
+		m_localeReader{ m_specfication.locale, &m_resourceDirectory },
 		m_isCloseSignalled{ false },
-		m_isUIPresetApplied{false}
+		m_isUIPresetApplied{ false }
 	{
 		glfwInit();
 		m_windowPointer = std::make_unique<Window>(&(m_specfication.windowSpecification), m_specfication.name);
@@ -317,5 +318,8 @@ namespace CombatTrackerLib {
 	}
 	const std::filesystem::path& App::getUserDataDirectory() const {
 		return m_userDataDirectory;
+	}
+	const LocaleReader& App::getLocaleReader() const {
+		return m_localeReader;
 	}
 }

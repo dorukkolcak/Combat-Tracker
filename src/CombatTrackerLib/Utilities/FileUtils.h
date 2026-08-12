@@ -30,7 +30,7 @@ namespace CombatTrackerLib {
 		}
 
 		// Passing false as the last argument hands back a discarded value on malformed input instead of throwing an error.
-		auto contents{ nlohmann::json::parse(file, nullptr, false) };
+		auto contents{ nlohmann::json::parse(file, nullptr, false, true) };
 		if (contents.is_discarded()) {
 			return std::nullopt;
 		};

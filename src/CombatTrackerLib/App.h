@@ -3,6 +3,7 @@
 #include "CombatTrackerLib/Window.h"
 #include "CombatTrackerLib/Scene.h"
 #include "CombatTrackerLib/Themes.h"
+#include "CombatTrackerLib/LocaleReader.h"
 
 #include <string>
 #include <memory>
@@ -16,6 +17,7 @@ namespace CombatTrackerLib {
 	public:
 		struct Specification {
 			UIPreset uiPreset{};
+			std::string locale{};
 			CombatTrackerLib::WindowSpecification windowSpecification{};
 			std::string name{};
 		};
@@ -44,6 +46,7 @@ namespace CombatTrackerLib {
 		
 		const std::filesystem::path& getResourceDirectory() const;
 		const std::filesystem::path& getUserDataDirectory() const;
+		const LocaleReader& getLocaleReader() const;
 
 	private:
 		Specification m_specfication{};
@@ -55,8 +58,10 @@ namespace CombatTrackerLib {
 		std::vector<Scene*> m_sceneDeletionQueue{};
 		std::unordered_map<Scene*, std::unique_ptr<Scene>> m_sceneTransitionQueue{};
 
-		std::filesystem::path m_resourceDirectory;
-		std::filesystem::path m_userDataDirectory;
+		std::filesystem::path m_resourceDirectory{};
+		std::filesystem::path m_userDataDirectory{};
+
+		LocaleReader m_localeReader{};
 
 		bool m_isCloseSignalled{}; 
 		bool m_isUIPresetApplied{};
