@@ -319,7 +319,7 @@ namespace CombatTrackerLib {
 	const std::filesystem::path& App::getUserDataDirectory() const {
 		return m_userDataDirectory;
 	}
-	const LocaleReader& App::getLocaleReader() const {
+	const LocaleProvider& App::getLocaleProvider() const {
 		return m_localeReader;
 	}
 }

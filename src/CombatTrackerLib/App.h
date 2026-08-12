@@ -3,7 +3,7 @@
 #include "CombatTrackerLib/Window.h"
 #include "CombatTrackerLib/Scene.h"
 #include "CombatTrackerLib/Themes.h"
-#include "CombatTrackerLib/LocaleReader.h"
+#include "CombatTrackerLib/LocaleProvider.h"
 
 #include <string>
 #include <memory>
@@ -46,7 +46,7 @@ namespace CombatTrackerLib {
 		
 		const std::filesystem::path& getResourceDirectory() const;
 		const std::filesystem::path& getUserDataDirectory() const;
-		const LocaleReader& getLocaleReader() const;
+		const LocaleProvider& getLocaleProvider() const;
 
 	private:
 		Specification m_specfication{};
@@ -61,7 +61,7 @@ namespace CombatTrackerLib {
 		std::filesystem::path m_resourceDirectory{};
 		std::filesystem::path m_userDataDirectory{};
 
-		LocaleReader m_localeReader{};
+		LocaleProvider m_localeReader{};
 
 		bool m_isCloseSignalled{}; 
 		bool m_isUIPresetApplied{};
