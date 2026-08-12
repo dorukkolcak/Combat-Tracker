@@ -25,8 +25,6 @@ namespace CombatTrackerApp {
 
 	private:
 
-		inline static constexpr std::string_view ENTITY_LABEL{ "Player Character" };
-
 		// Held by value for the same reason the creature block is. See EntityCreationScene.
 		PlayerStatBlock m_currentPlayerStatBlock{};
 

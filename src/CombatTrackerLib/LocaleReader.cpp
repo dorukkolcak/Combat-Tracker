@@ -37,10 +37,14 @@ namespace CombatTrackerLib {
 		}
 		return true;
 	}
-	std::string_view LocaleReader::getText(std::string_view key) const {
-		return m_locale->at(key.data());
+
+	// See https://json.nlohmann.me/features/json_pointer/. Json pointer is used to access nested values.
+	std::string_view LocaleReader::getText(const std::string& key) const {
+		nlohmann::json::json_pointer accessPointer{ key }; 
+		return m_locale->at(accessPointer);
 	}
-	const std::vector<nlohmann::json>& LocaleReader::getList(std::string_view key) const {
-		return m_locale->at(key.data()).get_ref<const std::vector<nlohmann::json>&>();
+	const nlohmann::json::array_t& LocaleReader::getList(const std::string& key) const {
+		nlohmann::json::json_pointer accessPointer{ key };
+		return m_locale->at(accessPointer).get_ref<const nlohmann::json::array_t&>();
 	}
 }

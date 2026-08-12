@@ -23,8 +23,8 @@ namespace CombatTrackerLib {
 		
 		bool setLocale(std::string_view localeCode);
 
-		std::string_view getText(std::string_view key) const;
-		const std::vector<nlohmann::json>& getList(std::string_view key) const;
+		std::string_view getText(const std::string& key) const;
+		const nlohmann::json::array_t& getList(const std::string& key) const;
 	private:
 		std::optional<nlohmann::json> m_locale{};
 		std::filesystem::path* m_resourceDirectoryPathPointer{};

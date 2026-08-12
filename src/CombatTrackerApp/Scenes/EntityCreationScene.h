@@ -30,14 +30,11 @@ namespace CombatTrackerApp {
 	protected:
 
 		/*
-		Constant UI labels. These should be static as they shouldn't be instantiated per object/scene.
-		They are string_views, so they cost nothing to hold and they are usable at compile time.
-		The concatenation these are used in goes through std::format, since a string_view has no operator+ to chain with.
+		These two only ever reach the ID half of a widget label, so they stay untranslated on purpose.
+		Putting them in the locale would make a checkbox change identity with the language.
 		*/
-		inline static constexpr std::string_view PROFICIENCY_SUFFIX{ " Proficiency" };
-		inline static constexpr std::string_view EXPERTISE_SUFFIX{ " Expertise" };
-		inline static constexpr std::string_view TRAIT_LABEL{ "Trait" };
-		inline static constexpr std::string_view EQUIPMENT_LABEL{ "Gear" };
+		inline static constexpr std::string_view PROFICIENCY_SUFFIX{ "Proficiency" };
+		inline static constexpr std::string_view EXPERTISE_SUFFIX{ "Expertise" };
 		inline static constexpr float MIN_CHILD_HEIGHT{ 180.f };
 		inline static constexpr ImGuiWindowFlags ENTITY_CREATION_WINDOW_FLAGS{
 			ImGuiWindowFlags_NoTitleBar |
@@ -80,13 +77,13 @@ namespace CombatTrackerApp {
 		void renderSpeedInfo();
 
 		// Proficiency and expertise items get changed in this function so pass them as non-const lvalue reference.
-		template <typename M, typename N>
+		template <typename M>
 		void renderProficiencyAndExpertiseCluster(
 			std::string_view proficiencyLabel,
 			std::string_view expertiseLabel,
 			M& proficiencyItems,
 			M& expertiseItems,
-			const N& itemNames
+			const nlohmann::json::array_t& itemNames
 		);
 		void renderAbilityScoresAndModifiers();
 		void renderSavingThrowModifiers();
@@ -95,11 +92,11 @@ namespace CombatTrackerApp {
 		void renderSenses();
 
 		// Simple helper method for rendering multi-selectable parameters.
-		template <typename M, typename N>
-		void renderMutuallyExclusiveCheckboxCluster(M& items, const N& names, std::string_view label, int columnCount);
+		template <typename M>
+		void renderMutuallyExclusiveCheckboxCluster(M& items, const nlohmann::json::array_t& names, std::string_view label, int columnCount);
 
 		template <typename I>
-		void renderAddables(std::vector<I>& currentItems, std::string_view label);
+		void renderAddables(std::vector<I>& currentItems, std::string_view label, std::string_view stableID);
 		void renderActions();
 		void renderNonOverridableInputInt(int& value, std::string_view label);
 
@@ -151,15 +148,15 @@ namespace CombatTrackerApp {
 			value.isOverridden = false;
 		}
 	}
-	template <typename M, typename N>
-	void EntityCreationScene::renderMutuallyExclusiveCheckboxCluster(M& items, const N& names, std::string_view label, int columnCount) {
+	template <typename M>
+	void EntityCreationScene::renderMutuallyExclusiveCheckboxCluster(M& items, const nlohmann::json::array_t& names, std::string_view label, int columnCount) {
 		ImGui::TextWrapped("%s", label.data());
 		if (ImGui::BeginTable(label.data(), columnCount, ImGuiTableFlags_SizingStretchSame)) {
 
 			// The whole table is drawn and the flags sit in an array of the same length, so one index walks both plain arrays.
 			for (size_t i{}; i < names.size(); ++i) {
 				ImGui::TableNextColumn();
-				ImGui::Checkbox(names[i].data(), &items[i]);
+				ImGui::Checkbox(names[i].get_ref<const std::string&>().c_str(), &items[i]);
 			}
 			ImGui::EndTable();
 		}
@@ -170,13 +167,13 @@ namespace CombatTrackerApp {
 	The two clusters have a simple deduping logic between them.
 	We can't have proficiency and expertise of the same "thing" at the same time.
 	*/
-	template <typename M, typename N>
+	template <typename M>
 	void EntityCreationScene::renderProficiencyAndExpertiseCluster(
 		std::string_view proficiencyLabel,
 		std::string_view expertiseLabel,
 		M& proficiencyItems,
 		M& expertiseItems,
-		const N& itemNames
+		const nlohmann::json::array_t& itemNames
 	) {
 		if (ImGui::BeginTable("ProfExpTable", 2, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_BordersInnerV)) {
 
@@ -190,7 +187,7 @@ namespace CombatTrackerApp {
 			ImGui::TableSetColumnIndex(0);
 			ImGui::TextWrapped("%s", proficiencyLabel.data());
 			for (size_t i{}; i < itemNames.size(); ++i) {
-				if (ImGui::Checkbox(std::format("{}##{}", itemNames[i], PROFICIENCY_SUFFIX).c_str(), &proficiencyItems[i])) {
+				if (ImGui::Checkbox(std::format("{}##{}{}", itemNames[i].get_ref<const std::string&>(), PROFICIENCY_SUFFIX, i).c_str(), &proficiencyItems[i])) {
 					if (proficiencyItems[i] && expertiseItems[i]) {
 						expertiseItems[i] = false;
 					}
@@ -201,7 +198,7 @@ namespace CombatTrackerApp {
 			ImGui::TableSetColumnIndex(1);
 			ImGui::TextWrapped("%s", expertiseLabel.data());
 			for (size_t i{}; i < itemNames.size(); ++i) {
-				if (ImGui::Checkbox(std::format("{}##{}", itemNames[i], EXPERTISE_SUFFIX).c_str(), &expertiseItems[i])) {
+				if (ImGui::Checkbox(std::format("{}##{}{}", itemNames[i].get_ref<const std::string&>(), EXPERTISE_SUFFIX, i).c_str(), &expertiseItems[i])) {
 					if (expertiseItems[i] && proficiencyItems[i]) {
 						proficiencyItems[i] = false;
 					}
@@ -213,7 +210,8 @@ namespace CombatTrackerApp {
 
 	// Chunky helper used for rendering traits and gear items.
 	template <typename I>
-	void EntityCreationScene::renderAddables(std::vector<I>& currentItems, std::string_view label) {
+	void EntityCreationScene::renderAddables(std::vector<I>& currentItems, std::string_view label, std::string_view stableID) {
+		const auto& localeReader{ m_applicationPointer->getLocaleReader() };
 		ImGui::TextWrapped("%s", label.data());
 
 		// It is fine for this to be actually static as we clear it on each render pass anyways.
@@ -222,7 +220,9 @@ namespace CombatTrackerApp {
 		for (size_t i{}; i < currentItems.size(); ++i) {
 
 			// Cache the string to prevent recomputing it.
-			const std::string popupName{ std::format("Edit {}##{}", label, i) };
+			const std::string popupName{
+				std::format("{}###{}Edit{}", std::vformat(localeReader.getText("/scenes/entityCreation/addables/edit"), std::make_format_args(label)), stableID, i)
+			};
 
 			// Push a separate id to the ID stack for each item.
 			ImGui::PushID(static_cast<int>(i));
@@ -252,15 +252,15 @@ namespace CombatTrackerApp {
 
 				// The layouting is quite similar to the big entity creation popup modal.
 				ImGui::BeginChild("EditAddableScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(2) }, true);
-				ImGui::InputText(std::format("{} Name", label).c_str(), &currentItems[i].name);
-				ImGui::InputText(std::format("{} Description", label).c_str(), &currentItems[i].description);
+				ImGui::InputText(std::vformat(localeReader.getText("/scenes/entityCreation/addables/name"), std::make_format_args(label)).c_str(), &currentItems[i].name);
+				ImGui::InputText(std::vformat(localeReader.getText("/scenes/entityCreation/addables/description"), std::make_format_args(label)).c_str(), &currentItems[i].description);
 				ImGui::EndChild();
 
 				ImGui::Separator();
-				if (CombatTrackerLib::alignedButton(std::format("Finish {} Editing", label).c_str(), 0.5f)) {
+				if (CombatTrackerLib::alignedButton(std::vformat(localeReader.getText("/scenes/entityCreation/addables/finishEditing"), std::make_format_args(label)).c_str(), 0.5f)) {
 					ImGui::CloseCurrentPopup();
 				}
-				if (CombatTrackerLib::alignedButton(std::format("Delete {}", label).c_str(), 0.5f)) {
+				if (CombatTrackerLib::alignedButton(std::vformat(localeReader.getText("/scenes/entityCreation/addables/delete"), std::make_format_args(label)).c_str(), 0.5f)) {
 					s_markedForDeletion.push_back(i);
 					ImGui::CloseCurrentPopup();
 				}
@@ -277,9 +277,10 @@ namespace CombatTrackerApp {
 		s_markedForDeletion.clear();
 
 		// Add item section.
+		const std::string addPopupName{ std::format("{}###{}Add", label, stableID) };
 		ImGui::Spacing();
-		if (ImGui::Button(std::format("Add {}", label).c_str())) {
-			ImGui::OpenPopup(label.data());
+		if (ImGui::Button(std::vformat(localeReader.getText("/scenes/entityCreation/addables/add"), std::make_format_args(label)).c_str())) {
+			ImGui::OpenPopup(addPopupName.c_str());
 		}
 
 		// Setup configs of the add item popup.
@@ -287,19 +288,19 @@ namespace CombatTrackerApp {
 		ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{ 0.5f, 0.5f });
 		const auto vp{ ImGui::GetMainViewport()->Size };
 		ImGui::SetNextWindowSize(ImVec2{ vp.x * 0.70f, vp.y * 0.70f }, ImGuiCond_Always);
-		if (ImGui::BeginPopupModal(label.data(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
+		if (ImGui::BeginPopupModal(addPopupName.c_str(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
 			ImGui::BeginChild("AddAddableScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(1) }, true);
 
 			// Again it is fine for these to be static, we only use them here and reset them after adding the item.
 			static std::string s_name{};
 			static std::string s_description{};
-			ImGui::InputText(std::format("{} Name", label).c_str(), &s_name);
-			ImGui::InputText(std::format("{} Description", label).c_str(), &s_description);
+			ImGui::InputText(std::vformat(localeReader.getText("/scenes/entityCreation/addables/name"), std::make_format_args(label)).c_str(), &s_name);
+			ImGui::InputText(std::vformat(localeReader.getText("/scenes/entityCreation/addables/description"), std::make_format_args(label)).c_str(), &s_description);
 			ImGui::EndChild();
 
 			// Button and cleanup section.
 			ImGui::Separator();
-			if (CombatTrackerLib::alignedButton(std::format("Finish {} Creation", label).c_str(), 0.5f) &&
+			if (CombatTrackerLib::alignedButton(std::vformat(localeReader.getText("/scenes/entityCreation/addables/finishCreation"), std::make_format_args(label)).c_str(), 0.5f) &&
 				!s_name.empty() && !s_description.empty()) {
 				I item(s_name, s_description);
 				currentItems.push_back(item);

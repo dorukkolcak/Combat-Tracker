@@ -4,10 +4,10 @@
 
 #include <imgui.h>
 #include <algorithm>
-#include <array>
 #include <cstddef>
 #include <string_view>
 #include <type_traits>
+#include <nlohmann/json.hpp>
 
 namespace CombatTrackerLib {
 
@@ -23,7 +23,7 @@ namespace CombatTrackerLib {
 		ListBoxParameters& parameters,
 		T& type,
 		const char* listBoxLabel,
-		const std::array<std::string_view, static_cast<size_t>(T::COUNT)>& names // We can't really check whether the enum type has a COUNT enumerator but this will only occur if I am stupid.
+		const nlohmann::json::array_t& names
 	) {
 		const float height{ ImGui::GetTextLineHeightWithSpacing() * 8.0f };
 		if (ImGui::BeginListBox(listBoxLabel, ImVec2{ 0, height })) {
@@ -32,7 +32,7 @@ namespace CombatTrackerLib {
 			for (std::size_t i{}; i < names.size(); ++i) {
 				const int rowIndex{ static_cast<int>(i) };
 				const bool isSelected{ rowIndex == parameters.chosenIndex };
-				if (ImGui::Selectable(names[i].data(), isSelected)) {
+				if (ImGui::Selectable(names[i].get_ref<const nlohmann::json::string_t&>().c_str(), isSelected)) {
 					parameters.chosenIndex = rowIndex;
 					type = static_cast<T>(i);
 				}

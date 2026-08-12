@@ -16,10 +16,13 @@ namespace CombatTrackerApp {
 	}
 
 	std::string_view MonsterCreationScene::getEntityLabel() const {
-		return ENTITY_LABEL;
+		return m_applicationPointer->getLocaleReader().getText("/scenes/monsterCreation/entityLabel");
 	}
 	void MonsterCreationScene::renderEntitySpecificInfo() {
-		ImGui::SeparatorText("Monster Specific Data");
+
+		const auto& localeReader{ m_applicationPointer->getLocaleReader() };
+
+		ImGui::SeparatorText(localeReader.getText("/scenes/monsterCreation/specificData").data());
 		if (ImGui::BeginTable("MonsterSpecificGrid", 1, ImGuiTableFlags_SizingStretchSame)) {
 
 			ImGui::TableNextRow();
@@ -27,21 +30,29 @@ namespace CombatTrackerApp {
 
 			// The label is hidden on the listbox itself so the widget can take the whole column, which is a narrow one here.
 			// The label is hidden by passing a ## prefix to the label name, which is something that is done extensively over the entire codebase.
-			ImGui::TextUnformatted("CR");
+			ImGui::TextUnformatted(localeReader.getText("/scenes/monsterCreation/challengeRating").data());
 			ImGui::SetNextItemWidth(-1.0f);
 			renderCRListBox();
 
 			ImGui::Spacing();
-			renderOverriddableInputInt(m_currentMonsterXP, "XP", "Reset XP", MAPPED_CR_TO_XP, 0, INT_MAX, m_currentMonsterCR);
+			renderOverriddableInputInt(
+				m_currentMonsterXP,
+				localeReader.getText("/scenes/monsterCreation/experiencePoints"),
+				localeReader.getText("/scenes/monsterCreation/resetExperiencePoints"),
+				MAPPED_CR_TO_XP,
+				0,
+				INT_MAX,
+				m_currentMonsterCR
+			);
 
 			ImGui::Spacing();
 			renderOverriddableInputInt(
-				m_currentCreatureStatBlock.proficiencyBonus, 
-				"PB", 
-				"Reset PB", 
-				MAPPED_CR_TO_PB, 
-				PB_LOWER_BOUND, 
-				INT_MAX, 
+				m_currentCreatureStatBlock.proficiencyBonus,
+				localeReader.getText("/scenes/monsterCreation/proficiencyBonus"),
+				localeReader.getText("/scenes/monsterCreation/resetProficiencyBonus"),
+				MAPPED_CR_TO_PB,
+				PB_LOWER_BOUND,
+				INT_MAX,
 				m_currentMonsterCR
 			);
 
@@ -54,9 +65,9 @@ namespace CombatTrackerApp {
 		int counter{};
 		const float height{ ImGui::GetTextLineHeightWithSpacing() * 8.0f };
 		if (ImGui::BeginListBox("##CR", ImVec2{ 0, height })) {
-			for (const auto& item: CR_NAMES) {
+			for (const auto& item: MAPPED_CR_TO_XP) {
 				const bool isSelected{ counter == m_monsterCRParameters.chosenIndex };
-				if (ImGui::Selectable(item.second.data(), isSelected)) {
+				if (ImGui::Selectable(std::format("{}", item.first).c_str(), isSelected)) {
 					m_monsterCRParameters.chosenIndex = counter;
 					m_currentMonsterCR = item.first;
 				}

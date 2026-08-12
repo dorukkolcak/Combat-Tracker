@@ -37,20 +37,7 @@ namespace CombatTrackerApp {
 			COMPENDIUM
 		};
 
-		/*
-		Constant UI labels. These should be static as they shouldn't be instantiated per object/scene.
-		They are string_views, so they cost nothing to hold and they are usable at compile time.
-		The concatenation these are used in goes through std::format, since a string_view has no operator+ to chain with.
-		*/
-		inline static constexpr std::array<std::string_view, static_cast<std::size_t>(WindowType::COUNT)> MAPPED_WINDOW_NAMES { {
-			"Encounter Creator",
-			"Menu",
-			"Entity Browser",
-			"Encounter Manager",
-			"Monster Browser",
-			"Player Character Browser",
-			"Encounter Browser"
-		} };
+		inline static constexpr std::string_view WINDOW_NAMES_KEY{ "/scenes/encounterCreation/windows" };
 
 		// These flags are shared between browser tabs.
 		inline static constexpr ImGuiTableFlags BROWSER_TABLE_FLAGS{
@@ -74,15 +61,8 @@ namespace CombatTrackerApp {
 			ImGuiDockNodeFlags_NoSplit
 		};
 
-		inline static constexpr std::array<std::string_view, 2> MONSTER_BROWSER_COLUMN_LABELS {
-			"CR",
-			"XP"
-		};
-		inline static constexpr std::array<std::string_view, 3> PLAYER_CHARACTER_BROWSER_COLUMN_LABELS {
-			"Level",
-			"Species",
-			"Origin"
-		};
+		inline static constexpr std::string_view MONSTER_BROWSER_COLUMNS_KEY{ "/scenes/encounterCreation/browser/monsterColumns" };
+		inline static constexpr std::string_view PLAYER_CHARACTER_BROWSER_COLUMNS_KEY{ "/scenes/encounterCreation/browser/playerCharacterColumns" };
 
 		ImGuiID m_dockspaceID{};
 		ImGuiID m_entityBrowserWindowID{};
@@ -100,6 +80,8 @@ namespace CombatTrackerApp {
 
 		bool m_isdockspaceInitialized{};
 
+		std::string composeWindowName(WindowType windowType, std::string_view stableID) const;
+
 		void renderHostWindow();
 
 		/*
@@ -110,10 +92,10 @@ namespace CombatTrackerApp {
 		void renderBrowserFilters(EntitySource& source, std::string& searchQuery, const char* label);
 		void renderEntityBrowserHostWindow();
 
-		template<size_t N, typename S>
+		template<typename S>
 		void renderEntityBrowserWindow(
 			std::string_view typeLabel,
-			const std::array<std::string_view, N>& columnLabels,
+			std::string_view columnLabelsKey,
 			EntitySource& source,
 			std::string& searchQuery,
 			int& selectionIndex
@@ -124,14 +106,16 @@ namespace CombatTrackerApp {
 	};
 
 	// TODO: Finish this function when JSON functionality is implemented.
-	template<size_t N, typename S>
+	template<typename S>
 	void EncounterCreationScene::renderEntityBrowserWindow(
 		std::string_view typeLabel,
-		const std::array<std::string_view, N>& columnLabels,
+		std::string_view columnLabelsKey,
 		EntitySource& source,
 		std::string& searchQuery,
 		int& selectionIndex
 	) {
+		const auto& localeReader{ m_applicationPointer->getLocaleReader() };
+		const auto& columnLabels{ localeReader.getList(std::string{ columnLabelsKey }) };
 		renderBrowserFilters(source, searchQuery, typeLabel.data());
 
 		/*
@@ -144,18 +128,23 @@ namespace CombatTrackerApp {
 		const auto bodyHeight{ ImGui::GetContentRegionAvail().y - createRowHeight - functionalityButtonsHeight };
 		const auto listingHeight{ bodyHeight * 0.55f }; // Cpnsider playing around with the multiplier.
 
+		const auto columnCount{ columnLabels.size() };
 		if (ImGui::BeginTable(
 			std::format("{} Listing", typeLabel).c_str(), // Use std::format to easily concatenate std::string_view to string literals.
-			static_cast<int>(N) + 2,
+			static_cast<int>(columnCount) + 2,
 			BROWSER_TABLE_FLAGS,
 			ImVec2{ 0.0f, listingHeight }
 		)) {
-			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch, 0.30f);
+			ImGui::TableSetupColumn(localeReader.getText("/scenes/encounterCreation/browser/nameColumn").data(), ImGuiTableColumnFlags_WidthStretch, 0.30f);
 
-			for (size_t i{}; i < N; ++i) {
-				ImGui::TableSetupColumn(columnLabels[i].data(), ImGuiTableColumnFlags_WidthStretch, 0.6f / static_cast<float>(N));
+			for (size_t i{}; i < columnCount; ++i) {
+				ImGui::TableSetupColumn(
+					columnLabels[i].get_ref<const std::string&>().c_str(),
+					ImGuiTableColumnFlags_WidthStretch,
+					0.6f / static_cast<float>(columnCount)
+				);
 			}
-			ImGui::TableSetupColumn("Source", ImGuiTableColumnFlags_WidthStretch, 0.10f);
+			ImGui::TableSetupColumn(localeReader.getText("/scenes/encounterCreation/browser/sourceColumn").data(), ImGuiTableColumnFlags_WidthStretch, 0.10f);
 
 			ImGui::TableSetupScrollFreeze(0, 1);
 			ImGui::TableHeadersRow();
@@ -163,7 +152,10 @@ namespace CombatTrackerApp {
 			ImGui::EndTable();
 		}
 
-		if (CombatTrackerLib::alignedButton(std::format("Create {}", typeLabel).c_str(), 0.5f)) {
+		if (CombatTrackerLib::alignedButton(
+			std::vformat(localeReader.getText("/scenes/encounterCreation/browser/createEntity"), std::make_format_args(typeLabel)).c_str(),
+			0.5f
+		)) {
 			m_applicationPointer->queueSceneTransition(this, std::make_unique<S>(m_applicationPointer));
 		}
 
@@ -174,20 +166,23 @@ namespace CombatTrackerApp {
 		*/
 		ImGui::BeginChild(std::format("{} Details", typeLabel).c_str(), ImVec2{ 0.0f, -functionalityButtonsHeight });
 		if (selectionIndex < 0) {
-			ImGui::TextWrapped("Select a %s to see its details.", typeLabel.data());
+			ImGui::TextWrapped(
+				"%s",
+				std::vformat(localeReader.getText("/scenes/encounterCreation/browser/emptyDetails"), std::make_format_args(typeLabel)).c_str()
+			);
 		}
 		ImGui::EndChild();
 
 		ImGui::BeginDisabled(selectionIndex < 0);
-		if (ImGui::Button("Add to Encounter")) {
+		if (ImGui::Button(localeReader.getText("/scenes/encounterCreation/browser/addToEncounter").data())) {
 
 		}
 		ImGui::SameLine();
-		if (ImGui::Button(std::format("Edit {}", typeLabel).c_str())) {
+		if (ImGui::Button(std::vformat(localeReader.getText("/scenes/encounterCreation/browser/editEntity"), std::make_format_args(typeLabel)).c_str())) {
 
 		}
 		ImGui::SameLine();
-		if (ImGui::Button(std::format("Delete {}", typeLabel).c_str())) {
+		if (ImGui::Button(std::vformat(localeReader.getText("/scenes/encounterCreation/browser/deleteEntity"), std::make_format_args(typeLabel)).c_str())) {
 
 		}
 		ImGui::EndDisabled();

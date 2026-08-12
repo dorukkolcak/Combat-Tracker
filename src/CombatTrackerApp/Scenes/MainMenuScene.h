@@ -25,11 +25,6 @@ namespace CombatTrackerApp {
 			COUNT,
 		};
 
-		inline static constexpr std::array<std::string_view, static_cast<std::size_t>(OptionsCategory::COUNT)> OPTIONS_CATEGORY_NAMES { {
-			"Appearance",
-			//...
-		} };
-
 		inline static constexpr ImGuiDockNodeFlags DOCKSPACE_FLAGS{
 			ImGuiDockNodeFlags_NoResize |
 			ImGuiDockNodeFlags_NoSplit |
