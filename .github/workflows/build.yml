@@ -117,3 +117,53 @@ jobs:
             build/release/src/CombatTrackerApp/Combat-Tracker-App.exe
           if-no-files-found: error
           retention-days: 14
+
+  # Sanitize workflow on the latest ubuntu version using gcc/clang.
+  sanitize:
+    name: ${{ matrix.toolchain.name }} sanitize
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain:
+          - id: linux-gcc
+            name: Linux GCC
+            c: gcc
+            cxx: g++
+          - id: linux-clang
+            name: Linux Clang
+            c: clang
+            cxx: clang++
+
+    env:
+      CC: ${{ matrix.toolchain.c }}
+      CXX: ${{ matrix.toolchain.cxx }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ninja-build \
+            xorg-dev \
+            libwayland-dev \
+            libxkbcommon-dev \
+            wayland-protocols \
+            extra-cmake-modules
+
+      - name: Lower ASLR entropy for ASan
+        run: sudo sysctl -w vm.mmap_rnd_bits=28
+
+      - name: Cache fetched dependencies
+        uses: actions/cache@v6
+        with:
+          path: build/sanitize/_deps
+          key: deps-${{ matrix.toolchain.id }}-sanitize-${{ hashFiles('Dependencies.cmake') }}
+          restore-keys: |
+            deps-${{ matrix.toolchain.id }}-sanitize-
+
+      - name: Configure, build and test
+        run: cmake --workflow --preset sanitize
