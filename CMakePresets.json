@@ -22,6 +22,19 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
+    },
+    {
+      "name": "sanitize",
+      "displayName": "Debug + ASan/UBSan",
+      "inherits": "debug",
+      "cacheVariables": {
+        "COMBAT_TRACKER_SANITIZE": "ON"
+      },
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
     }
   ],
   "buildPresets": [
@@ -32,6 +45,10 @@
     {
       "name": "debug",
       "configurePreset": "debug"
+    },
+    {
+      "name": "sanitize",
+      "configurePreset": "sanitize"
     }
   ],
   "testPresets": [
@@ -47,6 +64,17 @@
       "configurePreset": "debug",
       "output": {
         "outputOnFailure": true
+      }
+    },
+    {
+      "name": "sanitize",
+      "configurePreset": "sanitize",
+      "output": {
+        "outputOnFailure": true
+      },
+      "environment": {
+        "ASAN_OPTIONS": "detect_leaks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_string_checks=1",
+        "UBSAN_OPTIONS": "print_stacktrace=1"
       }
     }
   ],
@@ -82,6 +110,23 @@
         {
           "type": "test",
           "name": "debug"
+        }
+      ]
+    },
+    {
+      "name": "sanitize",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "sanitize"
+        },
+        {
+          "type": "build",
+          "name": "sanitize"
+        },
+        {
+          "type": "test",
+          "name": "sanitize"
         }
       ]
     }

@@ -59,6 +59,25 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(Combat-Tracker-Options INTERFACE /external:W0 /external:anglebrackets)
 endif()
 
+
+# Sanitizer options added to Combat-Tracker-Options.
+# Keep in mind that Asan and UBsan requires GCC and Clang.
+option(COMBAT_TRACKER_SANITIZE "Build our own targets with AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
+
+if(COMBAT_TRACKER_SANITIZE)
+    if(WIN32)
+        message(FATAL_ERROR "COMBAT_TRACKER_SANITIZE requires GCC or Clang on Linux or macOS.")
+    endif()
+
+    set(SANITIZER_FLAGS
+        -fsanitize=address,undefined
+        -fno-sanitize-recover=all
+        -fno-omit-frame-pointer
+    )
+    target_compile_options(Combat-Tracker-Options INTERFACE ${SANITIZER_FLAGS})
+    target_link_options(Combat-Tracker-Options INTERFACE ${SANITIZER_FLAGS})
+endif()
+
 # Setup directories.
 add_subdirectory(src/CombatTrackerLib)
 add_subdirectory(src/CombatTrackerApp)

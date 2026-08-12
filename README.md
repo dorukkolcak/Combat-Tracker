@@ -72,6 +72,13 @@ cmake --workflow --preset release
 
 Use `--preset debug` for a debug build.
 
+The `sanitize` preset is a debug build with AddressSanitizer and UndefinedBehaviorSanitizer enabled. It needs
+GCC or Clang on Linux or macOS and is hidden on Windows, where no toolchain supports both sanitizers:
+
+```bash
+cmake --workflow --preset sanitize
+```
+
 To build with a specific compiler, set `CXX` first:
 
 ```bash
@@ -103,5 +110,7 @@ and can be deleted at any point to get the default layout back.
 - Warnings are always enabled, but only become errors when the `CI` environment variable is set, which every
   CI provider does automatically. To reproduce that strictness locally, configure with
   `-D CMAKE_COMPILE_WARNING_AS_ERROR=ON`.
+- `-D COMBAT_TRACKER_SANITIZE=ON` builds our own targets with ASan and UBSan, leaving the third-party
+  dependencies uninstrumented. The `sanitize` preset sets this for you.
 - `compile_commands.json` is written to the build directory for clangd and similar tooling.
 - Personal preset overrides belong in `CMakeUserPresets.json`, which is ignored by git.
