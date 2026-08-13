@@ -1,0 +1,586 @@
+{
+
+  "endonym": "Türkçe",
+
+  "scenes": {
+    "mainMenu": {
+      "titleWindow": "CombatTracker###mainMenuTitle",
+      "options": "Seçenekler",
+      "exit": "Çıkış",
+
+      "optionsPopup": {
+        "header": "Seçenekler",
+        "categories": [
+          "Görünüm"
+        ],
+        "theme": "Tema",
+        "chooseTheme": "Tema Seç",
+        "themes": [
+          "Koyu",
+          "Açık",
+          "Yüksek Kontrast",
+          "Arkana",
+          "Orman",
+          "Cehennemî",
+          "Buzul",
+          "Semavî",
+          "Nekrotik",
+          "Kanlı Ay",
+          "Peri Diyarı",
+          "Fırtına",
+          "Kumlar",
+          "Ay Işığı"
+        ],
+        "close": "Kapat"
+      },
+
+      "encounterCreation": {
+        "windowTitle": "Karşılaşma Oluşturma###mainMenuEncounterCreation",
+        "creatureManagement": "Yaratık Yönetimi",
+        "creatureManagementBullets": [
+          "Canavarlar ve oyuncu karakterleri oluşturun ve kaydedin.",
+          "Kaydettiğiniz canavarları ve oyuncu karakterlerini derleme üzerinden inceleyin ve değiştirin.",
+          "Ayrıca hazır canavarları ve oyuncu karakterlerini derleme üzerinden inceleyin."
+        ],
+        "encounterManagement": "Karşılaşma Yönetimi",
+        "encounterManagementBullets": [
+          "Devasa yaratık listesinden karşılaşmalar oluşturun ve kaydedin.",
+          "Kaydettiğiniz karşılaşmaları derleme üzerinden inceleyin ve değiştirin.",
+          "Ayrıca hazır yaratıklarla hazırlanmış karşılaşmaları derleme üzerinden inceleyin.",
+          "Daha iyi görselleştirme için oluşturduğunuz karşılaşmalara savaş haritası dokusu ekleyin."
+        ],
+        "createButton": "Karşılaşma Oluştur"
+      },
+
+      "runEncounter": {
+        "windowTitle": "Karşılaşma Yürüt###mainMenuRunEncounter",
+        "preparationPhase": "Hazırlık Aşaması",
+        "preparationBullets": [
+          "Bir karşılaşma seçtikten sonra inisiyatif atın veya belirleyin.",
+          "Yaratıkları ilişkili savaş haritasına veya boş bir hazır savaş haritasına başlangıç konumlarında yerleştirin."
+        ],
+        "runningEncounters": "Karşılaşmaları Yürütme",
+        "runningBullets": [
+          "Karşılaşmaları tur tur ilerletin.",
+          "Her yaratığın bir turda hangi eylemleri oynadığını seçin.",
+          "Her yaratığı savaş haritasında 2B veya 3B görselleştirme seçenekleriyle hareket ettirin."
+        ],
+        "finishingEncounters": "Karşılaşmaları Bitirme",
+        "finishingBullets": [
+          "Mevcut karşılaşmayı bitirin ve sonuçları kaydedin."
+        ],
+        "selectButton": "Karşılaşma Seç"
+      },
+
+      "completedEncounters": {
+        "windowTitle": "Tamamlanan Karşılaşmaları Görüntüle###mainMenuCompletedEncounters",
+        "bullets": [
+          "Tamamladığınız karşılaşmaların listesini inceleyin ve sonuçlarını analiz edin.",
+          "Her turda tam olarak ne olduğunu hatırlayın."
+        ],
+        "browseButton": "Karşılaşmalara Göz At"
+      }
+    },
+
+    "encounterCreation": {
+      "windows": [
+        "Karşılaşma Oluşturucu###encounterCreator",
+        "Menü###menu",
+        "Varlık Tarayıcısı###entityBrowser",
+        "Karşılaşma Yöneticisi###encounterManager",
+        "Canavar Tarayıcısı###monsterBrowser",
+        "Oyuncu Karakteri Tarayıcısı###playerCharacterBrowser",
+        "Karşılaşma Tarayıcısı###encounterBrowser"
+      ],
+      "returnToMainMenu": "Ana Menüye Dön",
+
+      "filters": {
+        "source": "Kaynak",
+        "all": "Tümü",
+        "userCreated": "Kullanıcı Yapımı",
+        "compendium": "Derleme",
+        "searchHint": "İsme göre ara"
+      },
+
+      "browser": {
+        "nameColumn": "İsim",
+        "sourceColumn": "Kaynak",
+        "monsterColumns": [
+          "CR",
+          "XP"
+        ],
+        "playerCharacterColumns": [
+          "Seviye",
+          "Tür",
+          "Köken"
+        ],
+        "addToEncounter": "Karşılaşmaya Ekle",
+
+        "monster": {
+          "create": "Canavar Oluştur",
+          "edit": "Canavarı Düzenle",
+          "delete": "Canavarı Sil",
+          "emptyDetails": "Ayrıntılarını görmek için bir canavar seçin."
+        },
+
+        "playerCharacter": {
+          "create": "Oyuncu Karakteri Oluştur",
+          "edit": "Oyuncu Karakterini Düzenle",
+          "delete": "Oyuncu Karakterini Sil",
+          "emptyDetails": "Ayrıntılarını görmek için bir oyuncu karakteri seçin."
+        }
+      }
+    },
+
+    "entityCreation": {
+      "sections": {
+        "general": "Genel",
+        "movement": "Hareket",
+        "abilities": "Yetenekler",
+        "savingThrowsAndSkills": "Kurtarma Atışları ve Beceriler",
+        "damageAndConditions": "Hasar ve Durumlar",
+        "sensesAndLanguages": "Duyular ve Diller",
+        "actionsTraitsEquipment": "Eylemler, Özellikler, Teçhizat"
+      },
+
+      "general": {
+        "name": "İsim",
+        "size": "Boyut",
+        "creatureType": "Yaratık Türü",
+        "alignment": "Yönelim",
+        "initiativeBonus": "İnisiyatif Bonusu",
+        "resetInitiativeBonus": "İnisiyatif Bonusunu Sıfırla###ResetInitiativeBonus",
+        "passivePerception": "Pasif Algı",
+        "resetPassivePerception": "Pasif Algıyı Sıfırla###ResetPassivePerception",
+        "armorClass": "AC",
+        "hitPoints": "HP"
+      },
+
+      "speeds": {
+        "walk": "Yürüme",
+        "climb": "Tırmanma",
+        "swim": "Yüzme",
+        "burrow": "Kazma",
+        "fly": "Uçma"
+      },
+
+      "abilityTable": {
+        "abilityColumn": "Yetenek",
+        "scoreColumn": "Puan",
+        "modifierColumn": "Düzeltici",
+        "overrideColumn": "Geçersiz Kıl",
+        "resetModifiers": [
+          "Kuvvet Düzelticisini Sıfırla",
+          "Çeviklik Düzelticisini Sıfırla",
+          "Dayanıklılık Düzelticisini Sıfırla",
+          "Bilgelik Düzelticisini Sıfırla",
+          "Zekâ Düzelticisini Sıfırla",
+          "Karizma Düzelticisini Sıfırla"
+        ]
+      },
+
+      "savingThrows": {
+        "header": "Kurtarma Atışları",
+        "proficiencies": "Kurtarma Atışı Yeterlilikleri",
+        "expertises": "Kurtarma Atışı Uzmanlıkları",
+        "modifiers": "Kurtarma Atışı Düzelticileri",
+        "resetModifiers": [
+          "Kuvvet Kurtarma Atışı Düzelticisini Sıfırla",
+          "Çeviklik Kurtarma Atışı Düzelticisini Sıfırla",
+          "Dayanıklılık Kurtarma Atışı Düzelticisini Sıfırla",
+          "Bilgelik Kurtarma Atışı Düzelticisini Sıfırla",
+          "Zekâ Kurtarma Atışı Düzelticisini Sıfırla",
+          "Karizma Kurtarma Atışı Düzelticisini Sıfırla"
+        ]
+      },
+
+      "skills": {
+        "header": "Beceriler",
+        "proficiencies": "Beceri Yeterlilikleri",
+        "expertises": "Beceri Uzmanlıkları",
+        "modifiers": "Beceri Düzelticileri",
+        "skillColumn": "Beceri",
+        "valueColumn": "Değer",
+        "resetColumn": "Sıfırla",
+        "resetModifiers": [
+          "Atletizm Beceri Düzelticisini Sıfırla",
+          "Akrobasi Beceri Düzelticisini Sıfırla",
+          "El Çabukluğu Beceri Düzelticisini Sıfırla",
+          "Gizlilik Beceri Düzelticisini Sıfırla",
+          "Arkana Beceri Düzelticisini Sıfırla",
+          "Tarih Beceri Düzelticisini Sıfırla",
+          "Araştırma Beceri Düzelticisini Sıfırla",
+          "Doğa Beceri Düzelticisini Sıfırla",
+          "Din Beceri Düzelticisini Sıfırla",
+          "Hayvan Terbiyesi Beceri Düzelticisini Sıfırla",
+          "Sezgi Beceri Düzelticisini Sıfırla",
+          "Tıp Beceri Düzelticisini Sıfırla",
+          "Algı Beceri Düzelticisini Sıfırla",
+          "Hayatta Kalma Beceri Düzelticisini Sıfırla",
+          "Aldatma Beceri Düzelticisini Sıfırla",
+          "Sindirme Beceri Düzelticisini Sıfırla",
+          "Gösteri Beceri Düzelticisini Sıfırla",
+          "İkna Beceri Düzelticisini Sıfırla"
+        ]
+      },
+
+      "damage": {
+        "vulnerabilities": "Zayıflıklar",
+        "resistances": "Dirençler",
+        "immunities": "Bağışıklıklar",
+        "conditionImmunities": "Durum Bağışıklıkları"
+      },
+
+      "languages": "Diller",
+
+      "actions": {
+        "header": "Eylemler",
+        "add": "Eylem Ekle###ActionAdd",
+        "edit": "Eylem Düzenle",
+        "type": "Eylem Türü",
+        "name": "Eylem İsmi",
+        "description": "Eylem Açıklaması",
+        "finishCreation": "Eylem Oluşturmayı Bitir",
+        "finishEditing": "Eylem Düzenlemeyi Bitir",
+        "delete": "Eylemi Sil"
+      },
+
+      "traits": {
+        "header": "Özellikler",
+        "add": "Özellik Ekle###traitAdd",
+        "edit": "Özelliği Düzenle###traitEdit",
+        "name": "Özellik İsmi",
+        "description": "Özellik Açıklaması",
+        "finishCreation": "Özellik Oluşturmayı Bitir",
+        "finishEditing": "Özellik Düzenlemeyi Bitir",
+        "delete": "Özelliği Sil"
+      },
+
+      "equipment": {
+        "header": "Teçhizat",
+        "add": "Teçhizat Ekle###gearAdd",
+        "edit": "Teçhizatı Düzenle###gearEdit",
+        "name": "Teçhizat İsmi",
+        "description": "Teçhizat Açıklaması",
+        "finishCreation": "Teçhizat Oluşturmayı Bitir",
+        "finishEditing": "Teçhizat Düzenlemeyi Bitir",
+        "delete": "Teçhizatı Sil"
+      }
+    },
+
+    "monsterCreation": {
+      "windowTitle": "Canavar Oluşturma###entityCreation",
+      "completeButton": "Canavar Oluşturmayı Tamamla",
+      "cancelButton": "Canavar Oluşturmayı İptal Et",
+      "specificData": "Canavara Özel Veriler",
+      "challengeRating": "CR",
+      "experiencePoints": "XP",
+      "resetExperiencePoints": "XP Sıfırla",
+      "proficiencyBonus": "PB",
+      "resetProficiencyBonus": "PB Sıfırla"
+    },
+
+    "playerCharacterCreation": {
+      "windowTitle": "Oyuncu Karakteri Oluşturma###entityCreation",
+      "completeButton": "Oyuncu Karakteri Oluşturmayı Tamamla",
+      "cancelButton": "Oyuncu Karakteri Oluşturmayı İptal Et",
+      "classesAndSubclasses": "Sınıflar ve Alt Sınıflar",
+      "specificData": "Oyuncu Karakterine Özel Veriler",
+      "species": "Tür",
+      "origin": "Köken",
+      "weaponProficiencies": "Silah Yeterlilikleri",
+      "armorProficiencies": "Zırh Yeterlilikleri",
+      "toolProficiencies": "Alet Yeterlilikleri",
+      "weaponMasteries": "Silah Ustalıkları",
+      "configureButton": "Sınıfları ve Alt Sınıfları Yapılandır###ClassConfiguration",
+      "classes": "Sınıflar",
+      "subclasses": "Alt Sınıflar",
+      "finishConfiguration": "Sınıf ve Alt Sınıf Yapılandırmasını Bitir"
+    }
+  },
+
+  /*
+  The key values here use the enums integral type so we use integers for keys.
+  Also the ordering is important here, it is based on the enum's ordering in the source code.
+  So additions have to be made to the end and a reorder will result in completely different values.
+  Hence we have to be very careful while making additions/changes here. 
+  On the other hand, these tradeoffs allows us to have no middle-mapping layer and a couple of other upsides:
+  Constant time element access using enumerators as indices and labels being actually "ordered" (duh).
+  We can go straight from enums to translation values in each file, using no middle key values.
+  So no C++ container for mapping enums to json key values which is super nice.
+  */
+  "domain": {
+    "size": [
+      "Ufak",
+      "Küçük",
+      "Orta",
+      "Büyük",
+      "Kocaman",
+      "Devasa"
+    ],
+    "creatureType": [
+      "Sapkın",
+      "Hayvan",
+      "Semavi",
+      "Yapay Varlık",
+      "Ejderha",
+      "Elemental",
+      "Peri",
+      "İblis",
+      "Dev",
+      "İnsansı",
+      "Ucube",
+      "Balçık",
+      "Bitki",
+      "Ölümsüz"
+    ],
+    "alignment": [
+      "Yönelimsiz",
+      "Kanuni İyi",
+      "Tarafsız İyi",
+      "Kaotik İyi",
+      "Kanuni Tarafsız",
+      "Tarafsız",
+      "Kaotik Tarafsız",
+      "Kanuni Kötü",
+      "Tarafsız Kötü",
+      "Kaotik Kötü"
+    ],
+    "ability": [
+      "Kuvvet",
+      "Çeviklik",
+      "Dayanıklılık",
+      "Bilgelik",
+      "Zekâ",
+      "Karizma"
+    ],
+    "skill": [
+      "Atletizm",
+      "Akrobasi",
+      "El Çabukluğu",
+      "Gizlilik",
+      "Arkana",
+      "Tarih",
+      "Araştırma",
+      "Doğa",
+      "Din",
+      "Hayvan Terbiyesi",
+      "Sezgi",
+      "Tıp",
+      "Algı",
+      "Hayatta Kalma",
+      "Aldatma",
+      "Sindirme",
+      "Gösteri",
+      "İkna"
+    ],
+    "damageType": [
+      "Asit",
+      "Ezici",
+      "Soğuk",
+      "Ateş",
+      "Güç",
+      "Yıldırım",
+      "Nekrotik",
+      "Delici",
+      "Zehir",
+      "Psişik",
+      "Işınsal",
+      "Kesici",
+      "Gök Gürültüsü"
+    ],
+    "condition": [
+      "Kör",
+      "Büyülenmiş",
+      "Sağır",
+      "Korkmuş",
+      "Yakalanmış",
+      "Aciz",
+      "Görünmez",
+      "Felçli",
+      "Taşlaşmış",
+      "Zehirlenmiş",
+      "Yerde",
+      "Kısıtlanmış",
+      "Sersemlemiş",
+      "Bilinçsiz",
+      "Bitkinlik"
+    ],
+    "creatureLanguage": [
+      "Ortak Dil",
+      "Ortak İşaret Dili",
+      "Cücece",
+      "Elfçe",
+      "Devce",
+      "Gnomca",
+      "Goblince",
+      "Halflingce",
+      "Orkça",
+      "Uçurum Dili",
+      "Semavi Dil",
+      "Derin Konuşma",
+      "Druidce",
+      "Cehennem Dili",
+      "İlksel Dil",
+      "Orman Dili",
+      "Hırsız Argosu",
+      "Alt Ortak Dil"
+    ],
+    "sense": [
+      "Kör Görüş",
+      "Karanlık Görüş",
+      "Titreşim Duyusu",
+      "Gerçek Görüş"
+    ],
+    "actionType": [
+      "Eylem",
+      "Bonus Eylem",
+      "Tepki",
+      "Efsanevi Eylem",
+      "İn Eylemi"
+    ],
+    "playerClass": [
+      "Barbar",
+      "Ozan",
+      "Rahip",
+      "Druid",
+      "Savaşçı",
+      "Keşiş",
+      "Paladin",
+      "Korucu",
+      "Haydut",
+      "Sihirbaz",
+      "Kara Büyücü",
+      "Büyücü"
+    ],
+    "playerSubclass": [
+      "Berserker Yolu",
+      "Vahşi Kalp Yolu",
+      "Dünya Ağacı Yolu",
+      "Fanatik Yolu",
+      "Dans Okulu",
+      "Cazibe Okulu",
+      "İrfan Okulu",
+      "Yiğitlik Okulu",
+      "Yaşam Öğretisi",
+      "Işık Öğretisi",
+      "Hile Öğretisi",
+      "Savaş Öğretisi",
+      "Toprak Çemberi",
+      "Ay Çemberi",
+      "Deniz Çemberi",
+      "Yıldızlar Çemberi",
+      "Savaş Ustası",
+      "Şampiyon",
+      "Esrarengiz Şövalye",
+      "Psişik Savaşçı",
+      "Merhamet Savaşçısı",
+      "Gölge Savaşçısı",
+      "Elementlerin Savaşçısı",
+      "Açık El Savaşçısı",
+      "Adanmışlık Yemini",
+      "Zafer Yemini",
+      "Kadimlerin Yemini",
+      "İntikam Yemini",
+      "Hayvan Ustası",
+      "Peri Gezgini",
+      "Kasvet Avcısı",
+      "Avcı",
+      "Arkana Düzenbazı",
+      "Suikastçı",
+      "Ruh Bıçağı",
+      "Hırsız",
+      "Sapkın Sihir",
+      "Saat Düzeni Sihri",
+      "Ejderha Sihri",
+      "Vahşi Sihir",
+      "Baş Peri Hamisi",
+      "Semavi Hami",
+      "İblis Hamisi",
+      "Ulu Kadim Hamisi",
+      "Koruma Büyücüsü",
+      "Kehanet Büyücüsü",
+      "Celp Büyücüsü",
+      "Yanılsama Büyücüsü"
+    ],
+    "species": [
+      "Aasimar",
+      "Ejderdoğan",
+      "Cüce",
+      "Elf",
+      "Gnom",
+      "Goliath",
+      "Halfling",
+      "İnsan",
+      "Ork",
+      "Tiefling"
+    ],
+    "origin": [
+      "Yardımcı Rahip",
+      "Zanaatkâr",
+      "Şarlatan",
+      "Suçlu",
+      "Eğlendirici",
+      "Çiftçi",
+      "Muhafız",
+      "Rehber",
+      "Münzevi",
+      "Tüccar",
+      "Soylu",
+      "Bilge",
+      "Denizci",
+      "Kâtip",
+      "Asker",
+      "Gezgin"
+    ],
+    "weaponType": [
+      "Basit Yakın Dövüş",
+      "Basit Menzilli",
+      "Askeri Yakın Dövüş",
+      "Askeri Menzilli"
+    ],
+    "armorType": [
+      "Hafif",
+      "Orta",
+      "Ağır",
+      "Kalkan"
+    ],
+    "weaponMastery": [
+      "Yarma",
+      "Sıyırma",
+      "Çentik",
+      "İtme",
+      "Sersemletme",
+      "Yavaşlatma",
+      "Devirme",
+      "Bezdirme"
+    ],
+    "tool": [
+      "Simyacı Malzemeleri",
+      "Biracı Malzemeleri",
+      "Hattat Malzemeleri",
+      "Marangoz Aletleri",
+      "Haritacı Aletleri",
+      "Ayakkabıcı Aletleri",
+      "Aşçı Gereçleri",
+      "Cam Üfleyici Aletleri",
+      "Kuyumcu Aletleri",
+      "Derici Aletleri",
+      "Duvarcı Aletleri",
+      "Ressam Aletleri",
+      "Çömlekçi Aletleri",
+      "Demirci Aletleri",
+      "Tamirci Aletleri",
+      "Dokumacı Aletleri",
+      "Ahşap Oymacı Aletleri",
+      "Kılık Değiştirme Seti",
+      "Sahtecilik Seti",
+      "Oyun Seti",
+      "Şifalı Bitki Seti",
+      "Müzik Aleti",
+      "Seyrüsefer Aletleri",
+      "Zehirci Seti",
+      "Hırsız Aletleri"
+    ]
+  }
+}

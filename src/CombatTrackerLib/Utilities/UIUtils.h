@@ -1,19 +1,21 @@
 #pragma once
 
 #include "CombatTrackerLib/Texture2D.h"
+#include "CombatTrackerLib/Utilities/GenericUtils.h"
 
 #include <imgui.h>
 #include <algorithm>
-#include <array>
+#include <cassert>
 #include <cstddef>
+#include <span>
 #include <string_view>
 #include <type_traits>
 
 namespace CombatTrackerLib {
 
 	struct ListBoxParameters {
-		int chosenIndex{};
-		int highlightedIndex{};
+		std::size_t chosenIndex{};
+		std::size_t highlightedIndex{};
 		bool isHighlighted{};
 	};
 
@@ -23,24 +25,84 @@ namespace CombatTrackerLib {
 		ListBoxParameters& parameters,
 		T& type,
 		const char* listBoxLabel,
-		const std::array<std::string_view, static_cast<size_t>(T::COUNT)>& names // We can't really check whether the enum type has a COUNT enumerator but this will only occur if I am stupid.
+		std::span<const std::string_view> names // A view over a vector of const std::string_view elements. Basically same idea as string_view.
 	) {
+		assert(names.size() == enumToSizeT(T::COUNT));
 		const float height{ ImGui::GetTextLineHeightWithSpacing() * 8.0f };
 		if (ImGui::BeginListBox(listBoxLabel, ImVec2{ 0, height })) {
-
-			// Every entry is drawn, so the row index doubles as the index that the parameters keep track of.
 			for (std::size_t i{}; i < names.size(); ++i) {
-				const int rowIndex{ static_cast<int>(i) };
-				const bool isSelected{ rowIndex == parameters.chosenIndex };
+				const bool isSelected{ i == parameters.chosenIndex };
 				if (ImGui::Selectable(names[i].data(), isSelected)) {
-					parameters.chosenIndex = rowIndex;
+					parameters.chosenIndex = i;
 					type = static_cast<T>(i);
 				}
 				if (parameters.isHighlighted && ImGui::IsItemHovered()) {
-					parameters.highlightedIndex = rowIndex;
+					parameters.highlightedIndex = i;
 				}
 			}
 			ImGui::EndListBox();
+		}
+	}
+
+	// Simple helper for rendering input ints that can be overriden by an user provided value, also providing a lower/upper bound.
+	inline void renderOverridableInputInt(
+		int& value,
+		bool& isOverridden,
+		int defaultValue,
+		std::string_view label,
+		std::string_view overrideLabel,
+		int lowerBound,
+		int upperBound
+	) {
+		if (!isOverridden) {
+			value = defaultValue;
+		}
+
+		ImGui::TextUnformatted(label.data());
+		ImGui::SetNextItemWidth(-1.0f);
+		if (ImGui::InputInt("##Value", &value)) {
+			value = std::min(std::max(lowerBound, value), upperBound);
+			isOverridden = true;
+		}
+		if (ImGui::Button(overrideLabel.data(), ImVec2{ -1.0f, 0.0f })) {
+			isOverridden = false;
+		}
+	}
+
+	// Simple helper method used for user input of HP, AC, movement speed and sense distances.
+	inline void renderNonOverridableInputInt(int& value, std::string_view label, int lowerBound) {
+		if (ImGui::InputInt(label.data(), &value)) {
+			value = std::max(lowerBound, value);
+		}
+	}
+
+	// Simple helper method for rendering multi-selectable parameters. 
+	// This function uses a table call so we pass a non-localized id parameter to construct the table.
+	// Otherwise a localized value will cause us to create a different table depending on the language.
+	template <typename M>
+	void renderCheckboxGrid(
+		M& items,
+		std::span<const std::string_view> names,
+		std::string_view stableID,
+		std::string_view label,
+		int columnCount
+	) {
+		ImGui::TextWrapped("%s", label.data());
+		if (ImGui::BeginTable(stableID.data(), columnCount, ImGuiTableFlags_SizingStretchSame)) {
+
+			// The whole table is drawn and the flags sit in an array of the same length, so one index walks both plain arrays.
+			for (std::size_t i{}; i < names.size(); ++i) {
+				ImGui::TableNextColumn();
+				ImGui::Checkbox(names[i].data(), &items[i]);
+			}
+			ImGui::EndTable();
+		}
+	}
+
+	// Very simple helper for rendering information texts as bullet points.
+	inline void renderBulletList(std::span<const std::string_view> bullets) {
+		for (const auto& bullet : bullets) {
+			ImGui::Bullet(); ImGui::TextWrapped("%s", bullet.data());
 		}
 	}
 

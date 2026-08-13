@@ -1,0 +1,586 @@
+{
+
+  "endonym": "English",
+
+  "scenes": {
+    "mainMenu": {
+      "titleWindow": "CombatTracker###mainMenuTitle",
+      "options": "Options",
+      "exit": "Exit",
+
+      "optionsPopup": {
+        "header": "Options",
+        "categories": [
+          "Appearance"
+        ],
+        "theme": "Theme",
+        "chooseTheme": "Choose Theme",
+        "themes": [
+          "Dark",
+          "Light",
+          "High Contrast",
+          "Arcane",
+          "Forest",
+          "Infernal",
+          "Glacial",
+          "Celestial",
+          "Necrotic",
+          "Blood Moon",
+          "Feywild",
+          "Storm",
+          "Sands",
+          "Moonlit"
+        ],
+        "close": "Close"
+      },
+
+      "encounterCreation": {
+        "windowTitle": "Encounter Creation###mainMenuEncounterCreation",
+        "creatureManagement": "Creature Management",
+        "creatureManagementBullets": [
+          "Create and save monsters and player characters.",
+          "Browse and modify your saved monsters and player characters.",
+          "In addition, browse premade monsters and player characters through the compendium."
+        ],
+        "encounterManagement": "Encounter Management",
+        "encounterManagementBullets": [
+          "Create and save encounters from the giant list of creatures.",
+          "Browse and modify your saved encounters through the compendium.",
+          "In addition, browse premade encounters using premade creatures through the compendium.",
+          "Attach a battlemap texture to created encounters for better visualization."
+        ],
+        "createButton": "Create Encounter"
+      },
+
+      "runEncounter": {
+        "windowTitle": "Run Encounter###mainMenuRunEncounter",
+        "preparationPhase": "Preperation Phase",
+        "preparationBullets": [
+          "After selecting an encounter, roll or set initiative.",
+          "Place creatures in their initial positions in either the associated battlemap or an empty-premade battlemap."
+        ],
+        "runningEncounters": "Running Encounters",
+        "runningBullets": [
+          "Progress encounters in a turn-by-turn basis.",
+          "Select which actions each creature plays in a turn.",
+          "Move each creature in the battlemap with both 2D or 3D visualization options."
+        ],
+        "finishingEncounters": "Finishing Encounters",
+        "finishingBullets": [
+          "Finish the current encounter and save the results."
+        ],
+        "selectButton": "Select Encounter"
+      },
+
+      "completedEncounters": {
+        "windowTitle": "View Completed Encounters###mainMenuCompletedEncounters",
+        "bullets": [
+          "Browse the list of your completed encounters and analyze their results.",
+          "Remember what happened exactly in each turn."
+        ],
+        "browseButton": "Browse Encounters"
+      }
+    },
+
+    "encounterCreation": {
+      "windows": [
+        "Encounter Creator###encounterCreator",
+        "Menu###menu",
+        "Entity Browser###entityBrowser",
+        "Encounter Manager###encounterManager",
+        "Monster Browser###monsterBrowser",
+        "Player Character Browser###playerCharacterBrowser",
+        "Encounter Browser###encounterBrowser"
+      ],
+      "returnToMainMenu": "Return to Main Menu",
+
+      "filters": {
+        "source": "Source",
+        "all": "All",
+        "userCreated": "User Created",
+        "compendium": "Compendium",
+        "searchHint": "Search by name"
+      },
+
+      "browser": {
+        "nameColumn": "Name",
+        "sourceColumn": "Source",
+        "monsterColumns": [
+          "CR",
+          "XP"
+        ],
+        "playerCharacterColumns": [
+          "Level",
+          "Species",
+          "Origin"
+        ],
+        "addToEncounter": "Add to Encounter",
+
+        "monster": {
+          "create": "Create Monster",
+          "edit": "Edit Monster",
+          "delete": "Delete Monster",
+          "emptyDetails": "Select a monster to see its details."
+        },
+
+        "playerCharacter": {
+          "create": "Create Player Character",
+          "edit": "Edit Player Character",
+          "delete": "Delete Player Character",
+          "emptyDetails": "Select a player character to see its details."
+        }
+      }
+    },
+
+    "entityCreation": {
+      "sections": {
+        "general": "General",
+        "movement": "Movement",
+        "abilities": "Abilities",
+        "savingThrowsAndSkills": "Saving Throws & Skills",
+        "damageAndConditions": "Damage & Conditions",
+        "sensesAndLanguages": "Senses & Languages",
+        "actionsTraitsEquipment": "Actions, Traits, Equipment"
+      },
+
+      "general": {
+        "name": "Name",
+        "size": "Size",
+        "creatureType": "Creature Type",
+        "alignment": "Alignment",
+        "initiativeBonus": "Initiative Bonus",
+        "resetInitiativeBonus": "Reset Initiative Bonus###ResetInitiativeBonus",
+        "passivePerception": "Passive Perception",
+        "resetPassivePerception": "Reset Passive Perception###ResetPassivePerception",
+        "armorClass": "AC",
+        "hitPoints": "HP"
+      },
+
+      "speeds": {
+        "walk": "Walk",
+        "climb": "Climb",
+        "swim": "Swim",
+        "burrow": "Burrow",
+        "fly": "Fly"
+      },
+
+      "abilityTable": {
+        "abilityColumn": "Ability",
+        "scoreColumn": "Score",
+        "modifierColumn": "Modifier",
+        "overrideColumn": "Override",
+        "resetModifiers": [
+          "Reset Strength Modifier",
+          "Reset Dexterity Modifier",
+          "Reset Constitution Modifier",
+          "Reset Wisdom Modifier",
+          "Reset Intelligence Modifier",
+          "Reset Charisma Modifier"
+        ]
+      },
+
+      "savingThrows": {
+        "header": "Saving Throws",
+        "proficiencies": "Saving Throw Proficiencies",
+        "expertises": "Saving Throw Expertises",
+        "modifiers": "Saving Throw Modifiers",
+        "resetModifiers": [
+          "Reset Strength Saving Throw Modifier",
+          "Reset Dexterity Saving Throw Modifier",
+          "Reset Constitution Saving Throw Modifier",
+          "Reset Wisdom Saving Throw Modifier",
+          "Reset Intelligence Saving Throw Modifier",
+          "Reset Charisma Saving Throw Modifier"
+        ]
+      },
+
+      "skills": {
+        "header": "Skills",
+        "proficiencies": "Skill Proficiencies",
+        "expertises": "Skill Expertises",
+        "modifiers": "Skill Modifiers",
+        "skillColumn": "Skill",
+        "valueColumn": "Value",
+        "resetColumn": "Reset",
+        "resetModifiers": [
+          "Reset Athletics Skill Modifier",
+          "Reset Acrobatics Skill Modifier",
+          "Reset Sleight of Hand Skill Modifier",
+          "Reset Stealth Skill Modifier",
+          "Reset Arcana Skill Modifier",
+          "Reset History Skill Modifier",
+          "Reset Investigation Skill Modifier",
+          "Reset Nature Skill Modifier",
+          "Reset Religion Skill Modifier",
+          "Reset Animal Handling Skill Modifier",
+          "Reset Insight Skill Modifier",
+          "Reset Medicine Skill Modifier",
+          "Reset Perception Skill Modifier",
+          "Reset Survival Skill Modifier",
+          "Reset Deception Skill Modifier",
+          "Reset Intimidation Skill Modifier",
+          "Reset Performance Skill Modifier",
+          "Reset Persuasion Skill Modifier"
+        ]
+      },
+
+      "damage": {
+        "vulnerabilities": "Vulnerabilities",
+        "resistances": "Resistances",
+        "immunities": "Immunities",
+        "conditionImmunities": "Condition Immunities"
+      },
+
+      "languages": "Languages",
+
+      "actions": {
+        "header": "Actions",
+        "add": "Add Action###ActionAdd",
+        "edit": "Edit Action",
+        "type": "Action Type",
+        "name": "Action Name",
+        "description": "Action Description",
+        "finishCreation": "Finish Action Creation",
+        "finishEditing": "Finish Action Editing",
+        "delete": "Delete Action"
+      },
+
+      "traits": {
+        "header": "Traits",
+        "add": "Add Trait###traitAdd",
+        "edit": "Edit Trait###traitEdit",
+        "name": "Trait Name",
+        "description": "Trait Description",
+        "finishCreation": "Finish Trait Creation",
+        "finishEditing": "Finish Trait Editing",
+        "delete": "Delete Trait"
+      },
+
+      "equipment": {
+        "header": "Gear",
+        "add": "Add Gear###gearAdd",
+        "edit": "Edit Gear###gearEdit",
+        "name": "Gear Name",
+        "description": "Gear Description",
+        "finishCreation": "Finish Gear Creation",
+        "finishEditing": "Finish Gear Editing",
+        "delete": "Delete Gear"
+      }
+    },
+
+    "monsterCreation": {
+      "windowTitle": "Monster Creation###entityCreation",
+      "completeButton": "Complete Monster Creation",
+      "cancelButton": "Cancel Monster Creation",
+      "specificData": "Monster Specific Data",
+      "challengeRating": "CR",
+      "experiencePoints": "XP",
+      "resetExperiencePoints": "Reset XP",
+      "proficiencyBonus": "PB",
+      "resetProficiencyBonus": "Reset PB"
+    },
+
+    "playerCharacterCreation": {
+      "windowTitle": "Player Character Creation###entityCreation",
+      "completeButton": "Complete Player Character Creation",
+      "cancelButton": "Cancel Player Character Creation",
+      "classesAndSubclasses": "Classes and Subclasses",
+      "specificData": "Player Character Specific Data",
+      "species": "Species",
+      "origin": "Origin",
+      "weaponProficiencies": "Weapon Proficiencies",
+      "armorProficiencies": "Armor Proficiencies",
+      "toolProficiencies": "Tool Proficiencies",
+      "weaponMasteries": "Weapon Masteries",
+      "configureButton": "Configure Classes and Subclasses###ClassConfiguration",
+      "classes": "Classes",
+      "subclasses": "Subclasses",
+      "finishConfiguration": "Finish Class and Subclass Configuration"
+    }
+  },
+
+  /*
+  The key values here use the enums integral type so we use integers for keys.
+  Also the ordering is important here, it is based on the enum's ordering in the source code.
+  So additions have to be made to the end and a reorder will result in completely different values.
+  Hence we have to be very careful while making additions/changes here. 
+  On the other hand, these tradeoffs allows us to have no middle-mapping layer and a couple of other upsides:
+  Constant time element access using enumerators as indices and labels being actually "ordered" (duh).
+  We can go straight from enums to translation values in each file, using no middle key values.
+  So no C++ container for mapping enums to json key values which is super nice.
+  */
+  "domain": {
+    "size": [
+      "Tiny",
+      "Small",
+      "Medium",
+      "Large",
+      "Huge",
+      "Gargantuan"
+    ],
+    "creatureType": [
+      "Aberration",
+      "Beast",
+      "Celestial",
+      "Construct",
+      "Dragon",
+      "Elemental",
+      "Fey",
+      "Fiend",
+      "Giant",
+      "Humanoid",
+      "Monstrosity",
+      "Ooze",
+      "Plant",
+      "Undead"
+    ],
+    "alignment": [
+      "Unaligned",
+      "Lawful Good",
+      "Neutral Good",
+      "Chaotic Good",
+      "Lawful Neutral",
+      "Neutral",
+      "Chaotic Neutral",
+      "Lawful Evil",
+      "Neutral Evil",
+      "Chaotic Evil"
+    ],
+    "ability": [
+      "Strength",
+      "Dexterity",
+      "Constitution",
+      "Wisdom",
+      "Intelligence",
+      "Charisma"
+    ],
+    "skill": [
+      "Athletics",
+      "Acrobatics",
+      "Sleight of Hand",
+      "Stealth",
+      "Arcana",
+      "History",
+      "Investigation",
+      "Nature",
+      "Religion",
+      "Animal Handling",
+      "Insight",
+      "Medicine",
+      "Perception",
+      "Survival",
+      "Deception",
+      "Intimidation",
+      "Performance",
+      "Persuasion"
+    ],
+    "damageType": [
+      "Acid",
+      "Bludgeoning",
+      "Cold",
+      "Fire",
+      "Force",
+      "Lightning",
+      "Necrotic",
+      "Piercing",
+      "Poison",
+      "Psychic",
+      "Radiant",
+      "Slashing",
+      "Thunder"
+    ],
+    "condition": [
+      "Blinded",
+      "Charmed",
+      "Deafened",
+      "Frightened",
+      "Grappled",
+      "Incapacitated",
+      "Invisible",
+      "Paralyzed",
+      "Petrified",
+      "Poisoned",
+      "Prone",
+      "Restrained",
+      "Stunned",
+      "Unconscious",
+      "Exhaustion"
+    ],
+    "creatureLanguage": [
+      "Common",
+      "Common Sign Language",
+      "Dwarvish",
+      "Elvish",
+      "Giant",
+      "Gnomish",
+      "Goblin",
+      "Halfling",
+      "Orc",
+      "Abyssal",
+      "Celestial",
+      "Deep Speech",
+      "Druidic",
+      "Infernal",
+      "Primordial",
+      "Sylvan",
+      "Thieves' Cant",
+      "Undercommon"
+    ],
+    "sense": [
+      "Blindsight",
+      "Darkvision",
+      "Tremorsense",
+      "Truesight"
+    ],
+    "actionType": [
+      "Action",
+      "Bonus Action",
+      "Reaction",
+      "Legendary Action",
+      "Lair Action"
+    ],
+    "playerClass": [
+      "Barbarian",
+      "Bard",
+      "Cleric",
+      "Druid",
+      "Fighter",
+      "Monk",
+      "Paladin",
+      "Ranger",
+      "Rogue",
+      "Sorcerer",
+      "Warlock",
+      "Wizard"
+    ],
+    "playerSubclass": [
+      "Path of the Berserker",
+      "Path of the Wild Heart",
+      "Path of the World Tree",
+      "Path of the Zealot",
+      "College of Dance",
+      "College of Glamour",
+      "College of Lore",
+      "College of Valor",
+      "Life Domain",
+      "Light Domain",
+      "Trickery Domain",
+      "War Domain",
+      "Circle of the Land",
+      "Circle of the Moon",
+      "Circle of the Sea",
+      "Circle of the Stars",
+      "Battle Master",
+      "Champion",
+      "Eldritch Knight",
+      "Psi Warrior",
+      "Warrior of Mercy",
+      "Warrior of Shadow",
+      "Warrior of the Elements",
+      "Warrior of the Open Hand",
+      "Oath of Devotion",
+      "Oath of Glory",
+      "Oath of the Ancients",
+      "Oath of Vengeance",
+      "Beast Master",
+      "Fey Wanderer",
+      "Gloom Stalker",
+      "Hunter",
+      "Arcane Trickster",
+      "Assassin",
+      "Soulknife",
+      "Thief",
+      "Aberrant Sorcery",
+      "Clockwork Sorcery",
+      "Draconic Sorcery",
+      "Wild Magic Sorcery",
+      "Archfey Patron",
+      "Celestial Patron",
+      "Fiend Patron",
+      "Great Old One Patron",
+      "Abjurer",
+      "Diviner",
+      "Evoker",
+      "Illusionist"
+    ],
+    "species": [
+      "Aasimar",
+      "Dragonborn",
+      "Dwarf",
+      "Elf",
+      "Gnome",
+      "Goliath",
+      "Halfling",
+      "Human",
+      "Orc",
+      "Tiefling"
+    ],
+    "origin": [
+      "Acolyte",
+      "Artisan",
+      "Charlatan",
+      "Criminal",
+      "Entertainer",
+      "Farmer",
+      "Guard",
+      "Guide",
+      "Hermit",
+      "Merchant",
+      "Noble",
+      "Sage",
+      "Sailor",
+      "Scribe",
+      "Soldier",
+      "Wayfarer"
+    ],
+    "weaponType": [
+      "Simple Melee",
+      "Simple Ranged",
+      "Martial Melee",
+      "Martial Ranged"
+    ],
+    "armorType": [
+      "Light",
+      "Medium",
+      "Heavy",
+      "Shield"
+    ],
+    "weaponMastery": [
+      "Cleave",
+      "Graze",
+      "Nick",
+      "Push",
+      "Sap",
+      "Slow",
+      "Topple",
+      "Vex"
+    ],
+    "tool": [
+      "Alchemist's Supplies",
+      "Brewer's Supplies",
+      "Calligrapher's Supplies",
+      "Carpenter's Tools",
+      "Cartographer's Tools",
+      "Cobbler's Tools",
+      "Cook's Utensils",
+      "Glassblower's Tools",
+      "Jeweler's Tools",
+      "Leatherworker's Tools",
+      "Mason's Tools",
+      "Painter's Tools",
+      "Potter's Tools",
+      "Smith's Tools",
+      "Tinker's Tools",
+      "Weaver's Tools",
+      "Woodcarver's Tools",
+      "Disguise Kit",
+      "Forgery Kit",
+      "Gaming Set",
+      "Herbalism Kit",
+      "Musical Instrument",
+      "Navigator's Tools",
+      "Poisoner's Kit",
+      "Thieves' Tools"
+    ]
+  }
+}

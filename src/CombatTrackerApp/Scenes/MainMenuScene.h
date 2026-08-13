@@ -3,9 +3,8 @@
 #include "CombatTrackerLib/Scene.h"
 #include "CombatTrackerLib/Texture2D.h"
 #include "CombatTrackerLib/Utilities/UIUtils.h"
+#include "CombatTrackerLib/LocaleProvider.h"
 
-#include <array>
-#include <cstddef>
 #include <string_view>
 #include <imgui_internal.h>
 
@@ -24,12 +23,7 @@ namespace CombatTrackerApp {
 			// TODO: Expand the categories.
 			COUNT,
 		};
-
-		inline static constexpr std::array<std::string_view, static_cast<std::size_t>(OptionsCategory::COUNT)> OPTIONS_CATEGORY_NAMES { {
-			"Appearance",
-			//...
-		} };
-
+ 
 		inline static constexpr ImGuiDockNodeFlags DOCKSPACE_FLAGS{
 			ImGuiDockNodeFlags_NoResize |
 			ImGuiDockNodeFlags_NoSplit |
@@ -59,7 +53,6 @@ namespace CombatTrackerApp {
 		// Which category the options panel is currently showing.
 		OptionsCategory m_selectedOptionsCategory{};
 
-		// UI IDs.
 		ImGuiID m_dockspaceID{};
 		ImGuiID m_encounterCreationWindowID{};
 		ImGuiID m_encounterRunningWindowID{};
@@ -68,7 +61,6 @@ namespace CombatTrackerApp {
 
 		// Dockspace layout flag.
 		bool m_isDockspaceInitialized{};
-		
 	};
 
 }

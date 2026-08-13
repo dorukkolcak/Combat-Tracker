@@ -17,15 +17,13 @@ namespace CombatTrackerApp {
 
 	protected:
 
-		std::string_view getEntityLabel() const override;
+		CreationLabels getCreationLabels() const override;
 		void renderEntitySpecificInfo() override;
 		void renderEntitySpecificSection() override;
 		bool completeEntityCreation() override;
 		void resetParametersAndOverrides() override;
 
 	private:
-
-		inline static constexpr std::string_view ENTITY_LABEL{ "Player Character" };
 
 		// Held by value for the same reason the creature block is. See EntityCreationScene.
 		PlayerStatBlock m_currentPlayerStatBlock{};

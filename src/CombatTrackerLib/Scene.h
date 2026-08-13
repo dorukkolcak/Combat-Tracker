@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CombatTrackerLib/App.h"
+#include "CombatTrackerLib/LocaleProvider.h"
 
 #include <imgui.h>
 
@@ -50,8 +51,7 @@ namespace CombatTrackerLib {
 		virtual void renderScene() = 0;
 
 	protected:
-
-		// We keep this to queue scene events.
 		App* m_applicationPointer{};
+		const CombatTrackerLib::LocaleProvider& m_localeProviderRef{};
 	};
 }

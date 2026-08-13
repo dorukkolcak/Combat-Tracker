@@ -1,6 +1,7 @@
 #include "CombatTrackerApp/Scenes/MainMenuScene.h"
 #include "CombatTrackerApp/Scenes/EncounterCreationScene.h"
 #include "CombatTrackerLib/Utilities/UIUtils.h"
+#include "CombatTrackerLib/Utilities/GenericUtils.h"
 
 #include <imgui.h>
 #include <algorithm>
@@ -10,12 +11,24 @@ namespace CombatTrackerApp {
 
     MainMenuScene::MainMenuScene(CombatTrackerLib::App* app) :
         CombatTrackerLib::Scene{ app },
-        m_titleTexture{ m_applicationPointer->getResourceDirectory() / "assets" / "Title.png", 4, false, GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR},
-        m_UIThemeParameters{ -1, -1, false },
+        m_titleTexture{ 
+            m_applicationPointer->getResourceDirectory() / "assets" / "Textures" / "Title.png", 
+            4, 
+            false, 
+            GL_REPEAT, 
+            GL_REPEAT, 
+            GL_LINEAR, 
+            GL_LINEAR_MIPMAP_LINEAR
+        },
+        m_UIThemeParameters{ 
+            CombatTrackerLib::enumToSizeT(CombatTrackerLib::UIPreset::COUNT), 
+            CombatTrackerLib::enumToSizeT(CombatTrackerLib::UIPreset::COUNT), 
+            false
+        },
         m_chosenUIPreset{ m_applicationPointer->getUIPreset()},
         m_selectedOptionsCategory{},
         m_isDockspaceInitialized{ false }
-	{   
+	{
         m_titleWindowClass.DockNodeFlagsOverrideSet =
             ImGuiDockNodeFlags_NoResize |
             ImGuiDockNodeFlags_NoSplit |
@@ -23,7 +36,6 @@ namespace CombatTrackerApp {
 	}
     void MainMenuScene::notifyScene(const ImGuiIO&) {}
     void MainMenuScene::updateScene(double) {}
-
     void MainMenuScene::renderUI() {
 
         // Set configurations of the host window of the scene.
@@ -50,10 +62,10 @@ namespace CombatTrackerApp {
             ImGui::DockBuilderSplitNode(m_encounterRunningWindowID, ImGuiDir_Right, 0.50f, &m_completedEncountersWindowID, &m_encounterRunningWindowID);
 
             // Dock windows.
-            ImGui::DockBuilderDockWindow("CombatTracker", m_titleWindowID);
-            ImGui::DockBuilderDockWindow("Encounter Creation", m_encounterCreationWindowID);
-            ImGui::DockBuilderDockWindow("Run Encounter", m_encounterRunningWindowID);
-            ImGui::DockBuilderDockWindow("View Completed Encounters", m_completedEncountersWindowID);
+            ImGui::DockBuilderDockWindow(m_localeProviderRef.getText("/scenes/mainMenu/titleWindow").data(), m_titleWindowID);
+            ImGui::DockBuilderDockWindow(m_localeProviderRef.getText("/scenes/mainMenu/encounterCreation/windowTitle").data(), m_encounterCreationWindowID);
+            ImGui::DockBuilderDockWindow(m_localeProviderRef.getText("/scenes/mainMenu/runEncounter/windowTitle").data(), m_encounterRunningWindowID);
+            ImGui::DockBuilderDockWindow(m_localeProviderRef.getText("/scenes/mainMenu/completedEncounters/windowTitle").data(), m_completedEncountersWindowID);
 
             // Finish dockspace creation.
             ImGui::DockBuilderFinish(m_dockspaceID);
@@ -74,7 +86,10 @@ namespace CombatTrackerApp {
 
         // Title window.
         ImGui::SetNextWindowClass(&m_titleWindowClass);
-        ImGui::Begin("CombatTracker");
+        ImGui::Begin(m_localeProviderRef.getText("/scenes/mainMenu/titleWindow").data());
+
+        const auto optionsLabel{ m_localeProviderRef.getText("/scenes/mainMenu/options") };
+        const auto exitLabel{ m_localeProviderRef.getText("/scenes/mainMenu/exit") };
 
         /*
         The two buttons are aligned as one row instead of individually.
@@ -83,16 +98,16 @@ namespace CombatTrackerApp {
         But the ImGui style can change during run time through changing the UI preset so this has to be calculated every render.
         */
         const auto buttonRowWidth{
-            CombatTrackerLib::buttonWidth("Options") +
-            CombatTrackerLib::buttonWidth("Exit") +
+            CombatTrackerLib::buttonWidth(optionsLabel.data()) +
+            CombatTrackerLib::buttonWidth(exitLabel.data()) +
             ImGui::GetStyle().ItemSpacing.x
         };
         CombatTrackerLib::alignCursorForWidth(buttonRowWidth, 1.0f);
-        if (ImGui::Button("Options")) {
+        if (ImGui::Button(optionsLabel.data())) {
             ImGui::OpenPopup("Options Popup");
         }
         ImGui::SameLine();
-        if (ImGui::Button("Exit")) {
+        if (ImGui::Button(exitLabel.data())) {
 
             // This signal should be deferred and handled by the application instance at the start of the frame.
             m_applicationPointer->signalApplicationClose();
@@ -120,7 +135,7 @@ namespace CombatTrackerApp {
         if (ImGui::BeginPopupModal("Options Popup", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
 
             ImGui::PushFont(nullptr, ImGui::GetStyle().FontSizeBase * 1.35f);
-            ImGui::TextUnformatted("Options");
+            ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/mainMenu/optionsPopup/header").data());
             ImGui::PopFont();
             ImGui::Separator();
 
@@ -131,9 +146,10 @@ namespace CombatTrackerApp {
             // Category list.
             const auto categoryWidth{ std::min(ImGui::GetFontSize() * 9.0f, ImGui::GetContentRegionAvail().x * 0.35f) };
             ImGui::BeginChild("Options Categories", ImVec2(categoryWidth, bodyHeight), ImGuiChildFlags_Borders);
-            for (size_t i{}; i < OPTIONS_CATEGORY_NAMES.size(); ++i) {
+            const auto categoryNames{ m_localeProviderRef.getTextList("/scenes/mainMenu/optionsPopup/categories") };
+            for (size_t i{}; i < categoryNames.size(); ++i) {
                 const auto category{ static_cast<OptionsCategory>(i) }; // Cast is needed here so that we actually store the enumerator type.
-                if (ImGui::Selectable(OPTIONS_CATEGORY_NAMES[i].data(), m_selectedOptionsCategory == category)) {
+                if (ImGui::Selectable(categoryNames[i].data(), m_selectedOptionsCategory == category)) {
                     m_selectedOptionsCategory = category;
                 }
             }
@@ -144,12 +160,17 @@ namespace CombatTrackerApp {
             // Controls belonging to the selected category.
             ImGui::BeginChild("Options Content", ImVec2(0.0f, bodyHeight), ImGuiChildFlags_Borders);
             if (m_selectedOptionsCategory == OptionsCategory::APPEARANCE) {
-                ImGui::SeparatorText("Theme");
+                ImGui::SeparatorText(m_localeProviderRef.getText("/scenes/mainMenu/optionsPopup/theme").data());
 
                 // Hide the label of the listbox and put it above the widget, so the listbox can take the full panel width.
-                ImGui::TextUnformatted("Choose Theme");
+                ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/mainMenu/optionsPopup/chooseTheme").data());
                 ImGui::SetNextItemWidth(-1.0f); // -1.0f passed to the function means that the item spans the entire width.
-                CombatTrackerLib::renderListBox(m_UIThemeParameters, m_chosenUIPreset, "##ChooseTheme", CombatTrackerLib::PRESET_NAMES);
+                CombatTrackerLib::renderListBox(
+                    m_UIThemeParameters,
+                    m_chosenUIPreset,
+                    "##ChooseTheme",
+                    m_localeProviderRef.getTextList("/scenes/mainMenu/optionsPopup/themes")
+                );
                 m_applicationPointer->setUIPreset(m_chosenUIPreset); // This function early returns already so this is fine.
             }
             // TODO: Update this when more categories get added.
@@ -159,7 +180,7 @@ namespace CombatTrackerApp {
             ImGui::Separator();
 
             // A modal ignores both outside clicks and Escape, so this is the only way out.
-            if (CombatTrackerLib::alignedButton("Close", 1.0f)) {
+            if (CombatTrackerLib::alignedButton(m_localeProviderRef.getText("/scenes/mainMenu/optionsPopup/close").data(), 1.0f)) {
                 ImGui::CloseCurrentPopup();
             }
             ImGui::EndPopup();
@@ -168,47 +189,38 @@ namespace CombatTrackerApp {
         ImGui::End();
 
         // Encounter Creation window.
-        ImGui::Begin("Encounter Creation");
-        ImGui::TextWrapped("Creature Management");
-        ImGui::Bullet(); ImGui::TextWrapped("Create and save monsters and player characters.");
-        ImGui::Bullet(); ImGui::TextWrapped("Browse and modify your saved monsters and player characters through the compendium.");
-        ImGui::Bullet(); ImGui::TextWrapped("In addition, browse premade monsters and player characters through the compendium.");
-        ImGui::TextWrapped("Encounter Management");
-        ImGui::Bullet(); ImGui::TextWrapped("Create and save encounters from the giant list of creatures.");
-        ImGui::Bullet(); ImGui::TextWrapped("Browse and modify your saved encounters through the compendium.");
-        ImGui::Bullet(); ImGui::TextWrapped("In addition, browse premade encounters using premade creatures through the compendium.");
-        ImGui::Bullet(); ImGui::TextWrapped("Attach a battlemap texture to created encounters for better visualization.");
-        if (CombatTrackerLib::alignedButton("Create Encounter", 0.5f)) {
+        ImGui::Begin(m_localeProviderRef.getText("/scenes/mainMenu/encounterCreation/windowTitle").data());
+        ImGui::TextWrapped("%s", m_localeProviderRef.getText("/scenes/mainMenu/encounterCreation/creatureManagement").data());
+        CombatTrackerLib::renderBulletList(m_localeProviderRef.getTextList("/scenes/mainMenu/encounterCreation/creatureManagementBullets"));
+        ImGui::TextWrapped("%s", m_localeProviderRef.getText("/scenes/mainMenu/encounterCreation/encounterManagement").data());
+        CombatTrackerLib::renderBulletList(m_localeProviderRef.getTextList("/scenes/mainMenu/encounterCreation/encounterManagementBullets"));
+        if (CombatTrackerLib::alignedButton(m_localeProviderRef.getText("/scenes/mainMenu/encounterCreation/createButton").data(), 0.5f)) {
             m_applicationPointer->queueSceneTransition(this, std::make_unique<EncounterCreationScene>(m_applicationPointer));
         }
         ImGui::End();
 
         // Run Encounter window.
-        ImGui::Begin("Run Encounter");
-        ImGui::TextWrapped("Preperation Phase");
-        ImGui::Bullet(); ImGui::TextWrapped("After selecting an encounter, roll or set initiative.");
-        ImGui::Bullet(); ImGui::TextWrapped("Place creatures in their initial positions in either the associated battlemap or an empty-premade battlemap.");
-        ImGui::TextWrapped("Running Encounters");
-        ImGui::Bullet(); ImGui::TextWrapped("Progress encounters in a turn-by-turn basis.");
-        ImGui::Bullet(); ImGui::TextWrapped("Select which actions each creature plays in a turn.");
-        ImGui::Bullet(); ImGui::TextWrapped("Move each creature in the battlemap with both 2D or 3D visualization options.");
-        ImGui::TextWrapped("Finishing Encounters");
-        ImGui::Bullet(); ImGui::TextWrapped("Finish the current encounter and save the results.");
-        
+        ImGui::Begin(m_localeProviderRef.getText("/scenes/mainMenu/runEncounter/windowTitle").data());
+        ImGui::TextWrapped("%s", m_localeProviderRef.getText("/scenes/mainMenu/runEncounter/preparationPhase").data());
+        CombatTrackerLib::renderBulletList(m_localeProviderRef.getTextList("/scenes/mainMenu/runEncounter/preparationBullets"));
+        ImGui::TextWrapped("%s", m_localeProviderRef.getText("/scenes/mainMenu/runEncounter/runningEncounters").data());
+        CombatTrackerLib::renderBulletList(m_localeProviderRef.getTextList("/scenes/mainMenu/runEncounter/runningBullets"));
+        ImGui::TextWrapped("%s", m_localeProviderRef.getText("/scenes/mainMenu/runEncounter/finishingEncounters").data());
+        CombatTrackerLib::renderBulletList(m_localeProviderRef.getTextList("/scenes/mainMenu/runEncounter/finishingBullets"));
+
         // TODO: Complete the scene transition.
-        if (CombatTrackerLib::alignedButton("Select Encounter", 0.5f)) {
-           
+        if (CombatTrackerLib::alignedButton(m_localeProviderRef.getText("/scenes/mainMenu/runEncounter/selectButton").data(), 0.5f)) {
+
         }
         ImGui::End();
 
         // Completed Encounters window.
-        ImGui::Begin("View Completed Encounters");
-        ImGui::Bullet(); ImGui::TextWrapped("Browse the list of your completed encounters and analyze their results.");
-        ImGui::Bullet(); ImGui::TextWrapped("Remember what happened exactly in each turn.");
+        ImGui::Begin(m_localeProviderRef.getText("/scenes/mainMenu/completedEncounters/windowTitle").data());
+        CombatTrackerLib::renderBulletList(m_localeProviderRef.getTextList("/scenes/mainMenu/completedEncounters/bullets"));
 
         // TODO: Complete the scene transition.
-        if (CombatTrackerLib::alignedButton("Browse Encounters", 0.5f)) {
-        
+        if (CombatTrackerLib::alignedButton(m_localeProviderRef.getText("/scenes/mainMenu/completedEncounters/browseButton").data(), 0.5f)) {
+
         }
         ImGui::End();
 

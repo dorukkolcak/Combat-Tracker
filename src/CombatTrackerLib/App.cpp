@@ -31,16 +31,19 @@
 #include <cassert>
 #include <ranges>
 #include <cstdlib>
+#include <iostream>
+#include <string_view>
 #include <system_error>
 
 
 namespace CombatTrackerLib {
-	App::App(Specification specification) : 
+	App::App(Specification specification) :
 		m_specfication{ std::move(specification) }, // Specification should be owned by the application so move it.
-		m_resourceDirectory{ findResourceDirectory()},
-		m_userDataDirectory{findUserDataDirectory(m_specfication.name)},
+		m_resourceDirectory{ findResourceDirectory() },
+		m_userDataDirectory{ findUserDataDirectory(m_specfication.name) },
+		m_localeReader{ m_specfication.locale, &m_resourceDirectory },
 		m_isCloseSignalled{ false },
-		m_isUIPresetApplied{false}
+		m_isUIPresetApplied{ false }
 	{
 		glfwInit();
 		m_windowPointer = std::make_unique<Window>(&(m_specfication.windowSpecification), m_specfication.name);
@@ -59,6 +62,16 @@ namespace CombatTrackerLib {
 		ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
 		const char* glsl_version = "#version 150";
 		ImGui_ImplOpenGL3_Init(glsl_version);
+
+		// Load the application chosen font. This is needed for loading fonts that support some unconventional characters.
+		const std::filesystem::path fontPath{ m_resourceDirectory / "assets/Fonts/Roboto-Medium.ttf" };
+		std::error_code fontErrorCode{};
+		if (std::filesystem::exists(fontPath, fontErrorCode)) {
+			ImGui::GetIO().Fonts->AddFontFromFileTTF(fontPath.string().c_str(), 18.0f);
+		}
+		else {
+			std::cerr << "Font file couldn't be read, falling back to the default font." << std::endl;
+		}
 
 		setUIPreset(m_specfication.uiPreset); // Loads the required ImGui::Style constants from a constant unordered map.
 	}
@@ -317,5 +330,8 @@ namespace CombatTrackerLib {
 	}
 	const std::filesystem::path& App::getUserDataDirectory() const {
 		return m_userDataDirectory;
+	}
+	const LocaleProvider& App::getLocaleProvider() const {
+		return m_localeReader;
 	}
 }
