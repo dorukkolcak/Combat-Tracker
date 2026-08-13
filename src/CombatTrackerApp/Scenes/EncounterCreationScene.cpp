@@ -16,10 +16,8 @@ namespace CombatTrackerApp {
 		m_selectedPlayerCharacterIndex{ -1 },
 		m_isdockspaceInitialized{ false }
 	{}
-
 	void EncounterCreationScene::notifyScene(const ImGuiIO&) {}
 	void EncounterCreationScene::updateScene(double) {}
-
 	void EncounterCreationScene::renderUI() {
 
 		// The menu bar is rendered inside the host window and the three browsers inside the entity browser's tab bar.
@@ -30,20 +28,15 @@ namespace CombatTrackerApp {
 
 	}
 	void EncounterCreationScene::renderScene() {}
-
-	std::string EncounterCreationScene::composeWindowName(WindowType windowType, std::string_view stableID) const {
-		const auto& windowNames{ m_applicationPointer->getLocaleReader().getList(std::string{ WINDOW_NAMES_KEY }) };
-		return std::format("{}###{}", windowNames[CombatTrackerLib::enumToSizeT(windowType)].get_ref<const std::string&>(), stableID);
+	std::string_view EncounterCreationScene::getWindowName(WindowType windowType) const {
+		return m_localeProviderRef.getTextList("/scenes/encounterCreation/windows")[CombatTrackerLib::enumToSizeT(windowType)];
 	}
-
 	void EncounterCreationScene::renderHostWindow() {
 
 		using enum WindowType;
-
-		const auto& localeReader{ m_applicationPointer->getLocaleReader() };
-		const auto encounterCreatorWindowName{ composeWindowName(ENCOUNTER_CREATOR, "encounterCreator") };
-		const auto entityBrowserWindowName{ composeWindowName(ENTITY_BROWSER, "entityBrowser") };
-		const auto encounterManagerWindowName{ composeWindowName(ENCOUNTER_MANAGER, "encounterManager") };
+		const auto encounterCreatorWindowName{ getWindowName(ENCOUNTER_CREATOR) };
+		const auto entityBrowserWindowName{ getWindowName(ENTITY_BROWSER) };
+		const auto encounterManagerWindowName{ getWindowName(ENCOUNTER_MANAGER) };
 
 		// Set configurations of the host window of the scene.
 		// This has to happen on every pass and not just the initial one, otherwise the host stays at its old size once the OS window is resized.
@@ -72,8 +65,8 @@ namespace CombatTrackerApp {
 			);
 
 			// Dock windows.
-			ImGui::DockBuilderDockWindow(entityBrowserWindowName.c_str(), m_entityBrowserWindowID);
-			ImGui::DockBuilderDockWindow(encounterManagerWindowName.c_str(), m_encounterManagerWindowID);
+			ImGui::DockBuilderDockWindow(entityBrowserWindowName.data(), m_entityBrowserWindowID);
+			ImGui::DockBuilderDockWindow(encounterManagerWindowName.data(), m_encounterManagerWindowID);
 
 			// Finish dockspace creation.
 			ImGui::DockBuilderFinish(m_dockspaceID);
@@ -85,7 +78,7 @@ namespace CombatTrackerApp {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f, 0.0f });
 		ImGui::Begin(
-			encounterCreatorWindowName.c_str(),
+			encounterCreatorWindowName.data(),
 			nullptr,
 			ENCOUNTER_CREATION_WINDOW_FLAGS
 		);
@@ -93,9 +86,8 @@ namespace CombatTrackerApp {
 
 		// The menu bar of the host window. This should grant access to functionality such as returning to the main menu.
 		if (ImGui::BeginMenuBar()) {
-			const auto& windowNames{ localeReader.getList(std::string{ WINDOW_NAMES_KEY }) };
-			if (ImGui::BeginMenu(windowNames[CombatTrackerLib::enumToSizeT(MENU)].get_ref<const std::string&>().c_str())) {
-				if (ImGui::MenuItem(localeReader.getText("/scenes/encounterCreation/returnToMainMenu").data())) {
+			if (ImGui::BeginMenu(getWindowName(MENU).data())) {
+				if (ImGui::MenuItem(m_localeProviderRef.getText("/scenes/encounterCreation/returnToMainMenu").data())) {
 					m_applicationPointer->queueSceneTransition(this, std::make_unique<MainMenuScene>(m_applicationPointer));
 				}
 				// TODO: Expand the options from here.
@@ -114,31 +106,41 @@ namespace CombatTrackerApp {
 	void EncounterCreationScene::renderEntityBrowserHostWindow() {
 
 		using enum WindowType;
-
-		const auto& localeReader{ m_applicationPointer->getLocaleReader() };
-		const auto& windowNames{ localeReader.getList(std::string{ WINDOW_NAMES_KEY }) };
-		const auto entityBrowserWindowName{ composeWindowName(ENTITY_BROWSER, "entityBrowser") };
+		const auto entityBrowserWindowName{ getWindowName(ENTITY_BROWSER) };
 
 		// This window hosts each entity's seperate subbrowser window.
 		// These subbrowser windows are accessed via a tab bar.
-		ImGui::Begin(entityBrowserWindowName.c_str(), nullptr, ImGuiWindowFlags_NoTitleBar);
+		ImGui::Begin(entityBrowserWindowName.data(), nullptr, ImGuiWindowFlags_NoTitleBar);
 
 		// Tabs of the window host other windows for each entity (Monster and PlayerCharacter).
+		// Creating a temporary stack allocated struct for this section is fine as we are just copying string_views.
 		if (ImGui::BeginTabBar("##EntityBrowserTabs")) {
-			if (ImGui::BeginTabItem(windowNames[CombatTrackerLib::enumToSizeT(MONSTER_BROWSER)].get_ref<const std::string&>().c_str())) {
+			if (ImGui::BeginTabItem(getWindowName(MONSTER_BROWSER).data())) {
 				renderEntityBrowserWindow<MonsterCreationScene>(
-					localeReader.getText("/scenes/monsterCreation/entityLabel"),
-					MONSTER_BROWSER_COLUMNS_KEY,
+					BrowserLabels{
+						m_localeProviderRef.getText("/scenes/encounterCreation/browser/monster/create"),
+						m_localeProviderRef.getText("/scenes/encounterCreation/browser/monster/edit"),
+						m_localeProviderRef.getText("/scenes/encounterCreation/browser/monster/delete"),
+						m_localeProviderRef.getText("/scenes/encounterCreation/browser/monster/emptyDetails"),
+						"MonsterBrowser"
+					},
+					m_localeProviderRef.getTextList("/scenes/encounterCreation/browser/monsterColumns"),
 					m_monsterSource,
 					m_monsterSearchQuery,
 					m_selectedMonsterIndex
 				);
 				ImGui::EndTabItem();
 			}
-			if (ImGui::BeginTabItem(windowNames[CombatTrackerLib::enumToSizeT(PLAYER_CHARACTER_BROWSER)].get_ref<const std::string&>().c_str())) {
+			if (ImGui::BeginTabItem(getWindowName(PLAYER_CHARACTER_BROWSER).data())) {
 				renderEntityBrowserWindow<PlayerCharacterCreationScene>(
-					localeReader.getText("/scenes/playerCharacterCreation/entityLabel"),
-					PLAYER_CHARACTER_BROWSER_COLUMNS_KEY,
+					BrowserLabels{
+						m_localeProviderRef.getText("/scenes/encounterCreation/browser/playerCharacter/create"),
+						m_localeProviderRef.getText("/scenes/encounterCreation/browser/playerCharacter/edit"),
+						m_localeProviderRef.getText("/scenes/encounterCreation/browser/playerCharacter/delete"),
+						m_localeProviderRef.getText("/scenes/encounterCreation/browser/playerCharacter/emptyDetails"),
+						"PlayerCharacterBrowser"
+					},
+					m_localeProviderRef.getTextList("/scenes/encounterCreation/browser/playerCharacterColumns"),
 					m_playerCharacterSource,
 					m_playerCharacterSearchQuery,
 					m_selectedPlayerCharacterIndex
@@ -151,27 +153,25 @@ namespace CombatTrackerApp {
 	}
 	void EncounterCreationScene::renderBrowserFilters(EntitySource& source, std::string& searchQuery, const char* label) {
 
-		const auto& localeReader{ m_applicationPointer->getLocaleReader() };
-
 		// Each tab passes its own label so that the widgets below don't collide in the ID stack.
 		ImGui::PushID(label);
 		ImGui::AlignTextToFramePadding();
-		ImGui::TextUnformatted(localeReader.getText("/scenes/encounterCreation/filters/source").data());
+		ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/encounterCreation/filters/source").data());
 		ImGui::SameLine();
-		if (ImGui::RadioButton(localeReader.getText("/scenes/encounterCreation/filters/all").data(), source == EntitySource::ALL)) {
+		if (ImGui::RadioButton(m_localeProviderRef.getText("/scenes/encounterCreation/filters/all").data(), source == EntitySource::ALL)) {
 			source = EntitySource::ALL;
 		}
 		ImGui::SameLine();
-		if (ImGui::RadioButton(localeReader.getText("/scenes/encounterCreation/filters/userCreated").data(), source == EntitySource::USER_CREATED)) {
+		if (ImGui::RadioButton(m_localeProviderRef.getText("/scenes/encounterCreation/filters/userCreated").data(), source == EntitySource::USER_CREATED)) {
 			source = EntitySource::USER_CREATED;
 		}
 		ImGui::SameLine();
-		if (ImGui::RadioButton(localeReader.getText("/scenes/encounterCreation/filters/compendium").data(), source == EntitySource::COMPENDIUM)) {
+		if (ImGui::RadioButton(m_localeProviderRef.getText("/scenes/encounterCreation/filters/compendium").data(), source == EntitySource::COMPENDIUM)) {
 			source = EntitySource::COMPENDIUM;
 		}
 
 		ImGui::SetNextItemWidth(-1.0f); // The search field spans the tab so it grows with the browser instead of sitting at ImGui's default item width.
-		ImGui::InputTextWithHint("##Search", localeReader.getText("/scenes/encounterCreation/filters/searchHint").data(), &searchQuery);
+		ImGui::InputTextWithHint("##Search", m_localeProviderRef.getText("/scenes/encounterCreation/filters/searchHint").data(), &searchQuery);
 		ImGui::PopID();
 	}
 
@@ -181,7 +181,7 @@ namespace CombatTrackerApp {
 
 		using enum WindowType;
 
-		ImGui::Begin(composeWindowName(ENCOUNTER_MANAGER, "encounterManager").c_str());
+		ImGui::Begin(getWindowName(ENCOUNTER_MANAGER).data());
 		ImGui::End();
 	}
 }

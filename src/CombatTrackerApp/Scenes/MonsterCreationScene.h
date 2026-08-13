@@ -16,7 +16,7 @@ namespace CombatTrackerApp {
 
 	protected:
 
-		std::string_view getEntityLabel() const override;
+		CreationLabels getCreationLabels() const override;
 		void renderEntitySpecificInfo() override;
 		void renderEntitySpecificSection() override;
 		bool completeEntityCreation() override;
@@ -33,7 +33,7 @@ namespace CombatTrackerApp {
 		CR is the one selectable list in the application that is not backed by an enum.
 		Its table pairs each CR value with its label, because the value itself is what keys the XP and PB tables.
 		So the generic listbox helper, which turns a row position into an enumerator, does not fit and this does the job instead.
-		The labels are numerals rather than words, so they are formatted from the CR keys instead of coming from a locale file.
+		The labels are numerals rather than words, so they are listed alongside the CR keys instead of coming from a locale file.
 		*/
 		void renderCRListBox();
 	};

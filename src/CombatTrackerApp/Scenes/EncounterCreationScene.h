@@ -3,9 +3,7 @@
 #include "CombatTrackerLib/Utilities/UIUtils.h"
 #include "CombatTrackerLib/Scene.h"
 
-#include <array>
-#include <cstddef>
-#include <format>
+#include <span>
 #include <string>
 #include <string_view>
 
@@ -37,7 +35,13 @@ namespace CombatTrackerApp {
 			COMPENDIUM
 		};
 
-		inline static constexpr std::string_view WINDOW_NAMES_KEY{ "/scenes/encounterCreation/windows" };
+		struct BrowserLabels {
+			std::string_view create{};
+			std::string_view edit{};
+			std::string_view remove{};
+			std::string_view emptyDetails{};
+			std::string_view stableID{};
+		};
 
 		// These flags are shared between browser tabs.
 		inline static constexpr ImGuiTableFlags BROWSER_TABLE_FLAGS{
@@ -61,9 +65,6 @@ namespace CombatTrackerApp {
 			ImGuiDockNodeFlags_NoSplit
 		};
 
-		inline static constexpr std::string_view MONSTER_BROWSER_COLUMNS_KEY{ "/scenes/encounterCreation/browser/monsterColumns" };
-		inline static constexpr std::string_view PLAYER_CHARACTER_BROWSER_COLUMNS_KEY{ "/scenes/encounterCreation/browser/playerCharacterColumns" };
-
 		ImGuiID m_dockspaceID{};
 		ImGuiID m_entityBrowserWindowID{};
 		ImGuiID m_encounterManagerWindowID{};
@@ -80,7 +81,7 @@ namespace CombatTrackerApp {
 
 		bool m_isdockspaceInitialized{};
 
-		std::string composeWindowName(WindowType windowType, std::string_view stableID) const;
+		std::string_view getWindowName(WindowType windowType) const;
 
 		void renderHostWindow();
 
@@ -94,29 +95,26 @@ namespace CombatTrackerApp {
 
 		template<typename S>
 		void renderEntityBrowserWindow(
-			std::string_view typeLabel,
-			std::string_view columnLabelsKey,
+			const BrowserLabels& labels,
+			std::span<const std::string_view> columnLabels,
 			EntitySource& source,
 			std::string& searchQuery,
 			int& selectionIndex
 		);
-
 		void renderEncounterManagerWindow();
-
 	};
 
 	// TODO: Finish this function when JSON functionality is implemented.
 	template<typename S>
 	void EncounterCreationScene::renderEntityBrowserWindow(
-		std::string_view typeLabel,
-		std::string_view columnLabelsKey,
+		const BrowserLabels& labels,
+		std::span<const std::string_view> columnLabels,
 		EntitySource& source,
 		std::string& searchQuery,
 		int& selectionIndex
 	) {
-		const auto& localeReader{ m_applicationPointer->getLocaleReader() };
-		const auto& columnLabels{ localeReader.getList(std::string{ columnLabelsKey }) };
-		renderBrowserFilters(source, searchQuery, typeLabel.data());
+		ImGui::PushID(labels.stableID.data());
+		renderBrowserFilters(source, searchQuery, labels.stableID.data());
 
 		/*
 		Split what is left of the tab between the entity listings and the details panel.
@@ -126,36 +124,40 @@ namespace CombatTrackerApp {
 		const auto functionalityButtonsHeight{ CombatTrackerLib::reservedFooterHeight(1) };
 		const auto createRowHeight{ ImGui::GetFrameHeightWithSpacing() };
 		const auto bodyHeight{ ImGui::GetContentRegionAvail().y - createRowHeight - functionalityButtonsHeight };
-		const auto listingHeight{ bodyHeight * 0.55f }; // Cpnsider playing around with the multiplier.
+		const auto listingHeight{ bodyHeight * 0.55f }; // Consider playing around with the multiplier.
 
 		const auto columnCount{ columnLabels.size() };
 		if (ImGui::BeginTable(
-			std::format("{} Listing", typeLabel).c_str(), // Use std::format to easily concatenate std::string_view to string literals.
+			"Listing",
 			static_cast<int>(columnCount) + 2,
 			BROWSER_TABLE_FLAGS,
 			ImVec2{ 0.0f, listingHeight }
 		)) {
-			ImGui::TableSetupColumn(localeReader.getText("/scenes/encounterCreation/browser/nameColumn").data(), ImGuiTableColumnFlags_WidthStretch, 0.30f);
 
-			for (size_t i{}; i < columnCount; ++i) {
+			// Column setup.
+			ImGui::TableSetupColumn(
+				m_localeProviderRef.getText("/scenes/encounterCreation/browser/nameColumn").data(),
+				ImGuiTableColumnFlags_WidthStretch, 
+				0.30f
+			);
+			for (const auto& columnLabel : columnLabels) {
 				ImGui::TableSetupColumn(
-					columnLabels[i].get_ref<const std::string&>().c_str(),
+					columnLabel.data(),
 					ImGuiTableColumnFlags_WidthStretch,
 					0.6f / static_cast<float>(columnCount)
 				);
 			}
-			ImGui::TableSetupColumn(localeReader.getText("/scenes/encounterCreation/browser/sourceColumn").data(), ImGuiTableColumnFlags_WidthStretch, 0.10f);
-
+			ImGui::TableSetupColumn(
+				m_localeProviderRef.getText("/scenes/encounterCreation/browser/sourceColumn").data(), 
+				ImGuiTableColumnFlags_WidthStretch, 
+				0.10f
+			);
 			ImGui::TableSetupScrollFreeze(0, 1);
 			ImGui::TableHeadersRow();
-
 			ImGui::EndTable();
 		}
 
-		if (CombatTrackerLib::alignedButton(
-			std::vformat(localeReader.getText("/scenes/encounterCreation/browser/createEntity"), std::make_format_args(typeLabel)).c_str(),
-			0.5f
-		)) {
+		if (CombatTrackerLib::alignedButton(labels.create.data(), 0.5f)) {
 			m_applicationPointer->queueSceneTransition(this, std::make_unique<S>(m_applicationPointer));
 		}
 
@@ -164,27 +166,25 @@ namespace CombatTrackerApp {
 		The calculation is done by subtracting the absolute value of the negative height from the available height.
 		So these buttons span the remaining height, which is exactly what we want since they are the last UI elements to be rendered.
 		*/
-		ImGui::BeginChild(std::format("{} Details", typeLabel).c_str(), ImVec2{ 0.0f, -functionalityButtonsHeight });
+		ImGui::BeginChild("Details", ImVec2{ 0.0f, -functionalityButtonsHeight });
 		if (selectionIndex < 0) {
-			ImGui::TextWrapped(
-				"%s",
-				std::vformat(localeReader.getText("/scenes/encounterCreation/browser/emptyDetails"), std::make_format_args(typeLabel)).c_str()
-			);
+			ImGui::TextWrapped("%s", labels.emptyDetails.data());
 		}
 		ImGui::EndChild();
 
 		ImGui::BeginDisabled(selectionIndex < 0);
-		if (ImGui::Button(localeReader.getText("/scenes/encounterCreation/browser/addToEncounter").data())) {
+		if (ImGui::Button(m_localeProviderRef.getText("/scenes/encounterCreation/browser/addToEncounter").data())) {
 
 		}
 		ImGui::SameLine();
-		if (ImGui::Button(std::vformat(localeReader.getText("/scenes/encounterCreation/browser/editEntity"), std::make_format_args(typeLabel)).c_str())) {
+		if (ImGui::Button(labels.edit.data())) {
 
 		}
 		ImGui::SameLine();
-		if (ImGui::Button(std::vformat(localeReader.getText("/scenes/encounterCreation/browser/deleteEntity"), std::make_format_args(typeLabel)).c_str())) {
+		if (ImGui::Button(labels.remove.data())) {
 
 		}
 		ImGui::EndDisabled();
+		ImGui::PopID();
 	}
 }

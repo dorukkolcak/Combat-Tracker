@@ -1,13 +1,10 @@
 {
-  "locale": {
-    "code": "tr",
-    "endonym": "Türkçe",
-    "glyphRanges": "latinExtended" // This is needed so for ImGui to load some characters.
-  },
+
+  "endonym": "Türkçe",
 
   "scenes": {
     "mainMenu": {
-      "titleWindow": "CombatTracker",
+      "titleWindow": "CombatTracker###mainMenuTitle",
       "options": "Seçenekler",
       "exit": "Çıkış",
 
@@ -28,13 +25,17 @@
           "Buzul",
           "Semavî",
           "Nekrotik",
-          "Kanlı Ay"
+          "Kanlı Ay",
+          "Peri Diyarı",
+          "Fırtına",
+          "Kumlar",
+          "Ay Işığı"
         ],
         "close": "Kapat"
       },
 
       "encounterCreation": {
-        "windowTitle": "Karşılaşma Oluşturma",
+        "windowTitle": "Karşılaşma Oluşturma###mainMenuEncounterCreation",
         "creatureManagement": "Yaratık Yönetimi",
         "creatureManagementBullets": [
           "Canavarlar ve oyuncu karakterleri oluşturun ve kaydedin.",
@@ -52,7 +53,7 @@
       },
 
       "runEncounter": {
-        "windowTitle": "Karşılaşma Yürüt",
+        "windowTitle": "Karşılaşma Yürüt###mainMenuRunEncounter",
         "preparationPhase": "Hazırlık Aşaması",
         "preparationBullets": [
           "Bir karşılaşma seçtikten sonra inisiyatif atın veya belirleyin.",
@@ -72,7 +73,7 @@
       },
 
       "completedEncounters": {
-        "windowTitle": "Tamamlanan Karşılaşmaları Görüntüle",
+        "windowTitle": "Tamamlanan Karşılaşmaları Görüntüle###mainMenuCompletedEncounters",
         "bullets": [
           "Tamamladığınız karşılaşmaların listesini inceleyin ve sonuçlarını analiz edin.",
           "Her turda tam olarak ne olduğunu hatırlayın."
@@ -83,13 +84,13 @@
 
     "encounterCreation": {
       "windows": [
-        "Karşılaşma Oluşturucu",
-        "Menü",
-        "Varlık Tarayıcısı",
-        "Karşılaşma Yöneticisi",
-        "Canavar Tarayıcısı",
-        "Oyuncu Karakteri Tarayıcısı",
-        "Karşılaşma Tarayıcısı"
+        "Karşılaşma Oluşturucu###encounterCreator",
+        "Menü###menu",
+        "Varlık Tarayıcısı###entityBrowser",
+        "Karşılaşma Yöneticisi###encounterManager",
+        "Canavar Tarayıcısı###monsterBrowser",
+        "Oyuncu Karakteri Tarayıcısı###playerCharacterBrowser",
+        "Karşılaşma Tarayıcısı###encounterBrowser"
       ],
       "returnToMainMenu": "Ana Menüye Dön",
 
@@ -113,19 +114,25 @@
           "Tür",
           "Köken"
         ],
-        "createEntity": "{0} Oluştur",
-        "editEntity": "{0} Düzenle",
-        "deleteEntity": "{0} Sil",
         "addToEncounter": "Karşılaşmaya Ekle",
-        "emptyDetails": "Ayrıntılarını görmek için bir {0} seçin."
+
+        "monster": {
+          "create": "Canavar Oluştur",
+          "edit": "Canavarı Düzenle",
+          "delete": "Canavarı Sil",
+          "emptyDetails": "Ayrıntılarını görmek için bir canavar seçin."
+        },
+
+        "playerCharacter": {
+          "create": "Oyuncu Karakteri Oluştur",
+          "edit": "Oyuncu Karakterini Düzenle",
+          "delete": "Oyuncu Karakterini Sil",
+          "emptyDetails": "Ayrıntılarını görmek için bir oyuncu karakteri seçin."
+        }
       }
     },
 
     "entityCreation": {
-      "windowTitle": "{0} Oluşturma",
-      "completeButton": "{0} Oluşturmayı Tamamla",
-      "cancelButton": "{0} Oluşturmayı İptal Et",
-
       "sections": {
         "general": "Genel",
         "movement": "Hareket",
@@ -142,9 +149,9 @@
         "creatureType": "Yaratık Türü",
         "alignment": "Yönelim",
         "initiativeBonus": "İnisiyatif Bonusu",
-        "resetInitiativeBonus": "İnisiyatif Bonusunu Sıfırla",
+        "resetInitiativeBonus": "İnisiyatif Bonusunu Sıfırla###ResetInitiativeBonus",
         "passivePerception": "Pasif Algı",
-        "resetPassivePerception": "Pasif Algıyı Sıfırla",
+        "resetPassivePerception": "Pasif Algıyı Sıfırla###ResetPassivePerception",
         "armorClass": "AC",
         "hitPoints": "HP"
       },
@@ -162,7 +169,14 @@
         "scoreColumn": "Puan",
         "modifierColumn": "Düzeltici",
         "overrideColumn": "Geçersiz Kıl",
-        "resetModifier": "{0} Düzelticisini Sıfırla"
+        "resetModifiers": [
+          "Kuvvet Düzelticisini Sıfırla",
+          "Çeviklik Düzelticisini Sıfırla",
+          "Dayanıklılık Düzelticisini Sıfırla",
+          "Bilgelik Düzelticisini Sıfırla",
+          "Zekâ Düzelticisini Sıfırla",
+          "Karizma Düzelticisini Sıfırla"
+        ]
       },
 
       "savingThrows": {
@@ -170,7 +184,14 @@
         "proficiencies": "Kurtarma Atışı Yeterlilikleri",
         "expertises": "Kurtarma Atışı Uzmanlıkları",
         "modifiers": "Kurtarma Atışı Düzelticileri",
-        "resetModifier": "{0} Kurtarma Atışı Düzelticisini Sıfırla"
+        "resetModifiers": [
+          "Kuvvet Kurtarma Atışı Düzelticisini Sıfırla",
+          "Çeviklik Kurtarma Atışı Düzelticisini Sıfırla",
+          "Dayanıklılık Kurtarma Atışı Düzelticisini Sıfırla",
+          "Bilgelik Kurtarma Atışı Düzelticisini Sıfırla",
+          "Zekâ Kurtarma Atışı Düzelticisini Sıfırla",
+          "Karizma Kurtarma Atışı Düzelticisini Sıfırla"
+        ]
       },
 
       "skills": {
@@ -181,7 +202,26 @@
         "skillColumn": "Beceri",
         "valueColumn": "Değer",
         "resetColumn": "Sıfırla",
-        "resetModifier": "{0} Beceri Düzelticisini Sıfırla"
+        "resetModifiers": [
+          "Atletizm Beceri Düzelticisini Sıfırla",
+          "Akrobasi Beceri Düzelticisini Sıfırla",
+          "El Çabukluğu Beceri Düzelticisini Sıfırla",
+          "Gizlilik Beceri Düzelticisini Sıfırla",
+          "Arkana Beceri Düzelticisini Sıfırla",
+          "Tarih Beceri Düzelticisini Sıfırla",
+          "Araştırma Beceri Düzelticisini Sıfırla",
+          "Doğa Beceri Düzelticisini Sıfırla",
+          "Din Beceri Düzelticisini Sıfırla",
+          "Hayvan Terbiyesi Beceri Düzelticisini Sıfırla",
+          "Sezgi Beceri Düzelticisini Sıfırla",
+          "Tıp Beceri Düzelticisini Sıfırla",
+          "Algı Beceri Düzelticisini Sıfırla",
+          "Hayatta Kalma Beceri Düzelticisini Sıfırla",
+          "Aldatma Beceri Düzelticisini Sıfırla",
+          "Sindirme Beceri Düzelticisini Sıfırla",
+          "Gösteri Beceri Düzelticisini Sıfırla",
+          "İkna Beceri Düzelticisini Sıfırla"
+        ]
       },
 
       "damage": {
@@ -195,7 +235,7 @@
 
       "actions": {
         "header": "Eylemler",
-        "add": "Eylem Ekle",
+        "add": "Eylem Ekle###ActionAdd",
         "edit": "Eylem Düzenle",
         "type": "Eylem Türü",
         "name": "Eylem İsmi",
@@ -205,21 +245,33 @@
         "delete": "Eylemi Sil"
       },
 
-      "addables": {
-        "trait": "Özellik",
-        "equipment": "Teçhizat",
-        "add": "{0} Ekle",
-        "edit": "{0} Düzenle",
-        "name": "{0} İsmi",
-        "description": "{0} Açıklaması",
-        "finishCreation": "{0} Oluşturmayı Bitir",
-        "finishEditing": "{0} Düzenlemeyi Bitir",
-        "delete": "{0} Sil"
+      "traits": {
+        "header": "Özellikler",
+        "add": "Özellik Ekle###traitAdd",
+        "edit": "Özelliği Düzenle###traitEdit",
+        "name": "Özellik İsmi",
+        "description": "Özellik Açıklaması",
+        "finishCreation": "Özellik Oluşturmayı Bitir",
+        "finishEditing": "Özellik Düzenlemeyi Bitir",
+        "delete": "Özelliği Sil"
+      },
+
+      "equipment": {
+        "header": "Teçhizat",
+        "add": "Teçhizat Ekle###gearAdd",
+        "edit": "Teçhizatı Düzenle###gearEdit",
+        "name": "Teçhizat İsmi",
+        "description": "Teçhizat Açıklaması",
+        "finishCreation": "Teçhizat Oluşturmayı Bitir",
+        "finishEditing": "Teçhizat Düzenlemeyi Bitir",
+        "delete": "Teçhizatı Sil"
       }
     },
 
     "monsterCreation": {
-      "entityLabel": "Canavar",
+      "windowTitle": "Canavar Oluşturma###entityCreation",
+      "completeButton": "Canavar Oluşturmayı Tamamla",
+      "cancelButton": "Canavar Oluşturmayı İptal Et",
       "specificData": "Canavara Özel Veriler",
       "challengeRating": "CR",
       "experiencePoints": "XP",
@@ -229,7 +281,9 @@
     },
 
     "playerCharacterCreation": {
-      "entityLabel": "Oyuncu Karakteri",
+      "windowTitle": "Oyuncu Karakteri Oluşturma###entityCreation",
+      "completeButton": "Oyuncu Karakteri Oluşturmayı Tamamla",
+      "cancelButton": "Oyuncu Karakteri Oluşturmayı İptal Et",
       "classesAndSubclasses": "Sınıflar ve Alt Sınıflar",
       "specificData": "Oyuncu Karakterine Özel Veriler",
       "species": "Tür",
@@ -238,7 +292,7 @@
       "armorProficiencies": "Zırh Yeterlilikleri",
       "toolProficiencies": "Alet Yeterlilikleri",
       "weaponMasteries": "Silah Ustalıkları",
-      "configureButton": "Sınıfları ve Alt Sınıfları Yapılandır",
+      "configureButton": "Sınıfları ve Alt Sınıfları Yapılandır###ClassConfiguration",
       "classes": "Sınıflar",
       "subclasses": "Alt Sınıflar",
       "finishConfiguration": "Sınıf ve Alt Sınıf Yapılandırmasını Bitir"

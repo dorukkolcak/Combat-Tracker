@@ -1,13 +1,10 @@
 {
-  "locale": {
-    "code": "en",
-    "endonym": "English",
-    "glyphRanges": "default" // This is needed so for ImGui to load some characters.
-  },
+
+  "endonym": "English",
 
   "scenes": {
     "mainMenu": {
-      "titleWindow": "CombatTracker",
+      "titleWindow": "CombatTracker###mainMenuTitle",
       "options": "Options",
       "exit": "Exit",
 
@@ -28,17 +25,21 @@
           "Glacial",
           "Celestial",
           "Necrotic",
-          "Blood Moon"
+          "Blood Moon",
+          "Feywild",
+          "Storm",
+          "Sands",
+          "Moonlit"
         ],
         "close": "Close"
       },
 
       "encounterCreation": {
-        "windowTitle": "Encounter Creation",
+        "windowTitle": "Encounter Creation###mainMenuEncounterCreation",
         "creatureManagement": "Creature Management",
         "creatureManagementBullets": [
           "Create and save monsters and player characters.",
-          "Browse and modify your saved monsters and player characters through the compendium.",
+          "Browse and modify your saved monsters and player characters.",
           "In addition, browse premade monsters and player characters through the compendium."
         ],
         "encounterManagement": "Encounter Management",
@@ -52,7 +53,7 @@
       },
 
       "runEncounter": {
-        "windowTitle": "Run Encounter",
+        "windowTitle": "Run Encounter###mainMenuRunEncounter",
         "preparationPhase": "Preperation Phase",
         "preparationBullets": [
           "After selecting an encounter, roll or set initiative.",
@@ -72,7 +73,7 @@
       },
 
       "completedEncounters": {
-        "windowTitle": "View Completed Encounters",
+        "windowTitle": "View Completed Encounters###mainMenuCompletedEncounters",
         "bullets": [
           "Browse the list of your completed encounters and analyze their results.",
           "Remember what happened exactly in each turn."
@@ -83,13 +84,13 @@
 
     "encounterCreation": {
       "windows": [
-        "Encounter Creator",
-        "Menu",
-        "Entity Browser",
-        "Encounter Manager",
-        "Monster Browser",
-        "Player Character Browser",
-        "Encounter Browser"
+        "Encounter Creator###encounterCreator",
+        "Menu###menu",
+        "Entity Browser###entityBrowser",
+        "Encounter Manager###encounterManager",
+        "Monster Browser###monsterBrowser",
+        "Player Character Browser###playerCharacterBrowser",
+        "Encounter Browser###encounterBrowser"
       ],
       "returnToMainMenu": "Return to Main Menu",
 
@@ -113,19 +114,25 @@
           "Species",
           "Origin"
         ],
-        "createEntity": "Create {0}",
-        "editEntity": "Edit {0}",
-        "deleteEntity": "Delete {0}",
         "addToEncounter": "Add to Encounter",
-        "emptyDetails": "Select a {0} to see its details."
+
+        "monster": {
+          "create": "Create Monster",
+          "edit": "Edit Monster",
+          "delete": "Delete Monster",
+          "emptyDetails": "Select a monster to see its details."
+        },
+
+        "playerCharacter": {
+          "create": "Create Player Character",
+          "edit": "Edit Player Character",
+          "delete": "Delete Player Character",
+          "emptyDetails": "Select a player character to see its details."
+        }
       }
     },
 
     "entityCreation": {
-      "windowTitle": "{0} Creation",
-      "completeButton": "Complete {0} Creation",
-      "cancelButton": "Cancel {0} Creation",
-
       "sections": {
         "general": "General",
         "movement": "Movement",
@@ -142,9 +149,9 @@
         "creatureType": "Creature Type",
         "alignment": "Alignment",
         "initiativeBonus": "Initiative Bonus",
-        "resetInitiativeBonus": "Reset Initiative Bonus",
+        "resetInitiativeBonus": "Reset Initiative Bonus###ResetInitiativeBonus",
         "passivePerception": "Passive Perception",
-        "resetPassivePerception": "Reset Passive Perception",
+        "resetPassivePerception": "Reset Passive Perception###ResetPassivePerception",
         "armorClass": "AC",
         "hitPoints": "HP"
       },
@@ -162,7 +169,14 @@
         "scoreColumn": "Score",
         "modifierColumn": "Modifier",
         "overrideColumn": "Override",
-        "resetModifier": "Reset {0} Modifier"
+        "resetModifiers": [
+          "Reset Strength Modifier",
+          "Reset Dexterity Modifier",
+          "Reset Constitution Modifier",
+          "Reset Wisdom Modifier",
+          "Reset Intelligence Modifier",
+          "Reset Charisma Modifier"
+        ]
       },
 
       "savingThrows": {
@@ -170,7 +184,14 @@
         "proficiencies": "Saving Throw Proficiencies",
         "expertises": "Saving Throw Expertises",
         "modifiers": "Saving Throw Modifiers",
-        "resetModifier": "Reset {0} Saving Throw Modifier"
+        "resetModifiers": [
+          "Reset Strength Saving Throw Modifier",
+          "Reset Dexterity Saving Throw Modifier",
+          "Reset Constitution Saving Throw Modifier",
+          "Reset Wisdom Saving Throw Modifier",
+          "Reset Intelligence Saving Throw Modifier",
+          "Reset Charisma Saving Throw Modifier"
+        ]
       },
 
       "skills": {
@@ -181,7 +202,26 @@
         "skillColumn": "Skill",
         "valueColumn": "Value",
         "resetColumn": "Reset",
-        "resetModifier": "Reset {0} Skill Modifier"
+        "resetModifiers": [
+          "Reset Athletics Skill Modifier",
+          "Reset Acrobatics Skill Modifier",
+          "Reset Sleight of Hand Skill Modifier",
+          "Reset Stealth Skill Modifier",
+          "Reset Arcana Skill Modifier",
+          "Reset History Skill Modifier",
+          "Reset Investigation Skill Modifier",
+          "Reset Nature Skill Modifier",
+          "Reset Religion Skill Modifier",
+          "Reset Animal Handling Skill Modifier",
+          "Reset Insight Skill Modifier",
+          "Reset Medicine Skill Modifier",
+          "Reset Perception Skill Modifier",
+          "Reset Survival Skill Modifier",
+          "Reset Deception Skill Modifier",
+          "Reset Intimidation Skill Modifier",
+          "Reset Performance Skill Modifier",
+          "Reset Persuasion Skill Modifier"
+        ]
       },
 
       "damage": {
@@ -195,7 +235,7 @@
 
       "actions": {
         "header": "Actions",
-        "add": "Add Action",
+        "add": "Add Action###ActionAdd",
         "edit": "Edit Action",
         "type": "Action Type",
         "name": "Action Name",
@@ -205,21 +245,33 @@
         "delete": "Delete Action"
       },
 
-      "addables": {
-        "trait": "Trait",
-        "equipment": "Gear",
-        "add": "Add {0}",
-        "edit": "Edit {0}",
-        "name": "{0} Name",
-        "description": "{0} Description",
-        "finishCreation": "Finish {0} Creation",
-        "finishEditing": "Finish {0} Editing",
-        "delete": "Delete {0}"
+      "traits": {
+        "header": "Traits",
+        "add": "Add Trait###traitAdd",
+        "edit": "Edit Trait###traitEdit",
+        "name": "Trait Name",
+        "description": "Trait Description",
+        "finishCreation": "Finish Trait Creation",
+        "finishEditing": "Finish Trait Editing",
+        "delete": "Delete Trait"
+      },
+
+      "equipment": {
+        "header": "Gear",
+        "add": "Add Gear###gearAdd",
+        "edit": "Edit Gear###gearEdit",
+        "name": "Gear Name",
+        "description": "Gear Description",
+        "finishCreation": "Finish Gear Creation",
+        "finishEditing": "Finish Gear Editing",
+        "delete": "Delete Gear"
       }
     },
 
     "monsterCreation": {
-      "entityLabel": "Monster",
+      "windowTitle": "Monster Creation###entityCreation",
+      "completeButton": "Complete Monster Creation",
+      "cancelButton": "Cancel Monster Creation",
       "specificData": "Monster Specific Data",
       "challengeRating": "CR",
       "experiencePoints": "XP",
@@ -229,7 +281,9 @@
     },
 
     "playerCharacterCreation": {
-      "entityLabel": "Player Character",
+      "windowTitle": "Player Character Creation###entityCreation",
+      "completeButton": "Complete Player Character Creation",
+      "cancelButton": "Cancel Player Character Creation",
       "classesAndSubclasses": "Classes and Subclasses",
       "specificData": "Player Character Specific Data",
       "species": "Species",
@@ -238,7 +292,7 @@
       "armorProficiencies": "Armor Proficiencies",
       "toolProficiencies": "Tool Proficiencies",
       "weaponMasteries": "Weapon Masteries",
-      "configureButton": "Configure Classes and Subclasses",
+      "configureButton": "Configure Classes and Subclasses###ClassConfiguration",
       "classes": "Classes",
       "subclasses": "Subclasses",
       "finishConfiguration": "Finish Class and Subclass Configuration"

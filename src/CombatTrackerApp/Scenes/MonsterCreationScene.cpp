@@ -11,18 +11,19 @@ namespace CombatTrackerApp {
 		EntityCreationScene{ app },
 		m_currentMonsterCR{},
 		m_currentMonsterXP{},
-		m_monsterCRParameters{ -1, -1, false }
+		m_monsterCRParameters{ CHALLENGE_RATINGS.size(), CHALLENGE_RATINGS.size(), false }
 	{
 	}
 
-	std::string_view MonsterCreationScene::getEntityLabel() const {
-		return m_applicationPointer->getLocaleReader().getText("/scenes/monsterCreation/entityLabel");
+	EntityCreationScene::CreationLabels MonsterCreationScene::getCreationLabels() const {
+		return {
+			m_localeProviderRef.getText("/scenes/monsterCreation/windowTitle"),
+			m_localeProviderRef.getText("/scenes/monsterCreation/completeButton"),
+			m_localeProviderRef.getText("/scenes/monsterCreation/cancelButton")
+		};
 	}
 	void MonsterCreationScene::renderEntitySpecificInfo() {
-
-		const auto& localeReader{ m_applicationPointer->getLocaleReader() };
-
-		ImGui::SeparatorText(localeReader.getText("/scenes/monsterCreation/specificData").data());
+		ImGui::SeparatorText(m_localeProviderRef.getText("/scenes/monsterCreation/specificData").data());
 		if (ImGui::BeginTable("MonsterSpecificGrid", 1, ImGuiTableFlags_SizingStretchSame)) {
 
 			ImGui::TableNextRow();
@@ -30,31 +31,37 @@ namespace CombatTrackerApp {
 
 			// The label is hidden on the listbox itself so the widget can take the whole column, which is a narrow one here.
 			// The label is hidden by passing a ## prefix to the label name, which is something that is done extensively over the entire codebase.
-			ImGui::TextUnformatted(localeReader.getText("/scenes/monsterCreation/challengeRating").data());
+			ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/monsterCreation/challengeRating").data());
 			ImGui::SetNextItemWidth(-1.0f);
 			renderCRListBox();
 
-			ImGui::Spacing();
-			renderOverriddableInputInt(
-				m_currentMonsterXP,
-				localeReader.getText("/scenes/monsterCreation/experiencePoints"),
-				localeReader.getText("/scenes/monsterCreation/resetExperiencePoints"),
-				MAPPED_CR_TO_XP,
-				0,
-				INT_MAX,
-				m_currentMonsterCR
-			);
+			const auto& challengeRating{ findChallengeRating(m_currentMonsterCR) };
 
 			ImGui::Spacing();
-			renderOverriddableInputInt(
-				m_currentCreatureStatBlock.proficiencyBonus,
-				localeReader.getText("/scenes/monsterCreation/proficiencyBonus"),
-				localeReader.getText("/scenes/monsterCreation/resetProficiencyBonus"),
-				MAPPED_CR_TO_PB,
-				PB_LOWER_BOUND,
-				INT_MAX,
-				m_currentMonsterCR
+			ImGui::PushID("XP");
+			CombatTrackerLib::renderOverridableInputInt(
+				m_currentMonsterXP.value,
+				m_currentMonsterXP.isOverridden,
+				challengeRating.XP,
+				m_localeProviderRef.getText("/scenes/monsterCreation/experiencePoints"),
+				m_localeProviderRef.getText("/scenes/monsterCreation/resetExperiencePoints"),
+				0,
+				INT_MAX
 			);
+			ImGui::PopID();
+
+			ImGui::Spacing();
+			ImGui::PushID("PB");
+			CombatTrackerLib::renderOverridableInputInt(
+				m_currentCreatureStatBlock.proficiencyBonus.value,
+				m_currentCreatureStatBlock.proficiencyBonus.isOverridden,
+				challengeRating.proficiencyBonus,
+				m_localeProviderRef.getText("/scenes/monsterCreation/proficiencyBonus"),
+				m_localeProviderRef.getText("/scenes/monsterCreation/resetProficiencyBonus"),
+				PB_LOWER_BOUND,
+				INT_MAX
+			);
+			ImGui::PopID();
 
 			ImGui::EndTable();
 		}
@@ -65,11 +72,12 @@ namespace CombatTrackerApp {
 		int counter{};
 		const float height{ ImGui::GetTextLineHeightWithSpacing() * 8.0f };
 		if (ImGui::BeginListBox("##CR", ImVec2{ 0, height })) {
-			for (const auto& item: MAPPED_CR_TO_XP) {
+			for (const auto& challengeRating: CHALLENGE_RATINGS) {
 				const bool isSelected{ counter == m_monsterCRParameters.chosenIndex };
-				if (ImGui::Selectable(std::format("{}", item.first).c_str(), isSelected)) {
+
+				if (ImGui::Selectable(challengeRating.label.data(), isSelected)) {
 					m_monsterCRParameters.chosenIndex = counter;
-					m_currentMonsterCR = item.first;
+					m_currentMonsterCR = challengeRating.value;
 				}
 				if (m_monsterCRParameters.isHighlighted && ImGui::IsItemHovered()) {
 					m_monsterCRParameters.highlightedIndex = counter;
@@ -95,6 +103,6 @@ namespace CombatTrackerApp {
 		EntityCreationScene::resetParametersAndOverrides();
 		m_currentMonsterCR = 0.0;
 		m_currentMonsterXP = OverridableInt{};
-		m_monsterCRParameters = { -1, -1, false };
+		m_monsterCRParameters = { CHALLENGE_RATINGS.size(), CHALLENGE_RATINGS.size(), false};
 	}
 }

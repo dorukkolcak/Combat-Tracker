@@ -7,72 +7,77 @@ namespace CombatTrackerApp {
 	PlayerCharacterCreationScene::PlayerCharacterCreationScene(CombatTrackerLib::App* app) :
 		EntityCreationScene{ app },
 		m_currentPlayerStatBlock{},
-		m_speciesParameters{ -1, -1, false },
-		m_originParameters{ -1, -1, false }
+		m_speciesParameters{ CombatTrackerLib::enumToSizeT(Species::COUNT), CombatTrackerLib::enumToSizeT(Species::COUNT), false },
+		m_originParameters{ CombatTrackerLib::enumToSizeT(Origin::COUNT), CombatTrackerLib::enumToSizeT(Origin::COUNT), false }
 	{
 	}
 
-	std::string_view PlayerCharacterCreationScene::getEntityLabel() const {
-		return m_applicationPointer->getLocaleReader().getText("/scenes/playerCharacterCreation/entityLabel");
+	EntityCreationScene::CreationLabels PlayerCharacterCreationScene::getCreationLabels() const {
+		return {
+			m_localeProviderRef.getText("/scenes/playerCharacterCreation/windowTitle"),
+			m_localeProviderRef.getText("/scenes/playerCharacterCreation/completeButton"),
+			m_localeProviderRef.getText("/scenes/playerCharacterCreation/cancelButton")
+		};
 	}
 	void PlayerCharacterCreationScene::renderEntitySpecificInfo() {
-		ImGui::SeparatorText(m_applicationPointer->getLocaleReader().getText("/scenes/playerCharacterCreation/classesAndSubclasses").data());
+		ImGui::SeparatorText(m_localeProviderRef.getText("/scenes/playerCharacterCreation/classesAndSubclasses").data());
 		renderPlayerClassAndSubclasses();
 	}
 	void PlayerCharacterCreationScene::renderEntitySpecificSection() {
-		ImGui::SeparatorText(m_applicationPointer->getLocaleReader().getText("/scenes/playerCharacterCreation/specificData").data());
+		ImGui::SeparatorText(m_localeProviderRef.getText("/scenes/playerCharacterCreation/specificData").data());
 		renderPlayerCharacterSpecificInfo();
 	}
 	void PlayerCharacterCreationScene::renderPlayerCharacterSpecificInfo() {
-
-		const auto& localeReader{ m_applicationPointer->getLocaleReader() };
 
 		// The two listboxes sit side by side and split the section between them, instead of stacking at ImGui's default item width.
 		if (ImGui::BeginTable("##SpeciesAndOrigin", 2, ImGuiTableFlags_SizingStretchSame)) {
 			ImGui::TableNextRow();
 
 			ImGui::TableSetColumnIndex(0);
-			ImGui::TextUnformatted(localeReader.getText("/scenes/playerCharacterCreation/species").data());
+			ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/playerCharacterCreation/species").data());
 			ImGui::SetNextItemWidth(-1.0f);
-			renderListBox(m_speciesParameters, m_currentPlayerStatBlock.species, "##Species", localeReader.getList("/domain/species"));
+			renderListBox(m_speciesParameters, m_currentPlayerStatBlock.species, "##Species", m_localeProviderRef.getTextList("/domain/species"));
 
 			ImGui::TableSetColumnIndex(1);
-			ImGui::TextUnformatted(localeReader.getText("/scenes/playerCharacterCreation/origin").data());
+			ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/playerCharacterCreation/origin").data());
 			ImGui::SetNextItemWidth(-1.0f);
-			renderListBox(m_originParameters, m_currentPlayerStatBlock.origin, "##Origin", localeReader.getList("/domain/origin"));
+			renderListBox(m_originParameters, m_currentPlayerStatBlock.origin, "##Origin", m_localeProviderRef.getTextList("/domain/origin"));
 
 			ImGui::EndTable();
 		}
-		renderMutuallyExclusiveCheckboxCluster(
+		CombatTrackerLib::renderCheckboxGrid(
 			m_currentPlayerStatBlock.weaponProficiencies,
-			localeReader.getList("/domain/weaponType"),
-			localeReader.getText("/scenes/playerCharacterCreation/weaponProficiencies"),
+			m_localeProviderRef.getTextList("/domain/weaponType"),
+			"WeaponProficiencies",
+			m_localeProviderRef.getText("/scenes/playerCharacterCreation/weaponProficiencies"),
 			3
 		);
-		renderMutuallyExclusiveCheckboxCluster(
+		CombatTrackerLib::renderCheckboxGrid(
 			m_currentPlayerStatBlock.armorProficiencies,
-			localeReader.getList("/domain/armorType"),
-			localeReader.getText("/scenes/playerCharacterCreation/armorProficiencies"),
+			m_localeProviderRef.getTextList("/domain/armorType"),
+			"ArmorProficiencies",
+			m_localeProviderRef.getText("/scenes/playerCharacterCreation/armorProficiencies"),
 			3
 		);
-		renderMutuallyExclusiveCheckboxCluster(
+		CombatTrackerLib::renderCheckboxGrid(
 			m_currentPlayerStatBlock.toolProficiencies,
-			localeReader.getList("/domain/tool"),
-			localeReader.getText("/scenes/playerCharacterCreation/toolProficiencies"),
+			m_localeProviderRef.getTextList("/domain/tool"),
+			"ToolProficiencies",
+			m_localeProviderRef.getText("/scenes/playerCharacterCreation/toolProficiencies"),
 			3
 		);
-		renderMutuallyExclusiveCheckboxCluster(
+		CombatTrackerLib::renderCheckboxGrid(
 			m_currentPlayerStatBlock.weaponMasteries,
-			localeReader.getList("/domain/weaponMastery"),
-			localeReader.getText("/scenes/playerCharacterCreation/weaponMasteries"),
+			m_localeProviderRef.getTextList("/domain/weaponMastery"),
+			"WeaponMasteries",
+			m_localeProviderRef.getText("/scenes/playerCharacterCreation/weaponMasteries"),
 			3
 		);
 	}
 	void PlayerCharacterCreationScene::renderPlayerClassAndSubclasses() {
 
-		const auto& localeReader{ m_applicationPointer->getLocaleReader() };
-		const auto& classNames{ localeReader.getList("/domain/playerClass") };
-		const auto& subclassNames{ localeReader.getList("/domain/playerSubclass") };
+		const auto classNames{ m_localeProviderRef.getTextList("/domain/playerClass") };
+		const auto subclassNames{ m_localeProviderRef.getTextList("/domain/playerSubclass") };
 
 		if (ImGui::BeginTable("Classes and Subclasses", 1, ImGuiTableFlags_SizingStretchSame)) {
 
@@ -84,12 +89,12 @@ namespace CombatTrackerApp {
 				if (m_currentPlayerStatBlock.levels[i] == 0) {
 					continue;
 				}
-				ImGui::TextWrapped("%s %d", classNames[i].get_ref<const std::string&>().c_str(), m_currentPlayerStatBlock.levels[i]);
+				ImGui::TextWrapped("%s %d", classNames[i].data(), m_currentPlayerStatBlock.levels[i]);
 			}
 			for (const auto& item : m_currentPlayerStatBlock.subclasses) {
-				ImGui::TextWrapped("%s", subclassNames[CombatTrackerLib::enumToSizeT(item.second)].get_ref<const std::string&>().c_str());
+				ImGui::TextWrapped("%s", subclassNames[CombatTrackerLib::enumToSizeT(item.second)].data());
 			}
-			if (CombatTrackerLib::alignedButton(localeReader.getText("/scenes/playerCharacterCreation/configureButton").data(), 0.5f)) {
+			if (CombatTrackerLib::alignedButton(m_localeProviderRef.getText("/scenes/playerCharacterCreation/configureButton").data(), 0.5f)) {
 				ImGui::OpenPopup("###ClassConfiguration");
 			}
 
@@ -99,29 +104,31 @@ namespace CombatTrackerApp {
 			const auto viewportSize{ ImGui::GetMainViewport()->Size };
 			ImGui::SetNextWindowSize(ImVec2{ viewportSize.x * 0.92f, viewportSize.y * 0.92f }, ImGuiCond_Always);
 			if (ImGui::BeginPopupModal(
-				std::format("{}###ClassConfiguration", localeReader.getText("/scenes/playerCharacterCreation/configureButton")).c_str(),
-				NULL,
+				m_localeProviderRef.getText("/scenes/playerCharacterCreation/configureButton").data(),
+				nullptr,
 				ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize
 			)) {
 				ImGui::BeginChild("EditClassScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(1) }, true);
 
 
-				ImGui::TextWrapped("%s", localeReader.getText("/scenes/playerCharacterCreation/classes").data());
+				ImGui::TextWrapped("%s", m_localeProviderRef.getText("/scenes/playerCharacterCreation/classes").data());
 
 				// The level fields are laid out as a grid with the labels above them, so the twelve of them don't turn into twelve near empty rows.
 				if (ImGui::BeginTable("##ClassLevels", 4, ImGuiTableFlags_SizingStretchSame)) {
 					for (size_t i{}; i < classNames.size(); ++i) {
-						const auto& className{ classNames[i].get_ref<const std::string&>() };
+						const auto className{ classNames[i] };
+						ImGui::PushID(static_cast<int>(i));
 						ImGui::TableNextColumn();
-						ImGui::TextUnformatted(className.c_str());
+						ImGui::TextUnformatted(className.data());
 						ImGui::SetNextItemWidth(-1.0f);
-						renderNonOverridableInputInt(m_currentPlayerStatBlock.levels[i], std::format("##ClassLevel{}", i));
+						CombatTrackerLib::renderNonOverridableInputInt(m_currentPlayerStatBlock.levels[i], "##ClassLevel", 0);
+						ImGui::PopID();
 					}
 					ImGui::EndTable();
 				}
 
 				static PlayerClass s_currentClass{};
-				ImGui::SeparatorText(localeReader.getText("/scenes/playerCharacterCreation/subclasses").data());
+				ImGui::SeparatorText(m_localeProviderRef.getText("/scenes/playerCharacterCreation/subclasses").data());
 
 				for (size_t i{}; i < subclassNames.size(); ++i) {
 					const auto subclass{ static_cast<PlayerSubclass>(i) };
@@ -129,14 +136,14 @@ namespace CombatTrackerApp {
 					const auto classIndex{ CombatTrackerLib::enumToSizeT(correspondingClass) };
 
 					if (s_currentClass != correspondingClass) {
-						ImGui::SeparatorText(classNames[classIndex].get_ref<const std::string&>().c_str());
+						ImGui::SeparatorText(classNames[classIndex].data());
 					}
 					if (m_currentPlayerStatBlock.levels[classIndex] < SUBCLASS_LEVEL_THRESHOLD) {
 						m_chosenSubclasses[i] = false;
 						m_currentPlayerStatBlock.subclasses.erase(correspondingClass);
 					}
 					// The checkbox reports both directions of the change, so unchecking has to take the subclass back out of the map.
-					if (ImGui::Checkbox(subclassNames[i].get_ref<const std::string&>().c_str(), &m_chosenSubclasses[i])) {
+					if (ImGui::Checkbox(subclassNames[i].data(), &m_chosenSubclasses[i])) {
 						if (!m_chosenSubclasses[i]) {
 							m_currentPlayerStatBlock.subclasses.erase(correspondingClass);
 						}
@@ -156,7 +163,7 @@ namespace CombatTrackerApp {
 				}
 				ImGui::EndChild();
 
-				if (CombatTrackerLib::alignedButton(localeReader.getText("/scenes/playerCharacterCreation/finishConfiguration").data(), 0.5f)) {
+				if (CombatTrackerLib::alignedButton(m_localeProviderRef.getText("/scenes/playerCharacterCreation/finishConfiguration").data(), 0.5f)) {
 
 					// Lengthy but necessary validation.
 					int sum{};
@@ -194,8 +201,8 @@ namespace CombatTrackerApp {
 	void PlayerCharacterCreationScene::resetParametersAndOverrides() {
 		EntityCreationScene::resetParametersAndOverrides();
 		m_currentPlayerStatBlock = PlayerStatBlock{};
-		m_speciesParameters = { -1, -1, false };
-		m_originParameters = { -1, -1, false };
+		m_speciesParameters = { CombatTrackerLib::enumToSizeT(Species::COUNT), CombatTrackerLib::enumToSizeT(Species::COUNT), false };
+		m_originParameters = { CombatTrackerLib::enumToSizeT(Origin::COUNT), CombatTrackerLib::enumToSizeT(Origin::COUNT), false };
 		m_chosenSubclasses.fill(false);
 	}
 }

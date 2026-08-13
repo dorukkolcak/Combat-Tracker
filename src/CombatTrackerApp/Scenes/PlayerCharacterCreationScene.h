@@ -17,7 +17,7 @@ namespace CombatTrackerApp {
 
 	protected:
 
-		std::string_view getEntityLabel() const override;
+		CreationLabels getCreationLabels() const override;
 		void renderEntitySpecificInfo() override;
 		void renderEntitySpecificSection() override;
 		bool completeEntityCreation() override;

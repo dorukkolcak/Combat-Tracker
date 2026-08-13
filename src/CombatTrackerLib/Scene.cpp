@@ -2,7 +2,8 @@
 
 namespace CombatTrackerLib {
 	Scene::Scene(App* app) : 
-        m_applicationPointer{app}
+        m_applicationPointer{app},
+		m_localeProviderRef{m_applicationPointer->getLocaleProvider()}
 	{
 	}
 }

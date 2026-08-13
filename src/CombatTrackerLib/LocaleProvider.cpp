@@ -23,28 +23,55 @@ namespace CombatTrackerLib {
 		const std::filesystem::path localePath{ (*m_resourceDirectoryPathPointer) / "assets/Locales" / std::format("{}.json", localeCode) };
 		m_locale = readJSONFile(localePath);
 		if (m_locale == std::nullopt) {
-			m_viewMap.clear();
+			m_textViewMap.clear();
+			m_listViewMap.clear();
 			return false;
 		}
 
-		/*
-		Since we check for std::nullopt, we can access std::optional safely using ->.
-		See https://json.nlohmann.me/api/basic_json/flatten/.
-		Flattening allows us to access nested types easily, which is most of the localization file.
-		Array values are accessed via indicies (ie array/0, array/1). We can just use enumToSizeT() to access them (see GenericUtils).
-		We can't really get the array itself easily with this method, which should be fine. 
-		As the caller can create their own loop and pass the JSON pointer key to accessor function using std::format().
-		*/
-		m_locale = m_locale->flatten();
-		for (const auto& item : m_locale->items()) {
-			m_viewMap[item.key()] = item.value().get_ref<const nlohmann::json::string_t&>();
-		}
+		// Since we check for std::nullopt, we can access std::optional safely using ->.
+		buildViewMaps(*m_locale, std::string{});
 		return true;
 	}
+
+	/*
+	This is a recursive function that builds maps as follows:
+	If the underlying json node is of type string, it corresponds to a text. 
+	So we just get a string reference to the item's value and store it in the text view map.
+	If the underlying type is an array, it is a list. 
+	So we get the string_view vector that corresponds to the list, clear it and insert elements sequentially, similar to the string case.
+	As for the final case, the type being an object, it corresponds to a nested type.
+	So we have to recursively reach the nested values. We do this by iterating over the nested item's items.
+	*/
+	void LocaleProvider::buildViewMaps(const nlohmann::json& node, const std::string& pointerPrefix) {
+		for (const auto& item : node.items()) {
+			const auto pointer{ std::format("{}/{}", pointerPrefix, item.key()) };
+
+			if (item.value().is_object()) {
+				buildViewMaps(item.value(), pointer);
+			}
+			else if (item.value().is_string()) {
+				m_textViewMap[pointer] = item.value().get_ref<const nlohmann::json::string_t&>();
+			}
+			else if (item.value().is_array()) {
+				auto& list{ m_listViewMap[pointer] };
+				list.clear();
+				for (const auto& element : item.value()) {
+					list.push_back(element.get_ref<const nlohmann::json::string_t&>());
+				}
+			}
+		}
+	}
 	std::string_view LocaleProvider::getText(std::string_view key) const {
-		const auto entry{ m_viewMap.find(key) };
-		if (entry == m_viewMap.end()) {
+		const auto entry{ m_textViewMap.find(key) };
+		if (entry == m_textViewMap.end()) {
 			return key; // If this happens, there is something wrong. So this is mostly a debug statement.
+		}
+		return entry->second;
+	}
+	std::span<const std::string_view> LocaleProvider::getTextList(std::string_view keyPrefix) const {
+		const auto entry{ m_listViewMap.find(keyPrefix) };
+		if (entry == m_listViewMap.end()) {
+			return {};
 		}
 		return entry->second;
 	}

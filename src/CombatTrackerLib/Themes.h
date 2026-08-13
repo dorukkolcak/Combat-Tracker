@@ -1,10 +1,7 @@
 #pragma once
 
 #include <imgui.h>
-#include <array>
-#include <cstddef>
 #include <unordered_map>
-#include <string_view>
 
 namespace CombatTrackerLib {
 
@@ -710,23 +707,5 @@ namespace CombatTrackerLib {
 			}());
 		return instance;
 	}
-
-	// Notice double brace initialization for using initializer list.
-	inline constexpr std::array<std::string_view, static_cast<std::size_t>(UIPreset::COUNT)> PRESET_NAMES{ {
-		"Dark",
-		"Light",
-		"High Contrast",
-		"Arcane",
-		"Forest",
-		"Infernal",
-		"Glacial",
-		"Celestial",
-		"Necrotic",
-		"Blood Moon",
-		"Feywild",
-		"Storm",
-		"Sands",
-		"Moonlit"
-	} };
 	inline const std::unordered_map<UIPreset, ImGuiStyle> PRESET_TO_CONFIG{ buildPresetConfigs() };
 }

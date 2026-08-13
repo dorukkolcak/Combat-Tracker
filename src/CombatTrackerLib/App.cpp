@@ -31,6 +31,8 @@
 #include <cassert>
 #include <ranges>
 #include <cstdlib>
+#include <iostream>
+#include <string_view>
 #include <system_error>
 
 
@@ -60,6 +62,16 @@ namespace CombatTrackerLib {
 		ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
 		const char* glsl_version = "#version 150";
 		ImGui_ImplOpenGL3_Init(glsl_version);
+
+		// Load the application chosen font. This is needed for loading fonts that support some unconventional characters.
+		const std::filesystem::path fontPath{ m_resourceDirectory / "assets/Fonts/Roboto-Medium.ttf" };
+		std::error_code fontErrorCode{};
+		if (std::filesystem::exists(fontPath, fontErrorCode)) {
+			ImGui::GetIO().Fonts->AddFontFromFileTTF(fontPath.string().c_str(), 18.0f);
+		}
+		else {
+			std::cerr << "Font file couldn't be read, falling back to the default font." << std::endl;
+		}
 
 		setUIPreset(m_specfication.uiPreset); // Loads the required ImGui::Style constants from a constant unordered map.
 	}
