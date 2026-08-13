@@ -69,7 +69,7 @@ namespace CombatTrackerApp {
 
 	// The CR table carries its own keys, so the row is read straight out of it instead of being derived from the row position.
 	void MonsterCreationScene::renderCRListBox() {
-		int counter{};
+		std::size_t counter{};
 		const float height{ ImGui::GetTextLineHeightWithSpacing() * 8.0f };
 		if (ImGui::BeginListBox("##CR", ImVec2{ 0, height })) {
 			for (const auto& challengeRating: CHALLENGE_RATINGS) {

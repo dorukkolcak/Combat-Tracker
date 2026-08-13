@@ -841,10 +841,8 @@ namespace CombatTrackerApp {
 
 			ImGui::Separator();
 
-			// There is no longer an enumerator standing for "no action", so the listbox itself reports whether a type was picked.
-			// Its chosen index is negative until a row is clicked, and it is put back to that state after the action is added.
 			if (CombatTrackerLib::alignedButton(m_localeProviderRef.getText("/scenes/entityCreation/actions/finishCreation").data(), 0.5f) &&
-				!s_name.empty() && !s_description.empty() && s_actionParameters.chosenIndex >= 0) {
+				!s_name.empty() && !s_description.empty() && s_actionParameters.chosenIndex < CombatTrackerLib::enumToSizeT(ActionType::COUNT)) {
 				CreatureAction action{ s_name, s_description, s_type };
 				m_currentCreatureStatBlock.actions.push_back(action);
 				s_actionParameters = { 
