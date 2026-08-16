@@ -8,7 +8,7 @@ namespace CombatTrackerLib {
 	class Scene;
 	class SceneManager {
 	public:
-		SceneManager() = default;
+		SceneManager();
 
 		// Should exist as a singleton owned by the App class.
 		// So the manager should be non-copiable/movable.
@@ -17,7 +17,7 @@ namespace CombatTrackerLib {
 		SceneManager(SceneManager&& other) = delete;
 		SceneManager& operator=(SceneManager&& other) = delete;
 
-		~SceneManager() = default;
+		~SceneManager();
 
 		void queueAddScene(std::unique_ptr<Scene> scene);
 		void queueDeleteScene(Scene* sceneToBeDeleted);

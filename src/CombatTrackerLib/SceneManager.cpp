@@ -4,6 +4,9 @@
 #include <algorithm>
 
 namespace CombatTrackerLib {
+	SceneManager::SceneManager() = default;
+	SceneManager::~SceneManager() = default;
+
 	void SceneManager::queueAddScene(std::unique_ptr<Scene> scene) {
 		m_sceneAdditionQueue.push_back(std::move(scene));
 	}
