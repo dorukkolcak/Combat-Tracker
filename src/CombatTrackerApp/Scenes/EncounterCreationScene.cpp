@@ -88,7 +88,7 @@ namespace CombatTrackerApp {
 		if (ImGui::BeginMenuBar()) {
 			if (ImGui::BeginMenu(getWindowName(MENU).data())) {
 				if (ImGui::MenuItem(m_localeProviderRef.getText("/scenes/encounterCreation/returnToMainMenu").data())) {
-					m_applicationPointer->queueSceneTransition(this, std::make_unique<MainMenuScene>(m_applicationPointer));
+					m_applicationPointer->getSceneManager().queueSceneTransition(this, std::make_unique<MainMenuScene>(m_applicationPointer));
 				}
 				// TODO: Expand the options from here.
 				ImGui::EndMenu();

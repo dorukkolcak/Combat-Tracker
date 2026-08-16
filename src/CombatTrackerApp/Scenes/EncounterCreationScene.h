@@ -158,7 +158,7 @@ namespace CombatTrackerApp {
 		}
 
 		if (CombatTrackerLib::alignedButton(labels.create.data(), 0.5f)) {
-			m_applicationPointer->queueSceneTransition(this, std::make_unique<S>(m_applicationPointer));
+			m_applicationPointer->getSceneManager().queueSceneTransition(this, std::make_unique<S>(m_applicationPointer));
 		}
 
 		/*

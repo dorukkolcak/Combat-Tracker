@@ -179,11 +179,11 @@ namespace CombatTrackerApp {
 		ImGui::Separator();
 		if (CombatTrackerLib::alignedButton(creationLabels.completeButton.data(), 0.5f)) {
 			if (completeEntityCreation()) {
-				m_applicationPointer->queueSceneTransition(this, std::make_unique<EncounterCreationScene>(m_applicationPointer));
+				m_applicationPointer->getSceneManager().queueSceneTransition(this, std::make_unique<EncounterCreationScene>(m_applicationPointer));
 			}
 		}
 		if (CombatTrackerLib::alignedButton(creationLabels.cancelButton.data(), 0.5f)) {
-			m_applicationPointer->queueSceneTransition(this, std::make_unique<EncounterCreationScene>(m_applicationPointer));
+			m_applicationPointer->getSceneManager().queueSceneTransition(this, std::make_unique<EncounterCreationScene>(m_applicationPointer));
 		}
 		ImGui::End();
 	}

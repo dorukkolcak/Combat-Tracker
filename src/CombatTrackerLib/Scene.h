@@ -11,7 +11,9 @@ namespace CombatTrackerLib {
 	class App;
 	class Scene {
 	public:
-		Scene() = default;
+
+		// A scene needs an application reference for construction so we shouldn't be able to construct a scene with a default constructor.
+		Scene() = delete; 
 		explicit Scene(App* app);
 
 		virtual ~Scene() = default;
@@ -52,6 +54,6 @@ namespace CombatTrackerLib {
 
 	protected:
 		App* m_applicationPointer{};
-		const CombatTrackerLib::LocaleProvider& m_localeProviderRef{};
+		const CombatTrackerLib::LocaleProvider& m_localeProviderRef;
 	};
 }

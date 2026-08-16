@@ -195,7 +195,7 @@ namespace CombatTrackerApp {
         ImGui::TextWrapped("%s", m_localeProviderRef.getText("/scenes/mainMenu/encounterCreation/encounterManagement").data());
         CombatTrackerLib::renderBulletList(m_localeProviderRef.getTextList("/scenes/mainMenu/encounterCreation/encounterManagementBullets"));
         if (CombatTrackerLib::alignedButton(m_localeProviderRef.getText("/scenes/mainMenu/encounterCreation/createButton").data(), 0.5f)) {
-            m_applicationPointer->queueSceneTransition(this, std::make_unique<EncounterCreationScene>(m_applicationPointer));
+            m_applicationPointer->getSceneManager().queueSceneTransition(this, std::make_unique<EncounterCreationScene>(m_applicationPointer));
         }
         ImGui::End();
 
