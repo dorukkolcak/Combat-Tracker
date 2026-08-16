@@ -27,7 +27,6 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui.h>
-#include <algorithm>
 #include <cassert>
 #include <ranges>
 #include <cstdlib>
@@ -39,14 +38,13 @@
 namespace CombatTrackerLib {
 	App::App(Specification specification) :
 		m_specfication{ std::move(specification) }, // Specification should be owned by the application so move it.
-		m_resourceDirectory{ findResourceDirectory() },
-		m_userDataDirectory{ findUserDataDirectory(m_specfication.name) },
-		m_localeReader{ m_specfication.locale, &m_resourceDirectory },
+		m_localeProvider{ m_specfication.locale, &getResourceDirectory() },
 		m_isCloseSignalled{ false },
 		m_isUIPresetApplied{ false }
 	{
 		glfwInit();
 		m_windowPointer = std::make_unique<Window>(&(m_specfication.windowSpecification), m_specfication.name);
+
 		/*
 		Use reinterpret_cast here to treat expression as if it had the target type.
 		We are casting a function pointer here to another function pointer that returns a void pointer.
@@ -64,7 +62,7 @@ namespace CombatTrackerLib {
 		ImGui_ImplOpenGL3_Init(glsl_version);
 
 		// Load the application chosen font. This is needed for loading fonts that support some unconventional characters.
-		const std::filesystem::path fontPath{ m_resourceDirectory / "assets/Fonts/Roboto-Medium.ttf" };
+		const std::filesystem::path fontPath{ getResourceDirectory() / "assets/Fonts/Roboto-Medium.ttf" };
 		std::error_code fontErrorCode{};
 		if (std::filesystem::exists(fontPath, fontErrorCode)) {
 			ImGui::GetIO().Fonts->AddFontFromFileTTF(fontPath.string().c_str(), 18.0f);
@@ -94,7 +92,8 @@ namespace CombatTrackerLib {
 			lastFrameTime = currentTime;
 
 			// This specifies the order in which we traverse the scenes.
-			std::ranges::reverse_view reverseView{ m_sceneStack };
+			const auto& scenes{ m_sceneManager.getScenes() };
+			std::ranges::reverse_view reverseView{ scenes };
 
 			// Scene event handling occurs here.
 			for (const auto& scene : reverseView) {
@@ -121,7 +120,7 @@ namespace CombatTrackerLib {
 			ImGui::Render();
 
 			// OpenGL rendering work goes here. We do the rendering from bottom to top.
-			for (const auto& scene : m_sceneStack) {
+			for (const auto& scene : scenes) {
 				scene->renderScene();
 			}
 
@@ -132,7 +131,7 @@ namespace CombatTrackerLib {
 			m_windowPointer->update();
 
 			// Finally, after everything is done, we handle scene requests.
-			dequeueSceneOperations();
+			m_sceneManager.dequeueSceneOperations();
 		}
 	}
 	App::~App() {
@@ -140,61 +139,6 @@ namespace CombatTrackerLib {
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 		glfwTerminate();
-	}
-	void App::queueAddScene(std::unique_ptr<Scene> scene) {
-		m_sceneAdditionQueue.push_back(std::move(scene));
-	}
-	void App::queueDeleteScene(Scene* sceneToBeDeleted) {
-		m_sceneDeletionQueue.push_back(sceneToBeDeleted);
-	}
-	void App::queueSceneTransition(Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo) {
-		m_sceneTransitionQueue.insert({ transitionedFrom, std::move(transitionedTo) });
-	}
-	void App::dequeueSceneOperations() {
-
-		// Handle scene transition.
-		for (auto& transitionedTo : m_sceneTransitionQueue) {
-			for (auto& transitionedFrom : m_sceneStack) {
-				if (transitionedFrom.get() == transitionedTo.first) {
-					transitionedFrom = std::move(transitionedTo.second);
-					break;
-				}
-			}
-		}
-		m_sceneTransitionQueue.clear();
-
-		// Handle scene deletion.
-		for (auto& deletedScene : m_sceneDeletionQueue) {
-			for (auto& scene : m_sceneStack) {
-				if (scene.get() == deletedScene) {
-
-					/*
-					This is kinda dumb. The main reason we are using smart pointers in the first place is that they automatically manage memory.
-					But I explicitly "delete" the memory associated with the smart pointer here.
-					The thing is I don't like transferring the ownership of a new object to the "deleted" smart pointer either.
-					As after deletion we might have less scenes than the previous state, aka less smart pointers.
-					So regardless some smart pointers will just be left null with this design and I need to explicitly remove the null ones.
-					*/
-					scene.reset();
-					break;
-				}
-			}
-		}
-
-		// Remove the deleted scene unique_ptrs from the sceneStack.
-		m_sceneStack.erase(
-			std::remove_if(m_sceneStack.begin(), m_sceneStack.end(), [](const std::unique_ptr<Scene>& scenePointer) {
-				return scenePointer == nullptr;
-			}),
-			m_sceneStack.end()
-		);
-		m_sceneDeletionQueue.clear();
-
-		// Handle sceneAddition
-		for (auto& addedScene : m_sceneAdditionQueue) {
-			m_sceneStack.push_back(std::move(addedScene));
-		}
-		m_sceneAdditionQueue.clear();
 	}
 	void App::signalApplicationClose() {
 		m_isCloseSignalled = true;
@@ -325,13 +269,18 @@ namespace CombatTrackerLib {
 	UIPreset App::getUIPreset() const {
 		return m_specfication.uiPreset;
 	}
-	const std::filesystem::path& App::getResourceDirectory() const {
-		return m_resourceDirectory;
+	const std::filesystem::path& App::getResourceDirectory() {
+		static const std::filesystem::path s_resourceDirectory{ findResourceDirectory() };
+		return s_resourceDirectory;
 	}
-	const std::filesystem::path& App::getUserDataDirectory() const {
-		return m_userDataDirectory;
+	const std::filesystem::path& App::getUserDataDirectory(std::string_view applicationName) {
+		static std::filesystem::path s_userDataDirectory{ findUserDataDirectory(applicationName) };
+		return s_userDataDirectory;
 	}
 	const LocaleProvider& App::getLocaleProvider() const {
-		return m_localeReader;
+		return m_localeProvider;
+	}
+	SceneManager& App::getSceneManager() {
+		return m_sceneManager;
 	}
 }

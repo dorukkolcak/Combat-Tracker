@@ -5,7 +5,7 @@
 #include <format>
 
 namespace CombatTrackerLib {
-	LocaleProvider::LocaleProvider(std::string_view localeCode, std::filesystem::path* resourceDirectoryPathPointer) :
+	LocaleProvider::LocaleProvider(std::string_view localeCode, const std::filesystem::path* resourceDirectoryPathPointer) :
 		m_resourceDirectoryPathPointer{resourceDirectoryPathPointer}
 	{
 		const auto isLocaleSet{ setLocale(localeCode) };

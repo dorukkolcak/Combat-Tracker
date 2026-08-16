@@ -136,7 +136,7 @@ namespace CombatTrackerApp {
 
 			// Column setup.
 			ImGui::TableSetupColumn(
-				m_localeProviderRef.getText("/scenes/encounterCreation/browser/nameColumn").data(),
+				m_localeProviderPointer->getText("/scenes/encounterCreation/browser/nameColumn").data(),
 				ImGuiTableColumnFlags_WidthStretch, 
 				0.30f
 			);
@@ -148,7 +148,7 @@ namespace CombatTrackerApp {
 				);
 			}
 			ImGui::TableSetupColumn(
-				m_localeProviderRef.getText("/scenes/encounterCreation/browser/sourceColumn").data(), 
+				m_localeProviderPointer->getText("/scenes/encounterCreation/browser/sourceColumn").data(), 
 				ImGuiTableColumnFlags_WidthStretch, 
 				0.10f
 			);
@@ -158,7 +158,7 @@ namespace CombatTrackerApp {
 		}
 
 		if (CombatTrackerLib::alignedButton(labels.create.data(), 0.5f)) {
-			m_applicationPointer->queueSceneTransition(this, std::make_unique<S>(m_applicationPointer));
+			m_applicationPointer->getSceneManager().queueSceneTransition(this, std::make_unique<S>(m_applicationPointer));
 		}
 
 		/*
@@ -173,7 +173,7 @@ namespace CombatTrackerApp {
 		ImGui::EndChild();
 
 		ImGui::BeginDisabled(selectionIndex < 0);
-		if (ImGui::Button(m_localeProviderRef.getText("/scenes/encounterCreation/browser/addToEncounter").data())) {
+		if (ImGui::Button(m_localeProviderPointer->getText("/scenes/encounterCreation/browser/addToEncounter").data())) {
 
 		}
 		ImGui::SameLine();
