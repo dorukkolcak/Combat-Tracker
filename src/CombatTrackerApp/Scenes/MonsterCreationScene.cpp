@@ -17,13 +17,13 @@ namespace CombatTrackerApp {
 
 	EntityCreationScene::CreationLabels MonsterCreationScene::getCreationLabels() const {
 		return {
-			m_localeProviderRef.getText("/scenes/monsterCreation/windowTitle"),
-			m_localeProviderRef.getText("/scenes/monsterCreation/completeButton"),
-			m_localeProviderRef.getText("/scenes/monsterCreation/cancelButton")
+			m_localeProviderPointer->getText("/scenes/monsterCreation/windowTitle"),
+			m_localeProviderPointer->getText("/scenes/monsterCreation/completeButton"),
+			m_localeProviderPointer->getText("/scenes/monsterCreation/cancelButton")
 		};
 	}
 	void MonsterCreationScene::renderEntitySpecificInfo() {
-		ImGui::SeparatorText(m_localeProviderRef.getText("/scenes/monsterCreation/specificData").data());
+		ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/monsterCreation/specificData").data());
 		if (ImGui::BeginTable("MonsterSpecificGrid", 1, ImGuiTableFlags_SizingStretchSame)) {
 
 			ImGui::TableNextRow();
@@ -31,7 +31,7 @@ namespace CombatTrackerApp {
 
 			// The label is hidden on the listbox itself so the widget can take the whole column, which is a narrow one here.
 			// The label is hidden by passing a ## prefix to the label name, which is something that is done extensively over the entire codebase.
-			ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/monsterCreation/challengeRating").data());
+			ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/monsterCreation/challengeRating").data());
 			ImGui::SetNextItemWidth(-1.0f);
 			renderCRListBox();
 
@@ -43,8 +43,8 @@ namespace CombatTrackerApp {
 				m_currentMonsterXP.value,
 				m_currentMonsterXP.isOverridden,
 				challengeRating.XP,
-				m_localeProviderRef.getText("/scenes/monsterCreation/experiencePoints"),
-				m_localeProviderRef.getText("/scenes/monsterCreation/resetExperiencePoints"),
+				m_localeProviderPointer->getText("/scenes/monsterCreation/experiencePoints"),
+				m_localeProviderPointer->getText("/scenes/monsterCreation/resetExperiencePoints"),
 				0,
 				INT_MAX
 			);
@@ -56,8 +56,8 @@ namespace CombatTrackerApp {
 				m_currentCreatureStatBlock.proficiencyBonus.value,
 				m_currentCreatureStatBlock.proficiencyBonus.isOverridden,
 				challengeRating.proficiencyBonus,
-				m_localeProviderRef.getText("/scenes/monsterCreation/proficiencyBonus"),
-				m_localeProviderRef.getText("/scenes/monsterCreation/resetProficiencyBonus"),
+				m_localeProviderPointer->getText("/scenes/monsterCreation/proficiencyBonus"),
+				m_localeProviderPointer->getText("/scenes/monsterCreation/resetProficiencyBonus"),
 				PB_LOWER_BOUND,
 				INT_MAX
 			);

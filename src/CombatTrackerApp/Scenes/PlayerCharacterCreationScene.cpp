@@ -14,17 +14,17 @@ namespace CombatTrackerApp {
 
 	EntityCreationScene::CreationLabels PlayerCharacterCreationScene::getCreationLabels() const {
 		return {
-			m_localeProviderRef.getText("/scenes/playerCharacterCreation/windowTitle"),
-			m_localeProviderRef.getText("/scenes/playerCharacterCreation/completeButton"),
-			m_localeProviderRef.getText("/scenes/playerCharacterCreation/cancelButton")
+			m_localeProviderPointer->getText("/scenes/playerCharacterCreation/windowTitle"),
+			m_localeProviderPointer->getText("/scenes/playerCharacterCreation/completeButton"),
+			m_localeProviderPointer->getText("/scenes/playerCharacterCreation/cancelButton")
 		};
 	}
 	void PlayerCharacterCreationScene::renderEntitySpecificInfo() {
-		ImGui::SeparatorText(m_localeProviderRef.getText("/scenes/playerCharacterCreation/classesAndSubclasses").data());
+		ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/playerCharacterCreation/classesAndSubclasses").data());
 		renderPlayerClassAndSubclasses();
 	}
 	void PlayerCharacterCreationScene::renderEntitySpecificSection() {
-		ImGui::SeparatorText(m_localeProviderRef.getText("/scenes/playerCharacterCreation/specificData").data());
+		ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/playerCharacterCreation/specificData").data());
 		renderPlayerCharacterSpecificInfo();
 	}
 	void PlayerCharacterCreationScene::renderPlayerCharacterSpecificInfo() {
@@ -34,50 +34,50 @@ namespace CombatTrackerApp {
 			ImGui::TableNextRow();
 
 			ImGui::TableSetColumnIndex(0);
-			ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/playerCharacterCreation/species").data());
+			ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/playerCharacterCreation/species").data());
 			ImGui::SetNextItemWidth(-1.0f);
-			renderListBox(m_speciesParameters, m_currentPlayerStatBlock.species, "##Species", m_localeProviderRef.getTextList("/domain/species"));
+			renderListBox(m_speciesParameters, m_currentPlayerStatBlock.species, "##Species", m_localeProviderPointer->getTextList("/domain/species"));
 
 			ImGui::TableSetColumnIndex(1);
-			ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/playerCharacterCreation/origin").data());
+			ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/playerCharacterCreation/origin").data());
 			ImGui::SetNextItemWidth(-1.0f);
-			renderListBox(m_originParameters, m_currentPlayerStatBlock.origin, "##Origin", m_localeProviderRef.getTextList("/domain/origin"));
+			renderListBox(m_originParameters, m_currentPlayerStatBlock.origin, "##Origin", m_localeProviderPointer->getTextList("/domain/origin"));
 
 			ImGui::EndTable();
 		}
 		CombatTrackerLib::renderCheckboxGrid(
 			m_currentPlayerStatBlock.weaponProficiencies,
-			m_localeProviderRef.getTextList("/domain/weaponType"),
+			m_localeProviderPointer->getTextList("/domain/weaponType"),
 			"WeaponProficiencies",
-			m_localeProviderRef.getText("/scenes/playerCharacterCreation/weaponProficiencies"),
+			m_localeProviderPointer->getText("/scenes/playerCharacterCreation/weaponProficiencies"),
 			3
 		);
 		CombatTrackerLib::renderCheckboxGrid(
 			m_currentPlayerStatBlock.armorProficiencies,
-			m_localeProviderRef.getTextList("/domain/armorType"),
+			m_localeProviderPointer->getTextList("/domain/armorType"),
 			"ArmorProficiencies",
-			m_localeProviderRef.getText("/scenes/playerCharacterCreation/armorProficiencies"),
+			m_localeProviderPointer->getText("/scenes/playerCharacterCreation/armorProficiencies"),
 			3
 		);
 		CombatTrackerLib::renderCheckboxGrid(
 			m_currentPlayerStatBlock.toolProficiencies,
-			m_localeProviderRef.getTextList("/domain/tool"),
+			m_localeProviderPointer->getTextList("/domain/tool"),
 			"ToolProficiencies",
-			m_localeProviderRef.getText("/scenes/playerCharacterCreation/toolProficiencies"),
+			m_localeProviderPointer->getText("/scenes/playerCharacterCreation/toolProficiencies"),
 			3
 		);
 		CombatTrackerLib::renderCheckboxGrid(
 			m_currentPlayerStatBlock.weaponMasteries,
-			m_localeProviderRef.getTextList("/domain/weaponMastery"),
+			m_localeProviderPointer->getTextList("/domain/weaponMastery"),
 			"WeaponMasteries",
-			m_localeProviderRef.getText("/scenes/playerCharacterCreation/weaponMasteries"),
+			m_localeProviderPointer->getText("/scenes/playerCharacterCreation/weaponMasteries"),
 			3
 		);
 	}
 	void PlayerCharacterCreationScene::renderPlayerClassAndSubclasses() {
 
-		const auto classNames{ m_localeProviderRef.getTextList("/domain/playerClass") };
-		const auto subclassNames{ m_localeProviderRef.getTextList("/domain/playerSubclass") };
+		const auto classNames{ m_localeProviderPointer->getTextList("/domain/playerClass") };
+		const auto subclassNames{ m_localeProviderPointer->getTextList("/domain/playerSubclass") };
 
 		if (ImGui::BeginTable("Classes and Subclasses", 1, ImGuiTableFlags_SizingStretchSame)) {
 
@@ -94,7 +94,7 @@ namespace CombatTrackerApp {
 			for (const auto& item : m_currentPlayerStatBlock.subclasses) {
 				ImGui::TextWrapped("%s", subclassNames[CombatTrackerLib::enumToSizeT(item.second)].data());
 			}
-			if (CombatTrackerLib::alignedButton(m_localeProviderRef.getText("/scenes/playerCharacterCreation/configureButton").data(), 0.5f)) {
+			if (CombatTrackerLib::alignedButton(m_localeProviderPointer->getText("/scenes/playerCharacterCreation/configureButton").data(), 0.5f)) {
 				ImGui::OpenPopup("###ClassConfiguration");
 			}
 
@@ -104,14 +104,14 @@ namespace CombatTrackerApp {
 			const auto viewportSize{ ImGui::GetMainViewport()->Size };
 			ImGui::SetNextWindowSize(ImVec2{ viewportSize.x * 0.92f, viewportSize.y * 0.92f }, ImGuiCond_Always);
 			if (ImGui::BeginPopupModal(
-				m_localeProviderRef.getText("/scenes/playerCharacterCreation/configureButton").data(),
+				m_localeProviderPointer->getText("/scenes/playerCharacterCreation/configureButton").data(),
 				nullptr,
 				ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize
 			)) {
 				ImGui::BeginChild("EditClassScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(1) }, true);
 
 
-				ImGui::TextWrapped("%s", m_localeProviderRef.getText("/scenes/playerCharacterCreation/classes").data());
+				ImGui::TextWrapped("%s", m_localeProviderPointer->getText("/scenes/playerCharacterCreation/classes").data());
 
 				// The level fields are laid out as a grid with the labels above them, so the twelve of them don't turn into twelve near empty rows.
 				if (ImGui::BeginTable("##ClassLevels", 4, ImGuiTableFlags_SizingStretchSame)) {
@@ -128,7 +128,7 @@ namespace CombatTrackerApp {
 				}
 
 				static PlayerClass s_currentClass{};
-				ImGui::SeparatorText(m_localeProviderRef.getText("/scenes/playerCharacterCreation/subclasses").data());
+				ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/playerCharacterCreation/subclasses").data());
 
 				for (size_t i{}; i < subclassNames.size(); ++i) {
 					const auto subclass{ static_cast<PlayerSubclass>(i) };
@@ -163,7 +163,7 @@ namespace CombatTrackerApp {
 				}
 				ImGui::EndChild();
 
-				if (CombatTrackerLib::alignedButton(m_localeProviderRef.getText("/scenes/playerCharacterCreation/finishConfiguration").data(), 0.5f)) {
+				if (CombatTrackerLib::alignedButton(m_localeProviderPointer->getText("/scenes/playerCharacterCreation/finishConfiguration").data(), 0.5f)) {
 
 					// Lengthy but necessary validation.
 					int sum{};

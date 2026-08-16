@@ -51,11 +51,11 @@ namespace CombatTrackerApp {
 			ImGui::TableNextRow();
 
 			ImGui::TableSetColumnIndex(0);
-			ImGui::SeparatorText(m_localeProviderRef.getText("/scenes/entityCreation/sections/general").data());
+			ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/entityCreation/sections/general").data());
 			renderGeneralCreatureInfo();
 
 			ImGui::Spacing();
-			ImGui::SeparatorText(m_localeProviderRef.getText("/scenes/entityCreation/sections/movement").data());
+			ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/entityCreation/sections/movement").data());
 			renderSpeedInfo();
 
 			ImGui::TableSetColumnIndex(1);
@@ -64,11 +64,11 @@ namespace CombatTrackerApp {
 		}
 
 		ImGui::Spacing();
-		ImGui::SeparatorText(m_localeProviderRef.getText("/scenes/entityCreation/sections/abilities").data());
+		ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/entityCreation/sections/abilities").data());
 		renderAbilityScoresAndModifiers();
 
 		ImGui::Spacing();
-		ImGui::SeparatorText(m_localeProviderRef.getText("/scenes/entityCreation/sections/savingThrowsAndSkills").data());
+		ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/entityCreation/sections/savingThrowsAndSkills").data());
 		if (ImGui::BeginTable("##SavingThrowSkillsSplit", 2, ImGuiTableFlags_SizingStretchProp)) {
 			ImGui::TableSetupColumn("Left", ImGuiTableColumnFlags_WidthStretch, 0.5f);
 			ImGui::TableSetupColumn("Right", ImGuiTableColumnFlags_WidthStretch, 0.5f);
@@ -80,18 +80,18 @@ namespace CombatTrackerApp {
 			// Saving throw data as a separate collapsable header.
 			ImGui::TableSetColumnIndex(0);
 			if (ImGui::CollapsingHeader(
-				m_localeProviderRef.getText("/scenes/entityCreation/savingThrows/header").data(),
+				m_localeProviderPointer->getText("/scenes/entityCreation/savingThrows/header").data(),
 				ImGuiTreeNodeFlags_DefaultOpen
 			)) {
 
 				// Saving Throw proficiency and expertise.
 				ImGui::BeginChild("##SaveProfandExp", ImVec2{ 0.0f, childHeight }, true);
 				renderProficiencyAndExpertiseCluster(
-					m_localeProviderRef.getText("/scenes/entityCreation/savingThrows/proficiencies"),
-					m_localeProviderRef.getText("/scenes/entityCreation/savingThrows/expertises"),
+					m_localeProviderPointer->getText("/scenes/entityCreation/savingThrows/proficiencies"),
+					m_localeProviderPointer->getText("/scenes/entityCreation/savingThrows/expertises"),
 					m_currentCreatureStatBlock.savingThrowProficiencies,
 					m_currentCreatureStatBlock.savingThrowExpertise,
-					m_localeProviderRef.getTextList("/domain/ability")
+					m_localeProviderPointer->getTextList("/domain/ability")
 				);
 				ImGui::EndChild();
 
@@ -104,18 +104,18 @@ namespace CombatTrackerApp {
 			// Skill data as a seperate collapsable header.
 			ImGui::TableSetColumnIndex(1);
 			if (ImGui::CollapsingHeader(
-				m_localeProviderRef.getText("/scenes/entityCreation/skills/header").data(),
+				m_localeProviderPointer->getText("/scenes/entityCreation/skills/header").data(),
 				ImGuiTreeNodeFlags_DefaultOpen
 			)) {
 
 				// Skill proficiency and expertise.
 				ImGui::BeginChild("##SkillProfandExp", ImVec2{ 0.0f, childHeight }, true);
 				renderProficiencyAndExpertiseCluster(
-					m_localeProviderRef.getText("/scenes/entityCreation/skills/proficiencies"),
-					m_localeProviderRef.getText("/scenes/entityCreation/skills/expertises"),
+					m_localeProviderPointer->getText("/scenes/entityCreation/skills/proficiencies"),
+					m_localeProviderPointer->getText("/scenes/entityCreation/skills/expertises"),
 					m_currentCreatureStatBlock.skillProficiencies,
 					m_currentCreatureStatBlock.skillExpertise,
-					m_localeProviderRef.getTextList("/domain/skill")
+					m_localeProviderPointer->getTextList("/domain/skill")
 				);
 				ImGui::EndChild();
 
@@ -128,23 +128,23 @@ namespace CombatTrackerApp {
 		}
 
 		ImGui::Spacing();
-		ImGui::SeparatorText(m_localeProviderRef.getText("/scenes/entityCreation/sections/damageAndConditions").data());
+		ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/entityCreation/sections/damageAndConditions").data());
 		renderDmgVulnResAndImm();
 		CombatTrackerLib::renderCheckboxGrid(
 			m_currentCreatureStatBlock.conditionImmunities,
-			m_localeProviderRef.getTextList("/domain/condition"),
+			m_localeProviderPointer->getTextList("/domain/condition"),
 			"ConditionImmunities",
-			m_localeProviderRef.getText("/scenes/entityCreation/damage/conditionImmunities"),
+			m_localeProviderPointer->getText("/scenes/entityCreation/damage/conditionImmunities"),
 			3
 		);
 
 		ImGui::Spacing();
-		ImGui::SeparatorText(m_localeProviderRef.getText("/scenes/entityCreation/sections/sensesAndLanguages").data());
+		ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/entityCreation/sections/sensesAndLanguages").data());
 		CombatTrackerLib::renderCheckboxGrid(
 			m_currentCreatureStatBlock.languages,
-			m_localeProviderRef.getTextList("/domain/creatureLanguage"),
+			m_localeProviderPointer->getTextList("/domain/creatureLanguage"),
 			"Languages",
-			m_localeProviderRef.getText("/scenes/entityCreation/languages"),
+			m_localeProviderPointer->getText("/scenes/entityCreation/languages"),
 			3
 		);
 		renderSenses();
@@ -152,27 +152,27 @@ namespace CombatTrackerApp {
 		ImGui::Spacing();
 		renderEntitySpecificSection(); 	// Some parts of the player character specific info goes here.
 		ImGui::Spacing();
-		ImGui::SeparatorText(m_localeProviderRef.getText("/scenes/entityCreation/sections/actionsTraitsEquipment").data());
+		ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/entityCreation/sections/actionsTraitsEquipment").data());
 		renderActions();
 		renderAddables(m_currentCreatureStatBlock.traits, AddableLabels{
-			m_localeProviderRef.getText("/scenes/entityCreation/traits/header"),
-			m_localeProviderRef.getText("/scenes/entityCreation/traits/add"),
-			m_localeProviderRef.getText("/scenes/entityCreation/traits/edit"),
-			m_localeProviderRef.getText("/scenes/entityCreation/traits/name"),
-			m_localeProviderRef.getText("/scenes/entityCreation/traits/description"),
-			m_localeProviderRef.getText("/scenes/entityCreation/traits/finishCreation"),
-			m_localeProviderRef.getText("/scenes/entityCreation/traits/finishEditing"),
-			m_localeProviderRef.getText("/scenes/entityCreation/traits/delete")
+			m_localeProviderPointer->getText("/scenes/entityCreation/traits/header"),
+			m_localeProviderPointer->getText("/scenes/entityCreation/traits/add"),
+			m_localeProviderPointer->getText("/scenes/entityCreation/traits/edit"),
+			m_localeProviderPointer->getText("/scenes/entityCreation/traits/name"),
+			m_localeProviderPointer->getText("/scenes/entityCreation/traits/description"),
+			m_localeProviderPointer->getText("/scenes/entityCreation/traits/finishCreation"),
+			m_localeProviderPointer->getText("/scenes/entityCreation/traits/finishEditing"),
+			m_localeProviderPointer->getText("/scenes/entityCreation/traits/delete")
 		});
 		renderAddables(m_currentCreatureStatBlock.equipment, AddableLabels{
-			m_localeProviderRef.getText("/scenes/entityCreation/equipment/header"),
-			m_localeProviderRef.getText("/scenes/entityCreation/equipment/add"),
-			m_localeProviderRef.getText("/scenes/entityCreation/equipment/edit"),
-			m_localeProviderRef.getText("/scenes/entityCreation/equipment/name"),
-			m_localeProviderRef.getText("/scenes/entityCreation/equipment/description"),
-			m_localeProviderRef.getText("/scenes/entityCreation/equipment/finishCreation"),
-			m_localeProviderRef.getText("/scenes/entityCreation/equipment/finishEditing"),
-			m_localeProviderRef.getText("/scenes/entityCreation/equipment/delete")
+			m_localeProviderPointer->getText("/scenes/entityCreation/equipment/header"),
+			m_localeProviderPointer->getText("/scenes/entityCreation/equipment/add"),
+			m_localeProviderPointer->getText("/scenes/entityCreation/equipment/edit"),
+			m_localeProviderPointer->getText("/scenes/entityCreation/equipment/name"),
+			m_localeProviderPointer->getText("/scenes/entityCreation/equipment/description"),
+			m_localeProviderPointer->getText("/scenes/entityCreation/equipment/finishCreation"),
+			m_localeProviderPointer->getText("/scenes/entityCreation/equipment/finishEditing"),
+			m_localeProviderPointer->getText("/scenes/entityCreation/equipment/delete")
 		});
 		ImGui::EndChild();
 
@@ -190,8 +190,8 @@ namespace CombatTrackerApp {
 
 	void EntityCreationScene::renderAbilityScoresAndModifiers () {
 
-		const auto abilityNames{ m_localeProviderRef.getTextList("/domain/ability") };
-		const auto resetLabels{ m_localeProviderRef.getTextList("/scenes/entityCreation/abilityTable/resetModifiers") };
+		const auto abilityNames{ m_localeProviderPointer->getTextList("/domain/ability") };
+		const auto resetLabels{ m_localeProviderPointer->getTextList("/scenes/entityCreation/abilityTable/resetModifiers") };
 
 		if (ImGui::BeginTable("AbilityTable",
 			4,
@@ -208,22 +208,22 @@ namespace CombatTrackerApp {
 			4) Override button.
 			*/
 			ImGui::TableSetupColumn(
-				m_localeProviderRef.getText("/scenes/entityCreation/abilityTable/abilityColumn").data(),
+				m_localeProviderPointer->getText("/scenes/entityCreation/abilityTable/abilityColumn").data(),
 				ImGuiTableColumnFlags_WidthStretch, 
 				0.25f
 			);
 			ImGui::TableSetupColumn(
-				m_localeProviderRef.getText("/scenes/entityCreation/abilityTable/scoreColumn").data(),
+				m_localeProviderPointer->getText("/scenes/entityCreation/abilityTable/scoreColumn").data(),
 				ImGuiTableColumnFlags_WidthStretch, 
 				0.20f
 			);
 			ImGui::TableSetupColumn(
-				m_localeProviderRef.getText("/scenes/entityCreation/abilityTable/modifierColumn").data(),
+				m_localeProviderPointer->getText("/scenes/entityCreation/abilityTable/modifierColumn").data(),
 				ImGuiTableColumnFlags_WidthStretch,
 				0.20f
 			);
 			ImGui::TableSetupColumn(
-				m_localeProviderRef.getText("/scenes/entityCreation/abilityTable/overrideColumn").data(),
+				m_localeProviderPointer->getText("/scenes/entityCreation/abilityTable/overrideColumn").data(),
 				ImGuiTableColumnFlags_WidthStretch, 
 				0.35f
 			);
@@ -282,10 +282,10 @@ namespace CombatTrackerApp {
 	}
 	void EntityCreationScene::renderSavingThrowModifiers () {
 
-		const auto abilityNames{ m_localeProviderRef.getTextList("/domain/ability") };
-		const auto resetLabels{ m_localeProviderRef.getTextList("/scenes/entityCreation/savingThrows/resetModifiers") };
+		const auto abilityNames{ m_localeProviderPointer->getTextList("/domain/ability") };
+		const auto resetLabels{ m_localeProviderPointer->getTextList("/scenes/entityCreation/savingThrows/resetModifiers") };
 
-		ImGui::TextWrapped("%s", m_localeProviderRef.getText("/scenes/entityCreation/savingThrows/modifiers").data());
+		ImGui::TextWrapped("%s", m_localeProviderPointer->getText("/scenes/entityCreation/savingThrows/modifiers").data());
 		if (ImGui::BeginTable("SaveModsTable",
 			3,
 			ImGuiTableFlags_SizingStretchProp |
@@ -347,10 +347,10 @@ namespace CombatTrackerApp {
 	}
 	void EntityCreationScene::renderSkillModifiers () {
 
-		const auto skillNames{ m_localeProviderRef.getTextList("/domain/skill") };
-		const auto resetLabels{ m_localeProviderRef.getTextList("/scenes/entityCreation/skills/resetModifiers") };
+		const auto skillNames{ m_localeProviderPointer->getTextList("/domain/skill") };
+		const auto resetLabels{ m_localeProviderPointer->getTextList("/scenes/entityCreation/skills/resetModifiers") };
 
-		ImGui::TextWrapped("%s", m_localeProviderRef.getText("/scenes/entityCreation/skills/modifiers").data());
+		ImGui::TextWrapped("%s", m_localeProviderPointer->getText("/scenes/entityCreation/skills/modifiers").data());
 		if (ImGui::BeginTable("SkillModsTable",
 			3,
 			ImGuiTableFlags_SizingStretchProp |
@@ -360,17 +360,17 @@ namespace CombatTrackerApp {
 
 			// Exact same setup as saving throws.
 			ImGui::TableSetupColumn(
-				m_localeProviderRef.getText("/scenes/entityCreation/skills/skillColumn").data(),
+				m_localeProviderPointer->getText("/scenes/entityCreation/skills/skillColumn").data(),
 				ImGuiTableColumnFlags_WidthStretch,
 				0.45f
 			);
 			ImGui::TableSetupColumn(
-				m_localeProviderRef.getText("/scenes/entityCreation/skills/valueColumn").data(),
+				m_localeProviderPointer->getText("/scenes/entityCreation/skills/valueColumn").data(),
 				ImGuiTableColumnFlags_WidthStretch,
 				0.20f
 			);
 			ImGui::TableSetupColumn(
-				m_localeProviderRef.getText("/scenes/entityCreation/skills/resetColumn").data(),
+				m_localeProviderPointer->getText("/scenes/entityCreation/skills/resetColumn").data(),
 				ImGuiTableColumnFlags_WidthStretch, 
 				0.35f
 			);
@@ -438,9 +438,9 @@ namespace CombatTrackerApp {
 	*/
 	void EntityCreationScene::renderGeneralCreatureInfo() {
 
-		const auto nameLabel{ m_localeProviderRef.getText("/scenes/entityCreation/general/name") };
-		const auto armorClassLabel{ m_localeProviderRef.getText("/scenes/entityCreation/general/armorClass") };
-		const auto hitPointsLabel{ m_localeProviderRef.getText("/scenes/entityCreation/general/hitPoints") };
+		const auto nameLabel{ m_localeProviderPointer->getText("/scenes/entityCreation/general/name") };
+		const auto armorClassLabel{ m_localeProviderPointer->getText("/scenes/entityCreation/general/armorClass") };
+		const auto hitPointsLabel{ m_localeProviderPointer->getText("/scenes/entityCreation/general/hitPoints") };
 
 		if (ImGui::BeginTable("##GeneralCreatureInfo_NameRow", 2, ImGuiTableFlags_SizingStretchProp)) {
 
@@ -483,33 +483,33 @@ namespace CombatTrackerApp {
 
 				// The labels are hidden on the listboxes themselves, so each one can take its whole column.
 				ImGui::TableSetColumnIndex(0);
-				ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/entityCreation/general/size").data());
+				ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/entityCreation/general/size").data());
 				ImGui::SetNextItemWidth(-1.0f);
 				renderListBox(
 					m_sizeListBoxParameters,
 					m_currentCreatureStatBlock.size,
 					"##Size", 
-					m_localeProviderRef.getTextList("/domain/size")
+					m_localeProviderPointer->getTextList("/domain/size")
 				);
 
 				ImGui::TableSetColumnIndex(1);
-				ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/entityCreation/general/creatureType").data());
+				ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/entityCreation/general/creatureType").data());
 				ImGui::SetNextItemWidth(-1.0f);
 				renderListBox(
 					m_creatureTypeParameters,
 					m_currentCreatureStatBlock.type,
 					"##CreatureType",
-					m_localeProviderRef.getTextList("/domain/creatureType")
+					m_localeProviderPointer->getTextList("/domain/creatureType")
 				);
 
 				ImGui::TableSetColumnIndex(2);
-				ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/entityCreation/general/alignment").data());
+				ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/entityCreation/general/alignment").data());
 				ImGui::SetNextItemWidth(-1.0f);
 				renderListBox(
 					m_alignmentParameters,
 					m_currentCreatureStatBlock.alignment,
 					"##Alignment", 
-					m_localeProviderRef.getTextList("/domain/alignment")
+					m_localeProviderPointer->getTextList("/domain/alignment")
 				);
 
 				ImGui::EndTable();
@@ -523,7 +523,7 @@ namespace CombatTrackerApp {
 			}
 
 			// Hide the label of the input field. Instead use text field for the label for better layout.
-			ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/entityCreation/general/initiativeBonus").data());
+			ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/entityCreation/general/initiativeBonus").data());
 			ImGui::SetNextItemWidth(-1.0f);
 			if (ImGui::InputInt("##InitiativeBonus", &m_currentCreatureStatBlock.initiativeBonus.value, 0, 0)) {
 				m_currentCreatureStatBlock.initiativeBonus.value =
@@ -532,7 +532,7 @@ namespace CombatTrackerApp {
 				m_currentCreatureStatBlock.initiativeBonus.isOverridden = true;
 			}
 			if (ImGui::Button(
-				m_localeProviderRef.getText("/scenes/entityCreation/general/resetInitiativeBonus").data(),
+				m_localeProviderPointer->getText("/scenes/entityCreation/general/resetInitiativeBonus").data(),
 				ImVec2{ -1.0f, 0.0f }
 			)) {
 				m_currentCreatureStatBlock.initiativeBonus.isOverridden = false;
@@ -545,7 +545,7 @@ namespace CombatTrackerApp {
 			}
 
 			// Same thing here.
-			ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/entityCreation/general/passivePerception").data());
+			ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/entityCreation/general/passivePerception").data());
 			ImGui::SetNextItemWidth(-1.0f);
 			if (ImGui::InputInt("##PassivePerception", &m_currentCreatureStatBlock.passivePerception.value, 0, 0)) {
 				m_currentCreatureStatBlock.passivePerception.value =
@@ -554,7 +554,7 @@ namespace CombatTrackerApp {
 				m_currentCreatureStatBlock.passivePerception.isOverridden = true;
 			}
 			if (ImGui::Button(
-				m_localeProviderRef.getText("/scenes/entityCreation/general/resetPassivePerception").data(),
+				m_localeProviderPointer->getText("/scenes/entityCreation/general/resetPassivePerception").data(),
 				ImVec2{ -1.0f, 0.0f }
 			)) {
 				m_currentCreatureStatBlock.passivePerception.isOverridden = false;
@@ -621,27 +621,27 @@ namespace CombatTrackerApp {
 
 			// An inline label plus the stepper buttons does not fit into a fifth of the column, so the labels go above the fields here too.
 			ImGui::TableSetColumnIndex(0);
-			ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/entityCreation/speeds/walk").data());
+			ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/entityCreation/speeds/walk").data());
 			ImGui::SetNextItemWidth(-1.0f);
 			CombatTrackerLib::renderNonOverridableInputInt(m_currentCreatureStatBlock.walkSpeed, "##Walk", 0);
 
 			ImGui::TableSetColumnIndex(1);
-			ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/entityCreation/speeds/climb").data());
+			ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/entityCreation/speeds/climb").data());
 			ImGui::SetNextItemWidth(-1.0f);
 			CombatTrackerLib::renderNonOverridableInputInt(m_currentCreatureStatBlock.climbingSpeed, "##Climb", 0);
 
 			ImGui::TableSetColumnIndex(2);
-			ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/entityCreation/speeds/swim").data());
+			ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/entityCreation/speeds/swim").data());
 			ImGui::SetNextItemWidth(-1.0f);
 			CombatTrackerLib::renderNonOverridableInputInt(m_currentCreatureStatBlock.swimmingSpeed, "##Swim", 0);
 
 			ImGui::TableSetColumnIndex(3);
-			ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/entityCreation/speeds/burrow").data());
+			ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/entityCreation/speeds/burrow").data());
 			ImGui::SetNextItemWidth(-1.0f);
 			CombatTrackerLib::renderNonOverridableInputInt(m_currentCreatureStatBlock.burrowSpeed, "##Burrow", 0);
 
 			ImGui::TableSetColumnIndex(4);
-			ImGui::TextUnformatted(m_localeProviderRef.getText("/scenes/entityCreation/speeds/fly").data());
+			ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/entityCreation/speeds/fly").data());
 			ImGui::SetNextItemWidth(-1.0f);
 			CombatTrackerLib::renderNonOverridableInputInt(m_currentCreatureStatBlock.flySpeed, "##Fly", 0);
 
@@ -650,14 +650,14 @@ namespace CombatTrackerApp {
 	}
 	void EntityCreationScene::renderDmgVulnResAndImm () {
 
-		const auto damageTypeNames{ m_localeProviderRef.getTextList("/domain/damageType") };
+		const auto damageTypeNames{ m_localeProviderPointer->getTextList("/domain/damageType") };
 
 		if (ImGui::BeginTable("DmgTri", 3, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_BordersInnerV)) {
 			ImGui::TableNextRow();
 
 			// The three flag arrays and the name table all line up, so one index covers a damage type across all four.
 			ImGui::TableSetColumnIndex(0);
-			ImGui::TextWrapped("%s", m_localeProviderRef.getText("/scenes/entityCreation/damage/vulnerabilities").data());
+			ImGui::TextWrapped("%s", m_localeProviderPointer->getText("/scenes/entityCreation/damage/vulnerabilities").data());
 			ImGui::PushID("Vulnerabilities");
 			for (size_t i{}; i < damageTypeNames.size(); ++i) {
 				if (ImGui::Checkbox(damageTypeNames[i].data(),
@@ -678,7 +678,7 @@ namespace CombatTrackerApp {
 			ImGui::PopID();
 
 			ImGui::TableSetColumnIndex(1);
-			ImGui::TextWrapped("%s", m_localeProviderRef.getText("/scenes/entityCreation/damage/resistances").data());
+			ImGui::TextWrapped("%s", m_localeProviderPointer->getText("/scenes/entityCreation/damage/resistances").data());
 			ImGui::PushID("Resistances");
 			for (size_t i{}; i < damageTypeNames.size(); ++i) {
 				if (ImGui::Checkbox(damageTypeNames[i].data(),
@@ -699,7 +699,7 @@ namespace CombatTrackerApp {
 			ImGui::PopID();
 
 			ImGui::TableSetColumnIndex(2);
-			ImGui::TextWrapped("%s", m_localeProviderRef.getText("/scenes/entityCreation/damage/immunities").data());
+			ImGui::TextWrapped("%s", m_localeProviderPointer->getText("/scenes/entityCreation/damage/immunities").data());
 			ImGui::PushID("Immunities");
 			for (size_t i{}; i < damageTypeNames.size(); ++i) {
 				if (ImGui::Checkbox(damageTypeNames[i].data(),
@@ -724,7 +724,7 @@ namespace CombatTrackerApp {
 
 	// Specific function for sense rendering, just calls CombatTrackerLib::renderNonOverridableInputInt() for all senses.
 	void EntityCreationScene::renderSenses() {
-		const auto senseNames{ m_localeProviderRef.getTextList("/domain/sense") };
+		const auto senseNames{ m_localeProviderPointer->getTextList("/domain/sense") };
 		if (ImGui::BeginTable("SensesGrid", 4, ImGuiTableFlags_SizingStretchSame)) {
 			ImGui::TableNextRow();
 			for (size_t i{}; i < senseNames.size(); ++i) {
@@ -745,14 +745,14 @@ namespace CombatTrackerApp {
 	// Really similar to renderAddables() just adds actionType as a separate parameter.
 	void EntityCreationScene::renderActions() {
 
-		const auto actionNames{ m_localeProviderRef.getTextList("/domain/actionType") };
+		const auto actionNames{ m_localeProviderPointer->getTextList("/domain/actionType") };
 
-		ImGui::TextWrapped("%s", m_localeProviderRef.getText("/scenes/entityCreation/actions/header").data());
+		ImGui::TextWrapped("%s", m_localeProviderPointer->getText("/scenes/entityCreation/actions/header").data());
 		static std::vector<size_t> s_actionsMarkedForDeletion{};
 		for (size_t i{}; i < m_currentCreatureStatBlock.actions.size(); ++i) {
 			ImGui::PushID(static_cast<int> (i));
 
-			const auto editPopupName{ m_localeProviderRef.getText("/scenes/entityCreation/actions/edit") };
+			const auto editPopupName{ m_localeProviderPointer->getText("/scenes/entityCreation/actions/edit") };
 
 			ImGui::Button(m_currentCreatureStatBlock.actions[i].name.c_str(), ImVec2{ -1.0f, 0.0f });
 			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
@@ -774,20 +774,20 @@ namespace CombatTrackerApp {
 			if (ImGui::BeginPopupModal(editPopupName.data(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
 				ImGui::BeginChild("EditActionScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(2) }, true);
 				ImGui::InputText(
-					m_localeProviderRef.getText("/scenes/entityCreation/actions/name").data(),
+					m_localeProviderPointer->getText("/scenes/entityCreation/actions/name").data(),
 					&m_currentCreatureStatBlock.actions[i].name
 				);
 				ImGui::InputText(
-					m_localeProviderRef.getText("/scenes/entityCreation/actions/description").data(),
+					m_localeProviderPointer->getText("/scenes/entityCreation/actions/description").data(),
 					&m_currentCreatureStatBlock.actions[i].description
 				);
 				ImGui::EndChild();
 
 				ImGui::Separator();
-				if (CombatTrackerLib::alignedButton(m_localeProviderRef.getText("/scenes/entityCreation/actions/finishEditing").data(), 0.5f)) {
+				if (CombatTrackerLib::alignedButton(m_localeProviderPointer->getText("/scenes/entityCreation/actions/finishEditing").data(), 0.5f)) {
 					ImGui::CloseCurrentPopup();
 				}
-				if (CombatTrackerLib::alignedButton(m_localeProviderRef.getText("/scenes/entityCreation/actions/delete").data(), 0.5f)) {
+				if (CombatTrackerLib::alignedButton(m_localeProviderPointer->getText("/scenes/entityCreation/actions/delete").data(), 0.5f)) {
 					s_actionsMarkedForDeletion.push_back(i);
 					ImGui::CloseCurrentPopup();
 				}
@@ -804,7 +804,7 @@ namespace CombatTrackerApp {
 
 		// Action adding popup modal.
 		ImGui::Spacing();
-		if (ImGui::Button(m_localeProviderRef.getText("/scenes/entityCreation/actions/add").data())) {
+		if (ImGui::Button(m_localeProviderPointer->getText("/scenes/entityCreation/actions/add").data())) {
 			ImGui::OpenPopup("###ActionAdd");
 		}
 		const auto center{ ImGui::GetMainViewport()->GetCenter() };
@@ -812,7 +812,7 @@ namespace CombatTrackerApp {
 		const auto vp{ ImGui::GetMainViewport()->Size };
 		ImGui::SetNextWindowSize(ImVec2(vp.x * 0.70f, vp.y * 0.70f), ImGuiCond_Always);
 		if (ImGui::BeginPopupModal(
-			m_localeProviderRef.getText("/scenes/entityCreation/actions/add").data(),
+			m_localeProviderPointer->getText("/scenes/entityCreation/actions/add").data(),
 			nullptr,
 			ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize
 		)) {
@@ -829,19 +829,19 @@ namespace CombatTrackerApp {
 			CombatTrackerLib::renderListBox(
 				s_actionParameters,
 				s_type,
-				m_localeProviderRef.getText("/scenes/entityCreation/actions/type").data(),
+				m_localeProviderPointer->getText("/scenes/entityCreation/actions/type").data(),
 				actionNames
 			);
 
 			static std::string s_name{};
 			static std::string s_description{};
-			ImGui::InputText(m_localeProviderRef.getText("/scenes/entityCreation/actions/name").data(), &s_name);
-			ImGui::InputText(m_localeProviderRef.getText("/scenes/entityCreation/actions/description").data(), &s_description);
+			ImGui::InputText(m_localeProviderPointer->getText("/scenes/entityCreation/actions/name").data(), &s_name);
+			ImGui::InputText(m_localeProviderPointer->getText("/scenes/entityCreation/actions/description").data(), &s_description);
 			ImGui::EndChild();
 
 			ImGui::Separator();
 
-			if (CombatTrackerLib::alignedButton(m_localeProviderRef.getText("/scenes/entityCreation/actions/finishCreation").data(), 0.5f) &&
+			if (CombatTrackerLib::alignedButton(m_localeProviderPointer->getText("/scenes/entityCreation/actions/finishCreation").data(), 0.5f) &&
 				!s_name.empty() && !s_description.empty() && s_actionParameters.chosenIndex < CombatTrackerLib::enumToSizeT(ActionType::COUNT)) {
 				CreatureAction action{ s_name, s_description, s_type };
 				m_currentCreatureStatBlock.actions.push_back(action);
