@@ -44,6 +44,7 @@ namespace CombatTrackerLib {
 	{
 		glfwInit();
 		m_windowPointer = std::make_unique<Window>(&(m_specfication.windowSpecification), m_specfication.name);
+
 		/*
 		Use reinterpret_cast here to treat expression as if it had the target type.
 		We are casting a function pointer here to another function pointer that returns a void pointer.
