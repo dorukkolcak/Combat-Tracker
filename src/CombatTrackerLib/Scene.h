@@ -11,9 +11,6 @@ namespace CombatTrackerLib {
 	class App;
 	class Scene {
 	public:
-
-		// A scene needs an application reference for construction so we shouldn't be able to construct a scene with a default constructor.
-		Scene() = delete; 
 		explicit Scene(App* app);
 
 		virtual ~Scene() = default;
@@ -53,7 +50,16 @@ namespace CombatTrackerLib {
 		virtual void renderScene() = 0;
 
 	protected:
+
+		/*
+		This scene constructor shouldn't be visible to the public as we don't really want anyone to create a base Scene.
+		However a derived class of Scene can use this constructor particularly for testing purposes.
+		See SceneManagerTest for a use of this: StubScene uses this constructor to test out scene management workflows.
+		Since our purpose is only testing out scene workflows,initializing an application instance would be way too inefficient for every test case.
+		*/
+		Scene() = default;
+
 		App* m_applicationPointer{};
-		const CombatTrackerLib::LocaleProvider& m_localeProviderRef;
+		const CombatTrackerLib::LocaleProvider* m_localeProviderPointer{};
 	};
 }

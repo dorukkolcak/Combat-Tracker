@@ -38,9 +38,7 @@
 namespace CombatTrackerLib {
 	App::App(Specification specification) :
 		m_specfication{ std::move(specification) }, // Specification should be owned by the application so move it.
-		m_resourceDirectory{ findResourceDirectory() },
-		m_userDataDirectory{ findUserDataDirectory(m_specfication.name) },
-		m_localeReader{ m_specfication.locale, &m_resourceDirectory },
+		m_localeProvider{ m_specfication.locale, &getResourceDirectory() },
 		m_isCloseSignalled{ false },
 		m_isUIPresetApplied{ false }
 	{
@@ -63,7 +61,7 @@ namespace CombatTrackerLib {
 		ImGui_ImplOpenGL3_Init(glsl_version);
 
 		// Load the application chosen font. This is needed for loading fonts that support some unconventional characters.
-		const std::filesystem::path fontPath{ m_resourceDirectory / "assets/Fonts/Roboto-Medium.ttf" };
+		const std::filesystem::path fontPath{ getResourceDirectory() / "assets/Fonts/Roboto-Medium.ttf" };
 		std::error_code fontErrorCode{};
 		if (std::filesystem::exists(fontPath, fontErrorCode)) {
 			ImGui::GetIO().Fonts->AddFontFromFileTTF(fontPath.string().c_str(), 18.0f);
@@ -270,14 +268,16 @@ namespace CombatTrackerLib {
 	UIPreset App::getUIPreset() const {
 		return m_specfication.uiPreset;
 	}
-	const std::filesystem::path& App::getResourceDirectory() const {
-		return m_resourceDirectory;
+	const std::filesystem::path& App::getResourceDirectory() {
+		static const std::filesystem::path s_resourceDirectory{ findResourceDirectory() };
+		return s_resourceDirectory;
 	}
-	const std::filesystem::path& App::getUserDataDirectory() const {
-		return m_userDataDirectory;
+	const std::filesystem::path& App::getUserDataDirectory(std::string_view applicationName) {
+		static std::filesystem::path s_userDataDirectory{ findUserDataDirectory(applicationName) };
+		return s_userDataDirectory;
 	}
 	const LocaleProvider& App::getLocaleProvider() const {
-		return m_localeReader;
+		return m_localeProvider;
 	}
 	SceneManager& App::getSceneManager() {
 		return m_sceneManager;

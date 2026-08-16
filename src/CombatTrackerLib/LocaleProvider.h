@@ -13,8 +13,10 @@
 namespace CombatTrackerLib {
 	class LocaleProvider {
 	public:
+		friend class LocaleProviderTest;
+
 		LocaleProvider() = default;
-		LocaleProvider(std::string_view localeCode, std::filesystem::path* resourceDirectoryPathPointer);
+		LocaleProvider(std::string_view localeCode, const std::filesystem::path* resourceDirectoryPathPointer);
 
 		LocaleProvider(const LocaleProvider& reader) = delete;
 		LocaleProvider& operator=(const LocaleProvider& reader) = delete;
