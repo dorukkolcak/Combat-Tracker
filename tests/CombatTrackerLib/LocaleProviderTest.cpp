@@ -22,13 +22,13 @@ namespace CombatTrackerLib {
 		}
 		ASSERT_GE(m_locales.size(), MIN_NUMBER_OF_LOCALES) << "At least two locale files needed to compare." << std::endl;
 	}
-	TEST_F(LocaleProviderTest, LocaleFileLoad) {
+	TEST_F(LocaleProviderTest, LocaleFilesLoadTextAndListEntries) {
 		for (const auto& locale : m_locales) {
 			const auto areEntriesAvailable{ !getTextViewMap(*locale.provider).empty() && !getListViewMap(*locale.provider).empty() };
 			EXPECT_TRUE(areEntriesAvailable) << "No entries were read for locale " << locale.code << std::endl;
 		}
 	}
-	TEST_F(LocaleProviderTest, LocaleFileCommonTextKeys) {
+	TEST_F(LocaleProviderTest, LocaleFilesShareTheSameTextKeys) {
 		const auto& referenceLocale{ m_locales.begin() };
 		const auto& referenceLocaleProvider{ *referenceLocale->provider };
 		const auto& referenceLocaleCode{ referenceLocale->code };
@@ -45,7 +45,7 @@ namespace CombatTrackerLib {
 			}
 		}
 	}
-	TEST_F(LocaleProviderTest, LocaleFileCommonListKeys) {
+	TEST_F(LocaleProviderTest, LocaleFilesShareTheSameListKeys) {
 		const auto& referenceLocale{ m_locales.begin() };
 		const auto& referenceLocaleProvider{ *referenceLocale->provider };
 		const auto& referenceLocaleCode{ referenceLocale->code };
@@ -62,7 +62,7 @@ namespace CombatTrackerLib {
 			}
 		}
 	}
-	TEST_F(LocaleProviderTest, LocaleFileCommonListLengths) {
+	TEST_F(LocaleProviderTest, LocaleFilesShareTheSameListLengths) {
 		const auto& referenceLocale{ m_locales.begin() };
 		const auto& referenceLocaleProvider{ *referenceLocale->provider };
 		const auto& referenceLocaleCode{ referenceLocale->code };
@@ -72,7 +72,7 @@ namespace CombatTrackerLib {
 			for (const auto& listKeyValuePair : getListViewMap(localeProvider)) {
 				const auto referenceEntry{ getListViewMap(referenceLocaleProvider).find(listKeyValuePair.first) };
 
-				// This shouldn't happen because of the LocaleFileCommonListKeys test case.
+				// This shouldn't happen because of the LocaleFilesShareTheSameListKeys test case.
 				if (referenceEntry == getListViewMap(referenceLocaleProvider).end()) {
 					continue;
 				}
@@ -81,6 +81,51 @@ namespace CombatTrackerLib {
 					<< locale.code << " than in " << referenceLocaleCode << std::endl;
 			}
 		}
+	}
+	TEST_F(LocaleProviderTest, GetTextReturnsTheStoredValueForKnownKeys) {
+		for (const auto& locale : m_locales) {
+			for (const auto& textKeyValuePair : getTextViewMap(*locale.provider)) {
+				EXPECT_EQ(textKeyValuePair.second, locale.provider->getText(textKeyValuePair.first))
+					<< "Locale " << locale.code << " did not serve the stored value of the text key "
+					<< textKeyValuePair.first << std::endl;
+			}
+		}
+	}
+	TEST_F(LocaleProviderTest, GetTextReturnsTheKeyForMissingKeys) {
+		for (const auto& locale : m_locales) {
+			EXPECT_EQ(MISSING_KEY, locale.provider->getText(MISSING_KEY))
+				<< "Locale " << locale.code << " did not hand back the key of a missing text entry." << std::endl;
+		}
+	}
+	TEST_F(LocaleProviderTest, GetTextListReturnsTheStoredEntriesForKnownKeys) {
+		for (const auto& locale : m_locales) {
+			for (const auto& listKeyValuePair : getListViewMap(*locale.provider)) {
+				EXPECT_TRUE(std::ranges::equal(listKeyValuePair.second, locale.provider->getTextList(listKeyValuePair.first)))
+					<< "Locale " << locale.code << " did not serve the stored entries of the list key "
+					<< listKeyValuePair.first << std::endl;
+			}
+		}
+	}
+	TEST_F(LocaleProviderTest, GetTextListReturnsAnEmptySpanForMissingKeys) {
+		for (const auto& locale : m_locales) {
+			EXPECT_TRUE(locale.provider->getTextList(MISSING_KEY).empty())
+				<< "Locale " << locale.code << " handed back a non empty span for a missing list entry." << std::endl;
+		}
+	}
+	TEST_F(LocaleProviderTest, SetLocaleClearsViewsForAnUnknownLocale) {
+		auto& localeProvider{ *m_locales.begin()->provider };
+
+		EXPECT_FALSE(localeProvider.setLocale(UNKNOWN_LOCALE_CODE));
+		EXPECT_TRUE(getTextViewMap(localeProvider).empty())
+			<< "Text views into the previous locale file survived a failed locale switch." << std::endl;
+		EXPECT_TRUE(getListViewMap(localeProvider).empty())
+			<< "List views into the previous locale file survived a failed locale switch." << std::endl;
+	}
+	TEST_F(LocaleProviderTest, SetLocaleFailsWithoutAResourceDirectory) {
+		LocaleProvider localeProvider{};
+
+		EXPECT_FALSE(localeProvider.setLocale(m_locales.begin()->code))
+			<< "A locale was read without a resource directory to read it from." << std::endl;
 	}
 	TEST_F(LocaleProviderTest, SetLocaleReplacesPreviousLocale) {
 		auto& localeProvider{ *m_locales.begin()->provider };

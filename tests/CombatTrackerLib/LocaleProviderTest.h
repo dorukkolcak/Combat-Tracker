@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace CombatTrackerLib {
@@ -38,5 +39,7 @@ namespace CombatTrackerLib {
 
 		std::vector<Locale> m_locales{};
 		inline static constexpr std::size_t MIN_NUMBER_OF_LOCALES{ 2 };
+		inline static constexpr std::string_view MISSING_KEY{ "/thereIsNoSuchSection/thereIsNoSuchKey" };
+		inline static constexpr std::string_view UNKNOWN_LOCALE_CODE{ "thereIsNoSuchLocale" };
 	};
 }

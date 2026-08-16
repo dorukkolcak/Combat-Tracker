@@ -12,7 +12,7 @@ target_link_libraries(Combat-Tracker-Lib-Tests PRIVATE
 )
 
 # Copy assets to the test build directory.
-# Some test cases need to access assets as the test cases are actually mostly about testing the validity of assets.
+# Some test cases need to access assets as these test cases are about testing the validity of assets.
 # A POST_BUILD command only runs when the target itself relinks, which would leave the copy
 # stale whenever an asset changes on its own. A custom target is always out of date, so the
 # assets under test are refreshed on every build, not just on relink.
