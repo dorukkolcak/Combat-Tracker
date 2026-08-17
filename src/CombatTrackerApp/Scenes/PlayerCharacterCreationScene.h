@@ -1,10 +1,8 @@
 #pragma once
 
 #include "CombatTrackerApp/Scenes/EntityCreationScene.h"
-#include "CombatTrackerApp/Entities/PlayerCharacter/PlayerCharacter.h"
+#include "CombatTrackerApp/Entities/PlayerCharacter.h"
 
-#include <array>
-#include <cstddef>
 #include <string_view>
 
 namespace CombatTrackerApp {
@@ -21,6 +19,7 @@ namespace CombatTrackerApp {
 		void renderEntitySpecificInfo() override;
 		void renderEntitySpecificSection() override;
 		bool completeEntityCreation() override;
+		void resolveDerivedValues() override;
 		void resetParametersAndOverrides() override;
 
 	private:
@@ -30,8 +29,6 @@ namespace CombatTrackerApp {
 
 		CombatTrackerLib::ListBoxParameters m_speciesParameters{};
 		CombatTrackerLib::ListBoxParameters m_originParameters{};
-
-		std::array<bool, static_cast<std::size_t>(PlayerSubclass::COUNT)> m_chosenSubclasses{};
 
 		void renderPlayerClassAndSubclasses();
 		void renderPlayerCharacterSpecificInfo();

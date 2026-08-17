@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CombatTrackerLib/Utilities/UIUtils.h"
+#include "CombatTrackerLib/ImGuiScopes.h"
 #include "CombatTrackerLib/Scene.h"
 
 #include <span>
@@ -113,7 +114,7 @@ namespace CombatTrackerApp {
 		std::string& searchQuery,
 		int& selectionIndex
 	) {
-		ImGui::PushID(labels.stableID.data());
+		CombatTrackerLib::ScopedID scopedID{ labels.stableID };
 		renderBrowserFilters(source, searchQuery, labels.stableID.data());
 
 		/*
@@ -127,12 +128,12 @@ namespace CombatTrackerApp {
 		const auto listingHeight{ bodyHeight * 0.55f }; // Consider playing around with the multiplier.
 
 		const auto columnCount{ columnLabels.size() };
-		if (ImGui::BeginTable(
+		if (CombatTrackerLib::ScopedTable listing{ 
 			"Listing",
 			static_cast<int>(columnCount) + 2,
 			BROWSER_TABLE_FLAGS,
-			ImVec2{ 0.0f, listingHeight }
-		)) {
+			ImVec2{ 0.0f, listingHeight } 
+		}) {
 
 			// Column setup.
 			ImGui::TableSetupColumn(
@@ -154,7 +155,6 @@ namespace CombatTrackerApp {
 			);
 			ImGui::TableSetupScrollFreeze(0, 1);
 			ImGui::TableHeadersRow();
-			ImGui::EndTable();
 		}
 
 		if (CombatTrackerLib::alignedButton(labels.create.data(), 0.5f)) {
@@ -165,14 +165,16 @@ namespace CombatTrackerApp {
 		The negative height keeps the action row below the panel visible at any window size.
 		The calculation is done by subtracting the absolute value of the negative height from the available height.
 		So these buttons span the remaining height, which is exactly what we want since they are the last UI elements to be rendered.
+		Also notice the introduction of a scope in this section.
 		*/
-		ImGui::BeginChild("Details", ImVec2{ 0.0f, -functionalityButtonsHeight });
-		if (selectionIndex < 0) {
-			ImGui::TextWrapped("%s", labels.emptyDetails.data());
+		{
+			CombatTrackerLib::ScopedChild details{ "Details", ImVec2{ 0.0f, -functionalityButtonsHeight } };
+			if (selectionIndex < 0) {
+				ImGui::TextWrapped("%s", labels.emptyDetails.data());
+			}
 		}
-		ImGui::EndChild();
 
-		ImGui::BeginDisabled(selectionIndex < 0);
+		CombatTrackerLib::ScopedDisabled disabledWithoutSelection{ selectionIndex < 0 };
 		if (ImGui::Button(m_localeProviderPointer->getText("/scenes/encounterCreation/browser/addToEncounter").data())) {
 
 		}
@@ -184,7 +186,5 @@ namespace CombatTrackerApp {
 		if (ImGui::Button(labels.remove.data())) {
 
 		}
-		ImGui::EndDisabled();
-		ImGui::PopID();
 	}
 }

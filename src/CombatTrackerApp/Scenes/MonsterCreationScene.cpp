@@ -1,17 +1,14 @@
 #include "CombatTrackerApp/Scenes/MonsterCreationScene.h"
-#include "CombatTrackerApp/Entities/Creature/CreatureConstants.h"
-#include "CombatTrackerApp/Entities/Monster/MonsterConstants.h"
 #include "CombatTrackerLib/Utilities/UIUtils.h"
 #include "CombatTrackerApp/Entities/EntityStorage.h"
 
-#include <climits>
+#include <optional>
 
 namespace CombatTrackerApp {
 	MonsterCreationScene::MonsterCreationScene(CombatTrackerLib::App* app) :
 		EntityCreationScene{ app },
-		m_currentMonsterCR{},
-		m_currentMonsterXP{},
-		m_monsterCRParameters{ CHALLENGE_RATINGS.size(), CHALLENGE_RATINGS.size(), false }
+		m_currentMonsterStatBlock{},
+		m_monsterCRParameters{}
 	{
 	}
 
@@ -22,9 +19,12 @@ namespace CombatTrackerApp {
 			m_localeProviderPointer->getText("/scenes/monsterCreation/cancelButton")
 		};
 	}
+	void MonsterCreationScene::resolveDerivedValues() {
+		Monster::resolveDerived(m_currentCreatureStatBlock, m_currentMonsterStatBlock);
+	}
 	void MonsterCreationScene::renderEntitySpecificInfo() {
 		ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/monsterCreation/specificData").data());
-		if (ImGui::BeginTable("MonsterSpecificGrid", 1, ImGuiTableFlags_SizingStretchSame)) {
+		if (CombatTrackerLib::ScopedTable monsterSpecificGrid{ "MonsterSpecificGrid", 1, ImGuiTableFlags_SizingStretchSame }) {
 
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
@@ -33,66 +33,33 @@ namespace CombatTrackerApp {
 			// The label is hidden by passing a ## prefix to the label name, which is something that is done extensively over the entire codebase.
 			ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/monsterCreation/challengeRating").data());
 			ImGui::SetNextItemWidth(-1.0f);
-			renderCRListBox();
 
-			const auto& challengeRating{ findChallengeRating(m_currentMonsterCR) };
-
-			ImGui::Spacing();
-			ImGui::PushID("XP");
-			CombatTrackerLib::renderOverridableInputInt(
-				m_currentMonsterXP.value,
-				m_currentMonsterXP.isOverridden,
-				challengeRating.XP,
-				m_localeProviderPointer->getText("/scenes/monsterCreation/experiencePoints"),
-				m_localeProviderPointer->getText("/scenes/monsterCreation/resetExperiencePoints"),
-				0,
-				INT_MAX
-			);
-			ImGui::PopID();
-
-			ImGui::Spacing();
-			ImGui::PushID("PB");
-			CombatTrackerLib::renderOverridableInputInt(
-				m_currentCreatureStatBlock.proficiencyBonus.value,
-				m_currentCreatureStatBlock.proficiencyBonus.isOverridden,
-				challengeRating.proficiencyBonus,
-				m_localeProviderPointer->getText("/scenes/monsterCreation/proficiencyBonus"),
-				m_localeProviderPointer->getText("/scenes/monsterCreation/resetProficiencyBonus"),
-				PB_LOWER_BOUND,
-				INT_MAX
-			);
-			ImGui::PopID();
-
-			ImGui::EndTable();
-		}
-	}
-
-	// The CR table carries its own keys, so the row is read straight out of it instead of being derived from the row position.
-	void MonsterCreationScene::renderCRListBox() {
-		std::size_t counter{};
-		const float height{ ImGui::GetTextLineHeightWithSpacing() * 8.0f };
-		if (ImGui::BeginListBox("##CR", ImVec2{ 0, height })) {
-			for (const auto& challengeRating: CHALLENGE_RATINGS) {
-				const bool isSelected{ counter == m_monsterCRParameters.chosenIndex };
-
-				if (ImGui::Selectable(challengeRating.label.data(), isSelected)) {
-					m_monsterCRParameters.chosenIndex = counter;
-					m_currentMonsterCR = challengeRating.value;
-				}
-				if (m_monsterCRParameters.isHighlighted && ImGui::IsItemHovered()) {
-					m_monsterCRParameters.highlightedIndex = counter;
-				}
-				++counter;
+			const auto challengeRatingNames{ m_localeProviderPointer->getTextList("/domain/challengeRating") };
+			const auto clickedRating{ CombatTrackerLib::renderListBox(m_monsterCRParameters, "##CR", challengeRatingNames) };
+			if (clickedRating != std::nullopt) {
+				m_currentMonsterStatBlock.CR = CHALLENGE_RATINGS[*clickedRating].value;
 			}
-			ImGui::EndListBox();
+
+			ImGui::Spacing();
+			ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/monsterCreation/experiencePoints").data());
+			if (m_monsterCRParameters.isHighlighted) {
+				ImGui::TextDisabled("%d", CHALLENGE_RATINGS[m_monsterCRParameters.highlightedIndex].XP);
+			}
+			else {
+				ImGui::Text("%d", m_currentMonsterStatBlock.derived.getXP());
+			}
+
+			ImGui::Spacing();
+			ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/monsterCreation/proficiencyBonus").data());
+			ImGui::Text("%d", m_currentCreatureStatBlock.derived.getProficiencyBonus());
+
 		}
 	}
-
-	// Monsters have nothing to add below the senses, unlike player characters.
-	void MonsterCreationScene::renderEntitySpecificSection() {}
 
 	bool MonsterCreationScene::completeEntityCreation() {
-		bool isSavingSuccessful{ saveEntity<Monster>(m_currentCreatureStatBlock, m_currentMonsterCR, m_currentMonsterXP, std::nullopt) };
+		bool isSavingSuccessful{
+			saveEntity<Monster>(m_currentCreatureStatBlock, std::cref(m_currentMonsterStatBlock), std::nullopt)
+		};
 		if (isSavingSuccessful) {
 			resetParametersAndOverrides();
 			return true;
@@ -101,8 +68,7 @@ namespace CombatTrackerApp {
 	}
 	void MonsterCreationScene::resetParametersAndOverrides() {
 		EntityCreationScene::resetParametersAndOverrides();
-		m_currentMonsterCR = 0.0;
-		m_currentMonsterXP = OverridableInt{};
-		m_monsterCRParameters = { CHALLENGE_RATINGS.size(), CHALLENGE_RATINGS.size(), false};
+		m_currentMonsterStatBlock = MonsterStatBlock{};
+		m_monsterCRParameters = CombatTrackerLib::ListBoxParameters{};
 	}
 }

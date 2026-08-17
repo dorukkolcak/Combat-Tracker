@@ -1,9 +1,9 @@
 #pragma once
 
 #include "CombatTrackerLib/Utilities/UIUtils.h"
+#include "CombatTrackerLib/ImGuiScopes.h"
 #include "CombatTrackerLib/Scene.h"
-#include "CombatTrackerApp/Entities/Creature/CreatureEnums.h"
-#include "CombatTrackerApp/Entities/Creature/Creature.h"
+#include "CombatTrackerApp/Entities/Creature.h"
 
 #include <vector>
 #include <algorithm>
@@ -33,6 +33,13 @@ namespace CombatTrackerApp {
 			std::string_view windowTitle{};
 			std::string_view completeButton{};
 			std::string_view cancelButton{};
+		};
+
+		struct ModifierTableLabels {
+			std::string_view header{};
+			std::string_view itemColumn{};
+			std::string_view valueColumn{};
+			std::string_view resetColumn{};
 		};
 
 		struct AddableLabels {
@@ -67,36 +74,79 @@ namespace CombatTrackerApp {
 		// Right hand column of the top split (of the popup). Monster specific data for monsters, classes and subclasses for player characters.
 		virtual void renderEntitySpecificInfo() = 0;
 
-		// A specific section below the senses. Only player characters currently fill it.
-		// Monster provides an empty override in this case.
-		virtual void renderEntitySpecificSection() = 0;
+		// A specific section below the senses. Only player characters currently fill it so it defaults to rendering nothing 
+		virtual void renderEntitySpecificSection() {}
 
-		virtual bool completeEntityCreation() = 0; 
+		virtual bool completeEntityCreation() = 0;
 
-		/*
-		The block is edited in place by this base scene and by the derived ones alike.
-		The derived scene moves it into the entity it builds once creation is completed,
-		which is why resetParametersAndOverrides() puts a fresh block back in its place.
-		*/
+		// Resolving needs the entity specific block alongside the creature one, which only the derived
+		// scene owns, so the base scene provides a virtual function for this purpose.
+		virtual void resolveDerivedValues() = 0;
+
+		// The block is edited in place by this base scene and by the derived ones alike.
 		CreatureStatBlock m_currentCreatureStatBlock{};
 
 		CombatTrackerLib::ListBoxParameters m_sizeListBoxParameters{};
 		CombatTrackerLib::ListBoxParameters m_creatureTypeParameters{};
 		CombatTrackerLib::ListBoxParameters m_alignmentParameters{};
 
-		// Proficiency and expertise items get changed in this function so pass them as non-const lvalue reference.
-		template <typename M>
+		// Provide a span of proficiency levels as our array size can differ (skills vs saving throws).
 		static void renderProficiencyAndExpertiseCluster(
 			std::string_view proficiencyLabel,
 			std::string_view expertiseLabel,
-			M& proficiencyItems,
-			M& expertiseItems,
+			std::span<ProficiencyLevel> proficiencyLevels,
 			std::span<const std::string_view> itemNames
+		);
+
+		// A plain checkbox grid over proficiency levels, for the items that only ever toggle between
+		// having a proficiency and not having one. 
+		static void renderProficiencyLevelGrid(
+			std::span<ProficiencyLevel> proficiencyLevels,
+			std::span<const std::string_view> itemNames,
+			std::string_view stableID,
+			std::string_view label,
+			int columnCount
+		);
+
+		/*
+		Renders a list of items where each one is a button opening an edit popup, plus an add popup.
+		The extended form takes the three things an item type can differ in:
+		what extra widgets the add popup shows, how a finished item is built, and what the tooltip says.
+		The simple form covers anything that is just a name and a description.
+		*/
+		template <typename I, typename AddFieldsFn, typename MakeItemFn, typename TooltipFn>
+		static void renderAddables(
+			std::vector<I>& currentItems,
+			const AddableLabels& labels,
+			AddFieldsFn&& renderAddFields,
+			MakeItemFn&& makeItem,
+			TooltipFn&& renderTooltip
 		);
 		template <typename I>
 		static void renderAddables(std::vector<I>& currentItems, const AddableLabels& labels);
 
+		/*
+		Saving throws and skills present the same table, a name beside an overridable value beside a
+		reset button, so both go through here and differ only in what they hand over.
+		The column widths are passed in as the two tables sit in differently proportioned columns.
+		*/
+		static void renderModifierTable(
+			std::string_view stableID,
+			const ModifierTableLabels& labels,
+			std::span<CombatTrackerLib::OverridableInt> modifiers,
+			std::span<const std::string_view> itemNames,
+			std::span<const std::string_view> resetLabels,
+			std::span<const float, 3> columnWidths
+		);
+
+		// The general info is four unrelated tables stacked together, so each one gets its own function
+		// and renderGeneralCreatureInfo() is left as the layout that arranges them.
 		void renderGeneralCreatureInfo();
+		void renderNameRow();
+		void renderCreatureListBoxes();
+		void renderDerivedOverridables();
+		void renderArmorClassAndHitPoints();
+
 		void renderSpeedInfo();
 		void renderAbilityScoresAndModifiers();
 		void renderSavingThrowModifiers();
@@ -110,59 +160,15 @@ namespace CombatTrackerApp {
 		virtual void resetParametersAndOverrides();
 	};
 
-	/*
-	Used for rendering skill and saving throw proficiencies and expertises for both monsters and player characters.
-	The two clusters have a simple deduping logic between them.
-	We can't have proficiency and expertise of the same "thing" at the same time.
-	*/
-	template <typename M>
-	void EntityCreationScene::renderProficiencyAndExpertiseCluster(
-		std::string_view proficiencyLabel,
-		std::string_view expertiseLabel,
-		M& proficiencyItems,
-		M& expertiseItems,
-		std::span<const std::string_view> itemNames
+	// Chunky helper used for rendering traits, gear and actions alike.
+	template <typename I, typename AddFieldsFn, typename MakeItemFn, typename TooltipFn>
+	void EntityCreationScene::renderAddables(
+		std::vector<I>& currentItems,
+		const AddableLabels& labels,
+		AddFieldsFn&& renderAddFields,
+		MakeItemFn&& makeItem,
+		TooltipFn&& renderTooltip
 	) {
-		if (ImGui::BeginTable("ProfExpTable", 2, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_BordersInnerV)) {
-
-			ImGui::TableSetupColumn("Left");
-			ImGui::TableSetupColumn("Right");
-			ImGui::TableNextRow();
-
-			// Proficiency checkboxes.
-			// The names and both flag arrays are the same length, so a single index walks all three plain arrays.
-			// This is also why the helper works for abilities and skills alike, as nothing here is tied to one enum.
-			ImGui::TableSetColumnIndex(0);
-			ImGui::TextWrapped("%s", proficiencyLabel.data());
-			ImGui::PushID("Proficiency");
-			for (size_t i{}; i < itemNames.size(); ++i) {
-				if (ImGui::Checkbox(itemNames[i].data(), &proficiencyItems[i])) {
-					if (proficiencyItems[i] && expertiseItems[i]) {
-						expertiseItems[i] = false;
-					}
-				}
-			}
-			ImGui::PopID();
-
-			// Expertise checkboxes.
-			ImGui::TableSetColumnIndex(1);
-			ImGui::TextWrapped("%s", expertiseLabel.data());
-			ImGui::PushID("Expertise");
-			for (size_t i{}; i < itemNames.size(); ++i) {
-				if (ImGui::Checkbox(itemNames[i].data(), &expertiseItems[i])) {
-					if (expertiseItems[i] && proficiencyItems[i]) {
-						proficiencyItems[i] = false;
-					}
-				}
-			}
-			ImGui::PopID();
-			ImGui::EndTable();
-		}
-	}
-
-	// Chunky helper used for rendering traits and gear items.
-	template <typename I>
-	void EntityCreationScene::renderAddables(std::vector<I>& currentItems, const AddableLabels& labels) {
 		ImGui::TextWrapped("%s", labels.header.data());
 
 		// It is fine for this to be actually static as we clear it on each render pass anyways.
@@ -171,7 +177,7 @@ namespace CombatTrackerApp {
 		for (size_t i{}; i < currentItems.size(); ++i) {
 
 			// Push a separate id to the ID stack for each item.
-			ImGui::PushID(static_cast<int>(i));
+			CombatTrackerLib::ScopedID scopedID{ static_cast<int>(i) };
 
 			/*
 			We should check separate IO events explicitly instead of generically checking for any IO events for these buttons.
@@ -180,7 +186,7 @@ namespace CombatTrackerApp {
 			*/
 			ImGui::Button(currentItems[i].name.c_str(), ImVec2{ -1.0f, 0.0f });
 			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
-				ImGui::SetTooltip("%s", currentItems[i].description.c_str());
+				renderTooltip(currentItems[i]);
 			}
 			if (ImGui::IsItemClicked()) {
 				ImGui::OpenPopup(labels.edit.data());
@@ -188,19 +194,17 @@ namespace CombatTrackerApp {
 
 			// Setup configs of the edit popup of items.
 			// The popup can neither be moved nor resized by hand, so it simply keeps following the viewport.
-			const auto center{ ImGui::GetMainViewport()->GetCenter() };
-			ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{ 0.5f, 0.5f });
-			const auto vp{ ImGui::GetMainViewport()->Size };
-			ImGui::SetNextWindowSize(ImVec2{ vp.x * 0.70f, vp.y * 0.70f }, ImGuiCond_Always);
+			CombatTrackerLib::centerNextWindow(0.70f, 0.70f);
 
 			// Popup modal for editing/deleting items.
-			if (ImGui::BeginPopupModal(labels.edit.data(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
+			if (CombatTrackerLib::ScopedPopupModal popupModal{ labels.edit, nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize }) {
 
 				// The layouting is quite similar to the big entity creation popup modal.
-				ImGui::BeginChild("EditAddableScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(2) }, true);
-				ImGui::InputText(labels.name.data(), &currentItems[i].name);
-				ImGui::InputText(labels.description.data(), &currentItems[i].description);
-				ImGui::EndChild();
+				{
+					CombatTrackerLib::ScopedChild editAddableScroll{ "EditAddableScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(2) }, true };
+					ImGui::InputText(labels.name.data(), &currentItems[i].name);
+					ImGui::InputText(labels.description.data(), &currentItems[i].description);
+				}
 
 				ImGui::Separator();
 				if (CombatTrackerLib::alignedButton(labels.finishEditing.data(), 0.5f)) {
@@ -210,9 +214,7 @@ namespace CombatTrackerApp {
 					s_markedForDeletion.push_back(i);
 					ImGui::CloseCurrentPopup();
 				}
-				ImGui::EndPopup();
 			}
-			ImGui::PopID();
 		}
 
 		// Delete marked items safely, starting from the largest index to the smallest index.
@@ -229,31 +231,50 @@ namespace CombatTrackerApp {
 		}
 
 		// Setup configs of the add item popup.
-		const auto center{ ImGui::GetMainViewport()->GetCenter() };
-		ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{ 0.5f, 0.5f });
-		const auto vp{ ImGui::GetMainViewport()->Size };
-		ImGui::SetNextWindowSize(ImVec2{ vp.x * 0.70f, vp.y * 0.70f }, ImGuiCond_Always);
-		if (ImGui::BeginPopupModal(labels.add.data(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
-			ImGui::BeginChild("AddAddableScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(1) }, true);
+		CombatTrackerLib::centerNextWindow(0.70f, 0.70f);
+		if (CombatTrackerLib::ScopedPopupModal popupModal{ labels.add, NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize }) {
 
-			// Again it is fine for these to be static, we only use them here and reset them after adding the item.
+			/*
+			These are static so they survive between frames while the popup is open.
+			They are cleared as the popup appears rather than only on a successful add, as traits and
+			equipment share this instantiation and would otherwise hand each other their leftover text.
+			The check sits out here rather than inside the scrolling child, so it asks whether the popup
+			appeared rather than whether the child did.
+			*/
 			static std::string s_name{};
 			static std::string s_description{};
-			ImGui::InputText(labels.name.data(), &s_name);
-			ImGui::InputText(labels.description.data(), &s_description);
-			ImGui::EndChild();
+			if (ImGui::IsWindowAppearing()) {
+				s_name.clear();
+				s_description.clear();
+			}
+			{
+				CombatTrackerLib::ScopedChild addAddableScroll{ "AddAddableScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(1) }, true };
+				renderAddFields();
+				ImGui::InputText(labels.name.data(), &s_name);
+				ImGui::InputText(labels.description.data(), &s_description);
+			}
 
 			// Button and cleanup section.
 			ImGui::Separator();
 			if (CombatTrackerLib::alignedButton(labels.finishCreation.data(), 0.5f) &&
 				!s_name.empty() && !s_description.empty()) {
-				I item(s_name, s_description);
-				currentItems.push_back(item);
+				currentItems.push_back(makeItem(s_name, s_description));
 				s_name.clear();
 				s_description.clear();
 				ImGui::CloseCurrentPopup();
 			}
-			ImGui::EndPopup();
 		}
+	}
+
+	// Anything that is just a name and a description needs none of the hooks.
+	template <typename I>
+	void EntityCreationScene::renderAddables(std::vector<I>& currentItems, const AddableLabels& labels) {
+		renderAddables(
+			currentItems,
+			labels,
+			[] {},
+			[](const std::string& name, const std::string& description) { return I{ name, description }; },
+			[](const I& item) { ImGui::SetTooltip("%s", item.description.c_str()); }
+		);
 	}
 }

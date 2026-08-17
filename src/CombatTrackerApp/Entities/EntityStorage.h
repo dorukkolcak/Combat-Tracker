@@ -1,9 +1,8 @@
 #pragma once
 
-#include "CombatTrackerApp/Entities/Creature/Creature.h"
-#include "CombatTrackerApp/Entities/Creature/CreatureTypes.h"
-#include "CombatTrackerApp/Entities/Monster/Monster.h"
-#include "CombatTrackerApp/Entities/PlayerCharacter/PlayerCharacter.h"
+#include "CombatTrackerApp/Entities/Creature.h"
+#include "CombatTrackerApp/Entities/Monster.h"
+#include "CombatTrackerApp/Entities/PlayerCharacter.h"
 #include "CombatTrackerLib/Utilities/FileUtils.h"
 
 #include <concepts>
@@ -15,58 +14,76 @@
 #include <format>
 #include <nlohmann/json.hpp>
 
+
+namespace CombatTrackerLib {
+
+	template <int LOWER_BOUND, int UPPER_BOUND>
+	inline void to_json(nlohmann::json& contents, const BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt) {
+		contents = boundedInt.get();
+	}
+	template <int LOWER_BOUND, int UPPER_BOUND>
+	inline void from_json(const nlohmann::json& contents, BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt) {
+		boundedInt = contents.get<int>();
+	}
+	inline void to_json(nlohmann::json& contents, const OverridableInt& overridableInt) {
+		if (overridableInt.isOverridden()) {
+			contents = overridableInt.get();
+			return;
+		}
+		contents = nullptr;
+	}
+	inline void from_json(const nlohmann::json& contents, OverridableInt& overridableInt) {
+		if (contents.is_null()) {
+			overridableInt.clearOverride();
+			return;
+		}
+		overridableInt.setOverride(contents.get<int>());
+	}
+}
+
 // The utilities here are application specific and use the library-provided JSON reading/writing functionality.
 namespace CombatTrackerApp {
-	
+
 	// Use Nlohmann's macros to serialize structs/types/classes to json easily.
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(OverridableInt, value, isOverridden)
 	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CreatureAction, name, description, type)
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Trait, name, description)
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Gear, name, description)
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(NamedDescription, name, description)
 	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CreatureStatBlock,
-		savingThrowProficiencies, 
-		savingThrowExpertise, 
-		skillProficiencies, 
-		skillExpertise,
-		abilityScores, 
-		abilityScoreModifiers,
-		savingThrowModifiers, 
+		savingThrowProficiencyLevels,
+		skillProficiencyLevels,
+		abilityScores,
+		savingThrowModifiers,
 		skillModifiers,
-		damageVulnerabilities, 
-		damageResistances, 
-		damageImmunities, 
+		damageReactions,
 		conditionImmunities,
-		senses, 
+		senses,
+		speeds,
 		languages,
-		actions, 
-		traits, 
+		actions,
+		traits,
 		equipment,
-		name, 
-		size, 
-		type, 
+		name,
+		size,
+		type,
 		alignment,
-		initiativeBonus, 
-		proficiencyBonus, 
+		initiativeBonus,
 		passivePerception,
-		AC, 
-		HP, 
-		walkSpeed, 
-		climbingSpeed, 
-		swimmingSpeed, 
-		burrowSpeed, 
-		flySpeed
+		AC,
+		HP
 	)
 
 	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PlayerStatBlock,
-		levels, 
-		subclasses, 
-		weaponProficiencies, 
+		levels,
+		subclasses,
+		weaponProficiencies,
 		armorProficiencies,
-		toolProficiencies, 
-		weaponMasteries, 
-		species, 
+		toolProficiencyLevels,
+		weaponMasteries,
+		species,
 		origin
 	)
+
+	// The challenge rating is the only authored half of a monster, as the XP hangs off it.
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(MonsterStatBlock, CR)
 	inline constexpr std::string_view MONSTER_DIRECTORY{ "data/Monsters" };
 	inline constexpr std::string_view PLAYER_DIRECTORY{ "data/PlayerCharacters" };
 
@@ -92,26 +109,34 @@ namespace CombatTrackerApp {
 	template <typename T> requires std::derived_from<T, Creature>
 	inline bool saveEntity(
 		const CreatureStatBlock& creatureBlock,
-		std::optional<double> CR,
-		std::optional<OverridableInt> XP,
-		std::optional<std::reference_wrapper<PlayerStatBlock>> playerBlock
+		std::optional<std::reference_wrapper<const MonsterStatBlock>> monsterBlock,
+		std::optional<std::reference_wrapper<const PlayerStatBlock>> playerBlock
 	) {
 		if (!isValidEntityName(creatureBlock.name)) {
 			return false;
 		}
 
+		/*
+		A stat block being edited is a draft and is free to be half finished, so this is the one place
+		the rules are actually enforced. Nothing invalid reaches disk, and nothing has to police every
+		individual write a creation scene makes.
+		*/
 		nlohmann::json contents{};
-		contents["creatureBlock"] = creatureBlock;
 		if constexpr (std::same_as<T, Monster>) {
-			contents["CR"] = CR.value_or(0.0);
-			contents["XP"] = XP.value_or(OverridableInt{});
-		}
-		else {
-			if (!playerBlock.has_value()) {
+			if (!monsterBlock.has_value() || !Monster::isValid(creatureBlock, monsterBlock->get())) {
 				return false;
 			}
-			contents["playerBlock"] = playerBlock.value();
+
+			// The XP is not written, as the challenge rating recovers it through the table on load.
+			contents["monsterBlock"] = monsterBlock->get();
 		}
+		else {
+			if (!playerBlock.has_value() || !PlayerCharacter::isValid(creatureBlock, playerBlock->get())) {
+				return false;
+			}
+			contents["playerBlock"] = playerBlock->get();
+		}
+		contents["creatureBlock"] = creatureBlock;
 		return CombatTrackerLib::writeJSONFile(findCreatureFilePath<T>(creatureBlock.name), contents);
 	}
 	template <typename T> requires std::derived_from<T, Creature>
@@ -129,8 +154,7 @@ namespace CombatTrackerApp {
 	template <typename T> requires std::derived_from<T, Creature>
 	inline CreatureStatBlock loadEntity(
 		std::string_view entityName,
-		std::optional<std::reference_wrapper<double>> outCR,
-		std::optional<std::reference_wrapper<OverridableInt>> outXP,
+		std::optional<std::reference_wrapper<MonsterStatBlock>> outMonsterBlock,
 		std::optional<std::reference_wrapper<PlayerStatBlock>> outPlayerBlock
 	) {
 		if (!isValidEntityName(entityName)) {
@@ -143,16 +167,21 @@ namespace CombatTrackerApp {
 			return CreatureStatBlock{};
 		}
 		auto creatureBlock{ contents->at("creatureBlock").get<CreatureStatBlock>() };
+
+		// Nothing derived is on disk, so the block is only whole once the rules have run over it.
+		// Each entity type resolves through its own overload, as the proficiency bonus comes from
+		// the challenge rating for a monster and from the total class level for a player character.
 		if constexpr (std::same_as<T, Monster>) {
 
 			// Access specified JSON value with a default through the use of ->value().
 			// The out parameters hold reference wrappers, so ->get() is needed to reach the referenced object.
 			// Assigning to the optional's own value() would try to rebind the wrapper instead, which does not compile.
-			outCR->get() = contents->value("CR", 0.0);
-			outXP->get() = contents->value("XP", OverridableInt{});
+			outMonsterBlock->get() = contents->value("monsterBlock", MonsterStatBlock{});
+			Monster::resolveDerived(creatureBlock, outMonsterBlock->get());
 		}
 		else {
 			outPlayerBlock->get() = contents->value("playerBlock", PlayerStatBlock{});
+			PlayerCharacter::resolveDerived(creatureBlock, outPlayerBlock->get());
 		}
 		return creatureBlock; // Should internally use NRVO so no need for explicit std::move().
 	}
@@ -160,9 +189,8 @@ namespace CombatTrackerApp {
 	inline bool editEntity(
 		std::string_view entityName,
 		const CreatureStatBlock& creatureBlock,
-		std::optional<double> CR,
-		std::optional<OverridableInt> XP,
-		std::optional<std::reference_wrapper<PlayerStatBlock>> playerBlock
+		std::optional<std::reference_wrapper<const MonsterStatBlock>> monsterBlock,
+		std::optional<std::reference_wrapper<const PlayerStatBlock>> playerBlock
 	) {
 
 		// entityName refers to the old name of the creature and the name inside the creatureBlock refers to the new name.
@@ -179,7 +207,7 @@ namespace CombatTrackerApp {
 
 		// The new file has to be on disk before the old one goes away, otherwise a failed write loses the entity altogether.
 		// So we first attempt to save the new entity and delete the old file if it is needed.
-		if (!saveEntity<T>(creatureBlock, CR, XP, playerBlock)) {
+		if (!saveEntity<T>(creatureBlock, monsterBlock, playerBlock)) {
 			return false;
 		}
 		if (isRenamed) {
