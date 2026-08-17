@@ -15,17 +15,17 @@ namespace CombatTrackerLib {
 		m_sceneOneReference = queueStubScene();
 		m_sceneTwoReference = queueStubScene();
 	}
-	TEST_F(SceneManagerTest, QueueAddSceneDefersUntilDequeue) {
+	TEST_F(SceneManagerTest, TestQueueAddSceneDefer) {
 		EXPECT_TRUE(m_sceneManager.getScenes().empty());
 	}
-	TEST_F(SceneManagerTest, DequeueMovesQueuedScenesOntoStack) {
+	TEST_F(SceneManagerTest, TestDequeueMoveToStack) {
 		m_sceneManager.dequeueSceneOperations();
 		const auto& scenes{ m_sceneManager.getScenes() };
 		ASSERT_EQ(std::size_t{ 2 }, scenes.size());
 		EXPECT_EQ(m_sceneOneReference, scenes[0].get());
 		EXPECT_EQ(m_sceneTwoReference, scenes[1].get());
 	}
-	TEST_F(SceneManagerTest, DequeueAddsNewScenesOnTopOfTheStack) {
+	TEST_F(SceneManagerTest, TestDequeueAddOnTopOfTheStack) {
 		m_sceneManager.dequeueSceneOperations();
 		auto* sceneThreeReference{ queueStubScene() };
 		m_sceneManager.dequeueSceneOperations();
@@ -33,7 +33,7 @@ namespace CombatTrackerLib {
 		ASSERT_EQ(std::size_t{ 3 }, scenes.size());
 		EXPECT_EQ(sceneThreeReference, scenes[2].get());
 	}
-	TEST_F(SceneManagerTest, DequeueRemovesDeletedSceneFromStack) {
+	TEST_F(SceneManagerTest, TestDequeueRemoveFromStack) {
 		m_sceneManager.dequeueSceneOperations();
 		m_sceneManager.queueDeleteScene(m_sceneOneReference);
 		EXPECT_EQ(std::size_t{ 2 }, m_sceneManager.getScenes().size());
@@ -42,14 +42,14 @@ namespace CombatTrackerLib {
 		ASSERT_EQ(std::size_t{ 1 }, scenes.size());
 		EXPECT_EQ(m_sceneTwoReference, scenes[0].get());
 	}
-	TEST_F(SceneManagerTest, DequeueIgnoresDeletionOfSceneOutsideStack) {
+	TEST_F(SceneManagerTest, TestDequeueIgnoreDeletionOutsideStack) {
 		m_sceneManager.dequeueSceneOperations();
 		const auto foreignScene{ std::make_unique<StubScene>() };
 		m_sceneManager.queueDeleteScene(foreignScene.get());
 		m_sceneManager.dequeueSceneOperations();
 		EXPECT_EQ(std::size_t{ 2 }, m_sceneManager.getScenes().size());
 	}
-	TEST_F(SceneManagerTest, DequeueReplacesTransitionedSceneInPlace) {
+	TEST_F(SceneManagerTest, TestDequeueReplaceTransitionedSceneInPlace) {
 		m_sceneManager.dequeueSceneOperations();
 		auto transitionScene{ std::make_unique<StubScene>() };
 		auto* transitionSceneReference{ transitionScene.get() };
