@@ -156,27 +156,10 @@
         "hitPoints": "HP"
       },
 
-      "speeds": {
-        "walk": "Walk",
-        "climb": "Climb",
-        "swim": "Swim",
-        "burrow": "Burrow",
-        "fly": "Fly"
-      },
-
       "abilityTable": {
         "abilityColumn": "Ability",
         "scoreColumn": "Score",
-        "modifierColumn": "Modifier",
-        "overrideColumn": "Override",
-        "resetModifiers": [
-          "Reset Strength Modifier",
-          "Reset Dexterity Modifier",
-          "Reset Constitution Modifier",
-          "Reset Wisdom Modifier",
-          "Reset Intelligence Modifier",
-          "Reset Charisma Modifier"
-        ]
+        "modifierColumn": "Modifier"
       },
 
       "savingThrows": {
@@ -184,6 +167,9 @@
         "proficiencies": "Saving Throw Proficiencies",
         "expertises": "Saving Throw Expertises",
         "modifiers": "Saving Throw Modifiers",
+        "abilityColumn": "Ability",
+        "valueColumn": "Value",
+        "resetColumn": "Reset",
         "resetModifiers": [
           "Reset Strength Saving Throw Modifier",
           "Reset Dexterity Saving Throw Modifier",
@@ -236,7 +222,7 @@
       "actions": {
         "header": "Actions",
         "add": "Add Action###ActionAdd",
-        "edit": "Edit Action",
+        "edit": "Edit Action###actionEdit",
         "type": "Action Type",
         "name": "Action Name",
         "description": "Action Description",
@@ -275,9 +261,7 @@
       "specificData": "Monster Specific Data",
       "challengeRating": "CR",
       "experiencePoints": "XP",
-      "resetExperiencePoints": "Reset XP",
-      "proficiencyBonus": "PB",
-      "resetProficiencyBonus": "Reset PB"
+      "proficiencyBonus": "PB"
     },
 
     "playerCharacterCreation": {
@@ -431,6 +415,13 @@
       "Darkvision",
       "Tremorsense",
       "Truesight"
+    ],
+    "movementType": [
+      "Walk",
+      "Climb",
+      "Swim",
+      "Burrow",
+      "Fly"
     ],
     "actionType": [
       "Action",
