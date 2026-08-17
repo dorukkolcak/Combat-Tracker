@@ -3,6 +3,7 @@
 #include "CombatTrackerLib/Scene.h"
 #include "CombatTrackerLib/Texture2D.h"
 #include "CombatTrackerLib/Utilities/UIUtils.h"
+#include "CombatTrackerLib/ImGuiScopes.h"
 #include "CombatTrackerLib/LocaleProvider.h"
 
 #include <string_view>

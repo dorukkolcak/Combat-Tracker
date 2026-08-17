@@ -22,13 +22,13 @@ namespace CombatTrackerLib {
 		}
 		ASSERT_GE(m_locales.size(), MIN_NUMBER_OF_LOCALES) << "At least two locale files needed to compare." << std::endl;
 	}
-	TEST_F(LocaleProviderTest, LocaleFilesLoadTextAndListEntries) {
+	TEST_F(LocaleProviderTest, TestLocaleFilesLoad) {
 		for (const auto& locale : m_locales) {
 			const auto areEntriesAvailable{ !getTextViewMap(*locale.provider).empty() && !getListViewMap(*locale.provider).empty() };
 			EXPECT_TRUE(areEntriesAvailable) << "No entries were read for locale " << locale.code << std::endl;
 		}
 	}
-	TEST_F(LocaleProviderTest, LocaleFilesShareTheSameTextKeys) {
+	TEST_F(LocaleProviderTest, TestLocaleFilesSharedTextKeys) {
 		const auto& referenceLocale{ m_locales.begin() };
 		const auto& referenceLocaleProvider{ *referenceLocale->provider };
 		const auto& referenceLocaleCode{ referenceLocale->code };
@@ -45,7 +45,7 @@ namespace CombatTrackerLib {
 			}
 		}
 	}
-	TEST_F(LocaleProviderTest, LocaleFilesShareTheSameListKeys) {
+	TEST_F(LocaleProviderTest, TestLocaleFilesSharedListKeys) {
 		const auto& referenceLocale{ m_locales.begin() };
 		const auto& referenceLocaleProvider{ *referenceLocale->provider };
 		const auto& referenceLocaleCode{ referenceLocale->code };
@@ -62,7 +62,7 @@ namespace CombatTrackerLib {
 			}
 		}
 	}
-	TEST_F(LocaleProviderTest, LocaleFilesShareTheSameListLengths) {
+	TEST_F(LocaleProviderTest, TestLocaleFilesSharedListLengths) {
 		const auto& referenceLocale{ m_locales.begin() };
 		const auto& referenceLocaleProvider{ *referenceLocale->provider };
 		const auto& referenceLocaleCode{ referenceLocale->code };
@@ -82,7 +82,7 @@ namespace CombatTrackerLib {
 			}
 		}
 	}
-	TEST_F(LocaleProviderTest, GetTextReturnsTheStoredValueForKnownKeys) {
+	TEST_F(LocaleProviderTest, TestGetTextReturnValueForKnownKeys) {
 		for (const auto& locale : m_locales) {
 			for (const auto& textKeyValuePair : getTextViewMap(*locale.provider)) {
 				EXPECT_EQ(textKeyValuePair.second, locale.provider->getText(textKeyValuePair.first))
@@ -91,13 +91,13 @@ namespace CombatTrackerLib {
 			}
 		}
 	}
-	TEST_F(LocaleProviderTest, GetTextReturnsTheKeyForMissingKeys) {
+	TEST_F(LocaleProviderTest, TestGetTextReturnValueForMissingKeys) {
 		for (const auto& locale : m_locales) {
 			EXPECT_EQ(MISSING_KEY, locale.provider->getText(MISSING_KEY))
 				<< "Locale " << locale.code << " did not hand back the key of a missing text entry." << std::endl;
 		}
 	}
-	TEST_F(LocaleProviderTest, GetTextListReturnsTheStoredEntriesForKnownKeys) {
+	TEST_F(LocaleProviderTest, TestGetTextListReturnValueForKnownKeys) {
 		for (const auto& locale : m_locales) {
 			for (const auto& listKeyValuePair : getListViewMap(*locale.provider)) {
 				EXPECT_TRUE(std::ranges::equal(listKeyValuePair.second, locale.provider->getTextList(listKeyValuePair.first)))
@@ -106,13 +106,13 @@ namespace CombatTrackerLib {
 			}
 		}
 	}
-	TEST_F(LocaleProviderTest, GetTextListReturnsAnEmptySpanForMissingKeys) {
+	TEST_F(LocaleProviderTest, TestGetTextListReturnValueForMissingKeys) {
 		for (const auto& locale : m_locales) {
 			EXPECT_TRUE(locale.provider->getTextList(MISSING_KEY).empty())
 				<< "Locale " << locale.code << " handed back a non empty span for a missing list entry." << std::endl;
 		}
 	}
-	TEST_F(LocaleProviderTest, SetLocaleClearsViewsForAnUnknownLocale) {
+	TEST_F(LocaleProviderTest, TestSetLocaleForUnknownLocale) {
 		auto& localeProvider{ *m_locales.begin()->provider };
 
 		EXPECT_FALSE(localeProvider.setLocale(UNKNOWN_LOCALE_CODE));
@@ -121,13 +121,13 @@ namespace CombatTrackerLib {
 		EXPECT_TRUE(getListViewMap(localeProvider).empty())
 			<< "List views into the previous locale file survived a failed locale switch." << std::endl;
 	}
-	TEST_F(LocaleProviderTest, SetLocaleFailsWithoutAResourceDirectory) {
+	TEST_F(LocaleProviderTest, TestSetLocaleWithoutAResourceDirectory) {
 		LocaleProvider localeProvider{};
 
 		EXPECT_FALSE(localeProvider.setLocale(m_locales.begin()->code))
 			<< "A locale was read without a resource directory to read it from." << std::endl;
 	}
-	TEST_F(LocaleProviderTest, SetLocaleReplacesPreviousLocale) {
+	TEST_F(LocaleProviderTest, TestSetLocaleReplacePreviousLocale) {
 		auto& localeProvider{ *m_locales.begin()->provider };
 		const auto& replacementLocale{ *(m_locales.begin() + 1) };
 

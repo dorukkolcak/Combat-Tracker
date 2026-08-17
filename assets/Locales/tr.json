@@ -156,27 +156,10 @@
         "hitPoints": "HP"
       },
 
-      "speeds": {
-        "walk": "Yürüme",
-        "climb": "Tırmanma",
-        "swim": "Yüzme",
-        "burrow": "Kazma",
-        "fly": "Uçma"
-      },
-
       "abilityTable": {
         "abilityColumn": "Yetenek",
         "scoreColumn": "Puan",
-        "modifierColumn": "Düzeltici",
-        "overrideColumn": "Geçersiz Kıl",
-        "resetModifiers": [
-          "Kuvvet Düzelticisini Sıfırla",
-          "Çeviklik Düzelticisini Sıfırla",
-          "Dayanıklılık Düzelticisini Sıfırla",
-          "Bilgelik Düzelticisini Sıfırla",
-          "Zekâ Düzelticisini Sıfırla",
-          "Karizma Düzelticisini Sıfırla"
-        ]
+        "modifierColumn": "Düzeltici"
       },
 
       "savingThrows": {
@@ -184,6 +167,9 @@
         "proficiencies": "Kurtarma Atışı Yeterlilikleri",
         "expertises": "Kurtarma Atışı Uzmanlıkları",
         "modifiers": "Kurtarma Atışı Düzelticileri",
+        "abilityColumn": "Yetenek",
+        "valueColumn": "Değer",
+        "resetColumn": "Sıfırla",
         "resetModifiers": [
           "Kuvvet Kurtarma Atışı Düzelticisini Sıfırla",
           "Çeviklik Kurtarma Atışı Düzelticisini Sıfırla",
@@ -236,7 +222,7 @@
       "actions": {
         "header": "Eylemler",
         "add": "Eylem Ekle###ActionAdd",
-        "edit": "Eylem Düzenle",
+        "edit": "Eylem Düzenle###actionEdit",
         "type": "Eylem Türü",
         "name": "Eylem İsmi",
         "description": "Eylem Açıklaması",
@@ -275,9 +261,7 @@
       "specificData": "Canavara Özel Veriler",
       "challengeRating": "CR",
       "experiencePoints": "XP",
-      "resetExperiencePoints": "XP Sıfırla",
-      "proficiencyBonus": "PB",
-      "resetProficiencyBonus": "PB Sıfırla"
+      "proficiencyBonus": "PB"
     },
 
     "playerCharacterCreation": {
@@ -431,6 +415,49 @@
       "Karanlık Görüş",
       "Titreşim Duyusu",
       "Gerçek Görüş"
+    ],
+    "movementType": [
+      "Yürüme",
+      "Tırmanma",
+      "Yüzme",
+      "Kazma",
+      "Uçma"
+    ],
+    "challengeRating": [
+      "0",
+      "1/8",
+      "1/4",
+      "1/2",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16",
+      "17",
+      "18",
+      "19",
+      "20",
+      "21",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26",
+      "27",
+      "28",
+      "29",
+      "30"
     ],
     "actionType": [
       "Eylem",

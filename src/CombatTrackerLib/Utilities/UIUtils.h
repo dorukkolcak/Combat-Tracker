@@ -2,77 +2,115 @@
 
 #include "CombatTrackerLib/Texture2D.h"
 #include "CombatTrackerLib/Utilities/GenericUtils.h"
+#include "CombatTrackerLib/ImGuiScopes.h"
 
 #include <imgui.h>
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <optional>
 #include <span>
 #include <string_view>
 #include <type_traits>
 
 namespace CombatTrackerLib {
 
+	/*
+	The state a listbox keeps between frames.
+	isHighlighted says whether the cursor is over a row right now, and highlightedIndex says which one,
+	so a caller can preview whatever the cursor is over. It is recomputed every frame, 
+	so it goes back to false as soon as the cursor leaves the listbox.
+	*/
 	struct ListBoxParameters {
 		std::size_t chosenIndex{};
 		std::size_t highlightedIndex{};
 		bool isHighlighted{};
 	};
 
+	// Pins a popup to the middle of the viewport at a fraction of its size, so it neither drifts nor
+	// outgrows the window when the viewport is resized.
+	inline void centerNextWindow(float widthFactor, float heightFactor) {
+		const auto viewport{ ImGui::GetMainViewport() };
+		ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_Always, ImVec2{ 0.5f, 0.5f });
+		ImGui::SetNextWindowSize(
+			ImVec2{ viewport->Size.x * widthFactor, viewport->Size.y * heightFactor },
+			ImGuiCond_Always
+		);
+	}
+
 	// Generic helper for single selectable listbox layouts.
-	template <typename T> requires std::is_enum_v<T> // Use C++20 concepts to guarentee the passed type is an enum type.
-	void renderListBox(
+	// It reports the row clicked this frame, leaving what that means to the caller.
+	inline std::optional<std::size_t> renderListBox(
 		ListBoxParameters& parameters,
-		T& type,
-		const char* listBoxLabel,
+		std::string_view listBoxLabel,
 		std::span<const std::string_view> names // A view over a vector of const std::string_view elements. Basically same idea as string_view.
 	) {
-		assert(names.size() == enumToSizeT(T::COUNT));
+		parameters.isHighlighted = false;
+		std::optional<std::size_t> clickedIndex{};
 		const float height{ ImGui::GetTextLineHeightWithSpacing() * 8.0f };
-		if (ImGui::BeginListBox(listBoxLabel, ImVec2{ 0, height })) {
+
+		if (ScopedListBox listBox{ listBoxLabel, ImVec2{ 0, height } }) {
 			for (std::size_t i{}; i < names.size(); ++i) {
 				const bool isSelected{ i == parameters.chosenIndex };
 				if (ImGui::Selectable(names[i].data(), isSelected)) {
 					parameters.chosenIndex = i;
-					type = static_cast<T>(i);
+					clickedIndex = i;
 				}
-				if (parameters.isHighlighted && ImGui::IsItemHovered()) {
+				if (ImGui::IsItemHovered()) {
+					parameters.isHighlighted = true;
 					parameters.highlightedIndex = i;
 				}
 			}
-			ImGui::EndListBox();
+		}
+		return clickedIndex;
+	}
+
+	// The enumeration case, where a row position is an enumerator and the names are in that same order.
+	template <typename T> requires std::is_enum_v<T> // Use C++20 concepts to guarentee the passed type is an enum type.
+	void renderListBox(
+		ListBoxParameters& parameters,
+		T& type,
+		std::string_view listBoxLabel,
+		std::span<const std::string_view> names
+	) {
+		assert(names.size() == enumToSizeT(T::COUNT));
+		const auto clickedIndex{ renderListBox(parameters, listBoxLabel, names) };
+		if (clickedIndex != std::nullopt) {
+			type = static_cast<T>(*clickedIndex);
 		}
 	}
 
-	// Simple helper for rendering input ints that can be overriden by an user provided value, also providing a lower/upper bound.
+	/*
+	Simple helper for rendering input ints that can be overriden by an user provided value, also providing a lower/upper bound.
+	The computed default lives inside the integer itself, so this only shows what it currently reads as.
+	Typing a value overrides it, and the reset button hands the field back to whatever recomputes the default.
+	*/
 	inline void renderOverridableInputInt(
-		int& value,
-		bool& isOverridden,
-		int defaultValue,
+		OverridableInt& overridableInt,
 		std::string_view label,
 		std::string_view overrideLabel,
 		int lowerBound,
 		int upperBound
 	) {
-		if (!isOverridden) {
-			value = defaultValue;
-		}
-
 		ImGui::TextUnformatted(label.data());
 		ImGui::SetNextItemWidth(-1.0f);
+
+		// ImGui writes through an int pointer, so the widget edits a copy that is handed back on change.
+		int value{ overridableInt.get() };
 		if (ImGui::InputInt("##Value", &value)) {
-			value = std::min(std::max(lowerBound, value), upperBound);
-			isOverridden = true;
+			overridableInt.setOverride(std::clamp(value, lowerBound, upperBound));
 		}
 		if (ImGui::Button(overrideLabel.data(), ImVec2{ -1.0f, 0.0f })) {
-			isOverridden = false;
+			overridableInt.clearOverride();
 		}
 	}
 
-	// Simple helper method used for user input of HP, AC, movement speed and sense distances.
-	inline void renderNonOverridableInputInt(int& value, std::string_view label, int lowerBound) {
+	// Analogous parallel to renderOverridableInputInt for BoundedInt.
+	template <int LOWER_BOUND, int UPPER_BOUND>
+	void renderBoundedInputInt(BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt, std::string_view label) {
+		int value{ boundedInt.get() };
 		if (ImGui::InputInt(label.data(), &value)) {
-			value = std::max(lowerBound, value);
+			boundedInt = value;
 		}
 	}
 
@@ -88,21 +126,21 @@ namespace CombatTrackerLib {
 		int columnCount
 	) {
 		ImGui::TextWrapped("%s", label.data());
-		if (ImGui::BeginTable(stableID.data(), columnCount, ImGuiTableFlags_SizingStretchSame)) {
+		if (ScopedTable table{ stableID, columnCount, ImGuiTableFlags_SizingStretchSame }) {
 
 			// The whole table is drawn and the flags sit in an array of the same length, so one index walks both plain arrays.
 			for (std::size_t i{}; i < names.size(); ++i) {
 				ImGui::TableNextColumn();
 				ImGui::Checkbox(names[i].data(), &items[i]);
 			}
-			ImGui::EndTable();
 		}
 	}
 
 	// Very simple helper for rendering information texts as bullet points.
 	inline void renderBulletList(std::span<const std::string_view> bullets) {
 		for (const auto& bullet : bullets) {
-			ImGui::Bullet(); ImGui::TextWrapped("%s", bullet.data());
+			ImGui::Bullet(); 
+			ImGui::TextWrapped("%s", bullet.data());
 		}
 	}
 

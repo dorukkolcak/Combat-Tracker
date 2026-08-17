@@ -77,23 +77,17 @@ namespace CombatTrackerApp {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f, 0.0f });
-		ImGui::Begin(
-			encounterCreatorWindowName.data(),
-			nullptr,
-			ENCOUNTER_CREATION_WINDOW_FLAGS
-		);
+		CombatTrackerLib::ScopedWindow window{ encounterCreatorWindowName, nullptr, ENCOUNTER_CREATION_WINDOW_FLAGS };
 		ImGui::PopStyleVar(3);
 
 		// The menu bar of the host window. This should grant access to functionality such as returning to the main menu.
-		if (ImGui::BeginMenuBar()) {
-			if (ImGui::BeginMenu(getWindowName(MENU).data())) {
+		if (CombatTrackerLib::ScopedMenuBar menuBar{  }) {
+			if (CombatTrackerLib::ScopedMenu menu{ getWindowName(MENU) }) {
 				if (ImGui::MenuItem(m_localeProviderPointer->getText("/scenes/encounterCreation/returnToMainMenu").data())) {
 					m_applicationPointer->getSceneManager().queueSceneTransition(this, std::make_unique<MainMenuScene>(m_applicationPointer));
 				}
 				// TODO: Expand the options from here.
-				ImGui::EndMenu();
 			}
-			ImGui::EndMenuBar();
 		}
 
 		ImGui::DockSpace(
@@ -101,7 +95,6 @@ namespace CombatTrackerApp {
 			ImGui::GetContentRegionAvail(),
 			DOCKSPACE_FLAGS
 		);
-		ImGui::End();
 	}
 	void EncounterCreationScene::renderEntityBrowserHostWindow() {
 
@@ -110,12 +103,12 @@ namespace CombatTrackerApp {
 
 		// This window hosts each entity's seperate subbrowser window.
 		// These subbrowser windows are accessed via a tab bar.
-		ImGui::Begin(entityBrowserWindowName.data(), nullptr, ImGuiWindowFlags_NoTitleBar);
+		CombatTrackerLib::ScopedWindow window{ entityBrowserWindowName, nullptr, ImGuiWindowFlags_NoTitleBar };
 
 		// Tabs of the window host other windows for each entity (Monster and PlayerCharacter).
 		// Creating a temporary stack allocated struct for this section is fine as we are just copying string_views.
-		if (ImGui::BeginTabBar("##EntityBrowserTabs")) {
-			if (ImGui::BeginTabItem(getWindowName(MONSTER_BROWSER).data())) {
+		if (CombatTrackerLib::ScopedTabBar entityBrowserTabs{ "##EntityBrowserTabs" }) {
+			if (CombatTrackerLib::ScopedTabItem tabItem{ getWindowName(MONSTER_BROWSER) }) {
 				renderEntityBrowserWindow<MonsterCreationScene>(
 					BrowserLabels{
 						m_localeProviderPointer->getText("/scenes/encounterCreation/browser/monster/create"),
@@ -129,9 +122,8 @@ namespace CombatTrackerApp {
 					m_monsterSearchQuery,
 					m_selectedMonsterIndex
 				);
-				ImGui::EndTabItem();
 			}
-			if (ImGui::BeginTabItem(getWindowName(PLAYER_CHARACTER_BROWSER).data())) {
+			if (CombatTrackerLib::ScopedTabItem tabItem{ getWindowName(PLAYER_CHARACTER_BROWSER) }) {
 				renderEntityBrowserWindow<PlayerCharacterCreationScene>(
 					BrowserLabels{
 						m_localeProviderPointer->getText("/scenes/encounterCreation/browser/playerCharacter/create"),
@@ -145,16 +137,13 @@ namespace CombatTrackerApp {
 					m_playerCharacterSearchQuery,
 					m_selectedPlayerCharacterIndex
 				);
-				ImGui::EndTabItem();
 			}
-			ImGui::EndTabBar();
 		}
-		ImGui::End();
 	}
 	void EncounterCreationScene::renderBrowserFilters(EntitySource& source, std::string& searchQuery, const char* label) {
 
 		// Each tab passes its own label so that the widgets below don't collide in the ID stack.
-		ImGui::PushID(label);
+		CombatTrackerLib::ScopedID scopedID{ label };
 		ImGui::AlignTextToFramePadding();
 		ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/encounterCreation/filters/source").data());
 		ImGui::SameLine();
@@ -172,7 +161,6 @@ namespace CombatTrackerApp {
 
 		ImGui::SetNextItemWidth(-1.0f); // The search field spans the tab so it grows with the browser instead of sitting at ImGui's default item width.
 		ImGui::InputTextWithHint("##Search", m_localeProviderPointer->getText("/scenes/encounterCreation/filters/searchHint").data(), &searchQuery);
-		ImGui::PopID();
 	}
 
 	// TODO: Finish this window when all monster and player character functionality is done.
@@ -181,7 +169,6 @@ namespace CombatTrackerApp {
 
 		using enum WindowType;
 
-		ImGui::Begin(getWindowName(ENCOUNTER_MANAGER).data());
-		ImGui::End();
+		CombatTrackerLib::ScopedWindow window{ getWindowName(ENCOUNTER_MANAGER) };
 	}
 }
