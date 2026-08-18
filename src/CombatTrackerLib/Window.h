@@ -7,16 +7,10 @@
 #include <GLFW/glfw3.h>
 
 namespace CombatTrackerLib {
-	struct WindowSpecification {
-		unsigned int width{};
-		unsigned int height{};
-		bool isResizable{};
-		bool isVsyncEnabled{};
-	};
 	class Window {
 	public:
 		Window() = default;
-		Window(WindowSpecification* specification, std::string_view applicationName);
+		Window(int width, int height, std::string_view applicationName);
 
 		// A Window object exists as a singleton so it should be non-copiable and non-movable.
 		Window(const Window& other) = delete;
@@ -27,9 +21,16 @@ namespace CombatTrackerLib {
 
 		~Window();
 
+		void setVsync(bool enabled);
+		void setFullscreen(bool enabled);
+		void setResizable(bool enabled);
+
 		void update();
 	private:
-		WindowSpecification* m_specificationPointer{};
 		GLFWwindow* m_window{};
+		int m_currentWidth{};
+		int m_currentHeight{};
+		int m_currentXPos{};
+		int m_currentYPos{};
 	};
 }

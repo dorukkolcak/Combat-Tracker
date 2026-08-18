@@ -9,6 +9,7 @@
 #include <filesystem>
 #include <string_view>
 #include <nlohmann/json.hpp>
+#include <functional>
 
 namespace CombatTrackerLib {
 	enum class OptionsCategory {

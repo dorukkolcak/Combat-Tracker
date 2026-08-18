@@ -11,6 +11,13 @@
 #include <nlohmann/json.hpp>
 
 namespace CombatTrackerLib {
+
+	// Struct to hold the entire list of available localization file information.
+	// An application might need this large information to choose a language through the UI for example.
+	struct LocaleInfo {
+		std::string code{};
+		std::string endonym{};
+	};
 	class LocaleProvider {
 	public:
 		friend class LocaleProviderTest;
@@ -33,9 +40,12 @@ namespace CombatTrackerLib {
 		// Provide a span to string_view objects. So this is something like a view of views, lol.
 		// This also has the advantage of preserving size information which is super nice.
 		std::span<const std::string_view> getTextList(std::string_view keyPrefix) const;
+
+		std::span<const LocaleInfo> getAvailableLocales() const;
 	private:
 
 		void buildViewMaps(const nlohmann::json& node, const std::string& pointerPrefix);
+		void buildAvailableLocales();
 
 		/*
 		See https://stackoverflow.com/questions/34596768/stdunordered-mapfind-using-a-type-different-than-the-key-type
@@ -76,6 +86,7 @@ namespace CombatTrackerLib {
 		> m_listViewMap{};
 
 		std::optional<nlohmann::json> m_locale{};
+		std::vector<LocaleInfo> m_availableLocales{};
 		const std::filesystem::path* m_resourceDirectoryPathPointer{};
 	};
 }

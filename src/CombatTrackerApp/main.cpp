@@ -22,7 +22,8 @@ namespace CombatTrackerApp {
 		nlohmann::json::object({
 			{"theme", CombatTrackerLib::UIPreset::DARK},
 			{"vsyncEnabled", true},
-			{"fullscreenEnabled", false}
+			{"fullscreenEnabled", false},
+			{"isResizable", true}
 		})}
 	});
 
@@ -33,7 +34,8 @@ int main() {
 		"CombatTracker",
 		CombatTrackerApp::OPTION_CATEGORY_KEYS,
 		CombatTrackerApp::DEFAULT_OPTIONS,
-		CombatTrackerLib::WindowSpecification{ 1920, 1080, true }
+		1920,
+		1080
 	};
 	CombatTrackerLib::App application(std::move(appSpec));
 	application.getSceneManager().queueAddScene(std::make_unique<CombatTrackerApp::MainMenuScene>(&application));

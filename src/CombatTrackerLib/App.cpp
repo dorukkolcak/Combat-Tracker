@@ -51,9 +51,14 @@ namespace CombatTrackerLib {
 		m_isUIPresetApplied{ false }
 	{
 		glfwInit();
-		m_specification.windowSpecification.isVsyncEnabled
-			= m_optionsHandler.getOption<bool>(OptionsCategory::APPEARANCE, "vsyncEnabled");
-		m_windowPointer = std::make_unique<Window>(&(m_specification.windowSpecification), m_specification.name);
+		m_windowPointer = std::make_unique<Window>(
+			m_specification.initialWindowWidth,
+			m_specification.initialWindowHeight,
+			m_specification.name
+		);
+		m_windowPointer->setFullscreen(m_optionsHandler.getOption<bool>(OptionsCategory::APPEARANCE, "fullscreenEnabled")); 
+		m_windowPointer->setResizable(m_optionsHandler.getOption<bool>(OptionsCategory::APPEARANCE, "isResizable"));
+		m_windowPointer->setVsync(m_optionsHandler.getOption<bool>(OptionsCategory::APPEARANCE, "vsyncEnabled"));
 
 		/*
 		Use reinterpret_cast here to treat expression as if it had the target type.
@@ -72,6 +77,7 @@ namespace CombatTrackerLib {
 		ImGui_ImplOpenGL3_Init(glsl_version);
 
 		// Load the application chosen font. This is needed for loading fonts that support some unconventional characters.
+		// I though of creating a font loading system but I think it is completely unnecessary.
 		const std::filesystem::path fontPath{ getResourceDirectory() / "assets/Fonts/Roboto-Medium.ttf" };
 		std::error_code fontErrorCode{};
 		if (std::filesystem::exists(fontPath, fontErrorCode)) {
@@ -294,5 +300,23 @@ namespace CombatTrackerLib {
 	}
 	OptionsHandler& App::getOptionsHandler() {
 		return m_optionsHandler;
+	}
+
+	// IMPORTANT TODO: These should be written to utilize the observer pattern. See header file.
+	void App::setWindowVsync(bool enabled) {
+		m_optionsHandler.setOption<bool>(OptionsCategory::APPEARANCE, "vsyncEnabled", enabled);
+		m_windowPointer->setVsync(enabled);
+	}
+	void App::setWindowFullscreen(bool enabled) {
+		m_optionsHandler.setOption<bool>(OptionsCategory::APPEARANCE, "fullscreenEnabled", enabled);
+		m_windowPointer->setFullscreen(enabled);
+	}
+	void App::setWindowResize(bool enabled) {
+		m_optionsHandler.setOption<bool>(OptionsCategory::APPEARANCE, "isResizable", enabled);
+		m_windowPointer->setResizable(enabled);
+	}
+	void App::setLanguage(std::string_view localeCode) {
+		m_optionsHandler.setOption<std::string>(OptionsCategory::GENERAL, "language", std::string{ localeCode });
+		m_localeProvider.setLocale(localeCode);
 	}
 }
