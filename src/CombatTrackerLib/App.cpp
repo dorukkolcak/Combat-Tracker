@@ -37,13 +37,28 @@
 
 namespace CombatTrackerLib {
 	App::App(Specification specification) :
-		m_specfication{ std::move(specification) }, // Specification should be owned by the application so move it.
-		m_localeProvider{ m_specfication.locale, &getResourceDirectory() },
+		m_specification{ std::move(specification) }, // Specification should be owned by the application so move it.
+		m_optionsHandler{
+			m_specification.name,
+			std::move(m_specification.optionCategoryKeys),
+			std::move(m_specification.defaultOptions)
+		},
+		m_localeProvider{
+			m_optionsHandler.getOption<std::string>(OptionsCategory::GENERAL, "language"),
+			&getResourceDirectory()
+		},
 		m_isCloseSignalled{ false },
 		m_isUIPresetApplied{ false }
 	{
 		glfwInit();
-		m_windowPointer = std::make_unique<Window>(&(m_specfication.windowSpecification), m_specfication.name);
+		m_windowPointer = std::make_unique<Window>(
+			m_specification.initialWindowWidth,
+			m_specification.initialWindowHeight,
+			m_specification.name
+		);
+		m_windowPointer->setFullscreen(m_optionsHandler.getOption<bool>(OptionsCategory::APPEARANCE, "fullscreenEnabled")); 
+		m_windowPointer->setResizable(m_optionsHandler.getOption<bool>(OptionsCategory::APPEARANCE, "isResizable"));
+		m_windowPointer->setVsync(m_optionsHandler.getOption<bool>(OptionsCategory::APPEARANCE, "vsyncEnabled"));
 
 		/*
 		Use reinterpret_cast here to treat expression as if it had the target type.
@@ -62,6 +77,7 @@ namespace CombatTrackerLib {
 		ImGui_ImplOpenGL3_Init(glsl_version);
 
 		// Load the application chosen font. This is needed for loading fonts that support some unconventional characters.
+		// I though of creating a font loading system but I think it is completely unnecessary.
 		const std::filesystem::path fontPath{ getResourceDirectory() / "assets/Fonts/Roboto-Medium.ttf" };
 		std::error_code fontErrorCode{};
 		if (std::filesystem::exists(fontPath, fontErrorCode)) {
@@ -71,7 +87,7 @@ namespace CombatTrackerLib {
 			std::cerr << "Font file couldn't be read, falling back to the default font." << std::endl;
 		}
 
-		setUIPreset(m_specfication.uiPreset); // Loads the required ImGui::Style constants from a constant unordered map.
+		setUIPreset(m_optionsHandler.getOption<UIPreset>(OptionsCategory::APPEARANCE, "theme"));
 	}
 	void App::run() {
 
@@ -259,15 +275,14 @@ namespace CombatTrackerLib {
 		#endif
 	}
 	void App::setUIPreset(UIPreset newPreset) {
-		if (m_isUIPresetApplied && newPreset == m_specfication.uiPreset) {
+		const auto currentPreset{ m_optionsHandler.getOption<UIPreset>(OptionsCategory::APPEARANCE, "theme") };
+		if (m_isUIPresetApplied && newPreset == currentPreset) {
 			return;
 		}
 		m_isUIPresetApplied = true;
-		m_specfication.uiPreset = newPreset;
-		ImGui::GetStyle() = PRESET_TO_CONFIG.at(m_specfication.uiPreset);
-	}
-	UIPreset App::getUIPreset() const {
-		return m_specfication.uiPreset;
+		if(m_optionsHandler.setOption<UIPreset>(OptionsCategory::APPEARANCE, "theme", newPreset)) {
+			ImGui::GetStyle() = PRESET_TO_CONFIG.at(newPreset);
+		}
 	}
 	const std::filesystem::path& App::getResourceDirectory() {
 		static const std::filesystem::path s_resourceDirectory{ findResourceDirectory() };
@@ -282,5 +297,26 @@ namespace CombatTrackerLib {
 	}
 	SceneManager& App::getSceneManager() {
 		return m_sceneManager;
+	}
+	OptionsHandler& App::getOptionsHandler() {
+		return m_optionsHandler;
+	}
+
+	// IMPORTANT TODO: These should be written to utilize the observer pattern. See header file.
+	void App::setWindowVsync(bool enabled) {
+		m_optionsHandler.setOption<bool>(OptionsCategory::APPEARANCE, "vsyncEnabled", enabled);
+		m_windowPointer->setVsync(enabled);
+	}
+	void App::setWindowFullscreen(bool enabled) {
+		m_optionsHandler.setOption<bool>(OptionsCategory::APPEARANCE, "fullscreenEnabled", enabled);
+		m_windowPointer->setFullscreen(enabled);
+	}
+	void App::setWindowResize(bool enabled) {
+		m_optionsHandler.setOption<bool>(OptionsCategory::APPEARANCE, "isResizable", enabled);
+		m_windowPointer->setResizable(enabled);
+	}
+	void App::setLanguage(std::string_view localeCode) {
+		m_optionsHandler.setOption<std::string>(OptionsCategory::GENERAL, "language", std::string{ localeCode });
+		m_localeProvider.setLocale(localeCode);
 	}
 }

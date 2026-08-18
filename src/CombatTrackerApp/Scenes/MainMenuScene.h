@@ -5,6 +5,7 @@
 #include "CombatTrackerLib/Utilities/UIUtils.h"
 #include "CombatTrackerLib/ImGuiScopes.h"
 #include "CombatTrackerLib/LocaleProvider.h"
+#include "CombatTrackerLib/OptionsHandler.h"
 
 #include <string_view>
 #include <imgui_internal.h>
@@ -18,12 +19,6 @@ namespace CombatTrackerApp {
 		void renderUI() override;
 		void renderScene() override;
 	private:
-
-		enum class OptionsCategory {
-			APPEARANCE,
-			// TODO: Expand the categories.
-			COUNT,
-		};
  
 		inline static constexpr ImGuiDockNodeFlags DOCKSPACE_FLAGS{
 			ImGuiDockNodeFlags_NoResize |
@@ -52,7 +47,7 @@ namespace CombatTrackerApp {
 		CombatTrackerLib::UIPreset m_chosenUIPreset{};
 
 		// Which category the options panel is currently showing.
-		OptionsCategory m_selectedOptionsCategory{};
+		CombatTrackerLib::OptionsCategory m_selectedOptionsCategory{};
 
 		ImGuiID m_dockspaceID{};
 		ImGuiID m_encounterCreationWindowID{};

@@ -17,10 +17,11 @@ namespace CombatTrackerApp {
 		I can't be bothered to do this. Instead we submit them during program execution.
 		This change is saved in our .ini file so we only need to do this once.
 		*/
+	#ifndef NDEBUG
 		ImGui::ShowDebugLogWindow();
 		ImGui::ShowMetricsWindow();
 		ImGui::ShowDemoWindow();
-
+	#endif
 	}
 	void OverlayScene::renderScene() {}
 }

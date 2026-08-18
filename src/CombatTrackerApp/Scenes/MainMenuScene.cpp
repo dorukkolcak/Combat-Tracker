@@ -5,6 +5,9 @@
 
 #include <imgui.h>
 #include <algorithm>
+#include <optional>
+#include <string>
+#include <string_view>
 #include <glad/glad.h>
 
 namespace CombatTrackerApp {
@@ -25,7 +28,12 @@ namespace CombatTrackerApp {
             CombatTrackerLib::enumToSizeT(CombatTrackerLib::UIPreset::COUNT), 
             false
         },
-        m_chosenUIPreset{ m_applicationPointer->getUIPreset()},
+        m_chosenUIPreset{
+            m_applicationPointer->getOptionsHandler().getOption<CombatTrackerLib::UIPreset>(
+                CombatTrackerLib::OptionsCategory::APPEARANCE,
+                "theme"
+            )
+        },
         m_selectedOptionsCategory{},
         m_isDockspaceInitialized{ false }
     {
@@ -37,6 +45,8 @@ namespace CombatTrackerApp {
     void MainMenuScene::notifyScene(const ImGuiIO&) {}
     void MainMenuScene::updateScene(double) {}
     void MainMenuScene::renderUI() {
+
+        std::optional<std::string_view> pendingLocaleCode{};
 
         // Set configurations of the host window of the scene.
         // This has to happen on every pass and not just the initial one, otherwise the host stays at its old size.
@@ -156,7 +166,7 @@ namespace CombatTrackerApp {
                     CombatTrackerLib::ScopedChild optionsCategories{ "Options Categories", ImVec2(categoryWidth, bodyHeight), ImGuiChildFlags_Borders };
                     const auto categoryNames{ m_localeProviderPointer->getTextList("/scenes/mainMenu/optionsPopup/categories") };
                     for (size_t i{}; i < categoryNames.size(); ++i) {
-                        const auto category{ static_cast<OptionsCategory>(i) }; // Cast is needed here so that we actually store the enumerator type.
+                        const auto category{ static_cast<CombatTrackerLib::OptionsCategory>(i) }; // Cast is needed here so that we actually store the enumerator type.
                         if (ImGui::Selectable(categoryNames[i].data(), m_selectedOptionsCategory == category)) {
                             m_selectedOptionsCategory = category;
                         }
@@ -168,7 +178,27 @@ namespace CombatTrackerApp {
                 // Controls belonging to the selected category.
                 {
                     CombatTrackerLib::ScopedChild optionsContent{ "Options Content", ImVec2(0.0f, bodyHeight), ImGuiChildFlags_Borders };
-                    if (m_selectedOptionsCategory == OptionsCategory::APPEARANCE) {
+                    if (m_selectedOptionsCategory == CombatTrackerLib::OptionsCategory::GENERAL) {
+                        ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/mainMenu/optionsPopup/language").data());
+
+                        ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/mainMenu/optionsPopup/chooseLanguage").data());
+                        ImGui::SetNextItemWidth(-1.0f);
+
+                        const auto currentLocaleCode{
+                            m_applicationPointer->getOptionsHandler().getOption<std::string>(
+                                CombatTrackerLib::OptionsCategory::GENERAL,
+                                "language"
+                            )
+                        };
+                        if (CombatTrackerLib::ScopedListBox languages{ "##ChooseLanguage" }) {
+                            for (const auto& locale : m_localeProviderPointer->getAvailableLocales()) {
+                                if (ImGui::Selectable(locale.endonym.c_str(), locale.code == currentLocaleCode)) {
+                                    pendingLocaleCode = locale.code;
+                                }
+                            }
+                        }
+                    }
+                    if (m_selectedOptionsCategory == CombatTrackerLib::OptionsCategory::APPEARANCE) {
                         ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/mainMenu/optionsPopup/theme").data());
 
                         // Hide the label of the listbox and put it above the widget, so the listbox can take the full panel width.
@@ -181,6 +211,40 @@ namespace CombatTrackerApp {
                             m_localeProviderPointer->getTextList("/scenes/mainMenu/optionsPopup/themes")
                         );
                         m_applicationPointer->setUIPreset(m_chosenUIPreset); // This function early returns already so this is fine.
+
+                        ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/mainMenu/optionsPopup/window").data());
+
+                        auto& optionsHandler{ m_applicationPointer->getOptionsHandler() };
+
+                        bool isVsyncEnabled{
+                            optionsHandler.getOption<bool>(CombatTrackerLib::OptionsCategory::APPEARANCE, "vsyncEnabled")
+                        };
+                        if (ImGui::Checkbox(
+                            m_localeProviderPointer->getText("/scenes/mainMenu/optionsPopup/vsync").data(),
+                            &isVsyncEnabled
+                        )) {
+                            m_applicationPointer->setWindowVsync(isVsyncEnabled);
+                        }
+
+                        bool isFullscreenEnabled{
+                            optionsHandler.getOption<bool>(CombatTrackerLib::OptionsCategory::APPEARANCE, "fullscreenEnabled")
+                        };
+                        if (ImGui::Checkbox(
+                            m_localeProviderPointer->getText("/scenes/mainMenu/optionsPopup/fullscreen").data(),
+                            &isFullscreenEnabled
+                        )) {
+                            m_applicationPointer->setWindowFullscreen(isFullscreenEnabled);
+                        }
+
+                        bool isResizable{
+                            optionsHandler.getOption<bool>(CombatTrackerLib::OptionsCategory::APPEARANCE, "isResizable")
+                        };
+                        if (ImGui::Checkbox(
+                            m_localeProviderPointer->getText("/scenes/mainMenu/optionsPopup/resizable").data(),
+                            &isResizable
+                        )) {
+                            m_applicationPointer->setWindowResize(isResizable);
+                        }
                     }
                     // TODO: Update this when more categories get added.
 
@@ -233,6 +297,11 @@ namespace CombatTrackerApp {
 
         }
 
+        // The locale change should be deferred here, as the change invalidates the previous view maps, leaving the string_views dangling.
+        // This is kind of fragile and I don't really like it that much, consider changing.
+        if (pendingLocaleCode != std::nullopt) {
+            m_applicationPointer->setLanguage(*pendingLocaleCode);
+        }
     }
     void MainMenuScene::renderScene() {}
 }

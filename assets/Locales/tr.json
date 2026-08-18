@@ -11,6 +11,7 @@
       "optionsPopup": {
         "header": "Seçenekler",
         "categories": [
+          "Genel",
           "Görünüm"
         ],
         "theme": "Tema",
@@ -31,6 +32,12 @@
           "Kumlar",
           "Ay Işığı"
         ],
+        "language": "Dil",
+        "chooseLanguage": "Dil Seç",
+        "window": "Pencere",
+        "vsync": "Dikey Eşitleme###mainMenuVsync",
+        "fullscreen": "Tam Ekran###mainMenuFullscreen",
+        "resizable": "Yeniden Boyutlandırılabilir Pencere###mainMenuResizable",
         "close": "Kapat"
       },
 

@@ -11,6 +11,7 @@
       "optionsPopup": {
         "header": "Options",
         "categories": [
+          "General",
           "Appearance"
         ],
         "theme": "Theme",
@@ -31,6 +32,12 @@
           "Sands",
           "Moonlit"
         ],
+        "language": "Language",
+        "chooseLanguage": "Choose Language",
+        "window": "Window",
+        "vsync": "V-Sync###mainMenuVsync",
+        "fullscreen": "Fullscreen###mainMenuFullscreen",
+        "resizable": "Resizable Window###mainMenuResizable",
         "close": "Close"
       },
 

@@ -3,11 +3,13 @@
 
 #include <iostream>
 #include <format>
+#include <algorithm>
 
 namespace CombatTrackerLib {
 	LocaleProvider::LocaleProvider(std::string_view localeCode, const std::filesystem::path* resourceDirectoryPathPointer) :
 		m_resourceDirectoryPathPointer{resourceDirectoryPathPointer}
 	{
+		buildAvailableLocales();
 		const auto isLocaleSet{ setLocale(localeCode) };
 		if (!isLocaleSet) {
 			std::cerr << "Locale file couldn't be read." << std::endl;
@@ -60,6 +62,36 @@ namespace CombatTrackerLib {
 				}
 			}
 		}
+	}
+	void LocaleProvider::buildAvailableLocales() {
+		if (m_resourceDirectoryPathPointer == nullptr) {
+			return;
+		}
+
+		// Iterate through every file in the locale directory and read their filename and endonym key.
+		// This causes us to read one of the files twice in construction which is fine I guess.
+		std::error_code errorCode{};
+		const std::filesystem::path localeDirectory{ (*m_resourceDirectoryPathPointer) / "assets/Locales" };
+		for (const auto& entry : std::filesystem::directory_iterator{ localeDirectory, errorCode }) {
+			if (!entry.is_regular_file(errorCode) || entry.path().extension() != ".json") {
+				continue;
+			}
+			const auto contents{ readJSONFile(entry.path()) };
+			if (contents == std::nullopt || !contents->contains("endonym")) {
+				continue;
+			}
+
+			// Since entry and contents have local scope, we can't use string_view here.
+			// Which should be fine as we call this function once throughout the entire application lifecycle.
+			// So no string-heap allocation in hot paths.
+			m_availableLocales.emplace_back(
+				entry.path().stem().string(),
+				(*contents)["endonym"].get<std::string>()
+			);
+		}
+	}
+	std::span<const LocaleInfo> LocaleProvider::getAvailableLocales() const {
+		return m_availableLocales;
 	}
 	std::string_view LocaleProvider::getText(std::string_view key) const {
 		const auto entry{ m_textViewMap.find(key) };
