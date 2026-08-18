@@ -5,20 +5,26 @@
 #include "CombatTrackerLib/SceneManager.h"
 #include "CombatTrackerLib/Themes.h"
 #include "CombatTrackerLib/LocaleProvider.h"
+#include "CombatTrackerLib/OptionsHandler.h"
 
+#include <array>
 #include <string>
 #include <memory>
 #include <filesystem>
+#include <nlohmann/json.hpp>
 
 namespace CombatTrackerLib {
 	class Scene;
 	class App {
 	public:
 		struct Specification {
-			UIPreset uiPreset{};
-			std::string locale{};
-			CombatTrackerLib::WindowSpecification windowSpecification{};
 			std::string name{};
+
+			// These are moved during construction so they should be referenced via the options handler.
+			std::array<std::string, enumToSizeT(OptionsCategory::COUNT)> optionCategoryKeys{};
+			nlohmann::json defaultOptions{};
+
+			CombatTrackerLib::WindowSpecification windowSpecification{};
 		};
 		App() = default;
 		explicit App(Specification specification);
@@ -36,16 +42,21 @@ namespace CombatTrackerLib {
 		void signalApplicationClose();
 
 		void setUIPreset(UIPreset newPreset);
-		UIPreset getUIPreset() const;
 		
 		static const std::filesystem::path& getResourceDirectory();
 		static const std::filesystem::path& getUserDataDirectory(std::string_view applicationName);
 
 		const LocaleProvider& getLocaleProvider() const;
+
+		// This should be modifiable to handle scene operations.
 		SceneManager& getSceneManager();
 
+		// This should be modifiable to change options from the application side.
+		OptionsHandler& getOptionsHandler();
+
 	private:
-		Specification m_specfication{};
+		Specification m_specification{};
+		OptionsHandler m_optionsHandler{};
 		std::unique_ptr<Window> m_windowPointer{};
 
 		SceneManager m_sceneManager{};

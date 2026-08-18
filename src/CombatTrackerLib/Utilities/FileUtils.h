@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <system_error>
 
 namespace CombatTrackerLib {
 
@@ -37,6 +38,9 @@ namespace CombatTrackerLib {
 		return contents;
 	}
 	inline bool writeJSONFile(const std::filesystem::path& path, const nlohmann::json& contents) {
+		std::error_code errorCode{};
+		std::filesystem::create_directories(path.parent_path(), errorCode);
+
 		std::ofstream file{ path };
 		if (!file.is_open()) {
 			return false;

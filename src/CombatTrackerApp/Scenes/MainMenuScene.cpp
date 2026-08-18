@@ -25,7 +25,12 @@ namespace CombatTrackerApp {
             CombatTrackerLib::enumToSizeT(CombatTrackerLib::UIPreset::COUNT), 
             false
         },
-        m_chosenUIPreset{ m_applicationPointer->getUIPreset()},
+        m_chosenUIPreset{
+            m_applicationPointer->getOptionsHandler().getOption<CombatTrackerLib::UIPreset>(
+                CombatTrackerLib::OptionsCategory::APPEARANCE,
+                "theme"
+            )
+        },
         m_selectedOptionsCategory{},
         m_isDockspaceInitialized{ false }
     {
@@ -156,7 +161,7 @@ namespace CombatTrackerApp {
                     CombatTrackerLib::ScopedChild optionsCategories{ "Options Categories", ImVec2(categoryWidth, bodyHeight), ImGuiChildFlags_Borders };
                     const auto categoryNames{ m_localeProviderPointer->getTextList("/scenes/mainMenu/optionsPopup/categories") };
                     for (size_t i{}; i < categoryNames.size(); ++i) {
-                        const auto category{ static_cast<OptionsCategory>(i) }; // Cast is needed here so that we actually store the enumerator type.
+                        const auto category{ static_cast<CombatTrackerLib::OptionsCategory>(i) }; // Cast is needed here so that we actually store the enumerator type.
                         if (ImGui::Selectable(categoryNames[i].data(), m_selectedOptionsCategory == category)) {
                             m_selectedOptionsCategory = category;
                         }
@@ -168,7 +173,7 @@ namespace CombatTrackerApp {
                 // Controls belonging to the selected category.
                 {
                     CombatTrackerLib::ScopedChild optionsContent{ "Options Content", ImVec2(0.0f, bodyHeight), ImGuiChildFlags_Borders };
-                    if (m_selectedOptionsCategory == OptionsCategory::APPEARANCE) {
+                    if (m_selectedOptionsCategory == CombatTrackerLib::OptionsCategory::APPEARANCE) {
                         ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/mainMenu/optionsPopup/theme").data());
 
                         // Hide the label of the listbox and put it above the widget, so the listbox can take the full panel width.

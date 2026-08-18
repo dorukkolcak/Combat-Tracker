@@ -37,13 +37,23 @@
 
 namespace CombatTrackerLib {
 	App::App(Specification specification) :
-		m_specfication{ std::move(specification) }, // Specification should be owned by the application so move it.
-		m_localeProvider{ m_specfication.locale, &getResourceDirectory() },
+		m_specification{ std::move(specification) }, // Specification should be owned by the application so move it.
+		m_optionsHandler{
+			m_specification.name,
+			std::move(m_specification.optionCategoryKeys),
+			std::move(m_specification.defaultOptions)
+		},
+		m_localeProvider{
+			m_optionsHandler.getOption<std::string>(OptionsCategory::GENERAL, "language"),
+			&getResourceDirectory()
+		},
 		m_isCloseSignalled{ false },
 		m_isUIPresetApplied{ false }
 	{
 		glfwInit();
-		m_windowPointer = std::make_unique<Window>(&(m_specfication.windowSpecification), m_specfication.name);
+		m_specification.windowSpecification.isVsyncEnabled
+			= m_optionsHandler.getOption<bool>(OptionsCategory::APPEARANCE, "vsyncEnabled");
+		m_windowPointer = std::make_unique<Window>(&(m_specification.windowSpecification), m_specification.name);
 
 		/*
 		Use reinterpret_cast here to treat expression as if it had the target type.
@@ -71,7 +81,7 @@ namespace CombatTrackerLib {
 			std::cerr << "Font file couldn't be read, falling back to the default font." << std::endl;
 		}
 
-		setUIPreset(m_specfication.uiPreset); // Loads the required ImGui::Style constants from a constant unordered map.
+		setUIPreset(m_optionsHandler.getOption<UIPreset>(OptionsCategory::APPEARANCE, "theme"));
 	}
 	void App::run() {
 
@@ -259,15 +269,14 @@ namespace CombatTrackerLib {
 		#endif
 	}
 	void App::setUIPreset(UIPreset newPreset) {
-		if (m_isUIPresetApplied && newPreset == m_specfication.uiPreset) {
+		const auto currentPreset{ m_optionsHandler.getOption<UIPreset>(OptionsCategory::APPEARANCE, "theme") };
+		if (m_isUIPresetApplied && newPreset == currentPreset) {
 			return;
 		}
 		m_isUIPresetApplied = true;
-		m_specfication.uiPreset = newPreset;
-		ImGui::GetStyle() = PRESET_TO_CONFIG.at(m_specfication.uiPreset);
-	}
-	UIPreset App::getUIPreset() const {
-		return m_specfication.uiPreset;
+		if(m_optionsHandler.setOption<UIPreset>(OptionsCategory::APPEARANCE, "theme", newPreset)) {
+			ImGui::GetStyle() = PRESET_TO_CONFIG.at(newPreset);
+		}
 	}
 	const std::filesystem::path& App::getResourceDirectory() {
 		static const std::filesystem::path s_resourceDirectory{ findResourceDirectory() };
@@ -282,5 +291,8 @@ namespace CombatTrackerLib {
 	}
 	SceneManager& App::getSceneManager() {
 		return m_sceneManager;
+	}
+	OptionsHandler& App::getOptionsHandler() {
+		return m_optionsHandler;
 	}
 }

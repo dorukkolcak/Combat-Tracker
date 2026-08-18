@@ -11,6 +11,7 @@
       "optionsPopup": {
         "header": "Options",
         "categories": [
+          "General",
           "Appearance"
         ],
         "theme": "Theme",

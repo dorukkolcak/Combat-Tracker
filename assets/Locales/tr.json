@@ -11,6 +11,7 @@
       "optionsPopup": {
         "header": "Seçenekler",
         "categories": [
+          "Genel",
           "Görünüm"
         ],
         "theme": "Tema",

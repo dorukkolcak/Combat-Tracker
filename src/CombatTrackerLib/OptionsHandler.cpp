@@ -1,0 +1,36 @@
+#include "CombatTrackerLib/OptionsHandler.h"
+#include "CombatTrackerLib/Utilities/FileUtils.h"
+#include "CombatTrackerLib/App.h"
+
+#include <algorithm>
+
+namespace CombatTrackerLib {
+	OptionsHandler::OptionsHandler(
+		std::string_view applicationName,
+		std::array<std::string, enumToSizeT(OptionsCategory::COUNT)> categoryKeys,
+		nlohmann::json defaultOptions
+	) :
+		m_optionsFilePath(App::getUserDataDirectory(applicationName) / "options.json"),
+		m_categoryKeys{ std::move(categoryKeys) },
+		m_defaultOptions(std::move(defaultOptions)),
+		m_options(m_defaultOptions)
+	{
+		// See https://json.nlohmann.me/api/basic_json/merge_patch/.
+		// Essentially what we do here is we patch the default options with the read options file
+		// for each existing key in the original document.
+		m_options.merge_patch(readJSONFile(m_optionsFilePath).value_or(nlohmann::json::object()));
+	}
+
+	// This might be a massive mistake, implies that the options file itself is written back to only on application close.
+	// So upon a crash, we lose all the previous options. But I really like the management of this.
+	OptionsHandler::~OptionsHandler() {
+		writeJSONFile(m_optionsFilePath, m_options);
+	}
+	bool OptionsHandler::validateOption(OptionsCategory category, std::string_view option) const {
+		const auto& categoryKey{ m_categoryKeys[enumToSizeT(category)] };
+		if (!m_defaultOptions[categoryKey].contains(option)) {
+			return false;
+		}
+		return true;
+	}
+}
