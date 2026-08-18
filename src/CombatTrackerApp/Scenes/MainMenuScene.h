@@ -43,9 +43,6 @@ namespace CombatTrackerApp {
 		// Used for the window that hosts our application art.
 		ImGuiWindowClass m_titleWindowClass{};
 
-		CombatTrackerLib::ListBoxParameters m_UIThemeParameters{};
-		CombatTrackerLib::UIPreset m_chosenUIPreset{};
-
 		// Which category the options panel is currently showing.
 		CombatTrackerLib::OptionsCategory m_selectedOptionsCategory{};
 

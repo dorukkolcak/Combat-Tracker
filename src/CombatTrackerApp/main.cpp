@@ -20,7 +20,7 @@ namespace CombatTrackerApp {
 		})},
 		{OPTION_CATEGORY_KEYS[CombatTrackerLib::enumToSizeT(CombatTrackerLib::OptionsCategory::APPEARANCE)],
 		nlohmann::json::object({
-			{"theme", CombatTrackerLib::UIPreset::DARK},
+			{"theme", "Arcane"},
 			{"vsyncEnabled", true},
 			{"fullscreenEnabled", false},
 			{"isResizable", true}
