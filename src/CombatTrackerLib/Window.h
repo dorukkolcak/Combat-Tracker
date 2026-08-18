@@ -10,7 +10,7 @@ namespace CombatTrackerLib {
 	class Window {
 	public:
 		Window() = default;
-		Window(int width, int height, std::string_view applicationName);
+		Window(int initialWidth, int initialHeight, std::string_view applicationName);
 
 		// A Window object exists as a singleton so it should be non-copiable and non-movable.
 		Window(const Window& other) = delete;

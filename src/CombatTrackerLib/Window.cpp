@@ -4,9 +4,9 @@
 #include <cassert>
 
 namespace CombatTrackerLib {
-	Window::Window(int width, int height, std::string_view applicationName) : 
-		m_currentWidth{width}, 
-		m_currentHeight{height}
+	Window::Window(int initialWidth, int initialHeight, std::string_view applicationName) : 
+		m_currentWidth{ initialWidth },
+		m_currentHeight{ initialHeight }
 	{
 
 		// Window is created for OpenGL 3.3 Core Profile.
@@ -25,7 +25,7 @@ namespace CombatTrackerLib {
 		assert(m_window != nullptr);
 		glfwSetWindowUserPointer(m_window, this);
 		glfwMakeContextCurrent(m_window);
-		glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int width, int height) {
+		glfwSetFramebufferSizeCallback(m_window, []([[maybe_unused]] GLFWwindow* window, int width, int height) {
 			glViewport(0, 0, width, height);
 		});
 		glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height) {
