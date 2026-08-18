@@ -23,17 +23,6 @@ namespace CombatTrackerApp {
             GL_LINEAR, 
             GL_LINEAR_MIPMAP_LINEAR
         },
-        m_UIThemeParameters{ 
-            CombatTrackerLib::enumToSizeT(CombatTrackerLib::UIPreset::COUNT), 
-            CombatTrackerLib::enumToSizeT(CombatTrackerLib::UIPreset::COUNT), 
-            false
-        },
-        m_chosenUIPreset{
-            m_applicationPointer->getOptionsHandler().getOption<CombatTrackerLib::UIPreset>(
-                CombatTrackerLib::OptionsCategory::APPEARANCE,
-                "theme"
-            )
-        },
         m_selectedOptionsCategory{},
         m_isDockspaceInitialized{ false }
     {
@@ -204,13 +193,20 @@ namespace CombatTrackerApp {
                         // Hide the label of the listbox and put it above the widget, so the listbox can take the full panel width.
                         ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/mainMenu/optionsPopup/chooseTheme").data());
                         ImGui::SetNextItemWidth(-1.0f); // -1.0f passed to the function means that the item spans the entire width.
-                        CombatTrackerLib::renderListBox(
-                            m_UIThemeParameters,
-                            m_chosenUIPreset,
-                            "##ChooseTheme",
-                            m_localeProviderPointer->getTextList("/scenes/mainMenu/optionsPopup/themes")
-                        );
-                        m_applicationPointer->setUIPreset(m_chosenUIPreset); // This function early returns already so this is fine.
+
+                        const auto currentThemeName{
+                            m_applicationPointer->getOptionsHandler().getOption<std::string>(
+                                CombatTrackerLib::OptionsCategory::APPEARANCE,
+                                "theme"
+                            )
+                        };
+                        if (CombatTrackerLib::ScopedListBox themes{ "##ChooseTheme" }) {
+                            for (const auto& themeName : m_applicationPointer->getThemeProvider().getThemeNames()) {
+                                if (ImGui::Selectable(themeName.c_str(), themeName == currentThemeName)) {
+                                    m_applicationPointer->setTheme(themeName); // This function early returns already so this is fine.
+                                }
+                            }
+                        }
 
                         ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/mainMenu/optionsPopup/window").data());
 

@@ -1,5 +1,4 @@
 #include "CombatTrackerLib/App.h"
-#include "CombatTrackerLib/Themes.h"
 
 #if defined(_WIN32)
 
@@ -47,6 +46,7 @@ namespace CombatTrackerLib {
 			m_optionsHandler.getOption<std::string>(OptionsCategory::GENERAL, "language"),
 			&getResourceDirectory()
 		},
+		m_themeProvider{},
 		m_isCloseSignalled{ false },
 		m_isUIPresetApplied{ false }
 	{
@@ -76,6 +76,11 @@ namespace CombatTrackerLib {
 		const char* glsl_version = "#version 150";
 		ImGui_ImplOpenGL3_Init(glsl_version);
 
+		m_themeProvider.init(
+			m_optionsHandler.getOption<std::string>(OptionsCategory::APPEARANCE, "theme"),
+			&getResourceDirectory()
+		);
+
 		// Load the application chosen font. This is needed for loading fonts that support some unconventional characters.
 		// I though of creating a font loading system but I think it is completely unnecessary.
 		const std::filesystem::path fontPath{ getResourceDirectory() / "assets/Fonts/Roboto-Medium.ttf" };
@@ -87,7 +92,7 @@ namespace CombatTrackerLib {
 			std::cerr << "Font file couldn't be read, falling back to the default font." << std::endl;
 		}
 
-		setUIPreset(m_optionsHandler.getOption<UIPreset>(OptionsCategory::APPEARANCE, "theme"));
+		setTheme(m_optionsHandler.getOption<std::string>(OptionsCategory::APPEARANCE, "theme"));
 	}
 	void App::run() {
 
@@ -274,14 +279,14 @@ namespace CombatTrackerLib {
 			return std::filesystem::path{ home } / ".local" / "share" / applicationName;
 		#endif
 	}
-	void App::setUIPreset(UIPreset newPreset) {
-		const auto currentPreset{ m_optionsHandler.getOption<UIPreset>(OptionsCategory::APPEARANCE, "theme") };
-		if (m_isUIPresetApplied && newPreset == currentPreset) {
+	void App::setTheme(const std::string& themeName) {
+		const auto currentPreset{ m_optionsHandler.getOption<std::string>(OptionsCategory::APPEARANCE, "theme") };
+		if (m_isUIPresetApplied && themeName == currentPreset) {
 			return;
 		}
 		m_isUIPresetApplied = true;
-		if(m_optionsHandler.setOption<UIPreset>(OptionsCategory::APPEARANCE, "theme", newPreset)) {
-			ImGui::GetStyle() = PRESET_TO_CONFIG.at(newPreset);
+		if(m_optionsHandler.setOption<std::string>(OptionsCategory::APPEARANCE, "theme", themeName)) {
+			m_themeProvider.changeTheme(themeName);
 		}
 	}
 	const std::filesystem::path& App::getResourceDirectory() {
@@ -318,5 +323,8 @@ namespace CombatTrackerLib {
 	void App::setLanguage(std::string_view localeCode) {
 		m_optionsHandler.setOption<std::string>(OptionsCategory::GENERAL, "language", std::string{ localeCode });
 		m_localeProvider.setLocale(localeCode);
+	}
+	const ThemeProvider& App::getThemeProvider() const {
+		return m_themeProvider;
 	}
 }

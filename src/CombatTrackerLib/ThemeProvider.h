@@ -33,7 +33,6 @@ namespace CombatTrackerLib {
 	class ThemeProvider {
 	public:
 		ThemeProvider() = default;
-		ThemeProvider(std::string_view initialThemeName, const std::filesystem::path* resourceDirectoryPathPointer);
 
 		ThemeProvider(const ThemeProvider& provider) = delete;
 		ThemeProvider& operator=(const ThemeProvider& provider) = delete;
@@ -42,6 +41,10 @@ namespace CombatTrackerLib {
 		ThemeProvider& operator=(ThemeProvider&& provider) noexcept = delete;
 
 		~ThemeProvider() = default;
+
+		// This is the actual constructor of the class. This is because the theme provider needs to be initialized
+		// after initializing the ImGui context which we can't achieve via constructor member initializer list.
+		void init(std::string_view initialThemeName, const std::filesystem::path* resourceDirectoryPathPointer);
 
 		// This can be static as well but I prefer to have ThemeProvider as a singleton object where theme operations are handled.
 		void changeTheme(std::string_view themeName);

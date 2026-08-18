@@ -2,11 +2,11 @@
 #include "CombatTrackerLib/Utilities/FileUtils.h"
 
 namespace CombatTrackerLib {
-	ThemeProvider::ThemeProvider(std::string_view initialThemeName, const std::filesystem::path* resourceDirectoryPathPointer) {
+	void ThemeProvider::init(std::string_view initialThemeName, const std::filesystem::path* resourceDirectoryPathPointer) {
 		if (resourceDirectoryPathPointer == nullptr) {
 			return;
 		}
-		
+
 		std::error_code errorCode{};
 		const std::filesystem::path themePath{ *resourceDirectoryPathPointer / "assets/Themes" };
 		for (const auto& entry : std::filesystem::directory_iterator(themePath, errorCode)) {

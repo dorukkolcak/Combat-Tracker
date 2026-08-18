@@ -3,9 +3,9 @@
 #include "CombatTrackerLib/Window.h"
 #include "CombatTrackerLib/Scene.h"
 #include "CombatTrackerLib/SceneManager.h"
-#include "CombatTrackerLib/Themes.h"
 #include "CombatTrackerLib/LocaleProvider.h"
 #include "CombatTrackerLib/OptionsHandler.h"
+#include "CombatTrackerLib/ThemeProvider.h"
 
 #include <array>
 #include <string>
@@ -49,6 +49,7 @@ namespace CombatTrackerLib {
 		static const std::filesystem::path& getUserDataDirectory(std::string_view applicationName);
 
 		const LocaleProvider& getLocaleProvider() const;
+		const ThemeProvider& getThemeProvider() const;
 
 		// This should be modifiable to handle scene operations.
 		SceneManager& getSceneManager();
@@ -75,7 +76,7 @@ namespace CombatTrackerLib {
 		void setWindowVsync(bool enabled);
 		void setWindowFullscreen(bool enabled);
 		void setWindowResize(bool enabled);
-		void setUIPreset(UIPreset newPreset);
+		void setTheme(const std::string& themeName);
 		void setLanguage(std::string_view localeCode);
 
 	private:
@@ -86,6 +87,7 @@ namespace CombatTrackerLib {
 		SceneManager m_sceneManager{};
 
 		LocaleProvider m_localeProvider{};
+		ThemeProvider m_themeProvider{};
 
 		bool m_isCloseSignalled{}; 
 		bool m_isUIPresetApplied{};
