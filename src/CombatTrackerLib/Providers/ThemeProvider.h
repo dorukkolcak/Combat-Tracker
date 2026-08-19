@@ -1,6 +1,8 @@
 #pragma once
 
 #include "CombatTrackerLib/Utilities/GenericUtils.h"
+#include "CombatTrackerLib/Utilities/Unique.h"
+#include "CombatTrackerLib/Providers/DirectoryProvider.h"
 
 #include <string>
 #include <functional>
@@ -31,25 +33,13 @@ namespace nlohmann {
 }
 
 namespace CombatTrackerLib {
-	class ThemeProvider {
+	class ThemeProvider : public Unique<ThemeProvider> {
 	public:
-		ThemeProvider() = default;
-
-		ThemeProvider(const ThemeProvider& provider) = delete;
-		ThemeProvider& operator=(const ThemeProvider& provider) = delete;
-
-		ThemeProvider(ThemeProvider&& provider) noexcept = delete;
-		ThemeProvider& operator=(ThemeProvider&& provider) noexcept = delete;
-
+		ThemeProvider() = delete;
+		explicit ThemeProvider(const DirectoryProvider& directoryProvider);
 		~ThemeProvider() = default;
 
-		// This is the actual constructor of the class. This is because the theme provider needs to be initialized
-		// after initializing the ImGui context which we can't achieve via constructor member initializer list.
-		void init(std::string_view initialThemeName, const std::filesystem::path* resourceDirectoryPathPointer);
-
-		// This can be static as well but I prefer to have ThemeProvider as a singleton object where theme operations are handled.
-		void changeTheme(std::string_view themeName);
-
+		const ImGuiStyle* getStyle(std::string_view themeName) const;
 		auto getThemeNames() const {
 			return m_themeToStyle | std::views::keys;
 		}
@@ -63,6 +53,4 @@ namespace CombatTrackerLib {
 
 		void mapThemeToStyle(const std::string& themeName, const nlohmann::json& fileContents);
 	};
-
-
 }

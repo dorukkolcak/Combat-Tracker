@@ -253,7 +253,6 @@ namespace CombatTrackerApp {
                     ImGui::CloseCurrentPopup();
                 }
             }
-
         }
 
         // Encounter Creation window.

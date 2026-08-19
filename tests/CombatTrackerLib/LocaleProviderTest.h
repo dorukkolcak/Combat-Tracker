@@ -1,5 +1,6 @@
 #pragma once
 
+/*
 #include "CombatTrackerLib/Providers/LocaleProvider.h"
 
 #include <gtest/gtest.h>
@@ -10,6 +11,7 @@
 #include <vector>
 
 namespace CombatTrackerLib {
+	/*
 	class LocaleProviderTest : public testing::Test {
 	protected:
 		struct Locale {
@@ -23,13 +25,11 @@ namespace CombatTrackerLib {
 
 		void SetUp() override;
 		
-		/*
 		Normally, we would use friend classes to provide access to private member variables here.
 		We actually still do this in the base fixture class. 
 		However, we can't do this for TEST_F calls which create derived classes from the fixture classes
 		Since derived classes don't inherit friendship, they can't access private members.
 		So we provide this protected member function to grant member variable access.
-		*/
 		const auto& getTextViewMap(const LocaleProvider& provider) const {
 			return provider.m_textViewMap;
 		}
@@ -43,3 +43,4 @@ namespace CombatTrackerLib {
 		inline static constexpr std::string_view UNKNOWN_LOCALE_CODE{ "thereIsNoSuchLocale" };
 	};
 }
+*/

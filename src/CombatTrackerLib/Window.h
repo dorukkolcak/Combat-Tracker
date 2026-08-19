@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CombatTrackerLib/Utilities/Unique.h"
+
 #include <string_view>
 
 // Pay attention to the ordering here.
@@ -7,17 +9,10 @@
 #include <GLFW/glfw3.h>
 
 namespace CombatTrackerLib {
-	class Window {
+	class Window : public Unique<Window> {
 	public:
-		Window() = default;
+		Window() = delete;
 		Window(int initialWidth, int initialHeight, std::string_view applicationName);
-
-		// A Window object exists as a singleton so it should be non-copiable and non-movable.
-		Window(const Window& other) = delete;
-		Window& operator=(const Window& other) = delete;
-
-		Window(Window&& other) = delete;
-		Window& operator=(Window&& other) = delete;
 
 		~Window();
 

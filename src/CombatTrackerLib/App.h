@@ -7,6 +7,7 @@
 #include "CombatTrackerLib/Providers/LocaleProvider.h"
 #include "CombatTrackerLib/OptionsHandler.h"
 #include "CombatTrackerLib/Providers/ThemeProvider.h"
+#include "CombatTrackerLib/Utilities/Unique.h"
 
 #include <array>
 #include <string>
@@ -16,7 +17,7 @@
 
 namespace CombatTrackerLib {
 	class Scene;
-	class App {
+	class App : public Unique<App> {
 	public:
 		struct Specification {
 			std::string name{};
@@ -31,15 +32,8 @@ namespace CombatTrackerLib {
 			int initialWindowWidth{};
 			int initialWindowHeight{};
 		};
-		App() = default;
+		App() = delete;
 		explicit App(Specification specification);
-		
-		// An App object exists as a singleton so it should be non-copiable and non-movable.
-		App(const App& other) = delete;
-		App& operator=(const App& other)  = delete;
-
-		App(App&& other) = delete;
-		App& operator=(App& other) = delete;
 
 		~App();
 
@@ -79,15 +73,16 @@ namespace CombatTrackerLib {
 		void setLanguage(std::string_view localeCode);
 
 	private:
-		Specification m_specification{};
-		DirectoryProvider m_directoryProvider{};
-		OptionsHandler m_optionsHandler{};
-		std::unique_ptr<Window> m_windowPointer{};
 
+		// The order of construction of these members is quite important by the way.
 		SceneManager m_sceneManager{};
+		Specification m_specification{};
+		DirectoryProvider m_directoryProvider; // Deleted default constructor.
+		OptionsHandler m_optionsHandler; // Deleted default constructor.
+		LocaleProvider m_localeProvider; // Deleted default constructor
+		ThemeProvider m_themeProvider; // Deleted default constructor.
 
-		LocaleProvider m_localeProvider{};
-		ThemeProvider m_themeProvider{};
+		std::unique_ptr<Window> m_windowPointer{};
 
 		bool m_isCloseSignalled{};
 		bool m_isUIPresetApplied{};

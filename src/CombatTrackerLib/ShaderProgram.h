@@ -13,7 +13,7 @@
 namespace CombatTrackerLib {
 	class ShaderProgram {
 	public:
-		ShaderProgram() = default;
+		ShaderProgram() = delete;
 		explicit ShaderProgram(std::vector<Shader>& shaders);
 
 		ShaderProgram(const ShaderProgram& program) = delete;

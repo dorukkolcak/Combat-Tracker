@@ -1,14 +1,11 @@
 #include "CombatTrackerLib/Providers/ThemeProvider.h"
 #include "CombatTrackerLib/Utilities/FileUtils.h"
+#include "CombatTrackerLib/Providers/DirectoryProvider.h"
 
 namespace CombatTrackerLib {
-	void ThemeProvider::init(std::string_view initialThemeName, const std::filesystem::path* resourceDirectoryPathPointer) {
-		if (resourceDirectoryPathPointer == nullptr) {
-			return;
-		}
-
+	ThemeProvider::ThemeProvider(const DirectoryProvider& directoryProvider) : Unique() {
 		std::error_code errorCode{};
-		const std::filesystem::path themePath{ *resourceDirectoryPathPointer / "assets/Themes" };
+		const std::filesystem::path themePath{ directoryProvider.getResourceDirectory() / "assets/Themes" };
 		for (const auto& entry : std::filesystem::directory_iterator(themePath, errorCode)) {
 			const auto themeFile{ readJSONFile(entry.path()) };
 			if (themeFile == std::nullopt) {
@@ -17,16 +14,22 @@ namespace CombatTrackerLib {
 			const auto themeName{ entry.path().stem().string() };
 			mapThemeToStyle(themeName, *themeFile);
 		}
-		changeTheme(initialThemeName);
 	}
-	void ThemeProvider::changeTheme(std::string_view themeName) {
+
+	/*
+	The theme provider is responsible for returning the style, not actually setting the theme.
+	This is for a couple of reasons:
+	1) Theme setting requires an active ImGui context. The context management should be done solely by the App class.
+	2) This class would be hard to test as it will be coupled with the instantiation of an ImGui context.
+	3) The application class can instantiate the provider before booting up an ImGui context 
+	as it is the root class managing lifetimes, contexts, etc.
+	*/
+	const ImGuiStyle* ThemeProvider::getStyle(std::string_view themeName) const {
 		const auto theme{ m_themeToStyle.find(themeName) };
 		if (theme == m_themeToStyle.end()) {
-			ImGui::StyleColorsDark();
+			return nullptr;
 		}
-		else {
-			ImGui::GetStyle() = theme->second;
-		}
+		return &theme->second;
 	}
 	void ThemeProvider::mapThemeToStyle(const std::string& themeName, const nlohmann::json& fileContents) {
 

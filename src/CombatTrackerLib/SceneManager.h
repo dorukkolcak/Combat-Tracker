@@ -1,24 +1,17 @@
 #pragma once
 
+#include "CombatTrackerLib/Utilities/Unique.h"
+
 #include <memory>
 #include <vector>
 #include <unordered_map>
 
 namespace CombatTrackerLib {
 	class Scene;
-	class SceneManager {
+
+	// Should exist as a singleton owned by the App class.
+	class SceneManager : public Unique<SceneManager> {
 	public:
-		SceneManager();
-
-		// Should exist as a singleton owned by the App class.
-		// So the manager should be non-copiable/movable.
-		SceneManager(const SceneManager& other) = delete;
-		SceneManager& operator=(const SceneManager& other) = delete;
-		SceneManager(SceneManager&& other) = delete;
-		SceneManager& operator=(SceneManager&& other) = delete;
-
-		~SceneManager();
-
 		void queueAddScene(std::unique_ptr<Scene> scene);
 		void queueDeleteScene(Scene* sceneToBeDeleted);
 		void queueSceneTransition(Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo);

@@ -37,7 +37,7 @@ namespace CombatTrackerApp {
 			ImGuiWindowFlags_NoScrollWithMouse
 		};
 
-		CombatTrackerLib::Texture2D m_titleTexture{};
+		CombatTrackerLib::Texture2D m_titleTexture; // No default constructor. Initialize through member initializer list.
 
 		// Sort of a flag that overrides some options that are enforced on every window.
 		// Used for the window that hosts our application art.

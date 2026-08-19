@@ -8,7 +8,7 @@ namespace CombatTrackerLib {
 		const std::filesystem::path& userDataDirectory,
 		std::array<std::string, enumToSizeT(OptionsCategory::COUNT)> categoryKeys,
 		nlohmann::json defaultOptions
-	) :
+	) :	Unique(),
 		m_optionsFilePath(userDataDirectory / "options.json"),
 		m_categoryKeys{ std::move(categoryKeys) },
 		m_defaultOptions(std::move(defaultOptions)),

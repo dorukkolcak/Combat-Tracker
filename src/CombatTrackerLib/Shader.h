@@ -14,7 +14,7 @@ namespace CombatTrackerLib {
 			FRAGMENT
 		};
 
-		Shader() = default;
+		Shader() = delete;
 		Shader(const std::filesystem::path& shaderPath, Type type);
 
 		// Shouldn't be copiable as a copy might result in double delete, double call to glDeleteShader(shaderID).

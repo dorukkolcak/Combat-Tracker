@@ -6,7 +6,7 @@ namespace CombatTrackerLib {
 	class Texture2D {
 	public:
 
-		Texture2D() = default;
+		Texture2D() = delete;
 
 		// TODO: Ideally we would like to limit the texture parameters to a set of valid options instead of any arbitrary value.
 		Texture2D(

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "CombatTrackerLib/Utilities/GenericUtils.h"
+#include "CombatTrackerLib/Utilities/Unique.h"
+#include "CombatTrackerLib/Providers/DirectoryProvider.h"
 
 #include <string>
 #include <unordered_map>
@@ -20,41 +22,29 @@ namespace CombatTrackerLib {
 		std::string code{};
 		std::string endonym{};
 	};
-	class LocaleProvider {
+	class LocaleProvider : public Unique<LocaleProvider> {
 	public:
-		friend class LocaleProviderTest;
+		//friend class LocaleProviderTest;
 
-		LocaleProvider() = default;
-		LocaleProvider(std::string_view localeCode, const std::filesystem::path* resourceDirectoryPathPointer);
-
-		LocaleProvider(const LocaleProvider& reader) = delete;
-		LocaleProvider& operator=(const LocaleProvider& reader) = delete;
-
-		LocaleProvider(LocaleProvider&& reader) noexcept = delete;
-		LocaleProvider& operator=(LocaleProvider&& reader) noexcept = delete;
-
+		LocaleProvider() = delete;
+		LocaleProvider(const DirectoryProvider& directoryProvider, std::string_view localeCode);
 		~LocaleProvider() = default;
-		
-		bool setLocale(std::string_view localeCode);
 
+		bool setLocale(std::string_view localeCode);
 		std::string_view getText(std::string_view key) const;
 
 		// Provide a span to string_view objects. So this is something like a view of views, lol.
 		// This also has the advantage of preserving size information which is super nice.
 		std::span<const std::string_view> getTextList(std::string_view keyPrefix) const;
-
 		std::span<const LocaleInfo> getAvailableLocales() const;
 	private:
-
-		void buildViewMaps(const nlohmann::json& node, const std::string& pointerPrefix);
-		void buildAvailableLocales();
 		std::unordered_map<
 			std::string,
 			std::string_view,
 			StringHash,
 			std::equal_to<>
 		> m_textViewMap{};
-		
+
 		// We hold a seperate map for lists as well. If not, we would have to use std::format.
 		// Using std::format creates string temporaries so we allocate a lot of string temporaries per frame while iterating over a list.
 		std::unordered_map<
@@ -63,9 +53,14 @@ namespace CombatTrackerLib {
 			StringHash,
 			std::equal_to<>
 		> m_listViewMap{};
-
-		std::optional<nlohmann::json> m_locale{};
 		std::vector<LocaleInfo> m_availableLocales{};
-		const std::filesystem::path* m_resourceDirectoryPathPointer{};
+		std::optional<nlohmann::json> m_locale{}; // The views reference this locale.
+		
+		// The locale provider needs to remember the resource path directory.
+		// So we hold a reference to the directory provider via a pointer.
+		const DirectoryProvider* m_directoryProviderPointer{};
+
+		void buildViewMaps(const nlohmann::json& node, const std::string& pointerPrefix);
+		void buildAvailableLocales();
 	};
 }

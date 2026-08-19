@@ -11,6 +11,7 @@
 
 namespace CombatTrackerLib {
 	App::App(Specification specification) :
+		Unique(),
 		m_specification{ std::move(specification) }, // Specification should be owned by the application so move it.
 		m_directoryProvider{ m_specification.name },
 		m_optionsHandler{
@@ -19,10 +20,10 @@ namespace CombatTrackerLib {
 			std::move(m_specification.defaultOptions)
 		},
 		m_localeProvider{
-			m_optionsHandler.getOption<std::string>(OptionsCategory::GENERAL, "language"),
-			&m_directoryProvider.getResourceDirectory()
+			m_directoryProvider,
+			m_optionsHandler.getOption<std::string>(OptionsCategory::GENERAL, "language")
 		},
-		m_themeProvider{},
+		m_themeProvider{ m_directoryProvider },
 		m_isCloseSignalled{ false },
 		m_isUIPresetApplied{ false }
 	{
@@ -51,11 +52,6 @@ namespace CombatTrackerLib {
 		ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
 		const char* glsl_version = "#version 150";
 		ImGui_ImplOpenGL3_Init(glsl_version);
-
-		m_themeProvider.init(
-			m_optionsHandler.getOption<std::string>(OptionsCategory::APPEARANCE, "theme"),
-			&m_directoryProvider.getResourceDirectory()
-		);
 
 		// Load the application chosen font. This is needed for loading fonts that support some unconventional characters.
 		// I though of creating a font loading system but I think it is completely unnecessary.
@@ -147,7 +143,13 @@ namespace CombatTrackerLib {
 		}
 		m_isUIPresetApplied = true;
 		if(m_optionsHandler.setOption<std::string>(OptionsCategory::APPEARANCE, "theme", themeName)) {
-			m_themeProvider.changeTheme(themeName);
+			const auto* style{ m_themeProvider.getStyle(themeName) };
+			if (style == nullptr) {
+				ImGui::StyleColorsDark();
+			}
+			else {
+				ImGui::GetStyle() = *style;
+			}
 		}
 	}
 	const DirectoryProvider& App::getDirectoryProvider() const {

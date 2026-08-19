@@ -5,6 +5,7 @@
 
 namespace CombatTrackerLib {
 	Window::Window(int initialWidth, int initialHeight, std::string_view applicationName) : 
+		Unique(),
 		m_currentWidth{ initialWidth },
 		m_currentHeight{ initialHeight }
 	{

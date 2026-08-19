@@ -28,6 +28,7 @@
 
 namespace CombatTrackerLib {
 	DirectoryProvider::DirectoryProvider(std::string_view applicationName) :
+		Unique(),
 		m_resourceDirectory{ findResourceDirectory() },
 		m_userDataDirectory{ findUserDataDirectory(applicationName) }
 	{}

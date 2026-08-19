@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CombatTrackerLib/Utilities/GenericUtils.h"
+#include "CombatTrackerLib/Utilities/Unique.h"
 
 #include <array>
 #include <vector>
@@ -17,20 +18,15 @@ namespace CombatTrackerLib {
 		APPEARANCE, // Related to themes, fonts, vsync, fullscreen, etc.
 		COUNT
 	};
-	class OptionsHandler {
+	class OptionsHandler : public Unique<OptionsHandler> {
 	public:
-		OptionsHandler() = default;
+		OptionsHandler() = delete;
+ 
 		OptionsHandler(
 			const std::filesystem::path& userDataDirectory,
 			std::array<std::string, enumToSizeT(OptionsCategory::COUNT)> categoryKeys,
 			nlohmann::json defaultOptions
 		);
-
-		OptionsHandler(const OptionsHandler& handler) = delete;
-		OptionsHandler& operator=(const OptionsHandler& handler) = delete;
-
-		OptionsHandler(OptionsHandler&& handler) noexcept = delete;
-		OptionsHandler& operator=(OptionsHandler&& handler) noexcept = delete;
 
 		~OptionsHandler();
 
