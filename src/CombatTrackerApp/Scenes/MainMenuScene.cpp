@@ -15,7 +15,7 @@ namespace CombatTrackerApp {
     MainMenuScene::MainMenuScene(CombatTrackerLib::App* app) :
         CombatTrackerLib::Scene{ app },
         m_titleTexture{ 
-            CombatTrackerLib::App::getResourceDirectory() / "assets" / "Textures" / "Title.png",
+            app->getDirectoryProvider().getResourceDirectory() / "assets" / "Textures" / "Title.png",
             4, 
             false, 
             GL_REPEAT, 

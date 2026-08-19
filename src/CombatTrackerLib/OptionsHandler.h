@@ -21,7 +21,7 @@ namespace CombatTrackerLib {
 	public:
 		OptionsHandler() = default;
 		OptionsHandler(
-			std::string_view applicationName,
+			const std::filesystem::path& userDataDirectory,
 			std::array<std::string, enumToSizeT(OptionsCategory::COUNT)> categoryKeys,
 			nlohmann::json defaultOptions
 		);

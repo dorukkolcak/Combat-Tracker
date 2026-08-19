@@ -1,5 +1,5 @@
 #include "tests/CombatTrackerLib/LocaleProviderTest.h"
-#include "CombatTrackerLib/App.h"
+#include "CombatTrackerLib/Providers/DirectoryProvider.h"
 
 #include <filesystem>
 #include <system_error>
@@ -10,13 +10,14 @@ namespace CombatTrackerLib {
 	void LocaleProviderTest::SetUp() {
 
 		// Find all localization files and set up in memory structure for each one.
+		static const DirectoryProvider s_directoryProvider{ "CombatTrackerLibTests" };
 		std::error_code errorCode{};
-		for (const auto& item : std::filesystem::directory_iterator{ App::getResourceDirectory() / "assets/Locales", errorCode }) {
+		for (const auto& item : std::filesystem::directory_iterator{ s_directoryProvider.getResourceDirectory() / "assets/Locales", errorCode }) {
 			if (item.is_regular_file(errorCode) && item.path().extension() == ".json") {
 				std::string localeCode{ item.path().stem().string() };
 				m_locales.emplace_back(
 					localeCode,
-					std::make_unique<LocaleProvider>(localeCode, &App::getResourceDirectory())
+					std::make_unique<LocaleProvider>(localeCode, &s_directoryProvider.getResourceDirectory())
 				);
 			}
 		}

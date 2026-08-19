@@ -1,6 +1,6 @@
 #include "CombatTrackerApp/Scenes/MonsterCreationScene.h"
 #include "CombatTrackerLib/Utilities/UIUtils.h"
-#include "CombatTrackerApp/Entities/EntityStorage.h"
+#include "CombatTrackerApp/Entities/CreatureStorage.h"
 
 #include <optional>
 
@@ -58,7 +58,12 @@ namespace CombatTrackerApp {
 
 	bool MonsterCreationScene::completeEntityCreation() {
 		bool isSavingSuccessful{
-			saveEntity<Monster>(m_currentCreatureStatBlock, std::cref(m_currentMonsterStatBlock), std::nullopt)
+			CreatureStorage::saveCreature<Monster>(
+				m_applicationPointer->getDirectoryProvider().getUserDataDirectory(),
+				m_currentCreatureStatBlock,
+				std::cref(m_currentMonsterStatBlock),
+				std::nullopt
+			)
 		};
 		if (isSavingSuccessful) {
 			resetParametersAndOverrides();

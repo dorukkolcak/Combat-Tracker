@@ -38,6 +38,9 @@ namespace CombatTrackerLib {
 		return contents;
 	}
 	inline bool writeJSONFile(const std::filesystem::path& path, const nlohmann::json& contents) {
+
+		// Create directory to write in if it doesn't exist.
+		// If it already exists, create_directories returns false which we don't really care about.
 		std::error_code errorCode{};
 		std::filesystem::create_directories(path.parent_path(), errorCode);
 

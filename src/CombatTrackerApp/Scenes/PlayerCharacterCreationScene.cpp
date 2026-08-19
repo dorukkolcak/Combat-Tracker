@@ -1,7 +1,7 @@
 #include "CombatTrackerApp/Scenes/PlayerCharacterCreationScene.h"
 #include "CombatTrackerLib/Utilities/UIUtils.h"
 #include "CombatTrackerLib/Utilities/GenericUtils.h"
-#include "CombatTrackerApp/Entities/EntityStorage.h"
+#include "CombatTrackerApp/Entities/CreatureStorage.h"
 
 namespace CombatTrackerApp {
 	PlayerCharacterCreationScene::PlayerCharacterCreationScene(CombatTrackerLib::App* app) :
@@ -174,7 +174,12 @@ namespace CombatTrackerApp {
 
 	bool PlayerCharacterCreationScene::completeEntityCreation() {
 		bool isSavingSuccessful{
-			saveEntity<PlayerCharacter>(m_currentCreatureStatBlock, std::nullopt, std::cref(m_currentPlayerStatBlock))
+			CreatureStorage::saveCreature<PlayerCharacter>(
+				m_applicationPointer->getDirectoryProvider().getUserDataDirectory(),
+				m_currentCreatureStatBlock,
+				std::nullopt,
+				std::cref(m_currentPlayerStatBlock)
+			)
 		};
 		if (isSavingSuccessful) {
 			resetParametersAndOverrides();

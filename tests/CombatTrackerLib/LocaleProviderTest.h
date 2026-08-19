@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CombatTrackerLib/LocaleProvider.h"
+#include "CombatTrackerLib/Providers/LocaleProvider.h"
 
 #include <gtest/gtest.h>
 #include <filesystem>
