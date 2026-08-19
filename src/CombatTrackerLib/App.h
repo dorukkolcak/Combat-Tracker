@@ -3,9 +3,10 @@
 #include "CombatTrackerLib/Window.h"
 #include "CombatTrackerLib/Scene.h"
 #include "CombatTrackerLib/SceneManager.h"
-#include "CombatTrackerLib/LocaleProvider.h"
+#include "CombatTrackerLib/Providers/DirectoryProvider.h"
+#include "CombatTrackerLib/Providers/LocaleProvider.h"
 #include "CombatTrackerLib/OptionsHandler.h"
-#include "CombatTrackerLib/ThemeProvider.h"
+#include "CombatTrackerLib/Providers/ThemeProvider.h"
 
 #include <array>
 #include <string>
@@ -45,9 +46,7 @@ namespace CombatTrackerLib {
 		void run();
 		void signalApplicationClose();
 		
-		static const std::filesystem::path& getResourceDirectory();
-		static const std::filesystem::path& getUserDataDirectory(std::string_view applicationName);
-
+		const DirectoryProvider& getDirectoryProvider() const;
 		const LocaleProvider& getLocaleProvider() const;
 		const ThemeProvider& getThemeProvider() const;
 
@@ -81,6 +80,7 @@ namespace CombatTrackerLib {
 
 	private:
 		Specification m_specification{};
+		DirectoryProvider m_directoryProvider{};
 		OptionsHandler m_optionsHandler{};
 		std::unique_ptr<Window> m_windowPointer{};
 
@@ -89,19 +89,7 @@ namespace CombatTrackerLib {
 		LocaleProvider m_localeProvider{};
 		ThemeProvider m_themeProvider{};
 
-		bool m_isCloseSignalled{}; 
+		bool m_isCloseSignalled{};
 		bool m_isUIPresetApplied{};
-
-		// Both of the functions below should use NRVO so no expensive copies are made.
-		
-		// Finds the path for read only files that ship alongside the application, such as textures and shaders.
-		// This is derived from the executable's own location instead of the working directory.
-		// Falls back to the working directory if the platform call fails.
-		static std::filesystem::path findResourceDirectory();
-
-		// Finds the path for writable per user location for files the application creates.
-		// The application name is a parameter so the library half keeps no knowledge of a particular application.
-		// Returns an empty path when the location cannot be determined, which callers should treat as a failure to save.
-		static std::filesystem::path findUserDataDirectory(std::string_view applicationName);
 	};
 }

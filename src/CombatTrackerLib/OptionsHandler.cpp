@@ -1,16 +1,15 @@
 #include "CombatTrackerLib/OptionsHandler.h"
 #include "CombatTrackerLib/Utilities/FileUtils.h"
-#include "CombatTrackerLib/App.h"
 
 #include <algorithm>
 
 namespace CombatTrackerLib {
 	OptionsHandler::OptionsHandler(
-		std::string_view applicationName,
+		const std::filesystem::path& userDataDirectory,
 		std::array<std::string, enumToSizeT(OptionsCategory::COUNT)> categoryKeys,
 		nlohmann::json defaultOptions
 	) :
-		m_optionsFilePath(App::getUserDataDirectory(applicationName) / "options.json"),
+		m_optionsFilePath(userDataDirectory / "options.json"),
 		m_categoryKeys{ std::move(categoryKeys) },
 		m_defaultOptions(std::move(defaultOptions)),
 		m_options(m_defaultOptions)

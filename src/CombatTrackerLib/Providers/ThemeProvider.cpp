@@ -1,4 +1,4 @@
-#include "CombatTrackerLib/ThemeProvider.h"
+#include "CombatTrackerLib/Providers/ThemeProvider.h"
 #include "CombatTrackerLib/Utilities/FileUtils.h"
 
 namespace CombatTrackerLib {

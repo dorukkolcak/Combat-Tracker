@@ -1,4 +1,4 @@
-#include "CombatTrackerLib/LocaleProvider.h"
+#include "CombatTrackerLib/Providers/LocaleProvider.h"
 #include "CombatTrackerLib/Utilities/FileUtils.h"
 
 #include <iostream>

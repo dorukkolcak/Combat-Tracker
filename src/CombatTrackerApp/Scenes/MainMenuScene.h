@@ -4,7 +4,7 @@
 #include "CombatTrackerLib/Texture2D.h"
 #include "CombatTrackerLib/Utilities/UIUtils.h"
 #include "CombatTrackerLib/ImGuiScopes.h"
-#include "CombatTrackerLib/LocaleProvider.h"
+#include "CombatTrackerLib/Providers/LocaleProvider.h"
 #include "CombatTrackerLib/OptionsHandler.h"
 
 #include <string_view>

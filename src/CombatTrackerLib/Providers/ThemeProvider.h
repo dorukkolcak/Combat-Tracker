@@ -26,6 +26,7 @@ namespace nlohmann {
 				node.at(3).get<float>()
 			};
 		}
+		// I don't think to_json is possible as we have no way of passing the name of the color to to_json.
 	};
 }
 
@@ -62,4 +63,6 @@ namespace CombatTrackerLib {
 
 		void mapThemeToStyle(const std::string& themeName, const nlohmann::json& fileContents);
 	};
+
+
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CombatTrackerLib/App.h"
-#include "CombatTrackerLib/LocaleProvider.h"
+#include "CombatTrackerLib/Providers/LocaleProvider.h"
 
 #include <imgui.h>
 

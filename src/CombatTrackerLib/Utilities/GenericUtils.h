@@ -5,9 +5,9 @@
 #include <algorithm>
 #include <optional>
 #include <string_view>
+#include <nlohmann/json.hpp>
 
 namespace CombatTrackerLib {
-
 
 	/*
 	See https://stackoverflow.com/questions/34596768/stdunordered-mapfind-using-a-type-different-than-the-key-type
@@ -61,6 +61,14 @@ namespace CombatTrackerLib {
 	private:
 		int m_value{ std::clamp(0, LOWER_BOUND, UPPER_BOUND) };
 	};
+	template <int LOWER_BOUND, int UPPER_BOUND>
+	void from_json(const nlohmann::json& contents, BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt) {
+		boundedInt = contents.get<int>();
+	}
+	template <int LOWER_BOUND, int UPPER_BOUND>
+	void to_json(nlohmann::json& contents, const BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt) {
+		contents = boundedInt.get();
+	}
 
 	/*
 	An integer that is normally computed from some formula, but can also be set by hand.
@@ -102,4 +110,25 @@ namespace CombatTrackerLib {
 		int m_defaultValue{};
 		std::optional<int> m_override{};
 	};
+
+	// Since we don't really know how the default is computed from the json file,
+	// We reset the override and set the default elsewhere.
+	inline void from_json(const nlohmann::json& contents, OverridableInt& overridableInt) {
+		if (contents.is_null()) {
+			overridableInt.clearOverride();
+		}
+		else {
+			overridableInt.setOverride(contents.get<int>());
+		}
+	}
+
+	// If overridden we should hold the value. Otherwise we can derive the value from other values.
+	inline void to_json(nlohmann::json& contents, const OverridableInt& overridableInt) {
+		if (overridableInt.isOverridden()) {
+			contents = overridableInt.get();
+		}
+		else {
+			contents = nullptr;
+		}
+	}
 }
