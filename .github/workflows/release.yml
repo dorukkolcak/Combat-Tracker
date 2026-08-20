@@ -42,13 +42,16 @@ jobs:
     env:
       CC: ${{ matrix.toolchain.c }}
       CXX: ${{ matrix.toolchain.cxx }}
-      VCPKG_ROOT: ${{ env.VCPKG_INSTALLATION_ROOT }}
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.toolchain.triplet }}
       VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg-cache,readwrite
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+
+      - name: Point VCPKG_ROOT at the preinstalled vcpkg
+        shell: bash
+        run: echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
 
       - name: Install Linux build dependencies
         if: runner.os == 'Linux'
