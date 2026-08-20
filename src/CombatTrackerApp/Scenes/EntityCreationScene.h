@@ -53,10 +53,9 @@ namespace CombatTrackerApp {
 
 		inline static constexpr float MIN_CHILD_HEIGHT{ 180.f };
 		inline static constexpr ImGuiWindowFlags ENTITY_CREATION_WINDOW_FLAGS{
-			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
-			ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoBringToFrontOnFocus |
-			ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDocking
+			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+			ImGuiWindowFlags_NoDocking
 		};
 
 		/*
@@ -109,11 +108,7 @@ namespace CombatTrackerApp {
 		what extra widgets the add popup shows, how a finished item is built, and what the tooltip says.
 		The simple form covers anything that is just a name and a description.
 		*/
-		template <
-			typename I,
-			typename AddFieldsFn,
-			typename MakeItemFn,
-			typename TooltipFn>
+		template <typename I, typename AddFieldsFn, typename MakeItemFn, typename TooltipFn>
 		static void renderAddables(
 			std::vector<I>& currentItems,
 			const AddableLabels& labels,
@@ -121,10 +116,7 @@ namespace CombatTrackerApp {
 			MakeItemFn&& makeItem,
 			TooltipFn&& renderTooltip
 		);
-		template <typename I>
-		static void renderAddables(
-			std::vector<I>& currentItems, const AddableLabels& labels
-		);
+		template <typename I> static void renderAddables(std::vector<I>& currentItems, const AddableLabels& labels);
 
 		/*
 		Saving throws and skills present the same table, a name beside an overridable value beside a
@@ -162,11 +154,7 @@ namespace CombatTrackerApp {
 	};
 
 	// Chunky helper used for rendering traits, gear and actions alike.
-	template <
-		typename I,
-		typename AddFieldsFn,
-		typename MakeItemFn,
-		typename TooltipFn>
+	template <typename I, typename AddFieldsFn, typename MakeItemFn, typename TooltipFn>
 	void EntityCreationScene::renderAddables(
 		std::vector<I>& currentItems,
 		const AddableLabels& labels,
@@ -203,33 +191,22 @@ namespace CombatTrackerApp {
 
 			// Popup modal for editing/deleting items.
 			if (CombatTrackerLib::ScopedPopupModal popupModal{
-					labels.edit,
-					nullptr,
-					ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize }) {
+					labels.edit, nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize }) {
 
 				// The layouting is quite similar to the big entity creation popup modal.
 				{
 					CombatTrackerLib::ScopedChild editAddableScroll{
-						"EditAddableScroll",
-						ImVec2{ 0.0f,
-								-CombatTrackerLib::reservedFooterHeight(2) },
-						true
+						"EditAddableScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(2) }, true
 					};
 					ImGui::InputText(labels.name.data(), &currentItems[i].name);
-					ImGui::InputText(
-						labels.description.data(), &currentItems[i].description
-					);
+					ImGui::InputText(labels.description.data(), &currentItems[i].description);
 				}
 
 				ImGui::Separator();
-				if (CombatTrackerLib::alignedButton(
-						labels.finishEditing.data(), 0.5f
-					)) {
+				if (CombatTrackerLib::alignedButton(labels.finishEditing.data(), 0.5f)) {
 					ImGui::CloseCurrentPopup();
 				}
-				if (CombatTrackerLib::alignedButton(
-						labels.remove.data(), 0.5f
-					)) {
+				if (CombatTrackerLib::alignedButton(labels.remove.data(), 0.5f)) {
 					s_markedForDeletion.push_back(i);
 					ImGui::CloseCurrentPopup();
 				}
@@ -239,10 +216,7 @@ namespace CombatTrackerApp {
 		// Delete marked items safely, starting from the largest index to the smallest index.
 		std::sort(s_markedForDeletion.begin(), s_markedForDeletion.end());
 		for (size_t i = s_markedForDeletion.size(); i-- > 0;) {
-			currentItems.erase(
-				currentItems.begin() +
-				static_cast<std::ptrdiff_t>(s_markedForDeletion[i])
-			);
+			currentItems.erase(currentItems.begin() + static_cast<std::ptrdiff_t>(s_markedForDeletion[i]));
 		}
 		s_markedForDeletion.clear();
 
@@ -255,9 +229,7 @@ namespace CombatTrackerApp {
 		// Setup configs of the add item popup.
 		CombatTrackerLib::centerNextWindow(0.70f, 0.70f);
 		if (CombatTrackerLib::ScopedPopupModal popupModal{
-				labels.add,
-				NULL,
-				ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize }) {
+				labels.add, NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize }) {
 
 			/*
 			These are static so they survive between frames while the popup is open.
@@ -274,9 +246,7 @@ namespace CombatTrackerApp {
 			}
 			{
 				CombatTrackerLib::ScopedChild addAddableScroll{
-					"AddAddableScroll",
-					ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(1) },
-					true
+					"AddAddableScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(1) }, true
 				};
 				renderAddFields();
 				ImGui::InputText(labels.name.data(), &s_name);
@@ -285,10 +255,8 @@ namespace CombatTrackerApp {
 
 			// Button and cleanup section.
 			ImGui::Separator();
-			if (CombatTrackerLib::alignedButton(
-					labels.finishCreation.data(), 0.5f
-				) &&
-				!s_name.empty() && !s_description.empty()) {
+			if (CombatTrackerLib::alignedButton(labels.finishCreation.data(), 0.5f) && !s_name.empty() &&
+				!s_description.empty()) {
 				currentItems.push_back(makeItem(s_name, s_description));
 				s_name.clear();
 				s_description.clear();
@@ -299,19 +267,13 @@ namespace CombatTrackerApp {
 
 	// Anything that is just a name and a description needs none of the hooks.
 	template <typename I>
-	void EntityCreationScene::renderAddables(
-		std::vector<I>& currentItems, const AddableLabels& labels
-	) {
+	void EntityCreationScene::renderAddables(std::vector<I>& currentItems, const AddableLabels& labels) {
 		renderAddables(
 			currentItems,
 			labels,
 			[] {},
-			[](const std::string& name, const std::string& description) {
-				return I{ name, description };
-			},
-			[](const I& item) {
-				ImGui::SetTooltip("%s", item.description.c_str());
-			}
+			[](const std::string& name, const std::string& description) { return I{ name, description }; },
+			[](const I& item) { ImGui::SetTooltip("%s", item.description.c_str()); }
 		);
 	}
 }

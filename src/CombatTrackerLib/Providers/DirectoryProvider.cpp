@@ -30,14 +30,8 @@ namespace CombatTrackerLib {
 	DirectoryProvider::DirectoryProvider(std::string_view applicationName)
 		: Unique(), m_resourceDirectory{ findResourceDirectory() },
 		  m_userDataDirectory{ findUserDataDirectory(applicationName) } {}
-	const std::filesystem::path&
-	DirectoryProvider::getResourceDirectory() const {
-		return m_resourceDirectory;
-	}
-	const std::filesystem::path&
-	DirectoryProvider::getUserDataDirectory() const {
-		return m_userDataDirectory;
-	}
+	const std::filesystem::path& DirectoryProvider::getResourceDirectory() const { return m_resourceDirectory; }
+	const std::filesystem::path& DirectoryProvider::getUserDataDirectory() const { return m_userDataDirectory; }
 	std::filesystem::path DirectoryProvider::findResourceDirectory() {
 		std::error_code errorCode{};
 #if defined(_WIN32)
@@ -51,17 +45,13 @@ namespace CombatTrackerLib {
 		std::wstring buffer(
 			MAX_PATH, L'\0'
 		); //wstring has a initializer list constructor so we use direct brace initialization.
-		auto written{ GetModuleFileNameW(
-			nullptr, buffer.data(), static_cast<DWORD>(buffer.size())
-		) };
+		auto written{ GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size())) };
 
 		// According to the API specification, this implies that the string buffer is too small to hold the path.
 		// So we double the size of the buffer and try to read the path again.
 		while (written != 0 && written == buffer.size()) {
 			buffer.resize(buffer.size() * 2);
-			written = GetModuleFileNameW(
-				nullptr, buffer.data(), static_cast<DWORD>(buffer.size())
-			);
+			written = GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
 		}
 
 		// This implies that the function has failed so we return a fallback which is just the current working directory.
@@ -99,9 +89,7 @@ namespace CombatTrackerLib {
 
 		// According to _NSGetExecutablePath specification, the returned path can still contain symlinks and relative segments.
 		// This is resolved by calling std::filesystem::canonical which converts the path to the canonical absolute path.
-		const auto executablePath{
-			std::filesystem::canonical(buffer.data(), errorCode)
-		};
+		const auto executablePath{ std::filesystem::canonical(buffer.data(), errorCode) };
 		if (errorCode) {
 			return std::filesystem::path{ buffer.data() }.parent_path();
 		}
@@ -110,17 +98,14 @@ namespace CombatTrackerLib {
 
 		// On Linux, the OS maintains a symbolic link to the currently running executable file.
 		// We read this symbolic link to acquire te resource directory.
-		const auto executableDirectory{
-			std::filesystem::read_symlink("/proc/self/exe", errorCode)
-		};
+		const auto executableDirectory{ std::filesystem::read_symlink("/proc/self/exe", errorCode) };
 		if (errorCode) {
 			return std::filesystem::current_path(errorCode);
 		}
 		return executableDirectory.parent_path();
 #endif
 	}
-	const std::filesystem::path
-	DirectoryProvider::findUserDataDirectory(std::string_view applicationName) {
+	const std::filesystem::path DirectoryProvider::findUserDataDirectory(std::string_view applicationName) {
 		if (applicationName.empty()) {
 			return {};
 		}
@@ -133,9 +118,7 @@ namespace CombatTrackerLib {
 			return {};
 		}
 		std::wstring applicationData(required, L'\0');
-		const auto written{ GetEnvironmentVariableW(
-			L"APPDATA", applicationData.data(), required
-		) };
+		const auto written{ GetEnvironmentVariableW(L"APPDATA", applicationData.data(), required) };
 		if (written == 0 || written >= required) {
 			return {};
 		}
@@ -146,8 +129,7 @@ namespace CombatTrackerLib {
 		if (home == nullptr || home[0] == '\0') {
 			return {};
 		}
-		return std::filesystem::path{ home } / "Library" /
-			   "Application Support" / applicationName;
+		return std::filesystem::path{ home } / "Library" / "Application Support" / applicationName;
 #elif defined(__linux__)
 
 		// The XDG base directory specification says to use the default whenever the variable is unset or empty.
@@ -165,8 +147,7 @@ namespace CombatTrackerLib {
 		if (home == nullptr || home[0] == '\0') {
 			return {};
 		}
-		return std::filesystem::path{ home } / ".local" / "share" /
-			   applicationName;
+		return std::filesystem::path{ home } / ".local" / "share" / applicationName;
 #endif
 	}
 }

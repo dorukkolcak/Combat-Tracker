@@ -15,9 +15,7 @@ namespace CombatTrackerLib {
 		m_sceneOneReference = queueStubScene();
 		m_sceneTwoReference = queueStubScene();
 	}
-	TEST_F(SceneManagerTest, TestQueueAddSceneDefer) {
-		EXPECT_TRUE(m_sceneManager.getScenes().empty());
-	}
+	TEST_F(SceneManagerTest, TestQueueAddSceneDefer) { EXPECT_TRUE(m_sceneManager.getScenes().empty()); }
 	TEST_F(SceneManagerTest, TestDequeueMoveToStack) {
 		m_sceneManager.dequeueSceneOperations();
 		const auto& scenes{ m_sceneManager.getScenes() };
@@ -53,9 +51,7 @@ namespace CombatTrackerLib {
 		m_sceneManager.dequeueSceneOperations();
 		auto transitionScene{ std::make_unique<StubScene>() };
 		auto* transitionSceneReference{ transitionScene.get() };
-		m_sceneManager.queueSceneTransition(
-			m_sceneOneReference, std::move(transitionScene)
-		);
+		m_sceneManager.queueSceneTransition(m_sceneOneReference, std::move(transitionScene));
 		EXPECT_EQ(std::size_t{ 2 }, m_sceneManager.getScenes().size());
 		m_sceneManager.dequeueSceneOperations();
 		const auto& scenes{ m_sceneManager.getScenes() };

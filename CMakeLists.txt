@@ -13,6 +13,13 @@ if(DEFINED ENV{CI})
     set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 endif()
 
+option(COMBAT_TRACKER_CLANG_TIDY "Run clang-tidy on our own targets during the build" OFF)
+
+if(COMBAT_TRACKER_CLANG_TIDY)
+    find_program(CLANG_TIDY_EXECUTABLE NAMES clang-tidy REQUIRED)
+    set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_EXECUTABLE})
+endif()
+
 # This conditional tries to mimic the "treat all informational warnings as errors" behaviour across all compilers.
 # I don't think it is possible to have a direct reflection of all warnings for all compilers. 
 # This is where Github Workflows should hopefully catch some erros.

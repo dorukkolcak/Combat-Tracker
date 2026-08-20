@@ -31,13 +31,9 @@ namespace CombatTrackerLib {
 	// outgrows the window when the viewport is resized.
 	inline void centerNextWindow(float widthFactor, float heightFactor) {
 		const auto viewport{ ImGui::GetMainViewport() };
-		ImGui::SetNextWindowPos(
-			viewport->GetCenter(), ImGuiCond_Always, ImVec2{ 0.5f, 0.5f }
-		);
+		ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_Always, ImVec2{ 0.5f, 0.5f });
 		ImGui::SetNextWindowSize(
-			ImVec2{ viewport->Size.x * widthFactor,
-					viewport->Size.y * heightFactor },
-			ImGuiCond_Always
+			ImVec2{ viewport->Size.x * widthFactor, viewport->Size.y * heightFactor }, ImGuiCond_Always
 		);
 	}
 
@@ -71,18 +67,12 @@ namespace CombatTrackerLib {
 
 	// The enumeration case, where a row position is an enumerator and the names are in that same order.
 	template <typename T>
-		requires std::is_enum_v<
-			T> // Use C++20 concepts to guarentee the passed type is an enum type.
+		requires std::is_enum_v<T> // Use C++20 concepts to guarentee the passed type is an enum type.
 	void renderListBox(
-		ListBoxParameters& parameters,
-		T& type,
-		std::string_view listBoxLabel,
-		std::span<const std::string_view> names
+		ListBoxParameters& parameters, T& type, std::string_view listBoxLabel, std::span<const std::string_view> names
 	) {
 		assert(names.size() == enumToSizeT(T::COUNT));
-		const auto clickedIndex{
-			renderListBox(parameters, listBoxLabel, names)
-		};
+		const auto clickedIndex{ renderListBox(parameters, listBoxLabel, names) };
 		if (clickedIndex != std::nullopt) {
 			type = static_cast<T>(*clickedIndex);
 		}
@@ -106,8 +96,7 @@ namespace CombatTrackerLib {
 		// ImGui writes through an int pointer, so the widget edits a copy that is handed back on change.
 		int value{ overridableInt.get() };
 		if (ImGui::InputInt("##Value", &value)) {
-			overridableInt.setOverride(std::clamp(value, lowerBound, upperBound)
-			);
+			overridableInt.setOverride(std::clamp(value, lowerBound, upperBound));
 		}
 		if (ImGui::Button(overrideLabel.data(), ImVec2{ -1.0f, 0.0f })) {
 			overridableInt.clearOverride();
@@ -116,9 +105,7 @@ namespace CombatTrackerLib {
 
 	// Analogous parallel to renderOverridableInputInt for BoundedInt.
 	template <int LOWER_BOUND, int UPPER_BOUND>
-	void renderBoundedInputInt(
-		BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt, std::string_view label
-	) {
+	void renderBoundedInputInt(BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt, std::string_view label) {
 		int value{ boundedInt.get() };
 		if (ImGui::InputInt(label.data(), &value)) {
 			boundedInt = value;
@@ -137,8 +124,7 @@ namespace CombatTrackerLib {
 		int columnCount
 	) {
 		ImGui::TextWrapped("%s", label.data());
-		if (ScopedTable table{
-				stableID, columnCount, ImGuiTableFlags_SizingStretchSame }) {
+		if (ScopedTable table{ stableID, columnCount, ImGuiTableFlags_SizingStretchSame }) {
 
 			// The whole table is drawn and the flags sit in an array of the same length, so one index walks both plain arrays.
 			for (std::size_t i{}; i < names.size(); ++i) {
@@ -160,8 +146,7 @@ namespace CombatTrackerLib {
 	inline bool alignedButton(const char* label, float alignmentFactor) {
 
 		auto& style{ ImGui::GetStyle() };
-		auto buttonSize{ ImGui::CalcTextSize(label).x +
-						 style.FramePadding.x * 2.0f };
+		auto buttonSize{ ImGui::CalcTextSize(label).x + style.FramePadding.x * 2.0f };
 		auto avail{ ImGui::GetContentRegionAvail().x };
 
 		auto off{ (avail - buttonSize) * alignmentFactor };
@@ -170,10 +155,7 @@ namespace CombatTrackerLib {
 		}
 		return ImGui::Button(label);
 	}
-	inline void centeredImage(
-		const Texture2D& texture,
-		const ImVec4& tint = ImVec4(1.0f, 1.0f, 1.0f, 1.0f)
-	) {
+	inline void centeredImage(const Texture2D& texture, const ImVec4& tint = ImVec4(1.0f, 1.0f, 1.0f, 1.0f)) {
 
 		// Scale down the image size in case the available container is smaller than the texture itself.
 		// This scaling should be done uniformly.
@@ -185,9 +167,7 @@ namespace CombatTrackerLib {
 
 		// The scale is defaulted to 1.0 in case the region size is larger than the image size.
 		const auto finalScale{ std::min(std::min(scaleX, scaleY), 1.0f) };
-		const auto displaySize{
-			ImVec2(width * finalScale, height * finalScale)
-		};
+		const auto displaySize{ ImVec2(width * finalScale, height * finalScale) };
 
 		// Center the cursor position so that the image renders at the center of the content region.
 		auto cursorPos{ ImGui::GetCursorPos() };
@@ -208,21 +188,18 @@ namespace CombatTrackerLib {
 
 	// Vertical space to reserve at the bottom of a window or popup for a separator plus rowCount rows of full height widgets.
 	inline float reservedFooterHeight(int rowCount) {
-		return ImGui::GetFrameHeightWithSpacing() *
-				   static_cast<float>(rowCount) +
+		return ImGui::GetFrameHeightWithSpacing() * static_cast<float>(rowCount) +
 			   ImGui::GetStyle().ItemSpacing.y * 2.0f;
 	}
 
 	// The width a button auto sizes to for the given label.
 	inline float buttonWidth(const char* label) {
-		return ImGui::CalcTextSize(label).x +
-			   ImGui::GetStyle().FramePadding.x * 2.0f;
+		return ImGui::CalcTextSize(label).x + ImGui::GetStyle().FramePadding.x * 2.0f;
 	}
 
 	// The same alignment math alignedButton() does, but for a row of widgets whose total width is known up front.
 	inline void alignCursorForWidth(float width, float alignmentFactor) {
-		const auto off{ (ImGui::GetContentRegionAvail().x - width) *
-						alignmentFactor };
+		const auto off{ (ImGui::GetContentRegionAvail().x - width) * alignmentFactor };
 		if (off > 0.0f) {
 			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
 		}

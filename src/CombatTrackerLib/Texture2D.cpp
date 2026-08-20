@@ -66,11 +66,7 @@ namespace CombatTrackerLib {
 		// Load pixel data into CPU memory using stb's image loading API.
 		stbi_set_flip_vertically_on_load(isOriginAtTop);
 		auto* localBuffer{ stbi_load(
-			texturePath.string().c_str(),
-			&m_width,
-			&m_height,
-			&m_numberOfColorChannels,
-			numberOfDesiredChannels
+			texturePath.string().c_str(), &m_width, &m_height, &m_numberOfColorChannels, numberOfDesiredChannels
 		) };
 		if (localBuffer == nullptr) {
 			return;
@@ -86,22 +82,10 @@ namespace CombatTrackerLib {
 			GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, tAxisWrap
 		); // Parameter for what to do if texture y coordinates fall outside the range [0, 1].
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magnifyingFilter);
-		glTexParameteri(
-			GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minifyingMipmapFilter
-		);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minifyingMipmapFilter);
 
 		// Generate the actual texture and its mipmaps.
-		glTexImage2D(
-			GL_TEXTURE_2D,
-			0,
-			internalFormat,
-			m_width,
-			m_height,
-			0,
-			cpuFormat,
-			GL_UNSIGNED_BYTE,
-			localBuffer
-		);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, cpuFormat, GL_UNSIGNED_BYTE, localBuffer);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		// Cleanup.

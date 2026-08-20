@@ -4,54 +4,33 @@
 #include <cstddef>
 
 namespace CombatTrackerApp {
-	PlayerCharacterTest::PlayerCharacterTest()
-		: m_mockPlayerCharacter{ CreatureStatBlock{}, PlayerStatBlock{} } {}
-	PlayerStatBlock& PlayerCharacterTest::getPlayerBlock() {
-		return m_mockPlayerCharacter.m_statBlockPlayerPortion;
-	}
+	PlayerCharacterTest::PlayerCharacterTest() : m_mockPlayerCharacter{ CreatureStatBlock{}, PlayerStatBlock{} } {}
+	PlayerStatBlock& PlayerCharacterTest::getPlayerBlock() { return m_mockPlayerCharacter.m_statBlockPlayerPortion; }
 	TEST_F(PlayerCharacterTest, TestSubclassMapping) {
-		ASSERT_EQ(
-			CombatTrackerLib::enumToSizeT(PlayerSubclass::COUNT),
-			SUBCLASSES_TO_CLASSES.size()
-		);
+		ASSERT_EQ(CombatTrackerLib::enumToSizeT(PlayerSubclass::COUNT), SUBCLASSES_TO_CLASSES.size());
 		EXPECT_EQ(
 			PlayerClass::BARBARIAN,
-			SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(
-				PlayerSubclass::PATH_OF_THE_BERSERKER
-			)]
+			SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(PlayerSubclass::PATH_OF_THE_BERSERKER)]
 		);
 		EXPECT_EQ(
-			PlayerClass::CLERIC,
-			SUBCLASSES_TO_CLASSES
-				[CombatTrackerLib::enumToSizeT(PlayerSubclass::LIFE_DOMAIN)]
+			PlayerClass::CLERIC, SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(PlayerSubclass::LIFE_DOMAIN)]
 		);
 		EXPECT_EQ(
-			PlayerClass::FIGHTER,
-			SUBCLASSES_TO_CLASSES
-				[CombatTrackerLib::enumToSizeT(PlayerSubclass::PSI_WARRIOR)]
+			PlayerClass::FIGHTER, SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(PlayerSubclass::PSI_WARRIOR)]
 		);
 		EXPECT_EQ(
-			PlayerClass::ROGUE,
-			SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(
-				PlayerSubclass::ARCANE_TRICKSTER
-			)]
+			PlayerClass::ROGUE, SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(PlayerSubclass::ARCANE_TRICKSTER)]
 		);
 		EXPECT_EQ(
-			PlayerClass::WIZARD,
-			SUBCLASSES_TO_CLASSES
-				[CombatTrackerLib::enumToSizeT(PlayerSubclass::ILLUSIONIST)]
+			PlayerClass::WIZARD, SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(PlayerSubclass::ILLUSIONIST)]
 		);
 		// ...
 	}
 	TEST_F(PlayerCharacterTest, TestPlayerCharacterValidation) {
 		const CreatureStatBlock creatureBlock{};
 		auto& playerBlock{ getPlayerBlock() };
-		const auto barbarianIndex{
-			CombatTrackerLib::enumToSizeT(PlayerClass::BARBARIAN)
-		};
-		const auto fighterIndex{
-			CombatTrackerLib::enumToSizeT(PlayerClass::FIGHTER)
-		};
+		const auto barbarianIndex{ CombatTrackerLib::enumToSizeT(PlayerClass::BARBARIAN) };
+		const auto fighterIndex{ CombatTrackerLib::enumToSizeT(PlayerClass::FIGHTER) };
 
 		EXPECT_FALSE(PlayerCharacter::isValid(creatureBlock, playerBlock));
 
@@ -62,9 +41,7 @@ namespace CombatTrackerApp {
 		EXPECT_FALSE(PlayerCharacter::isValid(creatureBlock, playerBlock));
 
 		playerBlock.levels[fighterIndex] = MAX_TOTAL_CLASS_LEVEL + 100;
-		EXPECT_EQ(
-			MAX_TOTAL_CLASS_LEVEL, playerBlock.levels[fighterIndex].get()
-		);
+		EXPECT_EQ(MAX_TOTAL_CLASS_LEVEL, playerBlock.levels[fighterIndex].get());
 
 		playerBlock.levels[fighterIndex] = SUBCLASS_LEVEL_THRESHOLD - 1;
 		playerBlock.levels[barbarianIndex] = MIN_CLASS_LEVEL;
@@ -74,25 +51,17 @@ namespace CombatTrackerApp {
 		playerBlock.levels[fighterIndex] = SUBCLASS_LEVEL_THRESHOLD;
 		EXPECT_TRUE(PlayerCharacter::isValid(creatureBlock, playerBlock));
 
-		playerBlock.subclasses[barbarianIndex] =
-			PlayerSubclass::PATH_OF_THE_ZEALOT;
+		playerBlock.subclasses[barbarianIndex] = PlayerSubclass::PATH_OF_THE_ZEALOT;
 		EXPECT_FALSE(PlayerCharacter::isValid(creatureBlock, playerBlock));
 	}
 	TEST_F(PlayerCharacterTest, TestDerivedMemberResolution) {
 		CreatureStatBlock creatureBlock{};
 		auto& playerBlock{ getPlayerBlock() };
-		const auto fighterIndex{
-			CombatTrackerLib::enumToSizeT(PlayerClass::FIGHTER)
-		};
-		const auto rogueIndex{ CombatTrackerLib::enumToSizeT(PlayerClass::ROGUE
-		) };
-		const auto wizardIndex{
-			CombatTrackerLib::enumToSizeT(PlayerClass::WIZARD)
-		};
+		const auto fighterIndex{ CombatTrackerLib::enumToSizeT(PlayerClass::FIGHTER) };
+		const auto rogueIndex{ CombatTrackerLib::enumToSizeT(PlayerClass::ROGUE) };
+		const auto wizardIndex{ CombatTrackerLib::enumToSizeT(PlayerClass::WIZARD) };
 
-		creatureBlock
-			.abilityScores[CombatTrackerLib::enumToSizeT(Ability::DEXTERITY)] =
-			14;
+		creatureBlock.abilityScores[CombatTrackerLib::enumToSizeT(Ability::DEXTERITY)] = 14;
 		playerBlock.levels[fighterIndex] = 5;
 		playerBlock.levels[rogueIndex] = 4;
 		playerBlock.subclasses[fighterIndex] = PlayerSubclass::CHAMPION;

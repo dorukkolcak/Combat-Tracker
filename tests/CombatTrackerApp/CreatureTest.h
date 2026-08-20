@@ -12,9 +12,7 @@ namespace CombatTrackerApp {
 
 		// Friendship isn't inherited so we create protected versions for the CreatureTest
 		// That call the same function in Creature. I love C++!
-		static void resolveCreatureDerived(
-			CreatureStatBlock& statBlock, double proficiencyTier
-		);
+		static void resolveCreatureDerived(CreatureStatBlock& statBlock, double proficiencyTier);
 		static int findProficiencyBonus(double proficiencyTier);
 		static int findAbilityScoreModifier(int abilityScore);
 

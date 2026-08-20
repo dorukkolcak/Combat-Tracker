@@ -4,20 +4,15 @@
 #include <imgui_impl_glfw.h>
 
 namespace CombatTrackerLib {
-	Window::Window(
-		int initialWidth, int initialHeight, std::string_view applicationName
-	)
-		: Unique(), m_currentWidth{ initialWidth },
-		  m_currentHeight{ initialHeight } {
+	Window::Window(int initialWidth, int initialHeight, std::string_view applicationName)
+		: Unique(), m_currentWidth{ initialWidth }, m_currentHeight{ initialHeight } {
 
 		// Window is created for OpenGL 3.3 Core Profile.
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-		auto mainScale{
-			ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor())
-		};
+		auto mainScale{ ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()) };
 		m_window = glfwCreateWindow(
 			static_cast<int>(mainScale * static_cast<float>(m_currentWidth)),
 			static_cast<int>(mainScale * static_cast<float>(m_currentHeight)),
@@ -28,42 +23,29 @@ namespace CombatTrackerLib {
 		assert(m_window != nullptr);
 		glfwSetWindowUserPointer(m_window, this);
 		glfwMakeContextCurrent(m_window);
-		glfwSetFramebufferSizeCallback(
-			m_window,
-			[]([[maybe_unused]] GLFWwindow* window, int width, int height) {
-				glViewport(0, 0, width, height);
+		glfwSetFramebufferSizeCallback(m_window, []([[maybe_unused]] GLFWwindow* window, int width, int height) {
+			glViewport(0, 0, width, height);
+		});
+		glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height) {
+			// The window size callback records window resize in fullscreens as well
+			// which we don't want for remembering previos window dimensions/locations.
+			// So we check whether the window is fullscreen first.
+			if (glfwGetWindowMonitor(window) != nullptr) {
+				return;
 			}
-		);
-		glfwSetWindowSizeCallback(
-			m_window,
-			[](GLFWwindow* window, int width, int height) {
-				// The window size callback records window resize in fullscreens as well
-				// which we don't want for remembering previos window dimensions/locations.
-				// So we check whether the window is fullscreen first.
-				if (glfwGetWindowMonitor(window) != nullptr) {
-					return;
-				}
-				auto* const userPointer{
-					static_cast<Window*>(glfwGetWindowUserPointer(window))
-				};
-				userPointer->m_currentWidth = width;
-				userPointer->m_currentHeight = height;
+			auto* const userPointer{ static_cast<Window*>(glfwGetWindowUserPointer(window)) };
+			userPointer->m_currentWidth = width;
+			userPointer->m_currentHeight = height;
+		});
+		glfwSetWindowPosCallback(m_window, [](GLFWwindow* window, int xpos, int ypos) {
+			// Same fullscreen consideration here.
+			if (glfwGetWindowMonitor(window) != nullptr) {
+				return;
 			}
-		);
-		glfwSetWindowPosCallback(
-			m_window,
-			[](GLFWwindow* window, int xpos, int ypos) {
-				// Same fullscreen consideration here.
-				if (glfwGetWindowMonitor(window) != nullptr) {
-					return;
-				}
-				auto* const userPointer{
-					static_cast<Window*>(glfwGetWindowUserPointer(window))
-				};
-				userPointer->m_currentXPos = xpos;
-				userPointer->m_currentYPos = ypos;
-			}
-		);
+			auto* const userPointer{ static_cast<Window*>(glfwGetWindowUserPointer(window)) };
+			userPointer->m_currentXPos = xpos;
+			userPointer->m_currentYPos = ypos;
+		});
 		glfwGetWindowPos(m_window, &m_currentXPos, &m_currentYPos);
 		glfwGetWindowSize(m_window, &m_currentWidth, &m_currentHeight);
 	}
@@ -81,24 +63,12 @@ namespace CombatTrackerLib {
 		const auto* glfwVideoMode{ glfwGetVideoMode(monitor) };
 		if (enabled) {
 			glfwSetWindowMonitor(
-				m_window,
-				monitor,
-				0,
-				0,
-				glfwVideoMode->width,
-				glfwVideoMode->height,
-				glfwVideoMode->refreshRate
+				m_window, monitor, 0, 0, glfwVideoMode->width, glfwVideoMode->height, glfwVideoMode->refreshRate
 			);
 		}
 		else {
 			glfwSetWindowMonitor(
-				m_window,
-				nullptr,
-				m_currentXPos,
-				m_currentYPos,
-				m_currentWidth,
-				m_currentHeight,
-				GLFW_DONT_CARE
+				m_window, nullptr, m_currentXPos, m_currentYPos, m_currentWidth, m_currentHeight, GLFW_DONT_CARE
 			);
 		}
 	}

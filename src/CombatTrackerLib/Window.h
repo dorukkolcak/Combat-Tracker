@@ -14,11 +14,7 @@ namespace CombatTrackerLib {
 	class Window : public Unique<Window> {
 	public:
 		Window() = delete;
-		Window(
-			int initialWidth,
-			int initialHeight,
-			std::string_view applicationName
-		);
+		Window(int initialWidth, int initialHeight, std::string_view applicationName);
 
 		~Window();
 

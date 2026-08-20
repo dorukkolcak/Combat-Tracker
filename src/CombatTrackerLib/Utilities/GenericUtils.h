@@ -27,10 +27,8 @@ namespace CombatTrackerLib {
 	This is also used elsewhere (ThemeProvider).
 	*/
 	struct StringHash {
-		using is_transparent = void;
-		std::size_t operator()(std::string_view key) const {
-			return std::hash<std::string_view>{}(key);
-		}
+		using is_transparent = void; // NOLINT(readability-identifier-naming)
+		std::size_t operator()(std::string_view key) const { return std::hash<std::string_view>{}(key); }
 	};
 
 	template <typename E>
@@ -46,13 +44,12 @@ namespace CombatTrackerLib {
 	class BoundedInt {
 	public:
 		constexpr BoundedInt() = default;
-		constexpr BoundedInt(int value)
-			: m_value{ std::clamp(value, LOWER_BOUND, UPPER_BOUND) } {}
+		constexpr BoundedInt(int value) : m_value{ std::clamp(value, LOWER_BOUND, UPPER_BOUND) } {}
 		constexpr BoundedInt& operator=(int value) {
 			m_value = std::clamp(value, LOWER_BOUND, UPPER_BOUND);
 			return *this;
 		}
-		constexpr int get() const { return m_value; }
+		[[nodiscard]] constexpr int get() const { return m_value; }
 		static constexpr int getLowerBound() { return LOWER_BOUND; }
 		static constexpr int getUpperBound() { return UPPER_BOUND; }
 
@@ -60,17 +57,13 @@ namespace CombatTrackerLib {
 		int m_value{ std::clamp(0, LOWER_BOUND, UPPER_BOUND) };
 	};
 	template <int LOWER_BOUND, int UPPER_BOUND>
-	void from_json(
-		const nlohmann::json& contents,
-		BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt
-	) {
+	// NOLINTNEXTLINE(readability-identifier-naming)
+	void from_json(const nlohmann::json& contents, BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt) {
 		boundedInt = contents.get<int>();
 	}
 	template <int LOWER_BOUND, int UPPER_BOUND>
-	void to_json(
-		nlohmann::json& contents,
-		const BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt
-	) {
+	// NOLINTNEXTLINE(readability-identifier-naming)
+	void to_json(nlohmann::json& contents, const BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt) {
 		contents = boundedInt.get();
 	}
 
@@ -83,8 +76,7 @@ namespace CombatTrackerLib {
 	class OverridableInt {
 	public:
 		constexpr OverridableInt() = default;
-		constexpr explicit OverridableInt(int defaultValue)
-			: m_defaultValue{ defaultValue } {}
+		constexpr explicit OverridableInt(int defaultValue) : m_defaultValue{ defaultValue } {}
 
 		// Written by whatever computes the value, and kept fresh even while an override is in place.
 		constexpr OverridableInt& setDefault(int value) {
@@ -102,11 +94,9 @@ namespace CombatTrackerLib {
 			m_override.reset();
 			return *this;
 		}
-		constexpr int get() const {
-			return m_override.value_or(m_defaultValue);
-		}
-		constexpr int getDefault() const { return m_defaultValue; }
-		constexpr bool isOverridden() const { return m_override.has_value(); }
+		[[nodiscard]] constexpr int get() const { return m_override.value_or(m_defaultValue); }
+		[[nodiscard]] constexpr int getDefault() const { return m_defaultValue; }
+		[[nodiscard]] constexpr bool isOverridden() const { return m_override.has_value(); }
 
 	private:
 		int m_defaultValue{};
@@ -116,6 +106,7 @@ namespace CombatTrackerLib {
 	// Since we don't really know how the default is computed from the json file,
 	// We reset the override and set the default elsewhere.
 	inline void
+	// NOLINTNEXTLINE(readability-identifier-naming)
 	from_json(const nlohmann::json& contents, OverridableInt& overridableInt) {
 		if (contents.is_null()) {
 			overridableInt.clearOverride();
@@ -127,6 +118,7 @@ namespace CombatTrackerLib {
 
 	// If overridden we should hold the value. Otherwise we can derive the value from other values.
 	inline void
+	// NOLINTNEXTLINE(readability-identifier-naming)
 	to_json(nlohmann::json& contents, const OverridableInt& overridableInt) {
 		if (overridableInt.isOverridden()) {
 			contents = overridableInt.get();
@@ -152,17 +144,17 @@ namespace CombatTrackerLib {
 		Unique(Unique&& unique) noexcept = delete;
 		Unique& operator=(Unique&& unique) noexcept = delete;
 
-	protected:
+	private:
+		friend Derived;
+
 		Unique() {
-			static_assert(std::is_base_of_v<
-						  Unique,
-						  Derived>); // Evaluates to true if Unique is a base type of Derived.
+			static_assert(std::is_base_of_v<Unique,
+											Derived>); // Evaluates to true if Unique is a base type of Derived.
 			assert(!s_isAlive);
 			s_isAlive = true;
 		}
 		~Unique() { s_isAlive = false; }
 
-	private:
 		inline static bool s_isAlive{ false };
 	};
 }

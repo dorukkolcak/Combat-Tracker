@@ -16,9 +16,7 @@ namespace CombatTrackerLib {
 		if (isLinked == GL_FALSE) {
 			GLint logLength{};
 			glGetProgramiv(m_ID, GL_INFO_LOG_LENGTH, &logLength);
-			std::string infoLog(
-				static_cast<size_t>(std::max(logLength, 1)), '\0'
-			);
+			std::string infoLog(static_cast<size_t>(std::max(logLength, 1)), '\0');
 			glGetProgramInfoLog(m_ID, logLength, nullptr, infoLog.data());
 			std::cerr << "Program link failed: " << infoLog << std::endl;
 			glDeleteProgram(m_ID);

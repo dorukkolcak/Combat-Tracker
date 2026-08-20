@@ -32,19 +32,14 @@ namespace CombatTrackerLib {
 		It abstracts away every single glUniform function through the use of templates and type traits.
 		We have to do a long chain of if statements because OpenGL itself has a seperate function definition for each uniform type.
 		*/
-		template <typename T>
-		void setUniform(std::string_view uniformName, T value) const;
+		template <typename T> void setUniform(std::string_view uniformName, T value) const;
 
 	private:
 		unsigned int m_ID{};
 	};
 
-	template <typename T>
-	void
-	ShaderProgram::setUniform(std::string_view uniformName, T value) const {
-		const auto uniformLocation{
-			glGetUniformLocation(m_ID, uniformName.data())
-		};
+	template <typename T> void ShaderProgram::setUniform(std::string_view uniformName, T value) const {
+		const auto uniformLocation{ glGetUniformLocation(m_ID, uniformName.data()) };
 		if constexpr (std::is_same_v<T, bool>) {
 			glUniform1i(uniformLocation, value);
 		}
@@ -85,49 +80,31 @@ namespace CombatTrackerLib {
 			glUniform4uiv(uniformLocation, 1, glm::value_ptr(value));
 		}
 		else if constexpr (std::is_same_v<T, glm::mat2>) {
-			glUniformMatrix2fv(
-				uniformLocation, 1, GL_FALSE, glm::value_ptr(value)
-			);
+			glUniformMatrix2fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 		}
 		else if constexpr (std::is_same_v<T, glm::mat3>) {
-			glUniformMatrix3fv(
-				uniformLocation, 1, GL_FALSE, glm::value_ptr(value)
-			);
+			glUniformMatrix3fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 		}
 		else if constexpr (std::is_same_v<T, glm::mat4>) {
-			glUniformMatrix4fv(
-				uniformLocation, 1, GL_FALSE, glm::value_ptr(value)
-			);
+			glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 		}
 		else if constexpr (std::is_same_v<T, glm::mat2x3>) {
-			glUniformMatrix2x3fv(
-				uniformLocation, 1, GL_FALSE, glm::value_ptr(value)
-			);
+			glUniformMatrix2x3fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 		}
 		else if constexpr (std::is_same_v<T, glm::mat3x2>) {
-			glUniformMatrix3x2fv(
-				uniformLocation, 1, GL_FALSE, glm::value_ptr(value)
-			);
+			glUniformMatrix3x2fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 		}
 		else if constexpr (std::is_same_v<T, glm::mat2x4>) {
-			glUniformMatrix2x4fv(
-				uniformLocation, 1, GL_FALSE, glm::value_ptr(value)
-			);
+			glUniformMatrix2x4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 		}
 		else if constexpr (std::is_same_v<T, glm::mat4x2>) {
-			glUniformMatrix4x2fv(
-				uniformLocation, 1, GL_FALSE, glm::value_ptr(value)
-			);
+			glUniformMatrix4x2fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 		}
 		else if constexpr (std::is_same_v<T, glm::mat3x4>) {
-			glUniformMatrix3x4fv(
-				uniformLocation, 1, GL_FALSE, glm::value_ptr(value)
-			);
+			glUniformMatrix3x4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 		}
 		else if constexpr (std::is_same_v<T, glm::mat4x3>) {
-			glUniformMatrix4x3fv(
-				uniformLocation, 1, GL_FALSE, glm::value_ptr(value)
-			);
+			glUniformMatrix4x3fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 		}
 		else {
 			std::cerr << "Invalid uniform type.\n";

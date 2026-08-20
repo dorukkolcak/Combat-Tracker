@@ -24,8 +24,7 @@ namespace CombatTrackerLib {
 			std::string name{};
 
 			// These are moved during construction so they should be referenced via the options handler.
-			std::array<std::string, enumToSizeT(OptionsCategory::COUNT)>
-				optionCategoryKeys{};
+			std::array<std::string, enumToSizeT(OptionsCategory::COUNT)> optionCategoryKeys{};
 			nlohmann::json defaultOptions{};
 
 			// These parameters don't really make sense if the window is set to be fullscreen.

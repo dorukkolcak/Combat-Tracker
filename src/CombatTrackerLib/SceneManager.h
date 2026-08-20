@@ -12,11 +12,12 @@ namespace CombatTrackerLib {
 	// Should exist as a singleton owned by the App class.
 	class SceneManager : public Unique<SceneManager> {
 	public:
+		SceneManager();
+		~SceneManager();
+
 		void queueAddScene(std::unique_ptr<Scene> scene);
 		void queueDeleteScene(Scene* sceneToBeDeleted);
-		void queueSceneTransition(
-			Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo
-		);
+		void queueSceneTransition(Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo);
 
 		/*
 		So here is the rough idea of how scenes work:
@@ -55,7 +56,6 @@ namespace CombatTrackerLib {
 		std::vector<std::unique_ptr<Scene>> m_sceneStack{};
 		std::vector<std::unique_ptr<Scene>> m_sceneAdditionQueue{};
 		std::vector<Scene*> m_sceneDeletionQueue{};
-		std::unordered_map<Scene*, std::unique_ptr<Scene>>
-			m_sceneTransitionQueue{};
+		std::unordered_map<Scene*, std::unique_ptr<Scene>> m_sceneTransitionQueue{};
 	};
 }

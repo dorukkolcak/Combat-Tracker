@@ -20,16 +20,13 @@ namespace CombatTrackerApp {
 		void renderScene() override;
 
 	private:
-		inline static constexpr ImGuiDockNodeFlags DOCKSPACE_FLAGS{
-			ImGuiDockNodeFlags_NoResize | ImGuiDockNodeFlags_NoSplit |
-			ImGuiDockNodeFlags_NoWindowMenuButton
-		};
+		inline static constexpr ImGuiDockNodeFlags DOCKSPACE_FLAGS{ ImGuiDockNodeFlags_NoResize |
+																	ImGuiDockNodeFlags_NoSplit |
+																	ImGuiDockNodeFlags_NoWindowMenuButton };
 		inline static constexpr ImGuiWindowFlags HOST_WINDOW_FLAGS{
-			ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
-			ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoScrollbar |
-			ImGuiWindowFlags_NoScrollWithMouse
+			ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+			ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
+			ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse
 		};
 
 		CombatTrackerLib::Texture2D

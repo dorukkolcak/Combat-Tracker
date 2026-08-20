@@ -4,8 +4,7 @@
 #include <algorithm>
 
 namespace CombatTrackerLib {
-	Shader::Shader(const std::filesystem::path& shaderPath, Shader::Type type)
-		: m_isLinkedToProgram{ false } {
+	Shader::Shader(const std::filesystem::path& shaderPath, Shader::Type type) : m_isLinkedToProgram{ false } {
 
 		// Read the shader file.
 		auto shaderCode{ readFileToString(shaderPath) };
@@ -41,9 +40,7 @@ namespace CombatTrackerLib {
 			glGetShaderiv(m_ID, GL_INFO_LOG_LENGTH, &logLength);
 
 			// Create a string with logLength characters. Basically an empty char buffer.
-			std::string infoLog(
-				static_cast<size_t>(std::max(logLength, 1)), '\0'
-			);
+			std::string infoLog(static_cast<size_t>(std::max(logLength, 1)), '\0');
 			glGetShaderInfoLog(m_ID, logLength, nullptr, infoLog.data());
 			std::cerr << "Shader compilation failed: " << infoLog << std::endl;
 			glDeleteShader(m_ID);

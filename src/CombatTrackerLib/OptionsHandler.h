@@ -26,50 +26,33 @@ namespace CombatTrackerLib {
 		OptionsHandler() = delete;
 		OptionsHandler(
 			const std::filesystem::path& userDataDirectory,
-			std::array<std::string, enumToSizeT(OptionsCategory::COUNT)>
-				categoryKeys,
+			std::array<std::string, enumToSizeT(OptionsCategory::COUNT)> categoryKeys,
 			nlohmann::json defaultOptions
 		);
 		~OptionsHandler();
 
-		template <typename T>
-		T getOption(OptionsCategory category, std::string_view option) const;
+		template <typename T> T getOption(OptionsCategory category, std::string_view option) const;
 
-		template <typename T>
-		bool
-		setOption(OptionsCategory category, std::string_view option, T value);
+		template <typename T> bool setOption(OptionsCategory category, std::string_view option, T value);
 
 		void registerImmediateOptionChangeCallback(
-			OptionsCategory category,
-			const std::string& option,
-			std::function<void()> callback
+			OptionsCategory category, const std::string& option, std::function<void()> callback
 		);
 		void registerDeferredOptionChangeCallback(
-			OptionsCategory category,
-			const std::string& option,
-			std::function<void()> callback
+			OptionsCategory category, const std::string& option, std::function<void()> callback
 		);
 
 	private:
-		std::unordered_map<
-			std::pair<OptionsCategory, std::string>,
-			std::function<void()>>
-			m_immediateCallbacks{};
-		std::unordered_map<
-			std::pair<OptionsCategory, std::string>,
-			std::function<void()>>
-			m_deferredCallbacks{};
-		std::unordered_map<std::pair<OptionsCategory, std::string>, bool>
-			m_deferredCallbackStatuses{};
+		std::map<std::pair<OptionsCategory, std::string>, std::function<void()>> m_immediateCallbacks{};
+		std::map<std::pair<OptionsCategory, std::string>, std::function<void()>> m_deferredCallbacks{};
+		std::map<std::pair<OptionsCategory, std::string>, bool> m_deferredCallbackStatuses{};
 
 		std::filesystem::path m_optionsFilePath{};
-		std::array<std::string, enumToSizeT(OptionsCategory::COUNT)>
-			m_categoryKeys{};
+		std::array<std::string, enumToSizeT(OptionsCategory::COUNT)> m_categoryKeys{};
 		nlohmann::json m_defaultOptions{};
 		nlohmann::json m_options{};
 
-		bool
-		validateOption(OptionsCategory category, std::string_view option) const;
+		bool validateOption(OptionsCategory category, std::string_view option) const;
 		void invokeDeferredCallbacks();
 	};
 
@@ -82,19 +65,11 @@ namespace CombatTrackerLib {
 		friend class App;
 	};
 
-	template <typename T>
-	T OptionsHandler::getOption(
-		OptionsCategory category, std::string_view option
-	) const {
-		return validateOption(category, option)
-				   ? m_options[m_categoryKeys[enumToSizeT(category)]][option]
-						 .get<T>()
-				   : T{};
+	template <typename T> T OptionsHandler::getOption(OptionsCategory category, std::string_view option) const {
+		return validateOption(category, option) ? m_options[m_categoryKeys[enumToSizeT(category)]][option].get<T>()
+												: T{};
 	}
-	template <typename T>
-	bool OptionsHandler::setOption(
-		OptionsCategory category, std::string_view option, T value
-	) {
+	template <typename T> bool OptionsHandler::setOption(OptionsCategory category, std::string_view option, T value) {
 		if (validateOption(category, option)) {
 
 			const auto pair{ std::pair(category, std::string{ option }) };

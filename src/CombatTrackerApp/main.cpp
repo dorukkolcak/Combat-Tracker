@@ -9,18 +9,12 @@
 #include <string>
 
 namespace CombatTrackerApp {
-	const std::array<
-		std::string,
-		CombatTrackerLib::enumToSizeT(CombatTrackerLib::OptionsCategory::COUNT)>
+	const std::array<std::string, CombatTrackerLib::enumToSizeT(CombatTrackerLib::OptionsCategory::COUNT)>
 		OPTION_CATEGORY_KEYS{ "general", "appearance" };
 	const nlohmann::json DEFAULT_OPTIONS = nlohmann::json::object(
-		{ { OPTION_CATEGORY_KEYS[CombatTrackerLib::enumToSizeT(
-				CombatTrackerLib::OptionsCategory::GENERAL
-			)],
+		{ { OPTION_CATEGORY_KEYS[CombatTrackerLib::enumToSizeT(CombatTrackerLib::OptionsCategory::GENERAL)],
 			nlohmann::json::object({ { "language", "en" } }) },
-		  { OPTION_CATEGORY_KEYS[CombatTrackerLib::enumToSizeT(
-				CombatTrackerLib::OptionsCategory::APPEARANCE
-			)],
+		  { OPTION_CATEGORY_KEYS[CombatTrackerLib::enumToSizeT(CombatTrackerLib::OptionsCategory::APPEARANCE)],
 			nlohmann::json::object({ { "theme", "Arcane" },
 									 { "vsyncEnabled", true },
 									 { "fullscreenEnabled", false },
@@ -31,18 +25,10 @@ namespace CombatTrackerApp {
 
 int main() {
 	CombatTrackerLib::App::Specification appSpec{
-		"CombatTracker",
-		CombatTrackerApp::OPTION_CATEGORY_KEYS,
-		CombatTrackerApp::DEFAULT_OPTIONS,
-		1920,
-		1080
+		"CombatTracker", CombatTrackerApp::OPTION_CATEGORY_KEYS, CombatTrackerApp::DEFAULT_OPTIONS, 1920, 1080
 	};
 	CombatTrackerLib::App application(std::move(appSpec));
-	application.getSceneManager().queueAddScene(
-		std::make_unique<CombatTrackerApp::MainMenuScene>(&application)
-	);
-	application.getSceneManager().queueAddScene(
-		std::make_unique<CombatTrackerApp::OverlayScene>(&application)
-	);
+	application.getSceneManager().queueAddScene(std::make_unique<CombatTrackerApp::MainMenuScene>(&application));
+	application.getSceneManager().queueAddScene(std::make_unique<CombatTrackerApp::OverlayScene>(&application));
 	application.run();
 }

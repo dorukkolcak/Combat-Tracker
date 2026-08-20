@@ -4,38 +4,21 @@
 #include "CombatTrackerLib/Utilities/UIUtils.h"
 
 namespace CombatTrackerApp {
-	PlayerCharacterCreationScene::PlayerCharacterCreationScene(
-		CombatTrackerLib::App* app
-	)
-		: EntityCreationScene{ app }, m_currentPlayerStatBlock{},
-		  m_speciesParameters{}, m_originParameters{} {}
-	EntityCreationScene::CreationLabels
-	PlayerCharacterCreationScene::getCreationLabels() const {
-		return { m_localeProviderPointer->getText(
-					 "/scenes/playerCharacterCreation/windowTitle"
-				 ),
-				 m_localeProviderPointer->getText(
-					 "/scenes/playerCharacterCreation/completeButton"
-				 ),
-				 m_localeProviderPointer->getText(
-					 "/scenes/playerCharacterCreation/cancelButton"
-				 ) };
+	PlayerCharacterCreationScene::PlayerCharacterCreationScene(CombatTrackerLib::App* app)
+		: EntityCreationScene{ app }, m_currentPlayerStatBlock{}, m_speciesParameters{}, m_originParameters{} {}
+	EntityCreationScene::CreationLabels PlayerCharacterCreationScene::getCreationLabels() const {
+		return { m_localeProviderPointer->getText("/scenes/playerCharacterCreation/windowTitle"),
+				 m_localeProviderPointer->getText("/scenes/playerCharacterCreation/completeButton"),
+				 m_localeProviderPointer->getText("/scenes/playerCharacterCreation/cancelButton") };
 	}
 	void PlayerCharacterCreationScene::renderEntitySpecificInfo() {
 		ImGui::SeparatorText(
-			m_localeProviderPointer
-				->getText("/scenes/playerCharacterCreation/classesAndSubclasses"
-				)
-				.data()
+			m_localeProviderPointer->getText("/scenes/playerCharacterCreation/classesAndSubclasses").data()
 		);
 		renderPlayerClassAndSubclasses();
 	}
 	void PlayerCharacterCreationScene::renderEntitySpecificSection() {
-		ImGui::SeparatorText(
-			m_localeProviderPointer
-				->getText("/scenes/playerCharacterCreation/specificData")
-				.data()
-		);
+		ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/playerCharacterCreation/specificData").data());
 		renderPlayerCharacterSpecificInfo();
 	}
 	void PlayerCharacterCreationScene::renderPlayerCharacterSpecificInfo() {
@@ -46,11 +29,7 @@ namespace CombatTrackerApp {
 			ImGui::TableNextRow();
 
 			ImGui::TableSetColumnIndex(0);
-			ImGui::TextUnformatted(
-				m_localeProviderPointer
-					->getText("/scenes/playerCharacterCreation/species")
-					.data()
-			);
+			ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/playerCharacterCreation/species").data());
 			ImGui::SetNextItemWidth(-1.0f);
 			renderListBox(
 				m_speciesParameters,
@@ -60,11 +39,7 @@ namespace CombatTrackerApp {
 			);
 
 			ImGui::TableSetColumnIndex(1);
-			ImGui::TextUnformatted(
-				m_localeProviderPointer
-					->getText("/scenes/playerCharacterCreation/origin")
-					.data()
-			);
+			ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/playerCharacterCreation/origin").data());
 			ImGui::SetNextItemWidth(-1.0f);
 			renderListBox(
 				m_originParameters,
@@ -77,86 +52,55 @@ namespace CombatTrackerApp {
 			m_currentPlayerStatBlock.weaponProficiencies,
 			m_localeProviderPointer->getTextList("/domain/weaponType"),
 			"WeaponProficiencies",
-			m_localeProviderPointer->getText(
-				"/scenes/playerCharacterCreation/weaponProficiencies"
-			),
+			m_localeProviderPointer->getText("/scenes/playerCharacterCreation/weaponProficiencies"),
 			3
 		);
 		CombatTrackerLib::renderCheckboxGrid(
 			m_currentPlayerStatBlock.armorProficiencies,
 			m_localeProviderPointer->getTextList("/domain/armorType"),
 			"ArmorProficiencies",
-			m_localeProviderPointer->getText(
-				"/scenes/playerCharacterCreation/armorProficiencies"
-			),
+			m_localeProviderPointer->getText("/scenes/playerCharacterCreation/armorProficiencies"),
 			3
 		);
 		renderProficiencyLevelGrid(
 			m_currentPlayerStatBlock.toolProficiencyLevels,
 			m_localeProviderPointer->getTextList("/domain/tool"),
 			"ToolProficiencies",
-			m_localeProviderPointer->getText(
-				"/scenes/playerCharacterCreation/toolProficiencies"
-			),
+			m_localeProviderPointer->getText("/scenes/playerCharacterCreation/toolProficiencies"),
 			3
 		);
 		CombatTrackerLib::renderCheckboxGrid(
 			m_currentPlayerStatBlock.weaponMasteries,
 			m_localeProviderPointer->getTextList("/domain/weaponMastery"),
 			"WeaponMasteries",
-			m_localeProviderPointer->getText(
-				"/scenes/playerCharacterCreation/weaponMasteries"
-			),
+			m_localeProviderPointer->getText("/scenes/playerCharacterCreation/weaponMasteries"),
 			3
 		);
 	}
 	void PlayerCharacterCreationScene::renderPlayerClassAndSubclasses() {
 
-		const auto classNames{
-			m_localeProviderPointer->getTextList("/domain/playerClass")
-		};
-		const auto subclassNames{
-			m_localeProviderPointer->getTextList("/domain/playerSubclass")
-		};
+		const auto classNames{ m_localeProviderPointer->getTextList("/domain/playerClass") };
+		const auto subclassNames{ m_localeProviderPointer->getTextList("/domain/playerSubclass") };
 
 		if (CombatTrackerLib::ScopedTable classesAndSubclasses{
-				"Classes and Subclasses",
-				1,
-				ImGuiTableFlags_SizingStretchSame }) {
+				"Classes and Subclasses", 1, ImGuiTableFlags_SizingStretchSame }) {
 
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
 
 			for (size_t i{}; i < classNames.size(); ++i) {
-				if (m_currentPlayerStatBlock.levels[i].get() ==
-					MIN_CLASS_LEVEL) {
+				if (m_currentPlayerStatBlock.levels[i].get() == MIN_CLASS_LEVEL) {
 					continue;
 				}
-				ImGui::TextWrapped(
-					"%s %d",
-					classNames[i].data(),
-					m_currentPlayerStatBlock.levels[i].get()
-				);
+				ImGui::TextWrapped("%s %d", classNames[i].data(), m_currentPlayerStatBlock.levels[i].get());
 			}
-			for (const auto& subclassSlot :
-				 m_currentPlayerStatBlock.subclasses) {
+			for (const auto& subclassSlot : m_currentPlayerStatBlock.subclasses) {
 				if (subclassSlot.has_value()) {
-					ImGui::TextWrapped(
-						"%s",
-						subclassNames[CombatTrackerLib::enumToSizeT(
-										  subclassSlot.value()
-									  )]
-							.data()
-					);
+					ImGui::TextWrapped("%s", subclassNames[CombatTrackerLib::enumToSizeT(subclassSlot.value())].data());
 				}
 			}
 			if (CombatTrackerLib::alignedButton(
-					m_localeProviderPointer
-						->getText(
-							"/scenes/playerCharacterCreation/configureButton"
-						)
-						.data(),
-					0.5f
+					m_localeProviderPointer->getText("/scenes/playerCharacterCreation/configureButton").data(), 0.5f
 				)) {
 				ImGui::OpenPopup("###ClassConfiguration");
 			}
@@ -164,51 +108,32 @@ namespace CombatTrackerApp {
 			// The popup can neither be moved nor resized by hand, so both its position and its size keep following the viewport.
 			CombatTrackerLib::centerNextWindow(0.92f, 0.92f);
 			if (CombatTrackerLib::ScopedPopupModal popupModal{
-					m_localeProviderPointer->getText(
-						"/scenes/playerCharacterCreation/configureButton"
-					),
+					m_localeProviderPointer->getText("/scenes/playerCharacterCreation/configureButton"),
 					nullptr,
 					ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize }) {
 				{
 					CombatTrackerLib::ScopedChild editClassScroll{
-						"EditClassScroll",
-						ImVec2{ 0.0f,
-								-CombatTrackerLib::reservedFooterHeight(1) },
-						true
+						"EditClassScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(1) }, true
 					};
 
 					ImGui::TextWrapped(
-						"%s",
-						m_localeProviderPointer
-							->getText("/scenes/playerCharacterCreation/classes")
-							.data()
+						"%s", m_localeProviderPointer->getText("/scenes/playerCharacterCreation/classes").data()
 					);
 					if (CombatTrackerLib::ScopedTable classLevels{
-							"##ClassLevels",
-							4,
-							ImGuiTableFlags_SizingStretchSame }) {
+							"##ClassLevels", 4, ImGuiTableFlags_SizingStretchSame }) {
 						for (size_t i{}; i < classNames.size(); ++i) {
 							const auto className{ classNames[i] };
-							CombatTrackerLib::ScopedID scopedID{
-								static_cast<int>(i)
-							};
+							CombatTrackerLib::ScopedID scopedID{ static_cast<int>(i) };
 							ImGui::TableNextColumn();
 							ImGui::TextUnformatted(className.data());
 							ImGui::SetNextItemWidth(-1.0f);
-							CombatTrackerLib::renderBoundedInputInt(
-								m_currentPlayerStatBlock.levels[i],
-								"##ClassLevel"
-							);
+							CombatTrackerLib::renderBoundedInputInt(m_currentPlayerStatBlock.levels[i], "##ClassLevel");
 						}
 					}
 
 					static PlayerClass s_currentClass{};
 					ImGui::SeparatorText(
-						m_localeProviderPointer
-							->getText(
-								"/scenes/playerCharacterCreation/subclasses"
-							)
-							.data()
+						m_localeProviderPointer->getText("/scenes/playerCharacterCreation/subclasses").data()
 					);
 
 					/*
@@ -219,16 +144,9 @@ namespace CombatTrackerApp {
 					*/
 					for (size_t i{}; i < subclassNames.size(); ++i) {
 						const auto subclass{ static_cast<PlayerSubclass>(i) };
-						const auto correspondingClass{
-							SUBCLASSES_TO_CLASSES
-								[CombatTrackerLib::enumToSizeT(subclass)]
-						};
-						const auto classIndex{
-							CombatTrackerLib::enumToSizeT(correspondingClass)
-						};
-						auto& subclassSlot{
-							m_currentPlayerStatBlock.subclasses[classIndex]
-						};
+						const auto correspondingClass{ SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(subclass)] };
+						const auto classIndex{ CombatTrackerLib::enumToSizeT(correspondingClass) };
+						auto& subclassSlot{ m_currentPlayerStatBlock.subclasses[classIndex] };
 
 						// This prevents printing multiple class labels.
 						// Otherwise we would have a class label for every subclass.
@@ -238,9 +156,7 @@ namespace CombatTrackerApp {
 
 						// The checkbox reports both directions of the change, so unchecking has to empty the slot again.
 						bool isChosen{ subclassSlot == subclass };
-						if (ImGui::Checkbox(
-								subclassNames[i].data(), &isChosen
-							)) {
+						if (ImGui::Checkbox(subclassNames[i].data(), &isChosen)) {
 							if (isChosen) {
 								subclassSlot = subclass;
 							}
@@ -266,9 +182,7 @@ namespace CombatTrackerApp {
 	}
 
 	void PlayerCharacterCreationScene::resolveDerivedValues() {
-		PlayerCharacter::resolveDerived(
-			m_currentCreatureStatBlock, m_currentPlayerStatBlock
-		);
+		PlayerCharacter::resolveDerived(m_currentCreatureStatBlock, m_currentPlayerStatBlock);
 	}
 
 	bool PlayerCharacterCreationScene::completeEntityCreation() {
