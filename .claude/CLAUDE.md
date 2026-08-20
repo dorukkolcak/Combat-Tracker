@@ -34,14 +34,10 @@ Examples for systems and features that are suitable for this project are as foll
 
 - This architectural distinction is the single most important thing to consider during development and the boundaries listed should be respected at all times.
 
-- **`scripts`** is where utilities that are not part of the core runtime application but are related to the development of the project should live. Some examples can be as follows:
-  - Scripts for generating assets that are shipped with the project. The script itself shouldn't be part of the source code as we only care about the output of the script.
-  - Scripts for logging, automation and setting up the project.
-
 - **`tests`** is where unit tests for the source code live. The directory is further split into two subdirectories: CombatTrackerLib and CombatTrackerApp. 
 Unit tests exist for both the library-side and the application side of the project. Hence, tests written in one subdirectory should only test functionality for the corresponding part of the project.
 
-- **`external`** is where external dependencies live. This should almost never be touched by you and should be configured by the actual developer.
+- **`external`** holds only the dependencies that are deliberately vendored rather than packaged: `glad`, whose loader is generated for one specific OpenGL version and extension set, and `stb`, whose implementation translation unit belongs to this project. Every other dependency comes from vcpkg through the `vcpkg.json` manifest and is resolved with a plain `find_package` call, so `Dependencies.cmake` should stay a short list of `find_package` calls rather than growing vendored builds again. This directory should almost never be touched by you and should be configured by the actual developer.
 
 - One thing to keep in mind is that the examples given for directories shouldn't be seen as strict rules here. There can be many examples that fit one part of the project.
 When adding a feature, the guidelines in this section should be taken into consideration and the feature should be categorized into the proper part of the project.
@@ -64,11 +60,17 @@ When adding a feature, the guidelines in this section should be taken into consi
 
 - Comments should only be written by the actual developer. Preserve all comments when editing code and never write comments yourself. If the developer asks you to add explicit documentation for your work, you should make a write up in another form. You can delete/modify/correct redundant/outdated/unnecessary comments due to changes to the codebase.
 
+- The codebase is formatted with clang-format and analysed with clang-tidy, using the copies that ship with Visual Studio. Both tools take their configuration from the `.clang-format` and `.clang-tidy` files at the repository root. Both walk parent directories and stop at the first configuration they find, so these committed files take precedence over anything in the developer's user profile and are what CI and any contributor will use. Treat them as the single source of truth for style, and do not run a formatting pass across the tree on your own initiative.
+
+- Two kinds of tool marker exist in the source and must be preserved. `// clang-format off` / `// clang-format on` guards include blocks whose order is load bearing: in `Window.h`, `glad/glad.h` has to precede `GLFW/glfw3.h` or glad's `#error` for an already included OpenGL header fires. `// NOLINTNEXTLINE(readability-identifier-naming)` marks identifiers whose spelling an external API dictates, such as nlohmann's `from_json` and `to_json` or the standard library's `is_transparent`. Names like these are marked at the declaration rather than exempted through a regex in the tool configuration.
+
 - It is really important that you respect the given style/convention guidelines and visible conventions/stylistic choices already available in the code. Additions that do not conform to these guidelines/visible stylistic choices shouldn't be made at all.
 
 - The project is developed in a very professional mindset. Employ this mindset while developing the project and have quality as the main criteria.
 
 ## Other Guidelines
+
+- The build is driven by `CMakePresets.json`, which names vcpkg's toolchain file through `$env{VCPKG_ROOT}`. Configuring fails outright when that environment variable is unset, which is intended: vcpkg is the dependency mechanism, not an optional accelerator. Dependency versions are pinned by the `builtin-baseline` commit in `vcpkg.json`, so changing a version means moving that baseline deliberately rather than editing `Dependencies.cmake`.
 
 - Architectural decisions should be made by the developer. You can give suggestions but the final decision on how to organize code and layers should be made by the developer.
 

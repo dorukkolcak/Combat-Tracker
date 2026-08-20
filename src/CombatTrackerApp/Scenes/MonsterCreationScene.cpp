@@ -1,30 +1,25 @@
 #include "CombatTrackerApp/Scenes/MonsterCreationScene.h"
-#include "CombatTrackerLib/Utilities/UIUtils.h"
 #include "CombatTrackerApp/Entities/CreatureStorage.h"
+#include "CombatTrackerLib/Utilities/UIUtils.h"
 
 #include <optional>
 
 namespace CombatTrackerApp {
-	MonsterCreationScene::MonsterCreationScene(CombatTrackerLib::App* app) :
-		EntityCreationScene{ app },
-		m_currentMonsterStatBlock{},
-		m_monsterCRParameters{}
-	{
-	}
+	MonsterCreationScene::MonsterCreationScene(CombatTrackerLib::App* app)
+		: EntityCreationScene{ app }, m_currentMonsterStatBlock{}, m_monsterCRParameters{} {}
 
 	EntityCreationScene::CreationLabels MonsterCreationScene::getCreationLabels() const {
-		return {
-			m_localeProviderPointer->getText("/scenes/monsterCreation/windowTitle"),
-			m_localeProviderPointer->getText("/scenes/monsterCreation/completeButton"),
-			m_localeProviderPointer->getText("/scenes/monsterCreation/cancelButton")
-		};
+		return { m_localeProviderPointer->getText("/scenes/monsterCreation/windowTitle"),
+				 m_localeProviderPointer->getText("/scenes/monsterCreation/completeButton"),
+				 m_localeProviderPointer->getText("/scenes/monsterCreation/cancelButton") };
 	}
 	void MonsterCreationScene::resolveDerivedValues() {
 		Monster::resolveDerived(m_currentCreatureStatBlock, m_currentMonsterStatBlock);
 	}
 	void MonsterCreationScene::renderEntitySpecificInfo() {
 		ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/monsterCreation/specificData").data());
-		if (CombatTrackerLib::ScopedTable monsterSpecificGrid{ "MonsterSpecificGrid", 1, ImGuiTableFlags_SizingStretchSame }) {
+		if (CombatTrackerLib::ScopedTable monsterSpecificGrid{
+				"MonsterSpecificGrid", 1, ImGuiTableFlags_SizingStretchSame }) {
 
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
@@ -35,7 +30,9 @@ namespace CombatTrackerApp {
 			ImGui::SetNextItemWidth(-1.0f);
 
 			const auto challengeRatingNames{ m_localeProviderPointer->getTextList("/domain/challengeRating") };
-			const auto clickedRating{ CombatTrackerLib::renderListBox(m_monsterCRParameters, "##CR", challengeRatingNames) };
+			const auto clickedRating{
+				CombatTrackerLib::renderListBox(m_monsterCRParameters, "##CR", challengeRatingNames)
+			};
 			if (clickedRating != std::nullopt) {
 				m_currentMonsterStatBlock.CR = CHALLENGE_RATINGS[*clickedRating].value;
 			}
@@ -52,19 +49,16 @@ namespace CombatTrackerApp {
 			ImGui::Spacing();
 			ImGui::TextUnformatted(m_localeProviderPointer->getText("/scenes/monsterCreation/proficiencyBonus").data());
 			ImGui::Text("%d", m_currentCreatureStatBlock.derived.getProficiencyBonus());
-
 		}
 	}
 
 	bool MonsterCreationScene::completeEntityCreation() {
-		bool isSavingSuccessful{
-			CreatureStorage::saveCreature<Monster>(
-				m_applicationPointer->getDirectoryProvider().getUserDataDirectory(),
-				m_currentCreatureStatBlock,
-				std::cref(m_currentMonsterStatBlock),
-				std::nullopt
-			)
-		};
+		bool isSavingSuccessful{ CreatureStorage::saveCreature<Monster>(
+			m_applicationPointer->getDirectoryProvider().getUserDataDirectory(),
+			m_currentCreatureStatBlock,
+			std::cref(m_currentMonsterStatBlock),
+			std::nullopt
+		) };
 		if (isSavingSuccessful) {
 			resetParametersAndOverrides();
 			return true;

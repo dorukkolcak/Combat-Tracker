@@ -7,12 +7,8 @@ namespace CombatTrackerLib {
 	SceneManager::SceneManager() = default;
 	SceneManager::~SceneManager() = default;
 
-	void SceneManager::queueAddScene(std::unique_ptr<Scene> scene) {
-		m_sceneAdditionQueue.push_back(std::move(scene));
-	}
-	void SceneManager::queueDeleteScene(Scene* sceneToBeDeleted) {
-		m_sceneDeletionQueue.push_back(sceneToBeDeleted);
-	}
+	void SceneManager::queueAddScene(std::unique_ptr<Scene> scene) { m_sceneAdditionQueue.push_back(std::move(scene)); }
+	void SceneManager::queueDeleteScene(Scene* sceneToBeDeleted) { m_sceneDeletionQueue.push_back(sceneToBeDeleted); }
 	void SceneManager::queueSceneTransition(Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo) {
 		m_sceneTransitionQueue.insert({ transitionedFrom, std::move(transitionedTo) });
 	}
@@ -49,9 +45,11 @@ namespace CombatTrackerLib {
 
 		// Remove the deleted scene unique_ptrs from the sceneStack.
 		m_sceneStack.erase(
-			std::remove_if(m_sceneStack.begin(), m_sceneStack.end(), [](const std::unique_ptr<Scene>& scenePointer) {
-				return scenePointer == nullptr;
-			}),
+			std::remove_if(
+				m_sceneStack.begin(),
+				m_sceneStack.end(),
+				[](const std::unique_ptr<Scene>& scenePointer) { return scenePointer == nullptr; }
+			),
 			m_sceneStack.end()
 		);
 		m_sceneDeletionQueue.clear();
@@ -62,7 +60,5 @@ namespace CombatTrackerLib {
 		}
 		m_sceneAdditionQueue.clear();
 	}
-	const std::vector<std::unique_ptr<Scene>>& SceneManager::getScenes() const {
-		return m_sceneStack;
-	}
+	const std::vector<std::unique_ptr<Scene>>& SceneManager::getScenes() const { return m_sceneStack; }
 }

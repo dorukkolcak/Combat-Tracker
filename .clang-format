@@ -1,0 +1,53 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+Standard: Latest
+
+UseTab: Always
+TabWidth: 4
+IndentWidth: 4
+AccessModifierOffset: -4
+NamespaceIndentation: All
+ColumnLimit: 120
+
+PointerAlignment: Left
+Cpp11BracedListStyle: false
+BinPackArguments: false
+BinPackParameters: false
+AlignAfterOpenBracket: BlockIndent
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterClass: false
+  AfterControlStatement: Never
+  AfterEnum: false
+  AfterFunction: false
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+
+ReflowComments: false
+FixNamespaceComments: false
+
+SortIncludes: CaseSensitive
+IncludeBlocks: Preserve
+IncludeIsMainRegex: '([-_a-zA-Z0-9]+)?$'
+IncludeCategories:
+  - Regex:           '^"([^"]*)\.h"'
+    Priority:        1
+  - Regex:           '^"[^"]*"'
+    Priority:        2
+  - Regex:           '^<([^>]+/)+[^>]+\..+'
+    Priority:        3
+  - Regex:           '^<.*'
+    Priority:        4

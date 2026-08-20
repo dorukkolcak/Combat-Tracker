@@ -13,7 +13,7 @@ namespace CombatTrackerLib {
 			return;
 		}
 
-		// Create and compile the shader. 
+		// Create and compile the shader.
 		switch (type) {
 		case Type::VERTEX:
 			m_ID = glCreateShader(GL_VERTEX_SHADER);
@@ -73,16 +73,12 @@ namespace CombatTrackerLib {
 	}
 	Shader::~Shader() {
 
-		// A linked shader shoudn't call glDeleteShader from its destructor, 
+		// A linked shader shoudn't call glDeleteShader from its destructor,
 		// as its shader program will have already called this.
 		if (!m_isLinkedToProgram) {
 			glDeleteShader(m_ID);
 		}
 	}
-	unsigned int Shader::getShaderID() const {
-		return m_ID;
-	}
-	void Shader::setAsLinked() {
-		m_isLinkedToProgram = true;
-	}
+	unsigned int Shader::getShaderID() const { return m_ID; }
+	void Shader::setAsLinked() { m_isLinkedToProgram = true; }
 }

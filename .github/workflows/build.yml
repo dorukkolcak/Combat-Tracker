@@ -30,39 +30,57 @@ jobs:
             os: windows-latest
             c: cl
             cxx: cl
+            triplet: x64-windows
+            cache: sccache
           - id: windows-clang
             name: Windows Clang
             os: windows-latest
             c: clang-cl
             cxx: clang-cl
+            triplet: x64-windows
+            cache: sccache
           - id: windows-gcc
             name: Windows GCC
             os: windows-latest
             c: gcc
             cxx: g++
+            triplet: x64-mingw-static
+            cache: ccache
           - id: linux-gcc
             name: Linux GCC
             os: ubuntu-latest
             c: gcc
             cxx: g++
+            triplet: x64-linux
+            cache: ccache
           - id: linux-clang
             name: Linux Clang
             os: ubuntu-latest
             c: clang
             cxx: clang++
+            triplet: x64-linux
+            cache: ccache
           - id: macos-clang
             name: macOS Clang
             os: macos-latest
             c: clang
             cxx: clang++
+            triplet: arm64-osx
+            cache: ccache
 
     env:
       CC: ${{ matrix.toolchain.c }}
       CXX: ${{ matrix.toolchain.cxx }}
+      VCPKG_DEFAULT_TRIPLET: ${{ matrix.toolchain.triplet }}
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg-cache,readwrite
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+
+      - name: Point VCPKG_ROOT at the preinstalled vcpkg
+        shell: bash
+        run: echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
 
       # GLFW builds both its X11 and Wayland backends on Linux, so both sets of
       # headers have to be present or the configure step fails.
@@ -94,76 +112,33 @@ jobs:
         if: matrix.toolchain.id == 'windows-gcc'
         run: choco install mingw ninja -y --no-progress
 
-      - name: Cache fetched dependencies
+      - name: Cache vcpkg binaries
         uses: actions/cache@v6
         with:
-          path: build/${{ matrix.preset }}/_deps
-          key: deps-${{ matrix.toolchain.id }}-${{ matrix.preset }}-${{ hashFiles('Dependencies.cmake') }}
+          path: vcpkg-cache
+          key: vcpkg-${{ matrix.toolchain.id }}-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            deps-${{ matrix.toolchain.id }}-${{ matrix.preset }}-
+            vcpkg-${{ matrix.toolchain.id }}-
+
+      - name: Cache compiled objects
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          variant: ${{ matrix.toolchain.cache }}
+          key: ${{ matrix.toolchain.id }}-${{ matrix.preset }}
 
       - name: Configure, build and test
         run: cmake --workflow --preset ${{ matrix.preset }}
 
       # Only the release builds are kept. Debug binaries are large and rarely what you want to hand to someone.
-      # The two paths cover both naming conventions, and only one of them matches on any given runner.
-      - name: Upload application binary
+      - name: Package
+        if: matrix.preset == 'release'
+        run: cpack --preset release
+
+      - name: Upload application package
         if: matrix.preset == 'release'
         uses: actions/upload-artifact@v7
         with:
           name: Combat-Tracker-${{ matrix.toolchain.id }}
-          path: |
-            build/release/src/CombatTrackerApp/Combat-Tracker-App
-            build/release/src/CombatTrackerApp/Combat-Tracker-App.exe
+          path: build/packages/*
           if-no-files-found: error
           retention-days: 14
-
-  # Sanitize workflow on the latest ubuntu version using gcc/clang.
-  sanitize:
-    name: ${{ matrix.toolchain.name }} sanitize
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        toolchain:
-          - id: linux-gcc
-            name: Linux GCC
-            c: gcc
-            cxx: g++
-          - id: linux-clang
-            name: Linux Clang
-            c: clang
-            cxx: clang++
-
-    env:
-      CC: ${{ matrix.toolchain.c }}
-      CXX: ${{ matrix.toolchain.cxx }}
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-
-      - name: Install Linux build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            ninja-build \
-            xorg-dev \
-            libwayland-dev \
-            libxkbcommon-dev \
-            wayland-protocols \
-            extra-cmake-modules
-
-      - name: Lower ASLR entropy for ASan
-        run: sudo sysctl -w vm.mmap_rnd_bits=28
-
-      - name: Cache fetched dependencies
-        uses: actions/cache@v6
-        with:
-          path: build/sanitize/_deps
-          key: deps-${{ matrix.toolchain.id }}-sanitize-${{ hashFiles('Dependencies.cmake') }}
-          restore-keys: |
-            deps-${{ matrix.toolchain.id }}-sanitize-
-
-      - name: Configure, build and test
-        run: cmake --workflow --preset sanitize

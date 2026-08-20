@@ -1,13 +1,13 @@
 #pragma once
 
+#include "CombatTrackerLib/ImGuiScopes.h"
 #include "CombatTrackerLib/Texture2D.h"
 #include "CombatTrackerLib/Utilities/GenericUtils.h"
-#include "CombatTrackerLib/ImGuiScopes.h"
 
-#include <imgui.h>
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <imgui.h>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -33,8 +33,7 @@ namespace CombatTrackerLib {
 		const auto viewport{ ImGui::GetMainViewport() };
 		ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_Always, ImVec2{ 0.5f, 0.5f });
 		ImGui::SetNextWindowSize(
-			ImVec2{ viewport->Size.x * widthFactor, viewport->Size.y * heightFactor },
-			ImGuiCond_Always
+			ImVec2{ viewport->Size.x * widthFactor, viewport->Size.y * heightFactor }, ImGuiCond_Always
 		);
 	}
 
@@ -43,7 +42,8 @@ namespace CombatTrackerLib {
 	inline std::optional<std::size_t> renderListBox(
 		ListBoxParameters& parameters,
 		std::string_view listBoxLabel,
-		std::span<const std::string_view> names // A view over a vector of const std::string_view elements. Basically same idea as string_view.
+		std::span<const std::string_view>
+			names // A view over a vector of const std::string_view elements. Basically same idea as string_view.
 	) {
 		parameters.isHighlighted = false;
 		std::optional<std::size_t> clickedIndex{};
@@ -66,12 +66,10 @@ namespace CombatTrackerLib {
 	}
 
 	// The enumeration case, where a row position is an enumerator and the names are in that same order.
-	template <typename T> requires std::is_enum_v<T> // Use C++20 concepts to guarentee the passed type is an enum type.
+	template <typename T>
+		requires std::is_enum_v<T> // Use C++20 concepts to guarentee the passed type is an enum type.
 	void renderListBox(
-		ListBoxParameters& parameters,
-		T& type,
-		std::string_view listBoxLabel,
-		std::span<const std::string_view> names
+		ListBoxParameters& parameters, T& type, std::string_view listBoxLabel, std::span<const std::string_view> names
 	) {
 		assert(names.size() == enumToSizeT(T::COUNT));
 		const auto clickedIndex{ renderListBox(parameters, listBoxLabel, names) };
@@ -114,7 +112,7 @@ namespace CombatTrackerLib {
 		}
 	}
 
-	// Simple helper method for rendering multi-selectable parameters. 
+	// Simple helper method for rendering multi-selectable parameters.
 	// This function uses a table call so we pass a non-localized id parameter to construct the table.
 	// Otherwise a localized value will cause us to create a different table depending on the language.
 	template <typename M>
@@ -139,7 +137,7 @@ namespace CombatTrackerLib {
 	// Very simple helper for rendering information texts as bullet points.
 	inline void renderBulletList(std::span<const std::string_view> bullets) {
 		for (const auto& bullet : bullets) {
-			ImGui::Bullet(); 
+			ImGui::Bullet();
 			ImGui::TextWrapped("%s", bullet.data());
 		}
 	}
@@ -177,14 +175,21 @@ namespace CombatTrackerLib {
 		cursorPos.y += std::max(0.0f, (availableSize.y - displaySize.y) * 0.5f);
 		ImGui::SetCursorPos(cursorPos);
 
-		// The tint is multiplied with the texel in the ImGui shader, so a white texture comes out as exactly the tint colour. 
-		ImGui::ImageWithBg(static_cast<ImTextureID>(texture.getID()), displaySize,
-			ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tint);
+		// The tint is multiplied with the texel in the ImGui shader, so a white texture comes out as exactly the tint colour.
+		ImGui::ImageWithBg(
+			static_cast<ImTextureID>(texture.getID()),
+			displaySize,
+			ImVec2(0.0f, 0.0f),
+			ImVec2(1.0f, 1.0f),
+			ImVec4(0.0f, 0.0f, 0.0f, 0.0f),
+			tint
+		);
 	}
 
 	// Vertical space to reserve at the bottom of a window or popup for a separator plus rowCount rows of full height widgets.
 	inline float reservedFooterHeight(int rowCount) {
-		return ImGui::GetFrameHeightWithSpacing() * static_cast<float>(rowCount) + ImGui::GetStyle().ItemSpacing.y * 2.0f;
+		return ImGui::GetFrameHeightWithSpacing() * static_cast<float>(rowCount) +
+			   ImGui::GetStyle().ItemSpacing.y * 2.0f;
 	}
 
 	// The width a button auto sizes to for the given label.

@@ -47,13 +47,7 @@ namespace CombatTrackerLib {
 		program.m_ID = 0;
 		return *this;
 	}
-	ShaderProgram::~ShaderProgram() {
-		glDeleteProgram(m_ID);
-	}
-	void ShaderProgram::use() const {
-		glUseProgram(m_ID);
-	}
-	void ShaderProgram::unbind() const {
-		glUseProgram(0);
-	}
+	ShaderProgram::~ShaderProgram() { glDeleteProgram(m_ID); }
+	void ShaderProgram::use() const { glUseProgram(m_ID); }
+	void ShaderProgram::unbind() const { glUseProgram(0); }
 }

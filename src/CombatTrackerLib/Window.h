@@ -1,23 +1,20 @@
 #pragma once
 
+#include "CombatTrackerLib/Utilities/GenericUtils.h"
+
 #include <string_view>
 
 // Pay attention to the ordering here.
+// clang-format off
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+// clang-format on
 
 namespace CombatTrackerLib {
-	class Window {
+	class Window : public Unique<Window> {
 	public:
-		Window() = default;
+		Window() = delete;
 		Window(int initialWidth, int initialHeight, std::string_view applicationName);
-
-		// A Window object exists as a singleton so it should be non-copiable and non-movable.
-		Window(const Window& other) = delete;
-		Window& operator=(const Window& other) = delete;
-
-		Window(Window&& other) = delete;
-		Window& operator=(Window&& other) = delete;
 
 		~Window();
 
@@ -26,6 +23,7 @@ namespace CombatTrackerLib {
 		void setResizable(bool enabled);
 
 		void update();
+
 	private:
 		GLFWwindow* m_window{};
 		int m_currentWidth{};

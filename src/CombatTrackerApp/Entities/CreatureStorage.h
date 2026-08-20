@@ -3,23 +3,24 @@
 #include "CombatTrackerApp/Entities/Creature.h"
 #include "CombatTrackerApp/Entities/Monster.h"
 #include "CombatTrackerApp/Entities/PlayerCharacter.h"
-#include "CombatTrackerLib/Utilities/FileUtils.h"
 #include "CombatTrackerLib/App.h"
+#include "CombatTrackerLib/Utilities/FileUtils.h"
 
 #include <nlohmann/json.hpp>
 #include <concepts>
 #include <filesystem>
 #include <format>
-#include <string_view>
-#include <optional>
 #include <functional>
+#include <optional>
+#include <string_view>
 
 namespace CombatTrackerApp {
 
 	// Use Nlohmann's macros to serialize structs/types/classes to json easily.
 	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CreatureAction, name, description, type)
 	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(NamedDescription, name, description)
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CreatureStatBlock,
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+		CreatureStatBlock,
 		savingThrowProficiencyLevels,
 		skillProficiencyLevels,
 		abilityScores,
@@ -42,7 +43,8 @@ namespace CombatTrackerApp {
 		AC,
 		HP
 	)
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PlayerStatBlock,
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+		PlayerStatBlock,
 		levels,
 		subclasses,
 		weaponProficiencies,
@@ -56,7 +58,8 @@ namespace CombatTrackerApp {
 
 	class CreatureStorage {
 	public:
-		template <typename T> requires std::derived_from<T, Creature>
+		template <typename T>
+			requires std::derived_from<T, Creature>
 		static bool saveCreature(
 			const std::filesystem::path& userDataDirectory,
 			const CreatureStatBlock& creatureBlock,
@@ -69,12 +72,14 @@ namespace CombatTrackerApp {
 			}
 			return writeCreature<T>(userDataDirectory, creatureBlock, monsterBlock, playerBlock);
 		}
-		template <typename T> requires std::derived_from<T, Creature>
+		template <typename T>
+			requires std::derived_from<T, Creature>
 		static bool deleteCreature(const std::filesystem::path& userDataDirectory, std::string_view creatureName) {
 			std::error_code errorCode{};
 			return std::filesystem::remove(findFilePath<T>(userDataDirectory, creatureName), errorCode);
 		}
-		template <typename T> requires std::derived_from<T, Creature>
+		template <typename T>
+			requires std::derived_from<T, Creature>
 		static CreatureStatBlock loadCreature(
 			const std::filesystem::path& userDataDirectory,
 			std::string_view entityName,
@@ -85,7 +90,7 @@ namespace CombatTrackerApp {
 			if (contents == std::nullopt) {
 				return CreatureStatBlock{};
 			}
-			auto creatureBlock{ contents->at("creatureBlock").get<CreatureStatBlock>()};
+			auto creatureBlock{ contents->at("creatureBlock").get<CreatureStatBlock>() };
 			if constexpr (std::same_as<T, Monster>) {
 				outMonsterBlock->get() = contents->at("monsterBlock").get<MonsterStatBlock>();
 				Monster::resolveDerived(creatureBlock, outMonsterBlock->get());
@@ -96,7 +101,8 @@ namespace CombatTrackerApp {
 			}
 			return creatureBlock; // Should internally use NRVO so no need for explicit std::move().
 		}
-		template <typename T> requires std::derived_from<T, Creature>
+		template <typename T>
+			requires std::derived_from<T, Creature>
 		static bool editCreature(
 			const std::filesystem::path& userDataDirectory,
 			std::string_view entityName,
@@ -108,7 +114,8 @@ namespace CombatTrackerApp {
 
 			// If the creature is renamed to a creature that already exists, we should reject the edit.
 			std::error_code errorCode{};
-			if (isRenamed && std::filesystem::exists(findFilePath<T>(userDataDirectory, creatureBlock.name), errorCode)) {
+			if (isRenamed &&
+				std::filesystem::exists(findFilePath<T>(userDataDirectory, creatureBlock.name), errorCode)) {
 				return false;
 			}
 
@@ -122,9 +129,12 @@ namespace CombatTrackerApp {
 			}
 			return true;
 		}
+
 	private:
-		template <typename T> requires std::derived_from<T, Creature>
-		static std::filesystem::path findFilePath(const std::filesystem::path& userDataDirectory, std::string_view creatureName) {
+		template <typename T>
+			requires std::derived_from<T, Creature>
+		static std::filesystem::path
+		findFilePath(const std::filesystem::path& userDataDirectory, std::string_view creatureName) {
 			if constexpr (std::same_as<T, Monster>) {
 				return userDataDirectory / "Monsters" / std::format("{}.json", creatureName);
 			}
@@ -132,7 +142,8 @@ namespace CombatTrackerApp {
 				return userDataDirectory / "PlayerCharacters" / std::format("{}.json", creatureName);
 			}
 		}
-		template <typename T> requires std::derived_from<T, Creature>
+		template <typename T>
+			requires std::derived_from<T, Creature>
 		static bool writeCreature(
 			const std::filesystem::path& userDataDirectory,
 			const CreatureStatBlock& creatureBlock,

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <cstddef>
-#include <type_traits>
+#include <nlohmann/json.hpp>
 #include <algorithm>
+#include <cstddef>
 #include <optional>
 #include <string_view>
-#include <nlohmann/json.hpp>
+#include <type_traits>
 
 namespace CombatTrackerLib {
 
@@ -27,20 +27,20 @@ namespace CombatTrackerLib {
 	This is also used elsewhere (ThemeProvider).
 	*/
 	struct StringHash {
-		using is_transparent = void;
-		std::size_t operator()(std::string_view key) const {
-			return std::hash<std::string_view>{}(key);
-		}
+		using is_transparent = void; // NOLINT(readability-identifier-naming)
+		std::size_t operator()(std::string_view key) const { return std::hash<std::string_view>{}(key); }
 	};
 
-	template<typename E> requires std::is_enum_v<E>
+	template <typename E>
+		requires std::is_enum_v<E>
 	constexpr std::size_t enumToSizeT(E enumerator) {
 		return static_cast<std::size_t>(enumerator);
 	}
 
 	// A wrapper over int that defines lower and upper bounds.
 	// This is particularly useful for ability scores/modifiers which have set bounds.
-	template <int LOWER_BOUND, int UPPER_BOUND> requires (LOWER_BOUND <= UPPER_BOUND)
+	template <int LOWER_BOUND, int UPPER_BOUND>
+		requires(LOWER_BOUND <= UPPER_BOUND)
 	class BoundedInt {
 	public:
 		constexpr BoundedInt() = default;
@@ -49,23 +49,20 @@ namespace CombatTrackerLib {
 			m_value = std::clamp(value, LOWER_BOUND, UPPER_BOUND);
 			return *this;
 		}
-		constexpr int get() const {
-			return m_value;
-		}
-		static constexpr int getLowerBound() {
-			return LOWER_BOUND;
-		}
-		static constexpr int getUpperBound() {
-			return UPPER_BOUND;
-		}
+		[[nodiscard]] constexpr int get() const { return m_value; }
+		static constexpr int getLowerBound() { return LOWER_BOUND; }
+		static constexpr int getUpperBound() { return UPPER_BOUND; }
+
 	private:
 		int m_value{ std::clamp(0, LOWER_BOUND, UPPER_BOUND) };
 	};
 	template <int LOWER_BOUND, int UPPER_BOUND>
+	// NOLINTNEXTLINE(readability-identifier-naming)
 	void from_json(const nlohmann::json& contents, BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt) {
 		boundedInt = contents.get<int>();
 	}
 	template <int LOWER_BOUND, int UPPER_BOUND>
+	// NOLINTNEXTLINE(readability-identifier-naming)
 	void to_json(nlohmann::json& contents, const BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt) {
 		contents = boundedInt.get();
 	}
@@ -97,15 +94,10 @@ namespace CombatTrackerLib {
 			m_override.reset();
 			return *this;
 		}
-		constexpr int get() const {
-			return m_override.value_or(m_defaultValue);
-		}
-		constexpr int getDefault() const {
-			return m_defaultValue;
-		}
-		constexpr bool isOverridden() const {
-			return m_override.has_value();
-		}
+		[[nodiscard]] constexpr int get() const { return m_override.value_or(m_defaultValue); }
+		[[nodiscard]] constexpr int getDefault() const { return m_defaultValue; }
+		[[nodiscard]] constexpr bool isOverridden() const { return m_override.has_value(); }
+
 	private:
 		int m_defaultValue{};
 		std::optional<int> m_override{};
@@ -113,7 +105,9 @@ namespace CombatTrackerLib {
 
 	// Since we don't really know how the default is computed from the json file,
 	// We reset the override and set the default elsewhere.
-	inline void from_json(const nlohmann::json& contents, OverridableInt& overridableInt) {
+	inline void
+	// NOLINTNEXTLINE(readability-identifier-naming)
+	from_json(const nlohmann::json& contents, OverridableInt& overridableInt) {
 		if (contents.is_null()) {
 			overridableInt.clearOverride();
 		}
@@ -123,7 +117,9 @@ namespace CombatTrackerLib {
 	}
 
 	// If overridden we should hold the value. Otherwise we can derive the value from other values.
-	inline void to_json(nlohmann::json& contents, const OverridableInt& overridableInt) {
+	inline void
+	// NOLINTNEXTLINE(readability-identifier-naming)
+	to_json(nlohmann::json& contents, const OverridableInt& overridableInt) {
 		if (overridableInt.isOverridden()) {
 			contents = overridableInt.get();
 		}
@@ -131,4 +127,34 @@ namespace CombatTrackerLib {
 			contents = nullptr;
 		}
 	}
+
+	/*
+	This is a base class that attempts to enforce uniqueness/singleton-ish property to some objects.
+	We do this using CRTF and a static variable that gets instantiated every time a new derived class is created.
+	Now this is not a proper implementation of a singleton because I hate the global state singletons bring.
+	The way we enforce the uniqueness property is via deleting move/copy constructor/assignment operators.
+	And a static boolean flag that tracks whether an object of this type was instantiated.
+	Providers/handlers or any other object that is responsible for tracking/managing a resource should probably inherit from this.
+	*/
+	template <typename Derived> class Unique {
+	public:
+		Unique(const Unique& unique) = delete;
+		Unique& operator=(const Unique& unique) = delete;
+
+		Unique(Unique&& unique) noexcept = delete;
+		Unique& operator=(Unique&& unique) noexcept = delete;
+
+	private:
+		friend Derived;
+
+		Unique() {
+			static_assert(std::is_base_of_v<Unique,
+											Derived>); // Evaluates to true if Unique is a base type of Derived.
+			assert(!s_isAlive);
+			s_isAlive = true;
+		}
+		~Unique() { s_isAlive = false; }
+
+		inline static bool s_isAlive{ false };
+	};
 }

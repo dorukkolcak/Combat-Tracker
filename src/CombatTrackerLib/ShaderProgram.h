@@ -2,18 +2,18 @@
 
 #include "CombatTrackerLib/Shader.h"
 
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/glm.hpp>
-#include <type_traits>
-#include <string_view>
 #include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <string_view>
+#include <type_traits>
 #include <vector>
 
 namespace CombatTrackerLib {
 	class ShaderProgram {
 	public:
-		ShaderProgram() = default;
+		ShaderProgram() = delete;
 		explicit ShaderProgram(std::vector<Shader>& shaders);
 
 		ShaderProgram(const ShaderProgram& program) = delete;
@@ -32,14 +32,13 @@ namespace CombatTrackerLib {
 		It abstracts away every single glUniform function through the use of templates and type traits.
 		We have to do a long chain of if statements because OpenGL itself has a seperate function definition for each uniform type.
 		*/
-		template <typename T>
-		void setUniform(std::string_view uniformName, T value) const;
+		template <typename T> void setUniform(std::string_view uniformName, T value) const;
+
 	private:
 		unsigned int m_ID{};
 	};
 
-	template <typename T>
-	void ShaderProgram::setUniform(std::string_view uniformName, T value) const {
+	template <typename T> void ShaderProgram::setUniform(std::string_view uniformName, T value) const {
 		const auto uniformLocation{ glGetUniformLocation(m_ID, uniformName.data()) };
 		if constexpr (std::is_same_v<T, bool>) {
 			glUniform1i(uniformLocation, value);

@@ -1,22 +1,18 @@
 #pragma once
 
+#include "CombatTrackerLib/Utilities/GenericUtils.h"
+
 #include <memory>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 namespace CombatTrackerLib {
 	class Scene;
-	class SceneManager {
+
+	// Should exist as a singleton owned by the App class.
+	class SceneManager : public Unique<SceneManager> {
 	public:
 		SceneManager();
-
-		// Should exist as a singleton owned by the App class.
-		// So the manager should be non-copiable/movable.
-		SceneManager(const SceneManager& other) = delete;
-		SceneManager& operator=(const SceneManager& other) = delete;
-		SceneManager(SceneManager&& other) = delete;
-		SceneManager& operator=(SceneManager&& other) = delete;
-
 		~SceneManager();
 
 		void queueAddScene(std::unique_ptr<Scene> scene);
@@ -54,8 +50,8 @@ namespace CombatTrackerLib {
 		*/
 		void dequeueSceneOperations();
 		const std::vector<std::unique_ptr<Scene>>& getScenes() const;
-	private:
 
+	private:
 		// I prefer using vector as sort of a stack because it is much better at resizing, compared to a pure stack data structure.
 		std::vector<std::unique_ptr<Scene>> m_sceneStack{};
 		std::vector<std::unique_ptr<Scene>> m_sceneAdditionQueue{};

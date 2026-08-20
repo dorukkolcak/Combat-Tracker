@@ -16,6 +16,7 @@ namespace CombatTrackerLib {
 		ImGuiScope& operator=(const ImGuiScope&) = delete;
 		ImGuiScope(ImGuiScope&&) = delete;
 		ImGuiScope& operator=(ImGuiScope&&) = delete;
+
 	protected:
 		ImGuiScope() = default;
 		~ImGuiScope() = default;
@@ -30,6 +31,7 @@ namespace CombatTrackerLib {
 	class ImGuiConditionalScope : public ImGuiScope {
 	public:
 		explicit operator bool() const;
+
 	protected:
 		explicit ImGuiConditionalScope(bool isOpen);
 		~ImGuiConditionalScope() = default;
@@ -52,38 +54,24 @@ namespace CombatTrackerLib {
 	};
 	class ScopedListBox : public ImGuiConditionalScope {
 	public:
-		ScopedListBox(
-			std::string_view label,
-			const ImVec2& size = ImVec2{ 0.0f, 0.0f }
-		);
+		ScopedListBox(std::string_view label, const ImVec2& size = ImVec2{ 0.0f, 0.0f });
 		~ScopedListBox();
 	};
 
 	// Note that a popup modal closes with EndPopup rather than a matching EndPopupModal.
 	class ScopedPopupModal : public ImGuiConditionalScope {
 	public:
-		ScopedPopupModal(
-			std::string_view name,
-			bool* isOpenPointer = nullptr,
-			ImGuiWindowFlags flags = 0
-		);
+		ScopedPopupModal(std::string_view name, bool* isOpenPointer = nullptr, ImGuiWindowFlags flags = 0);
 		~ScopedPopupModal();
 	};
 	class ScopedTabBar : public ImGuiConditionalScope {
 	public:
-		ScopedTabBar(
-			std::string_view stableID,
-			ImGuiTabBarFlags flags = 0
-		);
+		ScopedTabBar(std::string_view stableID, ImGuiTabBarFlags flags = 0);
 		~ScopedTabBar();
 	};
 	class ScopedTabItem : public ImGuiConditionalScope {
 	public:
-		ScopedTabItem(
-			std::string_view label,
-			bool* isOpenPointer = nullptr,
-			ImGuiTabItemFlags flags = 0
-		);
+		ScopedTabItem(std::string_view label, bool* isOpenPointer = nullptr, ImGuiTabItemFlags flags = 0);
 		~ScopedTabItem();
 	};
 	class ScopedMenuBar : public ImGuiConditionalScope {
@@ -93,10 +81,7 @@ namespace CombatTrackerLib {
 	};
 	class ScopedMenu : public ImGuiConditionalScope {
 	public:
-		ScopedMenu(
-			std::string_view label,
-			bool isEnabled = true
-		);
+		ScopedMenu(std::string_view label, bool isEnabled = true);
 		~ScopedMenu();
 	};
 
@@ -104,11 +89,7 @@ namespace CombatTrackerLib {
 	// So their closing call must not sit behind the same if.
 	class ScopedWindow : public ImGuiConditionalScope {
 	public:
-		ScopedWindow(
-			std::string_view name,
-			bool* isOpenPointer = nullptr,
-			ImGuiWindowFlags flags = 0
-		);
+		ScopedWindow(std::string_view name, bool* isOpenPointer = nullptr, ImGuiWindowFlags flags = 0);
 		~ScopedWindow();
 	};
 	class ScopedChild : public ImGuiConditionalScope {

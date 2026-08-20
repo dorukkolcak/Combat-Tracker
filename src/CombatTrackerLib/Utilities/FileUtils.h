@@ -1,11 +1,11 @@
-#pragma once 
+#pragma once
 
-#include <optional>
 #include <nlohmann/json.hpp>
 #include <filesystem>
 #include <fstream>
-#include <sstream>
 #include <iostream>
+#include <optional>
+#include <sstream>
 #include <system_error>
 
 namespace CombatTrackerLib {

@@ -5,16 +5,25 @@
 
 namespace CombatTrackerApp {
 	PlayerCharacterTest::PlayerCharacterTest() : m_mockPlayerCharacter{ CreatureStatBlock{}, PlayerStatBlock{} } {}
-	PlayerStatBlock& PlayerCharacterTest::getPlayerBlock() {
-		return m_mockPlayerCharacter.m_statBlockPlayerPortion;
-	}
+	PlayerStatBlock& PlayerCharacterTest::getPlayerBlock() { return m_mockPlayerCharacter.m_statBlockPlayerPortion; }
 	TEST_F(PlayerCharacterTest, TestSubclassMapping) {
 		ASSERT_EQ(CombatTrackerLib::enumToSizeT(PlayerSubclass::COUNT), SUBCLASSES_TO_CLASSES.size());
-		EXPECT_EQ(PlayerClass::BARBARIAN, SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(PlayerSubclass::PATH_OF_THE_BERSERKER)]);
-		EXPECT_EQ(PlayerClass::CLERIC, SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(PlayerSubclass::LIFE_DOMAIN)]);
-		EXPECT_EQ(PlayerClass::FIGHTER, SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(PlayerSubclass::PSI_WARRIOR)]);
-		EXPECT_EQ(PlayerClass::ROGUE, SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(PlayerSubclass::ARCANE_TRICKSTER)]);
-		EXPECT_EQ(PlayerClass::WIZARD, SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(PlayerSubclass::ILLUSIONIST)]);
+		EXPECT_EQ(
+			PlayerClass::BARBARIAN,
+			SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(PlayerSubclass::PATH_OF_THE_BERSERKER)]
+		);
+		EXPECT_EQ(
+			PlayerClass::CLERIC, SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(PlayerSubclass::LIFE_DOMAIN)]
+		);
+		EXPECT_EQ(
+			PlayerClass::FIGHTER, SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(PlayerSubclass::PSI_WARRIOR)]
+		);
+		EXPECT_EQ(
+			PlayerClass::ROGUE, SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(PlayerSubclass::ARCANE_TRICKSTER)]
+		);
+		EXPECT_EQ(
+			PlayerClass::WIZARD, SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(PlayerSubclass::ILLUSIONIST)]
+		);
 		// ...
 	}
 	TEST_F(PlayerCharacterTest, TestPlayerCharacterValidation) {

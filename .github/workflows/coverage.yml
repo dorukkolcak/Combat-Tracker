@@ -1,0 +1,85 @@
+name: Coverage
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    name: Linux GCC coverage
+    runs-on: ubuntu-latest
+
+    env:
+      CC: gcc
+      CXX: g++
+      VCPKG_DEFAULT_TRIPLET: x64-linux
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg-cache,readwrite
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Point VCPKG_ROOT at the preinstalled vcpkg
+        run: echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ninja-build \
+            xorg-dev \
+            libwayland-dev \
+            libxkbcommon-dev \
+            wayland-protocols \
+            extra-cmake-modules
+
+      - name: Install gcovr
+        run: pipx install gcovr
+
+      - name: Cache vcpkg binaries
+        uses: actions/cache@v6
+        with:
+          path: vcpkg-cache
+          key: vcpkg-linux-gcc-coverage-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-linux-gcc-coverage-
+
+      - name: Configure, build and test
+        run: cmake --workflow --preset coverage
+
+      - name: Generate coverage report
+        run: |
+          mkdir -p coverage
+          gcovr --root . --filter src/ --html-details coverage/index.html --json-summary coverage/summary.json --print-summary
+
+      - name: Append coverage to job summary
+        run: |
+          lines=$(jq -r .line_percent coverage/summary.json)
+          branches=$(jq -r .branch_percent coverage/summary.json)
+          functions=$(jq -r .function_percent coverage/summary.json)
+          {
+            echo "### Coverage"
+            echo
+            echo "| Metric | Percent |"
+            echo "| --- | --- |"
+            echo "| Lines | $lines% |"
+            echo "| Branches | $branches% |"
+            echo "| Functions | $functions% |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: coverage
+          if-no-files-found: error
+          retention-days: 14

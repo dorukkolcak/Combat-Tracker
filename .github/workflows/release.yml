@@ -1,0 +1,121 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    name: ${{ matrix.toolchain.name }}
+    runs-on: ${{ matrix.toolchain.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain:
+          - id: windows-msvc
+            name: Windows MSVC
+            os: windows-latest
+            c: cl
+            cxx: cl
+            triplet: x64-windows
+          - id: linux-gcc
+            name: Linux GCC
+            os: ubuntu-latest
+            c: gcc
+            cxx: g++
+            triplet: x64-linux
+          - id: macos-clang
+            name: macOS Clang
+            os: macos-latest
+            c: clang
+            cxx: clang++
+            triplet: arm64-osx
+
+    env:
+      CC: ${{ matrix.toolchain.c }}
+      CXX: ${{ matrix.toolchain.cxx }}
+      VCPKG_DEFAULT_TRIPLET: ${{ matrix.toolchain.triplet }}
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg-cache,readwrite
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Point VCPKG_ROOT at the preinstalled vcpkg
+        shell: bash
+        run: echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ninja-build \
+            xorg-dev \
+            libwayland-dev \
+            libxkbcommon-dev \
+            wayland-protocols \
+            extra-cmake-modules
+
+      - name: Install Ninja (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ninja || true
+
+      - name: Set up MSVC developer environment
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Cache vcpkg binaries
+        uses: actions/cache@v6
+        with:
+          path: vcpkg-cache
+          key: vcpkg-${{ matrix.toolchain.id }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ matrix.toolchain.id }}-
+
+      - name: Configure, build and test
+        run: cmake --workflow --preset release
+
+      - name: Package
+        run: cpack --preset release
+
+      - name: Upload package
+        uses: actions/upload-artifact@v7
+        with:
+          name: package-${{ matrix.toolchain.id }}
+          path: build/packages/*
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish release
+    needs: package
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v7
+        with:
+          pattern: package-*
+          merge-multiple: true
+          path: packages
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release create "$GITHUB_REF_NAME" packages/* --title "$GITHUB_REF_NAME" --generate-notes

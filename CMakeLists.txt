@@ -1,16 +1,37 @@
 cmake_minimum_required(VERSION 3.25)
-project(Combat-Tracker LANGUAGES C CXX)
+project(Combat-Tracker VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+option(COMBAT_TRACKER_CACHE "Use sccache or ccache as the compiler launcher when one is available" ON)
+
+if(COMBAT_TRACKER_CACHE)
+    find_program(COMPILER_CACHE_EXECUTABLE NAMES sccache ccache)
+    if(COMPILER_CACHE_EXECUTABLE)
+        set(CMAKE_C_COMPILER_LAUNCHER ${COMPILER_CACHE_EXECUTABLE})
+        set(CMAKE_CXX_COMPILER_LAUNCHER ${COMPILER_CACHE_EXECUTABLE})
+
+        if(MSVC AND COMPILER_CACHE_EXECUTABLE MATCHES "sccache")
+            set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>")
+        endif()
+    endif()
+endif()
 
 include(CTest)
 include(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies.cmake)
 
 # CMAKE_COMPILE_WARNING_AS_ERROR is deliberately set here rather than at the top of the file.
 # The COMPILE_WARNING_AS_ERROR property of a target is initialized from this variable at the moment the target is created,
-# so setting it after the dependencies are declared leaves every fetched and vendored target out of it and covers only ours.
+# so setting it after the dependencies are declared leaves every vendored target out of it and covers only ours.
 # We only set this during the CI builds as it makes testing things locally really cumbersome.
 if(DEFINED ENV{CI})
     set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
+endif()
+
+option(COMBAT_TRACKER_CLANG_TIDY "Run clang-tidy on our own targets during the build" OFF)
+
+if(COMBAT_TRACKER_CLANG_TIDY)
+    find_program(CLANG_TIDY_EXECUTABLE NAMES clang-tidy REQUIRED)
+    set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_EXECUTABLE})
 endif()
 
 # This conditional tries to mimic the "treat all informational warnings as errors" behaviour across all compilers.
@@ -78,6 +99,17 @@ if(COMBAT_TRACKER_SANITIZE)
     target_link_options(Combat-Tracker-Options INTERFACE ${SANITIZER_FLAGS})
 endif()
 
+option(COMBAT_TRACKER_COVERAGE "Build our own targets with coverage instrumentation" OFF)
+
+if(COMBAT_TRACKER_COVERAGE)
+    if(MSVC)
+        message(FATAL_ERROR "COMBAT_TRACKER_COVERAGE requires GCC or Clang.")
+    endif()
+
+    target_compile_options(Combat-Tracker-Options INTERFACE --coverage)
+    target_link_options(Combat-Tracker-Options INTERFACE --coverage)
+endif()
+
 # Setup directories.
 add_subdirectory(src/CombatTrackerLib)
 add_subdirectory(src/CombatTrackerApp)
@@ -85,3 +117,16 @@ if(BUILD_TESTING)
     add_subdirectory(tests/CombatTrackerLib)
     add_subdirectory(tests/CombatTrackerApp)
 endif()
+
+find_package(Doxygen QUIET)
+
+if(DOXYGEN_FOUND)
+    add_custom_target(docs
+        COMMAND ${CMAKE_COMMAND} -E env COMBAT_TRACKER_VERSION=${PROJECT_VERSION}
+                $<TARGET_FILE:Doxygen::doxygen> ${PROJECT_SOURCE_DIR}/Doxyfile
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        VERBATIM
+    )
+endif()
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/Packaging.cmake)

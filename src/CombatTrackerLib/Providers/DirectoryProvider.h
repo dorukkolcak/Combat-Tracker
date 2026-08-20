@@ -1,27 +1,20 @@
 #pragma once
 
+#include "CombatTrackerLib/Utilities/GenericUtils.h"
+
 #include <filesystem>
 #include <string_view>
 
 namespace CombatTrackerLib {
-	class DirectoryProvider {
+	class DirectoryProvider : public Unique<DirectoryProvider> {
 	public:
-		DirectoryProvider() = default;
+		DirectoryProvider() = delete;
 		explicit DirectoryProvider(std::string_view applicationName);
 
-		DirectoryProvider(const DirectoryProvider& provider) = delete;
-		DirectoryProvider& operator=(const DirectoryProvider& provider) = delete;
-
-		DirectoryProvider(DirectoryProvider&& provider) noexcept = delete;
-		DirectoryProvider& operator=(DirectoryProvider&& provider) noexcept = delete;
-
-		~DirectoryProvider() = default;
-
-		const std::filesystem::path& getResourceDirectory() const;
-		const std::filesystem::path& getUserDataDirectory() const;
+		[[nodiscard]] const std::filesystem::path& getResourceDirectory() const;
+		[[nodiscard]] const std::filesystem::path& getUserDataDirectory() const;
 
 	private:
-
 		std::filesystem::path m_resourceDirectory{};
 		std::filesystem::path m_userDataDirectory{};
 

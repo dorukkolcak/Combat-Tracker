@@ -3,11 +3,11 @@
 #include "CombatTrackerApp/Entities/Creature.h"
 #include "CombatTrackerLib/Utilities/GenericUtils.h"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
-#include <optional>
-#include <algorithm>
 #include <functional>
+#include <optional>
 
 namespace CombatTrackerApp {
 
@@ -174,50 +174,50 @@ namespace CombatTrackerApp {
 		PlayerClass::BARBARIAN, // PATH_OF_THE_WILD_HEART
 		PlayerClass::BARBARIAN, // PATH_OF_THE_WORLD_TREE
 		PlayerClass::BARBARIAN, // PATH_OF_THE_ZEALOT
-		PlayerClass::BARD,      // COLLEGE_OF_DANCE
-		PlayerClass::BARD,      // COLLEGE_OF_GLAMOUR
-		PlayerClass::BARD,      // COLLEGE_OF_LORE
-		PlayerClass::BARD,      // COLLEGE_OF_VALOR
-		PlayerClass::CLERIC,    // LIFE_DOMAIN
-		PlayerClass::CLERIC,    // LIGHT_DOMAIN
-		PlayerClass::CLERIC,    // TRICKERY_DOMAIN
-		PlayerClass::CLERIC,    // WAR_DOMAIN
-		PlayerClass::DRUID,     // CIRCLE_OF_THE_LAND
-		PlayerClass::DRUID,     // CIRCLE_OF_THE_MOON
-		PlayerClass::DRUID,     // CIRCLE_OF_THE_SEA
-		PlayerClass::DRUID,     // CIRCLE_OF_THE_STARS
-		PlayerClass::FIGHTER,   // BATTLE_MASTER
-		PlayerClass::FIGHTER,   // CHAMPION
-		PlayerClass::FIGHTER,   // ELDRITCH_KNIGHT
-		PlayerClass::FIGHTER,   // PSI_WARRIOR
-		PlayerClass::MONK,      // WARRIOR_OF_MERCY
-		PlayerClass::MONK,      // WARRIOR_OF_SHADOW
-		PlayerClass::MONK,      // WARRIOR_OF_THE_ELEMENTS
-		PlayerClass::MONK,      // WARRIOR_OF_THE_OPEN_HAND
-		PlayerClass::PALADIN,   // OATH_OF_DEVOTION
-		PlayerClass::PALADIN,   // OATH_OF_GLORY
-		PlayerClass::PALADIN,   // OATH_OF_THE_ANCIENTS
-		PlayerClass::PALADIN,   // OATH_OF_VENGEANCE
-		PlayerClass::RANGER,    // BEAST_MASTER
-		PlayerClass::RANGER,    // FEY_WANDERER
-		PlayerClass::RANGER,    // GLOOM_STALKER
-		PlayerClass::RANGER,    // HUNTER
-		PlayerClass::ROGUE,     // ARCANE_TRICKSTER
-		PlayerClass::ROGUE,     // ASSASSIN
-		PlayerClass::ROGUE,     // SOULKNIFE
-		PlayerClass::ROGUE,     // THIEF
-		PlayerClass::SORCERER,  // ABERRANT_SORCERY
-		PlayerClass::SORCERER,  // CLOCKWORK_SORCERY
-		PlayerClass::SORCERER,  // DRACONIC_SORCERY
-		PlayerClass::SORCERER,  // WILD_MAGIC_SORCERY
-		PlayerClass::WARLOCK,   // ARCHFEY_PATRON
-		PlayerClass::WARLOCK,   // CELESTIAL_PATRON
-		PlayerClass::WARLOCK,   // FIEND_PATRON
-		PlayerClass::WARLOCK,   // GREAT_OLD_ONE_PATRON
-		PlayerClass::WIZARD,    // ABJURER
-		PlayerClass::WIZARD,    // DIVINER
-		PlayerClass::WIZARD,    // EVOKER
-		PlayerClass::WIZARD     // ILLUSIONIST
+		PlayerClass::BARD,		// COLLEGE_OF_DANCE
+		PlayerClass::BARD,		// COLLEGE_OF_GLAMOUR
+		PlayerClass::BARD,		// COLLEGE_OF_LORE
+		PlayerClass::BARD,		// COLLEGE_OF_VALOR
+		PlayerClass::CLERIC,	// LIFE_DOMAIN
+		PlayerClass::CLERIC,	// LIGHT_DOMAIN
+		PlayerClass::CLERIC,	// TRICKERY_DOMAIN
+		PlayerClass::CLERIC,	// WAR_DOMAIN
+		PlayerClass::DRUID,		// CIRCLE_OF_THE_LAND
+		PlayerClass::DRUID,		// CIRCLE_OF_THE_MOON
+		PlayerClass::DRUID,		// CIRCLE_OF_THE_SEA
+		PlayerClass::DRUID,		// CIRCLE_OF_THE_STARS
+		PlayerClass::FIGHTER,	// BATTLE_MASTER
+		PlayerClass::FIGHTER,	// CHAMPION
+		PlayerClass::FIGHTER,	// ELDRITCH_KNIGHT
+		PlayerClass::FIGHTER,	// PSI_WARRIOR
+		PlayerClass::MONK,		// WARRIOR_OF_MERCY
+		PlayerClass::MONK,		// WARRIOR_OF_SHADOW
+		PlayerClass::MONK,		// WARRIOR_OF_THE_ELEMENTS
+		PlayerClass::MONK,		// WARRIOR_OF_THE_OPEN_HAND
+		PlayerClass::PALADIN,	// OATH_OF_DEVOTION
+		PlayerClass::PALADIN,	// OATH_OF_GLORY
+		PlayerClass::PALADIN,	// OATH_OF_THE_ANCIENTS
+		PlayerClass::PALADIN,	// OATH_OF_VENGEANCE
+		PlayerClass::RANGER,	// BEAST_MASTER
+		PlayerClass::RANGER,	// FEY_WANDERER
+		PlayerClass::RANGER,	// GLOOM_STALKER
+		PlayerClass::RANGER,	// HUNTER
+		PlayerClass::ROGUE,		// ARCANE_TRICKSTER
+		PlayerClass::ROGUE,		// ASSASSIN
+		PlayerClass::ROGUE,		// SOULKNIFE
+		PlayerClass::ROGUE,		// THIEF
+		PlayerClass::SORCERER,	// ABERRANT_SORCERY
+		PlayerClass::SORCERER,	// CLOCKWORK_SORCERY
+		PlayerClass::SORCERER,	// DRACONIC_SORCERY
+		PlayerClass::SORCERER,	// WILD_MAGIC_SORCERY
+		PlayerClass::WARLOCK,	// ARCHFEY_PATRON
+		PlayerClass::WARLOCK,	// CELESTIAL_PATRON
+		PlayerClass::WARLOCK,	// FIEND_PATRON
+		PlayerClass::WARLOCK,	// GREAT_OLD_ONE_PATRON
+		PlayerClass::WIZARD,	// ABJURER
+		PlayerClass::WIZARD,	// DIVINER
+		PlayerClass::WIZARD,	// EVOKER
+		PlayerClass::WIZARD		// ILLUSIONIST
 	};
 	inline constexpr int MIN_CLASS_LEVEL{ 0 };
 	inline constexpr int MAX_TOTAL_CLASS_LEVEL{ 20 };
@@ -226,9 +226,8 @@ namespace CombatTrackerApp {
 	// Exact same idea as creature/monster side, currently only applied to total class levels.
 	class PlayerDerivedStats {
 	public:
-		constexpr int getTotalClassLevel() const {
-			return m_totalClassLevel;
-		}
+		constexpr int getTotalClassLevel() const { return m_totalClassLevel; }
+
 	private:
 		friend class PlayerCharacter;
 
@@ -236,10 +235,10 @@ namespace CombatTrackerApp {
 	};
 	struct PlayerStatBlock {
 
-		std::array<CombatTrackerLib::BoundedInt<
-			MIN_CLASS_LEVEL, MAX_TOTAL_CLASS_LEVEL>,
-			static_cast<std::size_t>(PlayerClass::COUNT)
-		> levels{};
+		std::array<
+			CombatTrackerLib::BoundedInt<MIN_CLASS_LEVEL, MAX_TOTAL_CLASS_LEVEL>,
+			static_cast<std::size_t>(PlayerClass::COUNT)>
+			levels{};
 
 		/*
 		A class holds at most one subclass, so each index in the array corresponds to a class (mapped to a subclass).
@@ -297,20 +296,21 @@ namespace CombatTrackerApp {
 		static constexpr bool isValid(const CreatureStatBlock& creatureBlock, const PlayerStatBlock& playerBlock) {
 
 			// Should be computed from scratch as we don't have a guarentee of calling resolveDerived() everywhere.
-			const auto totalClassLevel{ findTotalClassLevel(playerBlock) }; 
-			if (!Creature::isValid(creatureBlock)
-				|| totalClassLevel <= MIN_CLASS_LEVEL
-				|| totalClassLevel > MAX_TOTAL_CLASS_LEVEL) {
+			const auto totalClassLevel{ findTotalClassLevel(playerBlock) };
+			if (!Creature::isValid(creatureBlock) || totalClassLevel <= MIN_CLASS_LEVEL ||
+				totalClassLevel > MAX_TOTAL_CLASS_LEVEL) {
 				return false;
 			}
-			for (std::size_t classIndex{}; classIndex < CombatTrackerLib::enumToSizeT(PlayerClass::COUNT); ++classIndex) {
-				if (playerBlock.subclasses[classIndex].has_value()
-					&& playerBlock.levels[classIndex].get() < SUBCLASS_LEVEL_THRESHOLD) {
+			for (std::size_t classIndex{}; classIndex < CombatTrackerLib::enumToSizeT(PlayerClass::COUNT);
+				 ++classIndex) {
+				if (playerBlock.subclasses[classIndex].has_value() &&
+					playerBlock.levels[classIndex].get() < SUBCLASS_LEVEL_THRESHOLD) {
 					return false;
 				}
 			}
 			return true;
 		}
+
 	private:
 		PlayerStatBlock m_statBlockPlayerPortion{};
 		static constexpr int findTotalClassLevel(const PlayerStatBlock& statBlock) {
@@ -325,7 +325,8 @@ namespace CombatTrackerApp {
 
 		// Empties the subclass slots for classes that have allocated levels below SUBCLASS_LEVEL_THRESHOLD.
 		static constexpr void resolveSubclasses(PlayerStatBlock& statBlock) {
-			for (std::size_t classIndex{}; classIndex < CombatTrackerLib::enumToSizeT(PlayerClass::COUNT); ++classIndex) {
+			for (std::size_t classIndex{}; classIndex < CombatTrackerLib::enumToSizeT(PlayerClass::COUNT);
+				 ++classIndex) {
 				if (statBlock.levels[classIndex].get() < SUBCLASS_LEVEL_THRESHOLD) {
 					statBlock.subclasses[classIndex].reset();
 				}

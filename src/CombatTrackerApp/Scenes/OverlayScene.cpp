@@ -1,11 +1,9 @@
 #include "CombatTrackerApp/Scenes/OverlayScene.h"
 
 namespace CombatTrackerApp {
-	OverlayScene::OverlayScene(CombatTrackerLib::App* app) :
-		CombatTrackerLib::Scene{ app }
-	{}
+	OverlayScene::OverlayScene(CombatTrackerLib::App* app) : CombatTrackerLib::Scene{ app } {}
 
-	void OverlayScene::notifyScene(const ImGuiIO&) {} 
+	void OverlayScene::notifyScene(const ImGuiIO&) {}
 	void OverlayScene::updateScene(double) {}
 	void OverlayScene::renderUI() {
 
@@ -17,11 +15,11 @@ namespace CombatTrackerApp {
 		I can't be bothered to do this. Instead we submit them during program execution.
 		This change is saved in our .ini file so we only need to do this once.
 		*/
-	#ifndef NDEBUG
+#ifndef NDEBUG
 		ImGui::ShowDebugLogWindow();
 		ImGui::ShowMetricsWindow();
 		ImGui::ShowDemoWindow();
-	#endif
+#endif
 	}
 	void OverlayScene::renderScene() {}
 }

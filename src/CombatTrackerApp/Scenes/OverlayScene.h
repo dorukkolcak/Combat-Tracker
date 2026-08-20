@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CombatTrackerLib/Scene.h"
 #include "CombatTrackerLib/App.h"
+#include "CombatTrackerLib/Scene.h"
 
 // Used as a sort of "omni-present" Scene at the top layer that will be constantly running.
 // Currently hosts some debug and demo windows which should be visible only on debug builds.
