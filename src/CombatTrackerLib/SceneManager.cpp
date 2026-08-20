@@ -10,8 +10,11 @@ namespace CombatTrackerLib {
 	void SceneManager::queueDeleteScene(Scene* sceneToBeDeleted) {
 		m_sceneDeletionQueue.push_back(sceneToBeDeleted);
 	}
-	void SceneManager::queueSceneTransition(Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo) {
-		m_sceneTransitionQueue.insert({ transitionedFrom, std::move(transitionedTo) });
+	void SceneManager::queueSceneTransition(
+		Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo
+	) {
+		m_sceneTransitionQueue.insert({ transitionedFrom,
+										std::move(transitionedTo) });
 	}
 	void SceneManager::dequeueSceneOperations() {
 
@@ -46,9 +49,13 @@ namespace CombatTrackerLib {
 
 		// Remove the deleted scene unique_ptrs from the sceneStack.
 		m_sceneStack.erase(
-			std::remove_if(m_sceneStack.begin(), m_sceneStack.end(), [](const std::unique_ptr<Scene>& scenePointer) {
-				return scenePointer == nullptr;
-			}),
+			std::remove_if(
+				m_sceneStack.begin(),
+				m_sceneStack.end(),
+				[](const std::unique_ptr<Scene>& scenePointer) {
+					return scenePointer == nullptr;
+				}
+			),
 			m_sceneStack.end()
 		);
 		m_sceneDeletionQueue.clear();

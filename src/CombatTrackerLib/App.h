@@ -1,19 +1,19 @@
 #pragma once
 
-#include "CombatTrackerLib/Window.h"
-#include "CombatTrackerLib/Scene.h"
-#include "CombatTrackerLib/SceneManager.h"
+#include "CombatTrackerLib/OptionsHandler.h"
 #include "CombatTrackerLib/Providers/DirectoryProvider.h"
 #include "CombatTrackerLib/Providers/LocaleProvider.h"
-#include "CombatTrackerLib/OptionsHandler.h"
 #include "CombatTrackerLib/Providers/ThemeProvider.h"
+#include "CombatTrackerLib/Scene.h"
+#include "CombatTrackerLib/SceneManager.h"
 #include "CombatTrackerLib/Utilities/GenericUtils.h"
+#include "CombatTrackerLib/Window.h"
 
-#include <array>
-#include <string>
-#include <memory>
-#include <filesystem>
 #include <nlohmann/json.hpp>
+#include <array>
+#include <filesystem>
+#include <memory>
+#include <string>
 
 namespace CombatTrackerLib {
 	class Scene;
@@ -24,7 +24,8 @@ namespace CombatTrackerLib {
 			std::string name{};
 
 			// These are moved during construction so they should be referenced via the options handler.
-			std::array<std::string, enumToSizeT(OptionsCategory::COUNT)> optionCategoryKeys{};
+			std::array<std::string, enumToSizeT(OptionsCategory::COUNT)>
+				optionCategoryKeys{};
 			nlohmann::json defaultOptions{};
 
 			// These parameters don't really make sense if the window is set to be fullscreen.
@@ -41,7 +42,7 @@ namespace CombatTrackerLib {
 
 		void run();
 		void signalApplicationClose();
-		
+
 		const DirectoryProvider& getDirectoryProvider() const;
 		const LocaleProvider& getLocaleProvider() const;
 		const ThemeProvider& getThemeProvider() const;
@@ -75,14 +76,13 @@ namespace CombatTrackerLib {
 		void setLanguage(std::string_view localeCode);
 
 	private:
-
 		// The order of construction of these members is quite important by the way.
 		SceneManager m_sceneManager{};
 		Specification m_specification{};
 		DirectoryProvider m_directoryProvider; // Deleted default constructor.
-		OptionsHandler m_optionsHandler; // Deleted default constructor.
-		LocaleProvider m_localeProvider; // Deleted default constructor
-		ThemeProvider m_themeProvider; // Deleted default constructor.
+		OptionsHandler m_optionsHandler;	   // Deleted default constructor.
+		LocaleProvider m_localeProvider;	   // Deleted default constructor
+		ThemeProvider m_themeProvider;		   // Deleted default constructor.
 
 		std::unique_ptr<Window> m_windowPointer{};
 

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <cstddef>
-#include <type_traits>
+#include <nlohmann/json.hpp>
 #include <algorithm>
+#include <cstddef>
 #include <optional>
 #include <string_view>
-#include <nlohmann/json.hpp>
+#include <type_traits>
 
 namespace CombatTrackerLib {
 
@@ -33,40 +33,44 @@ namespace CombatTrackerLib {
 		}
 	};
 
-	template<typename E> requires std::is_enum_v<E>
+	template <typename E>
+		requires std::is_enum_v<E>
 	constexpr std::size_t enumToSizeT(E enumerator) {
 		return static_cast<std::size_t>(enumerator);
 	}
 
 	// A wrapper over int that defines lower and upper bounds.
 	// This is particularly useful for ability scores/modifiers which have set bounds.
-	template <int LOWER_BOUND, int UPPER_BOUND> requires (LOWER_BOUND <= UPPER_BOUND)
+	template <int LOWER_BOUND, int UPPER_BOUND>
+		requires(LOWER_BOUND <= UPPER_BOUND)
 	class BoundedInt {
 	public:
 		constexpr BoundedInt() = default;
-		constexpr BoundedInt(int value) : m_value{ std::clamp(value, LOWER_BOUND, UPPER_BOUND) } {}
+		constexpr BoundedInt(int value)
+			: m_value{ std::clamp(value, LOWER_BOUND, UPPER_BOUND) } {}
 		constexpr BoundedInt& operator=(int value) {
 			m_value = std::clamp(value, LOWER_BOUND, UPPER_BOUND);
 			return *this;
 		}
-		constexpr int get() const {
-			return m_value;
-		}
-		static constexpr int getLowerBound() {
-			return LOWER_BOUND;
-		}
-		static constexpr int getUpperBound() {
-			return UPPER_BOUND;
-		}
+		constexpr int get() const { return m_value; }
+		static constexpr int getLowerBound() { return LOWER_BOUND; }
+		static constexpr int getUpperBound() { return UPPER_BOUND; }
+
 	private:
 		int m_value{ std::clamp(0, LOWER_BOUND, UPPER_BOUND) };
 	};
 	template <int LOWER_BOUND, int UPPER_BOUND>
-	void from_json(const nlohmann::json& contents, BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt) {
+	void from_json(
+		const nlohmann::json& contents,
+		BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt
+	) {
 		boundedInt = contents.get<int>();
 	}
 	template <int LOWER_BOUND, int UPPER_BOUND>
-	void to_json(nlohmann::json& contents, const BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt) {
+	void to_json(
+		nlohmann::json& contents,
+		const BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt
+	) {
 		contents = boundedInt.get();
 	}
 
@@ -79,7 +83,8 @@ namespace CombatTrackerLib {
 	class OverridableInt {
 	public:
 		constexpr OverridableInt() = default;
-		constexpr explicit OverridableInt(int defaultValue) : m_defaultValue{ defaultValue } {}
+		constexpr explicit OverridableInt(int defaultValue)
+			: m_defaultValue{ defaultValue } {}
 
 		// Written by whatever computes the value, and kept fresh even while an override is in place.
 		constexpr OverridableInt& setDefault(int value) {
@@ -100,12 +105,9 @@ namespace CombatTrackerLib {
 		constexpr int get() const {
 			return m_override.value_or(m_defaultValue);
 		}
-		constexpr int getDefault() const {
-			return m_defaultValue;
-		}
-		constexpr bool isOverridden() const {
-			return m_override.has_value();
-		}
+		constexpr int getDefault() const { return m_defaultValue; }
+		constexpr bool isOverridden() const { return m_override.has_value(); }
+
 	private:
 		int m_defaultValue{};
 		std::optional<int> m_override{};
@@ -113,7 +115,8 @@ namespace CombatTrackerLib {
 
 	// Since we don't really know how the default is computed from the json file,
 	// We reset the override and set the default elsewhere.
-	inline void from_json(const nlohmann::json& contents, OverridableInt& overridableInt) {
+	inline void
+	from_json(const nlohmann::json& contents, OverridableInt& overridableInt) {
 		if (contents.is_null()) {
 			overridableInt.clearOverride();
 		}
@@ -123,7 +126,8 @@ namespace CombatTrackerLib {
 	}
 
 	// If overridden we should hold the value. Otherwise we can derive the value from other values.
-	inline void to_json(nlohmann::json& contents, const OverridableInt& overridableInt) {
+	inline void
+	to_json(nlohmann::json& contents, const OverridableInt& overridableInt) {
 		if (overridableInt.isOverridden()) {
 			contents = overridableInt.get();
 		}
@@ -140,8 +144,7 @@ namespace CombatTrackerLib {
 	And a static boolean flag that tracks whether an object of this type was instantiated.
 	Providers/handlers or any other object that is responsible for tracking/managing a resource should probably inherit from this.
 	*/
-	template <typename Derived>
-	class Unique {
+	template <typename Derived> class Unique {
 	public:
 		Unique(const Unique& unique) = delete;
 		Unique& operator=(const Unique& unique) = delete;
@@ -151,13 +154,13 @@ namespace CombatTrackerLib {
 
 	protected:
 		Unique() {
-			static_assert(std::is_base_of_v<Unique, Derived>); // Evaluates to true if Unique is a base type of Derived.
+			static_assert(std::is_base_of_v<
+						  Unique,
+						  Derived>); // Evaluates to true if Unique is a base type of Derived.
 			assert(!s_isAlive);
 			s_isAlive = true;
 		}
-		~Unique() {
-			s_isAlive = false;
-		}
+		~Unique() { s_isAlive = false; }
 
 	private:
 		inline static bool s_isAlive{ false };

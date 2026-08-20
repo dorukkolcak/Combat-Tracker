@@ -12,19 +12,18 @@ namespace CombatTrackerLib {
 		int tAxisWrap,
 		int magnifyingFilter,
 		int minifyingMipmapFilter
-	) : Texture2D(
-		texturePath,
-		numberOfDesiredChannels,
-		isOriginAtTop,
-		sAxisWrap,
-		tAxisWrap,
-		magnifyingFilter,
-		minifyingMipmapFilter,
-		GL_TEXTURE0,
-		0
 	)
-	{
-	}
+		: Texture2D(
+			  texturePath,
+			  numberOfDesiredChannels,
+			  isOriginAtTop,
+			  sAxisWrap,
+			  tAxisWrap,
+			  magnifyingFilter,
+			  minifyingMipmapFilter,
+			  GL_TEXTURE0,
+			  0
+		  ) {}
 
 	Texture2D::Texture2D(
 		const std::filesystem::path& texturePath,
@@ -36,9 +35,8 @@ namespace CombatTrackerLib {
 		int minifyingMipmapFilter,
 		unsigned int glUnit,
 		int integerUnit
-	) : m_glUnit{ glUnit },
-	m_integerUnit{ integerUnit }
-	{
+	)
+		: m_glUnit{ glUnit }, m_integerUnit{ integerUnit } {
 
 		/*
 		Set the internal and CPU format based on the number of desired channels of the loaded texture.
@@ -68,12 +66,12 @@ namespace CombatTrackerLib {
 		// Load pixel data into CPU memory using stb's image loading API.
 		stbi_set_flip_vertically_on_load(isOriginAtTop);
 		auto* localBuffer{ stbi_load(
-			texturePath.string().c_str(), 
-			&m_width, 
-			&m_height, 
-			&m_numberOfColorChannels, 
+			texturePath.string().c_str(),
+			&m_width,
+			&m_height,
+			&m_numberOfColorChannels,
 			numberOfDesiredChannels
-		)};
+		) };
 		if (localBuffer == nullptr) {
 			return;
 		}
@@ -81,13 +79,29 @@ namespace CombatTrackerLib {
 		// Generate the texture id and set its parameters.
 		glGenTextures(1, &m_ID);
 		use();
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, sAxisWrap); // Parameter for what to do if texture x coordinates fall outside the range [0, 1].
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, tAxisWrap); // Parameter for what to do if texture y coordinates fall outside the range [0, 1].
+		glTexParameteri(
+			GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, sAxisWrap
+		); // Parameter for what to do if texture x coordinates fall outside the range [0, 1].
+		glTexParameteri(
+			GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, tAxisWrap
+		); // Parameter for what to do if texture y coordinates fall outside the range [0, 1].
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magnifyingFilter);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minifyingMipmapFilter);
+		glTexParameteri(
+			GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minifyingMipmapFilter
+		);
 
 		// Generate the actual texture and its mipmaps.
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, cpuFormat, GL_UNSIGNED_BYTE, localBuffer);
+		glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			internalFormat,
+			m_width,
+			m_height,
+			0,
+			cpuFormat,
+			GL_UNSIGNED_BYTE,
+			localBuffer
+		);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		// Cleanup.
@@ -137,9 +151,7 @@ namespace CombatTrackerLib {
 
 		return *this;
 	}
-	Texture2D::~Texture2D() {
-		glDeleteTextures(1, &m_ID);
-	}
+	Texture2D::~Texture2D() { glDeleteTextures(1, &m_ID); }
 	void Texture2D::use() const {
 		glActiveTexture(m_glUnit);
 		glBindTexture(GL_TEXTURE_2D, m_ID);
@@ -152,16 +164,8 @@ namespace CombatTrackerLib {
 		m_glUnit = glUnit;
 		m_integerUnit = integerUnit;
 	}
-	int Texture2D::getIntUnit() const {
-		return m_integerUnit;
-	}
-	int Texture2D::getWidth() const {
-		return m_width;
-	}
-	int Texture2D::getHeight() const {
-		return m_height;
-	}
-	unsigned int Texture2D::getID() const {
-		return m_ID;
-	}
+	int Texture2D::getIntUnit() const { return m_integerUnit; }
+	int Texture2D::getWidth() const { return m_width; }
+	int Texture2D::getHeight() const { return m_height; }
+	unsigned int Texture2D::getID() const { return m_ID; }
 }

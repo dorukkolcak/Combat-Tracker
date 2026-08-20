@@ -1,17 +1,17 @@
 #pragma once
 
-#include "CombatTrackerLib/Utilities/GenericUtils.h"
 #include "CombatTrackerLib/Providers/DirectoryProvider.h"
+#include "CombatTrackerLib/Utilities/GenericUtils.h"
 
-#include <string>
-#include <unordered_map>
-#include <vector>
-#include <span>
+#include <nlohmann/json.hpp>
+#include <filesystem>
 #include <functional>
 #include <optional>
-#include <filesystem>
+#include <span>
+#include <string>
 #include <string_view>
-#include <nlohmann/json.hpp>
+#include <unordered_map>
+#include <vector>
 
 namespace CombatTrackerLib {
 
@@ -26,7 +26,10 @@ namespace CombatTrackerLib {
 		//friend class LocaleProviderTest;
 
 		LocaleProvider() = delete;
-		LocaleProvider(const DirectoryProvider& directoryProvider, std::string_view localeCode);
+		LocaleProvider(
+			const DirectoryProvider& directoryProvider,
+			std::string_view localeCode
+		);
 		~LocaleProvider() = default;
 
 		bool setLocale(std::string_view localeCode);
@@ -34,15 +37,17 @@ namespace CombatTrackerLib {
 
 		// Provide a span to string_view objects. So this is something like a view of views, lol.
 		// This also has the advantage of preserving size information which is super nice.
-		std::span<const std::string_view> getTextList(std::string_view keyPrefix) const;
+		std::span<const std::string_view> getTextList(std::string_view keyPrefix
+		) const;
 		std::span<const LocaleInfo> getAvailableLocales() const;
+
 	private:
 		std::unordered_map<
 			std::string,
 			std::string_view,
 			StringHash,
-			std::equal_to<>
-		> m_textViewMap{};
+			std::equal_to<>>
+			m_textViewMap{};
 
 		// We hold a seperate map for lists as well. If not, we would have to use std::format.
 		// Using std::format creates string temporaries so we allocate a lot of string temporaries per frame while iterating over a list.
@@ -50,16 +55,19 @@ namespace CombatTrackerLib {
 			std::string,
 			std::vector<std::string_view>,
 			StringHash,
-			std::equal_to<>
-		> m_listViewMap{};
+			std::equal_to<>>
+			m_listViewMap{};
 		std::vector<LocaleInfo> m_availableLocales{};
-		std::optional<nlohmann::json> m_locale{}; // The views reference this locale.
-		
+		std::optional<nlohmann::json>
+			m_locale{}; // The views reference this locale.
+
 		// The locale provider needs to remember the resource path directory.
 		// So we hold a reference to the directory provider via a pointer.
 		const DirectoryProvider* m_directoryProviderPointer{};
 
-		void buildViewMaps(const nlohmann::json& node, const std::string& pointerPrefix);
+		void buildViewMaps(
+			const nlohmann::json& node, const std::string& pointerPrefix
+		);
 		void buildAvailableLocales();
 	};
 }

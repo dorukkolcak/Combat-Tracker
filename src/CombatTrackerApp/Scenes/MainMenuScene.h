@@ -1,14 +1,14 @@
 #pragma once
 
+#include "CombatTrackerLib/ImGuiScopes.h"
+#include "CombatTrackerLib/OptionsHandler.h"
+#include "CombatTrackerLib/Providers/LocaleProvider.h"
 #include "CombatTrackerLib/Scene.h"
 #include "CombatTrackerLib/Texture2D.h"
 #include "CombatTrackerLib/Utilities/UIUtils.h"
-#include "CombatTrackerLib/ImGuiScopes.h"
-#include "CombatTrackerLib/Providers/LocaleProvider.h"
-#include "CombatTrackerLib/OptionsHandler.h"
 
-#include <string_view>
 #include <imgui_internal.h>
+#include <string_view>
 
 namespace CombatTrackerApp {
 	class MainMenuScene : public CombatTrackerLib::Scene {
@@ -18,26 +18,22 @@ namespace CombatTrackerApp {
 		void updateScene(double timeInterval) override;
 		void renderUI() override;
 		void renderScene() override;
+
 	private:
- 
 		inline static constexpr ImGuiDockNodeFlags DOCKSPACE_FLAGS{
-			ImGuiDockNodeFlags_NoResize |
-			ImGuiDockNodeFlags_NoSplit |
+			ImGuiDockNodeFlags_NoResize | ImGuiDockNodeFlags_NoSplit |
 			ImGuiDockNodeFlags_NoWindowMenuButton
 		};
 		inline static constexpr ImGuiWindowFlags HOST_WINDOW_FLAGS{
-			ImGuiWindowFlags_NoDocking |
-			ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_NoCollapse |
-			ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoBringToFrontOnFocus |
-			ImGuiWindowFlags_NoNavFocus |
-			ImGuiWindowFlags_NoScrollbar |
+			ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
+			ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoScrollbar |
 			ImGuiWindowFlags_NoScrollWithMouse
 		};
 
-		CombatTrackerLib::Texture2D m_titleTexture; // No default constructor. Initialize through member initializer list.
+		CombatTrackerLib::Texture2D
+			m_titleTexture; // No default constructor. Initialize through member initializer list.
 
 		// Sort of a flag that overrides some options that are enforced on every window.
 		// Used for the window that hosts our application art.

@@ -1,18 +1,13 @@
 #pragma once
 
-#include <string>
-#include <filesystem>
 #include <glad/glad.h>
+#include <filesystem>
+#include <string>
 
 namespace CombatTrackerLib {
 	class Shader {
 	public:
-		enum class Type {
-			INVALID,
-			VERTEX,
-			GEOMETRY,
-			FRAGMENT
-		};
+		enum class Type { INVALID, VERTEX, GEOMETRY, FRAGMENT };
 
 		Shader() = delete;
 		Shader(const std::filesystem::path& shaderPath, Type type);
@@ -29,6 +24,7 @@ namespace CombatTrackerLib {
 
 		unsigned int getShaderID() const;
 		void setAsLinked();
+
 	private:
 		unsigned int m_ID{};
 		bool m_isLinkedToProgram{};

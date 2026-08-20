@@ -16,7 +16,9 @@ namespace CombatTrackerLib {
 		if (isLinked == GL_FALSE) {
 			GLint logLength{};
 			glGetProgramiv(m_ID, GL_INFO_LOG_LENGTH, &logLength);
-			std::string infoLog(static_cast<size_t>(std::max(logLength, 1)), '\0');
+			std::string infoLog(
+				static_cast<size_t>(std::max(logLength, 1)), '\0'
+			);
 			glGetProgramInfoLog(m_ID, logLength, nullptr, infoLog.data());
 			std::cerr << "Program link failed: " << infoLog << std::endl;
 			glDeleteProgram(m_ID);
@@ -47,13 +49,7 @@ namespace CombatTrackerLib {
 		program.m_ID = 0;
 		return *this;
 	}
-	ShaderProgram::~ShaderProgram() {
-		glDeleteProgram(m_ID);
-	}
-	void ShaderProgram::use() const {
-		glUseProgram(m_ID);
-	}
-	void ShaderProgram::unbind() const {
-		glUseProgram(0);
-	}
+	ShaderProgram::~ShaderProgram() { glDeleteProgram(m_ID); }
+	void ShaderProgram::use() const { glUseProgram(m_ID); }
+	void ShaderProgram::unbind() const { glUseProgram(0); }
 }

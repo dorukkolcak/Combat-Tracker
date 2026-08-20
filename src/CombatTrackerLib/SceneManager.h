@@ -3,8 +3,8 @@
 #include "CombatTrackerLib/Utilities/GenericUtils.h"
 
 #include <memory>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 namespace CombatTrackerLib {
 	class Scene;
@@ -14,7 +14,9 @@ namespace CombatTrackerLib {
 	public:
 		void queueAddScene(std::unique_ptr<Scene> scene);
 		void queueDeleteScene(Scene* sceneToBeDeleted);
-		void queueSceneTransition(Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo);
+		void queueSceneTransition(
+			Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo
+		);
 
 		/*
 		So here is the rough idea of how scenes work:
@@ -47,12 +49,13 @@ namespace CombatTrackerLib {
 		*/
 		void dequeueSceneOperations();
 		const std::vector<std::unique_ptr<Scene>>& getScenes() const;
-	private:
 
+	private:
 		// I prefer using vector as sort of a stack because it is much better at resizing, compared to a pure stack data structure.
 		std::vector<std::unique_ptr<Scene>> m_sceneStack{};
 		std::vector<std::unique_ptr<Scene>> m_sceneAdditionQueue{};
 		std::vector<Scene*> m_sceneDeletionQueue{};
-		std::unordered_map<Scene*, std::unique_ptr<Scene>> m_sceneTransitionQueue{};
+		std::unordered_map<Scene*, std::unique_ptr<Scene>>
+			m_sceneTransitionQueue{};
 	};
 }

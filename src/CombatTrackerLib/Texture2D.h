@@ -5,7 +5,6 @@
 namespace CombatTrackerLib {
 	class Texture2D {
 	public:
-
 		Texture2D() = delete;
 
 		// TODO: Ideally we would like to limit the texture parameters to a set of valid options instead of any arbitrary value.
@@ -48,6 +47,7 @@ namespace CombatTrackerLib {
 		int getWidth() const;
 		int getHeight() const;
 		unsigned int getID() const;
+
 	private:
 		unsigned int m_ID{};
 		unsigned int m_glUnit{};

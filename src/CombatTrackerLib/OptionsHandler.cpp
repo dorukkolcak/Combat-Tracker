@@ -6,18 +6,20 @@
 namespace CombatTrackerLib {
 	OptionsHandler::OptionsHandler(
 		const std::filesystem::path& userDataDirectory,
-		std::array<std::string, enumToSizeT(OptionsCategory::COUNT)> categoryKeys,
+		std::array<std::string, enumToSizeT(OptionsCategory::COUNT)>
+			categoryKeys,
 		nlohmann::json defaultOptions
-	) :	Unique(),
-		m_optionsFilePath(userDataDirectory / "options.json"),
-		m_categoryKeys{ std::move(categoryKeys) },
-		m_defaultOptions(std::move(defaultOptions)),
-		m_options(m_defaultOptions)
-	{
+	)
+		: Unique(), m_optionsFilePath(userDataDirectory / "options.json"),
+		  m_categoryKeys{ std::move(categoryKeys) },
+		  m_defaultOptions(std::move(defaultOptions)),
+		  m_options(m_defaultOptions) {
 		// See https://json.nlohmann.me/api/basic_json/merge_patch/.
 		// Essentially what we do here is we patch the default options with the read options file
 		// for each existing key in the original document.
-		m_options.merge_patch(readJSONFile(m_optionsFilePath).value_or(nlohmann::json::object()));
+		m_options.merge_patch(
+			readJSONFile(m_optionsFilePath).value_or(nlohmann::json::object())
+		);
 	}
 
 	// This might be a massive mistake, implies that the options file itself is written back to only on application close.
@@ -25,7 +27,9 @@ namespace CombatTrackerLib {
 	OptionsHandler::~OptionsHandler() {
 		writeJSONFile(m_optionsFilePath, m_options);
 	}
-	bool OptionsHandler::validateOption(OptionsCategory category, std::string_view option) const {
+	bool OptionsHandler::validateOption(
+		OptionsCategory category, std::string_view option
+	) const {
 		const auto& categoryKey{ m_categoryKeys[enumToSizeT(category)] };
 		if (!m_defaultOptions[categoryKey].contains(option)) {
 			return false;
@@ -37,14 +41,14 @@ namespace CombatTrackerLib {
 		const std::string& option,
 		std::function<void()> callback
 	) {
-		m_immediateCallbacks[{category, option}] = callback;
+		m_immediateCallbacks[{ category, option }] = callback;
 	}
 	void OptionsHandler::registerDeferredOptionChangeCallback(
 		OptionsCategory category,
 		const std::string& option,
 		std::function<void()> callback
 	) {
-		const auto pair{ std::pair{category, option} };
+		const auto pair{ std::pair{ category, option } };
 		m_deferredCallbacks[pair] = callback;
 		m_deferredCallbackStatuses[pair] = false;
 	}

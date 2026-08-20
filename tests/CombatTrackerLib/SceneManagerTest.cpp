@@ -6,7 +6,7 @@ namespace CombatTrackerLib {
 
 		// .get() returns a pointer to the own object.
 		// So even if the pointer is moved, the reference will point to the same object.
-		auto* sceneReference{ scene.get() }; 
+		auto* sceneReference{ scene.get() };
 
 		m_sceneManager.queueAddScene(std::move(scene));
 		return sceneReference;
@@ -53,7 +53,9 @@ namespace CombatTrackerLib {
 		m_sceneManager.dequeueSceneOperations();
 		auto transitionScene{ std::make_unique<StubScene>() };
 		auto* transitionSceneReference{ transitionScene.get() };
-		m_sceneManager.queueSceneTransition(m_sceneOneReference, std::move(transitionScene));
+		m_sceneManager.queueSceneTransition(
+			m_sceneOneReference, std::move(transitionScene)
+		);
 		EXPECT_EQ(std::size_t{ 2 }, m_sceneManager.getScenes().size());
 		m_sceneManager.dequeueSceneOperations();
 		const auto& scenes{ m_sceneManager.getScenes() };

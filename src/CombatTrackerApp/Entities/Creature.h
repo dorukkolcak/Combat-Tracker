@@ -2,12 +2,12 @@
 
 #include "CombatTrackerLib/Utilities/GenericUtils.h"
 
+#include <algorithm>
 #include <array>
 #include <climits>
 #include <cstddef>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 namespace CombatTrackerApp {
 
@@ -150,21 +150,8 @@ namespace CombatTrackerApp {
 		UNDEAD,
 		COUNT
 	};
-	enum class Sense {
-		BLINDSIGHT,
-		DARKVISION,
-		TREMORSENSE,
-		TRUESIGHT,
-		COUNT
-	};
-	enum class MovementType {
-		WALK,
-		CLIMB,
-		SWIM,
-		BURROW,
-		FLY,
-		COUNT
-	};
+	enum class Sense { BLINDSIGHT, DARKVISION, TREMORSENSE, TRUESIGHT, COUNT };
+	enum class MovementType { WALK, CLIMB, SWIM, BURROW, FLY, COUNT };
 
 	// These two enums below don't have counts as we don't really need them in context.
 	// They don't have a corresponding in memory array.
@@ -187,26 +174,27 @@ namespace CombatTrackerApp {
 	};
 
 	// The order is via enumeration order, same idea as every other array structure.
-	inline constexpr std::array<Ability, static_cast<std::size_t>(Skill::COUNT)> MAPPED_SKILLS{
-		Ability::STRENGTH,     // ATHLETICS
-		Ability::DEXTERITY,    // ACROBATICS
-		Ability::DEXTERITY,    // SLEIGHT_OF_HAND
-		Ability::DEXTERITY,    // STEALTH
-		Ability::INTELLIGENCE, // ARCANA
-		Ability::INTELLIGENCE, // HISTORY
-		Ability::INTELLIGENCE, // INVESTIGATION
-		Ability::INTELLIGENCE, // NATURE
-		Ability::INTELLIGENCE, // RELIGION
-		Ability::WISDOM,       // ANIMAL_HANDLING
-		Ability::WISDOM,       // INSIGHT
-		Ability::WISDOM,       // MEDICINE
-		Ability::WISDOM,       // PERCEPTION
-		Ability::WISDOM,       // SURVIVAL
-		Ability::CHARISMA,     // DECEPTION
-		Ability::CHARISMA,     // INTIMIDATION
-		Ability::CHARISMA,     // PERFORMANCE
-		Ability::CHARISMA      // PERSUASION
-	};
+	inline constexpr std::array<Ability, static_cast<std::size_t>(Skill::COUNT)>
+		MAPPED_SKILLS{
+			Ability::STRENGTH,	   // ATHLETICS
+			Ability::DEXTERITY,	   // ACROBATICS
+			Ability::DEXTERITY,	   // SLEIGHT_OF_HAND
+			Ability::DEXTERITY,	   // STEALTH
+			Ability::INTELLIGENCE, // ARCANA
+			Ability::INTELLIGENCE, // HISTORY
+			Ability::INTELLIGENCE, // INVESTIGATION
+			Ability::INTELLIGENCE, // NATURE
+			Ability::INTELLIGENCE, // RELIGION
+			Ability::WISDOM,	   // ANIMAL_HANDLING
+			Ability::WISDOM,	   // INSIGHT
+			Ability::WISDOM,	   // MEDICINE
+			Ability::WISDOM,	   // PERCEPTION
+			Ability::WISDOM,	   // SURVIVAL
+			Ability::CHARISMA,	   // DECEPTION
+			Ability::CHARISMA,	   // INTIMIDATION
+			Ability::CHARISMA,	   // PERFORMANCE
+			Ability::CHARISMA	   // PERSUASION
+		};
 	inline constexpr int PB_LOWER_BOUND{ 2 };
 	inline constexpr int PB_UPPER_BOUND{ 9 };
 	inline constexpr int ABILITY_SCORE_LOWER_BOUND{};
@@ -236,19 +224,21 @@ namespace CombatTrackerApp {
 	class CreatureDerivedStats {
 	public:
 		constexpr int getAbilityScoreModifier(Ability ability) const {
-			return m_abilityScoreModifiers[CombatTrackerLib::enumToSizeT(ability)];
+			return m_abilityScoreModifiers[CombatTrackerLib::enumToSizeT(ability
+			)];
 		}
 		constexpr int getProficiencyBonus() const {
 			return m_proficiencyBonus.get();
 		}
-	private:
 
+	private:
 		// Creature class is the class responsible for actually deriving the member values.
 		// So we grant it private access by making it a friend.
 		friend class Creature;
 
 		// This doesn't need to be bounded as it is directly calculated from ability scores (which itself is bounded).
-		std::array<int, static_cast<std::size_t>(Ability::COUNT)> m_abilityScoreModifiers{};
+		std::array<int, static_cast<std::size_t>(Ability::COUNT)>
+			m_abilityScoreModifiers{};
 
 		/*
 		PB is calculated for both PlayerCharacters and Monsters, and has a hard cap of 9.
@@ -256,7 +246,8 @@ namespace CombatTrackerApp {
 		But I am not as sure on this as I am with ability score modifiers.
 		So I will keep this bounded for now.
 		*/
-		CombatTrackerLib::BoundedInt<PB_LOWER_BOUND, PB_UPPER_BOUND> m_proficiencyBonus{};
+		CombatTrackerLib::BoundedInt<PB_LOWER_BOUND, PB_UPPER_BOUND>
+			m_proficiencyBonus{};
 	};
 
 	/*
@@ -269,26 +260,44 @@ namespace CombatTrackerApp {
 	*/
 	struct CreatureStatBlock {
 
-		std::array<ProficiencyLevel, static_cast<std::size_t>(Ability::COUNT)> savingThrowProficiencyLevels{};
-		std::array<ProficiencyLevel, static_cast<std::size_t>(Skill::COUNT)> skillProficiencyLevels{};
+		std::array<ProficiencyLevel, static_cast<std::size_t>(Ability::COUNT)>
+			savingThrowProficiencyLevels{};
+		std::array<ProficiencyLevel, static_cast<std::size_t>(Skill::COUNT)>
+			skillProficiencyLevels{};
 
 		// Should be set by the user but have defined lower and upper bounds, per the game rules.
 		std::array<
-			CombatTrackerLib::BoundedInt<ABILITY_SCORE_LOWER_BOUND, ABILITY_SCORE_UPPER_BOUND>,
-			static_cast<std::size_t>(Ability::COUNT)
-		> abilityScores{ { 10, 10, 10, 10, 10, 10 } };
+			CombatTrackerLib::BoundedInt<
+				ABILITY_SCORE_LOWER_BOUND,
+				ABILITY_SCORE_UPPER_BOUND>,
+			static_cast<std::size_t>(Ability::COUNT)>
+			abilityScores{ { 10, 10, 10, 10, 10, 10 } };
 
 		// These two values should be overriddable because of item/class effects.
-		std::array<CombatTrackerLib::OverridableInt, static_cast<std::size_t>(Ability::COUNT)> savingThrowModifiers{};
-		std::array<CombatTrackerLib::OverridableInt, static_cast<std::size_t>(Skill::COUNT)> skillModifiers{};
+		std::array<
+			CombatTrackerLib::OverridableInt,
+			static_cast<std::size_t>(Ability::COUNT)>
+			savingThrowModifiers{};
+		std::array<
+			CombatTrackerLib::OverridableInt,
+			static_cast<std::size_t>(Skill::COUNT)>
+			skillModifiers{};
 
 		// Represents the status of a player character towards a damage type (None, resistant, vulnerable, immune).
-		std::array<DamageReaction, static_cast<std::size_t>(DamageType::COUNT)> damageReactions{};
+		std::array<DamageReaction, static_cast<std::size_t>(DamageType::COUNT)>
+			damageReactions{};
 
-		std::array<bool, static_cast<std::size_t>(Condition::COUNT)> conditionImmunities{};
+		std::array<bool, static_cast<std::size_t>(Condition::COUNT)>
+			conditionImmunities{};
 
-		std::array<CombatTrackerLib::BoundedInt<0, INT_MAX>, static_cast<std::size_t>(Sense::COUNT)> senses{};
-		std::array<CombatTrackerLib::BoundedInt<0, INT_MAX>, static_cast<std::size_t>(MovementType::COUNT)> speeds{};
+		std::array<
+			CombatTrackerLib::BoundedInt<0, INT_MAX>,
+			static_cast<std::size_t>(Sense::COUNT)>
+			senses{};
+		std::array<
+			CombatTrackerLib::BoundedInt<0, INT_MAX>,
+			static_cast<std::size_t>(MovementType::COUNT)>
+			speeds{};
 		std::array<bool, static_cast<std::size_t>(Language::COUNT)> languages{};
 
 		std::vector<CreatureAction> actions{};
@@ -319,8 +328,8 @@ namespace CombatTrackerApp {
 
 	class Creature {
 		friend class CreatureTest;
-	protected:
 
+	protected:
 		/*
 		This constructor should be protected as we don't really want to allow anyone to create a Creature instance.
 		The actual Creature object should only be created for encounter runnning as the use of ID values make sense there.
@@ -347,27 +356,42 @@ namespace CombatTrackerApp {
 		And breaking up this function creates a lot of boilerplate that is hard to track.
 		Also the performance gain is very, very minimal compared to rendering UI components.
 		*/
-		static constexpr void resolveDerived(CreatureStatBlock& statBlock, double proficiencyTier) {
+		static constexpr void
+		resolveDerived(CreatureStatBlock& statBlock, double proficiencyTier) {
 
 			// Taking the tier as an argument means the proficiency bonus cannot be left stale by a caller
 			// that forgets to set it first, which matters as every saving throw and skill below scales by it.
-			statBlock.derived.m_proficiencyBonus = findProficiencyBonus(proficiencyTier);
-			for (std::size_t abilityIndex{}; abilityIndex < CombatTrackerLib::enumToSizeT(Ability::COUNT); ++abilityIndex) {
+			statBlock.derived.m_proficiencyBonus =
+				findProficiencyBonus(proficiencyTier);
+			for (std::size_t abilityIndex{};
+				 abilityIndex < CombatTrackerLib::enumToSizeT(Ability::COUNT);
+				 ++abilityIndex) {
 				statBlock.derived.m_abilityScoreModifiers[abilityIndex] =
-					findAbilityScoreModifier(statBlock.abilityScores[abilityIndex].get());
+					findAbilityScoreModifier(
+						statBlock.abilityScores[abilityIndex].get()
+					);
 			}
-			for (std::size_t abilityIndex{}; abilityIndex < CombatTrackerLib::enumToSizeT(Ability::COUNT); ++abilityIndex) {
+			for (std::size_t abilityIndex{};
+				 abilityIndex < CombatTrackerLib::enumToSizeT(Ability::COUNT);
+				 ++abilityIndex) {
 				statBlock.savingThrowModifiers[abilityIndex].setDefault(
-					findSavingThrowModifier(statBlock, static_cast<Ability>(abilityIndex))
+					findSavingThrowModifier(
+						statBlock, static_cast<Ability>(abilityIndex)
+					)
 				);
 			}
-			for (std::size_t skillIndex{}; skillIndex < CombatTrackerLib::enumToSizeT(Skill::COUNT); ++skillIndex) {
+			for (std::size_t skillIndex{};
+				 skillIndex < CombatTrackerLib::enumToSizeT(Skill::COUNT);
+				 ++skillIndex) {
 				statBlock.skillModifiers[skillIndex].setDefault(
 					findSkillModifier(statBlock, static_cast<Skill>(skillIndex))
 				);
 			}
-			statBlock.initiativeBonus.setDefault(findInitiativeBonus(statBlock));
-			statBlock.passivePerception.setDefault(findPassivePerception(statBlock));
+			statBlock.initiativeBonus.setDefault(findInitiativeBonus(statBlock)
+			);
+			statBlock.passivePerception.setDefault(
+				findPassivePerception(statBlock)
+			);
 		}
 
 		/*
@@ -376,13 +400,10 @@ namespace CombatTrackerApp {
 		TODO: Feel free to add more validation, particularly to creature naming. 
 		Currently empty as all validation goes through inherent stages (for creatures).
 		*/
-		static constexpr bool isValid(const CreatureStatBlock&) {
-			return true;
-		}
+		static constexpr bool isValid(const CreatureStatBlock&) { return true; }
 
 	private:
-
-		inline static int s_currentIDValue{1};
+		inline static int s_currentIDValue{ 1 };
 
 		/*
 		These static functions are used for entity creation/modification purposes.
@@ -399,7 +420,10 @@ namespace CombatTrackerApp {
 
 		// Surprisingly PB is calculated the same way for both PlayerCharacters and Monsters.
 		static constexpr int findProficiencyBonus(double proficiencyTier) {
-			return PB_LOWER_BOUND + (proficiencyTier < 1 ? 0 : static_cast<int>((proficiencyTier - 1) / 4));
+			return PB_LOWER_BOUND +
+				   (proficiencyTier < 1
+						? 0
+						: static_cast<int>((proficiencyTier - 1) / 4));
 		}
 
 		// The modifier is the difference from ten, halved and rounded down.
@@ -418,30 +442,49 @@ namespace CombatTrackerApp {
 		Saving Mod = relevant ability mod if none.
 		The proficiency level's ordinal is the multiplier that scales the proficiency bonus.
 		*/
-		static constexpr int findSavingThrowModifier(const CreatureStatBlock& statBlock, Ability ability) {
+		static constexpr int findSavingThrowModifier(
+			const CreatureStatBlock& statBlock, Ability ability
+		) {
 			const auto abilityIndex{ CombatTrackerLib::enumToSizeT(ability) };
-			const auto proficiencyLevel{ statBlock.savingThrowProficiencyLevels[abilityIndex] };
-			return statBlock.derived.m_abilityScoreModifiers[abilityIndex]
-				+ statBlock.derived.m_proficiencyBonus.get() * static_cast<int>(proficiencyLevel);
+			const auto proficiencyLevel{
+				statBlock.savingThrowProficiencyLevels[abilityIndex]
+			};
+			return statBlock.derived.m_abilityScoreModifiers[abilityIndex] +
+				   statBlock.derived.m_proficiencyBonus.get() *
+					   static_cast<int>(proficiencyLevel);
 		}
 
 		// Skill Mod = backing ability mod, scaled by proficiency the same way saving throws are.
-		static constexpr int findSkillModifier(const CreatureStatBlock& statBlock, Skill skill) {
+		static constexpr int
+		findSkillModifier(const CreatureStatBlock& statBlock, Skill skill) {
 			const auto skillIndex{ CombatTrackerLib::enumToSizeT(skill) };
-			const auto abilityIndex{ CombatTrackerLib::enumToSizeT(MAPPED_SKILLS[skillIndex]) };
-			const auto proficiencyLevel{ statBlock.skillProficiencyLevels[skillIndex] };
-			return statBlock.derived.m_abilityScoreModifiers[abilityIndex]
-				+ statBlock.derived.m_proficiencyBonus.get() * static_cast<int>(proficiencyLevel);
+			const auto abilityIndex{
+				CombatTrackerLib::enumToSizeT(MAPPED_SKILLS[skillIndex])
+			};
+			const auto proficiencyLevel{
+				statBlock.skillProficiencyLevels[skillIndex]
+			};
+			return statBlock.derived.m_abilityScoreModifiers[abilityIndex] +
+				   statBlock.derived.m_proficiencyBonus.get() *
+					   static_cast<int>(proficiencyLevel);
 		}
 
 		// Passive Perception = Perception mod + 10.
-		static constexpr int findPassivePerception(const CreatureStatBlock& statBlock) {
-			return statBlock.skillModifiers[CombatTrackerLib::enumToSizeT(Skill::PERCEPTION)].get() + PASSIVE_PERCEPTION_BASE;
+		static constexpr int
+		findPassivePerception(const CreatureStatBlock& statBlock) {
+			return statBlock
+					   .skillModifiers[CombatTrackerLib::enumToSizeT(
+						   Skill::PERCEPTION
+					   )]
+					   .get() +
+				   PASSIVE_PERCEPTION_BASE;
 		}
 
 		// Initiative Bonus = Dexterity mod.
-		static constexpr int findInitiativeBonus(const CreatureStatBlock& statBlock) {
-			return statBlock.derived.m_abilityScoreModifiers[CombatTrackerLib::enumToSizeT(Ability::DEXTERITY)];
+		static constexpr int
+		findInitiativeBonus(const CreatureStatBlock& statBlock) {
+			return statBlock.derived.m_abilityScoreModifiers
+				[CombatTrackerLib::enumToSizeT(Ability::DEXTERITY)];
 		}
 	};
 }

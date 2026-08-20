@@ -1,11 +1,11 @@
-#pragma once 
+#pragma once
 
-#include <optional>
 #include <nlohmann/json.hpp>
 #include <filesystem>
 #include <fstream>
-#include <sstream>
 #include <iostream>
+#include <optional>
+#include <sstream>
 #include <system_error>
 
 namespace CombatTrackerLib {
@@ -24,7 +24,8 @@ namespace CombatTrackerLib {
 
 	// These two functions implement generic JSON reading/writing functionality so they are put inside the library section of the project.
 	// They can be used to read/write any arbitrary JSON file.
-	inline std::optional<nlohmann::json> readJSONFile(const std::filesystem::path& path) {
+	inline std::optional<nlohmann::json>
+	readJSONFile(const std::filesystem::path& path) {
 		std::ifstream file{ path };
 		if (!file.is_open()) {
 			return std::nullopt;
@@ -37,7 +38,9 @@ namespace CombatTrackerLib {
 		};
 		return contents;
 	}
-	inline bool writeJSONFile(const std::filesystem::path& path, const nlohmann::json& contents) {
+	inline bool writeJSONFile(
+		const std::filesystem::path& path, const nlohmann::json& contents
+	) {
 
 		// Create directory to write in if it doesn't exist.
 		// If it already exists, create_directories returns false which we don't really care about.

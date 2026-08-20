@@ -1,12 +1,16 @@
 #include "CombatTrackerLib/Providers/ThemeProvider.h"
-#include "CombatTrackerLib/Utilities/FileUtils.h"
 #include "CombatTrackerLib/Providers/DirectoryProvider.h"
+#include "CombatTrackerLib/Utilities/FileUtils.h"
 
 namespace CombatTrackerLib {
-	ThemeProvider::ThemeProvider(const DirectoryProvider& directoryProvider) : Unique() {
+	ThemeProvider::ThemeProvider(const DirectoryProvider& directoryProvider)
+		: Unique() {
 		std::error_code errorCode{};
-		const std::filesystem::path themePath{ directoryProvider.getResourceDirectory() / "assets/Themes" };
-		for (const auto& entry : std::filesystem::directory_iterator(themePath, errorCode)) {
+		const std::filesystem::path themePath{
+			directoryProvider.getResourceDirectory() / "assets/Themes"
+		};
+		for (const auto& entry :
+			 std::filesystem::directory_iterator(themePath, errorCode)) {
 			const auto themeFile{ readJSONFile(entry.path()) };
 			if (themeFile == std::nullopt) {
 				continue;
@@ -24,20 +28,25 @@ namespace CombatTrackerLib {
 	3) The application class can instantiate the provider before booting up an ImGui context 
 	as it is the root class managing lifetimes, contexts, etc.
 	*/
-	const ImGuiStyle* ThemeProvider::getStyle(std::string_view themeName) const {
+	const ImGuiStyle* ThemeProvider::getStyle(std::string_view themeName
+	) const {
 		const auto theme{ m_themeToStyle.find(themeName) };
 		if (theme == m_themeToStyle.end()) {
 			return nullptr;
 		}
 		return &theme->second;
 	}
-	void ThemeProvider::mapThemeToStyle(const std::string& themeName, const nlohmann::json& fileContents) {
+	void ThemeProvider::mapThemeToStyle(
+		const std::string& themeName, const nlohmann::json& fileContents
+	) {
 
 		// This call does the initial insertion, this is why we also pass a string reference here instead of string_view.
-		auto& style{ m_themeToStyle[themeName]}; 
+		auto& style{ m_themeToStyle[themeName] };
 		const auto baseNode{ fileContents.find("base") };
 		if (baseNode != fileContents.end() && baseNode->is_string()) {
-			const auto& baseName{ baseNode->get_ref<const nlohmann::json::string_t&>() };
+			const auto& baseName{
+				baseNode->get_ref<const nlohmann::json::string_t&>()
+			};
 			if (baseName == "dark") {
 				ImGui::StyleColorsDark(&style);
 			}
@@ -53,7 +62,8 @@ namespace CombatTrackerLib {
 		for (int i{}; i < ImGuiCol_COUNT; ++i) {
 			const auto colorName{ ImGui::GetStyleColorName(i) };
 			const auto color{ colorNodes->find(colorName) };
-			if (color != colorNodes->end() && color->is_array() && color->size() == 4) {
+			if (color != colorNodes->end() && color->is_array() &&
+				color->size() == 4) {
 				style.Colors[i] = color->get<ImVec4>();
 			}
 		}

@@ -23,8 +23,8 @@ namespace CombatTrackerLib {
 		This function is specifically for non-Imgui event handling.
 		I expect this function to be empty for most scenes, as they purely consist of UI widgets.
 		*/
-		virtual void notifyScene(const ImGuiIO& imguiIO) = 0; 
-		
+		virtual void notifyScene(const ImGuiIO& imguiIO) = 0;
+
 		/*
 		This function is for duration-based scene updates. Think something like a car moving across a road.
 		I might actually end up never using this function as the application will probably be purely input based.
@@ -50,7 +50,6 @@ namespace CombatTrackerLib {
 		virtual void renderScene() = 0;
 
 	protected:
-
 		/*
 		The default scene constructor shouldn't be visible to the public as we don't really want anyone to create a base Scene.
 		However a derived class of Scene can use this constructor particularly for testing purposes.

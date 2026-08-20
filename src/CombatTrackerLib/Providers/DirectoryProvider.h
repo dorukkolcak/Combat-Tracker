@@ -8,7 +8,6 @@
 namespace CombatTrackerLib {
 	class DirectoryProvider : public Unique<DirectoryProvider> {
 	public:
-
 		DirectoryProvider() = delete;
 		explicit DirectoryProvider(std::string_view applicationName);
 		~DirectoryProvider() = default;
@@ -30,6 +29,7 @@ namespace CombatTrackerLib {
 		// Finds the path for writable per user location for files the application creates.
 		// The application name is a parameter so the library half keeps no knowledge of a particular application.
 		// Returns an empty path when the location cannot be determined, which callers should treat as a failure to save.
-		static const std::filesystem::path findUserDataDirectory(std::string_view applicationName);
+		static const std::filesystem::path
+		findUserDataDirectory(std::string_view applicationName);
 	};
 }

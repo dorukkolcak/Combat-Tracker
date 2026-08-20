@@ -1,8 +1,8 @@
 #pragma once
 
-#include "CombatTrackerLib/Utilities/UIUtils.h"
 #include "CombatTrackerLib/ImGuiScopes.h"
 #include "CombatTrackerLib/Scene.h"
+#include "CombatTrackerLib/Utilities/UIUtils.h"
 
 #include <span>
 #include <string>
@@ -11,15 +11,14 @@
 namespace CombatTrackerApp {
 	class EncounterCreationScene : public CombatTrackerLib::Scene {
 	public:
-
 		explicit EncounterCreationScene(CombatTrackerLib::App* app);
 
 		void notifyScene(const ImGuiIO& imguiIO) override;
 		void updateScene(double timeInterval) override;
 		void renderUI() override;
 		void renderScene() override;
-	private:
 
+	private:
 		enum class WindowType {
 			ENCOUNTER_CREATOR,
 			MENU,
@@ -30,11 +29,7 @@ namespace CombatTrackerApp {
 			ENCOUNTER_BROWSER,
 			COUNT,
 		};
-		enum class EntitySource {
-			ALL,
-			USER_CREATED,
-			COMPENDIUM
-		};
+		enum class EntitySource { ALL, USER_CREATED, COMPENDIUM };
 
 		struct BrowserLabels {
 			std::string_view create{};
@@ -46,24 +41,19 @@ namespace CombatTrackerApp {
 
 		// These flags are shared between browser tabs.
 		inline static constexpr ImGuiTableFlags BROWSER_TABLE_FLAGS{
-			ImGuiTableFlags_RowBg |
-			ImGuiTableFlags_BordersInnerV |
-			ImGuiTableFlags_ScrollY |
-			ImGuiTableFlags_Sortable |
+			ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV |
+			ImGuiTableFlags_ScrollY | ImGuiTableFlags_Sortable |
 			ImGuiTableFlags_SizingStretchProp
 		};
 		inline static constexpr ImGuiWindowFlags ENCOUNTER_CREATION_WINDOW_FLAGS{
-			ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_NoCollapse |
-			ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+			ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
 			ImGuiWindowFlags_NoBringToFrontOnFocus |
 			ImGuiWindowFlags_NoNavFocus |
 			ImGuiWindowFlags_MenuBar // This flag allows us to append a menu bar to this window by immediately calling the appropriate ImGui function.
 		};
 		inline static constexpr ImGuiDockNodeFlags DOCKSPACE_FLAGS{
-			ImGuiDockNodeFlags_NoResize |
-			ImGuiDockNodeFlags_NoSplit
+			ImGuiDockNodeFlags_NoResize | ImGuiDockNodeFlags_NoSplit
 		};
 
 		ImGuiID m_dockspaceID{};
@@ -77,8 +67,8 @@ namespace CombatTrackerApp {
 		std::string m_playerCharacterSearchQuery{};
 
 		// Negative means nothing is selected, so the details panel stays empty.
-		int m_selectedMonsterIndex{-1};
-		int m_selectedPlayerCharacterIndex{-1};
+		int m_selectedMonsterIndex{ -1 };
+		int m_selectedPlayerCharacterIndex{ -1 };
 
 		bool m_isdockspaceInitialized{};
 
@@ -91,10 +81,12 @@ namespace CombatTrackerApp {
 		The distinction between browser tabs is made via EntitySource parameter.
 		Should be passed a non-const lvalue reference as we change it inside the function.
 		*/
-		void renderBrowserFilters(EntitySource& source, std::string& searchQuery, const char* label);
+		void renderBrowserFilters(
+			EntitySource& source, std::string& searchQuery, const char* label
+		);
 		void renderEntityBrowserHostWindow();
 
-		template<typename S>
+		template <typename S>
 		void renderEntityBrowserWindow(
 			const BrowserLabels& labels,
 			std::span<const std::string_view> columnLabels,
@@ -106,7 +98,7 @@ namespace CombatTrackerApp {
 	};
 
 	// TODO: Finish this function when JSON functionality is implemented.
-	template<typename S>
+	template <typename S>
 	void EncounterCreationScene::renderEntityBrowserWindow(
 		const BrowserLabels& labels,
 		std::span<const std::string_view> columnLabels,
@@ -122,23 +114,29 @@ namespace CombatTrackerApp {
 		A scrolling table with no explicit height occupies every remaining pixel, which pushes the "functionality" buttons
 		out of the tab as soon as the window gets shorter. So both regions get a computed height.
 		*/
-		const auto functionalityButtonsHeight{ CombatTrackerLib::reservedFooterHeight(1) };
+		const auto functionalityButtonsHeight{
+			CombatTrackerLib::reservedFooterHeight(1)
+		};
 		const auto createRowHeight{ ImGui::GetFrameHeightWithSpacing() };
-		const auto bodyHeight{ ImGui::GetContentRegionAvail().y - createRowHeight - functionalityButtonsHeight };
-		const auto listingHeight{ bodyHeight * 0.55f }; // Consider playing around with the multiplier.
+		const auto bodyHeight{ ImGui::GetContentRegionAvail().y -
+							   createRowHeight - functionalityButtonsHeight };
+		const auto listingHeight{
+			bodyHeight * 0.55f
+		}; // Consider playing around with the multiplier.
 
 		const auto columnCount{ columnLabels.size() };
-		if (CombatTrackerLib::ScopedTable listing{ 
-			"Listing",
-			static_cast<int>(columnCount) + 2,
-			BROWSER_TABLE_FLAGS,
-			ImVec2{ 0.0f, listingHeight } 
-		}) {
+		if (CombatTrackerLib::ScopedTable listing{
+				"Listing",
+				static_cast<int>(columnCount) + 2,
+				BROWSER_TABLE_FLAGS,
+				ImVec2{ 0.0f, listingHeight } }) {
 
 			// Column setup.
 			ImGui::TableSetupColumn(
-				m_localeProviderPointer->getText("/scenes/encounterCreation/browser/nameColumn").data(),
-				ImGuiTableColumnFlags_WidthStretch, 
+				m_localeProviderPointer
+					->getText("/scenes/encounterCreation/browser/nameColumn")
+					.data(),
+				ImGuiTableColumnFlags_WidthStretch,
 				0.30f
 			);
 			for (const auto& columnLabel : columnLabels) {
@@ -149,8 +147,10 @@ namespace CombatTrackerApp {
 				);
 			}
 			ImGui::TableSetupColumn(
-				m_localeProviderPointer->getText("/scenes/encounterCreation/browser/sourceColumn").data(), 
-				ImGuiTableColumnFlags_WidthStretch, 
+				m_localeProviderPointer
+					->getText("/scenes/encounterCreation/browser/sourceColumn")
+					.data(),
+				ImGuiTableColumnFlags_WidthStretch,
 				0.10f
 			);
 			ImGui::TableSetupScrollFreeze(0, 1);
@@ -158,7 +158,9 @@ namespace CombatTrackerApp {
 		}
 
 		if (CombatTrackerLib::alignedButton(labels.create.data(), 0.5f)) {
-			m_applicationPointer->getSceneManager().queueSceneTransition(this, std::make_unique<S>(m_applicationPointer));
+			m_applicationPointer->getSceneManager().queueSceneTransition(
+				this, std::make_unique<S>(m_applicationPointer)
+			);
 		}
 
 		/*
@@ -168,23 +170,29 @@ namespace CombatTrackerApp {
 		Also notice the introduction of a scope in this section.
 		*/
 		{
-			CombatTrackerLib::ScopedChild details{ "Details", ImVec2{ 0.0f, -functionalityButtonsHeight } };
+			CombatTrackerLib::ScopedChild details{
+				"Details", ImVec2{ 0.0f, -functionalityButtonsHeight }
+			};
 			if (selectionIndex < 0) {
 				ImGui::TextWrapped("%s", labels.emptyDetails.data());
 			}
 		}
 
-		CombatTrackerLib::ScopedDisabled disabledWithoutSelection{ selectionIndex < 0 };
-		if (ImGui::Button(m_localeProviderPointer->getText("/scenes/encounterCreation/browser/addToEncounter").data())) {
-
+		CombatTrackerLib::ScopedDisabled disabledWithoutSelection{
+			selectionIndex < 0
+		};
+		if (ImGui::Button(
+				m_localeProviderPointer
+					->getText("/scenes/encounterCreation/browser/addToEncounter"
+					)
+					.data()
+			)) {
 		}
 		ImGui::SameLine();
 		if (ImGui::Button(labels.edit.data())) {
-
 		}
 		ImGui::SameLine();
 		if (ImGui::Button(labels.remove.data())) {
-
 		}
 	}
 }

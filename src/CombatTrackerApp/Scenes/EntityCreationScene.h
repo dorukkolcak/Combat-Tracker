@@ -1,17 +1,17 @@
 #pragma once
 
-#include "CombatTrackerLib/Utilities/UIUtils.h"
+#include "CombatTrackerApp/Entities/Creature.h"
 #include "CombatTrackerLib/ImGuiScopes.h"
 #include "CombatTrackerLib/Scene.h"
-#include "CombatTrackerApp/Entities/Creature.h"
+#include "CombatTrackerLib/Utilities/UIUtils.h"
 
-#include <vector>
 #include <algorithm>
+#include <cstddef>
+#include <imgui_stdlib.h>
 #include <span>
 #include <string>
 #include <string_view>
-#include <cstddef>
-#include <imgui_stdlib.h>
+#include <vector>
 
 namespace CombatTrackerApp {
 
@@ -19,7 +19,6 @@ namespace CombatTrackerApp {
 	// Whatever differs between the two entities is left to the derived scenes as pure virtuals.
 	class EntityCreationScene : public CombatTrackerLib::Scene {
 	public:
-
 		explicit EntityCreationScene(CombatTrackerLib::App* app);
 
 		void notifyScene(const ImGuiIO& imguiIO) override;
@@ -28,7 +27,6 @@ namespace CombatTrackerApp {
 		void renderScene() override;
 
 	protected:
-
 		struct CreationLabels {
 			std::string_view windowTitle{};
 			std::string_view completeButton{};
@@ -55,13 +53,10 @@ namespace CombatTrackerApp {
 
 		inline static constexpr float MIN_CHILD_HEIGHT{ 180.f };
 		inline static constexpr ImGuiWindowFlags ENTITY_CREATION_WINDOW_FLAGS{
-			ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_NoCollapse |
-			ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+			ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
 			ImGuiWindowFlags_NoBringToFrontOnFocus |
-			ImGuiWindowFlags_NoNavFocus |
-			ImGuiWindowFlags_NoDocking
+			ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDocking
 		};
 
 		/*
@@ -74,7 +69,7 @@ namespace CombatTrackerApp {
 		// Right hand column of the top split (of the popup). Monster specific data for monsters, classes and subclasses for player characters.
 		virtual void renderEntitySpecificInfo() = 0;
 
-		// A specific section below the senses. Only player characters currently fill it so it defaults to rendering nothing 
+		// A specific section below the senses. Only player characters currently fill it so it defaults to rendering nothing
 		virtual void renderEntitySpecificSection() {}
 
 		virtual bool completeEntityCreation() = 0;
@@ -99,7 +94,7 @@ namespace CombatTrackerApp {
 		);
 
 		// A plain checkbox grid over proficiency levels, for the items that only ever toggle between
-		// having a proficiency and not having one. 
+		// having a proficiency and not having one.
 		static void renderProficiencyLevelGrid(
 			std::span<ProficiencyLevel> proficiencyLevels,
 			std::span<const std::string_view> itemNames,
@@ -114,7 +109,11 @@ namespace CombatTrackerApp {
 		what extra widgets the add popup shows, how a finished item is built, and what the tooltip says.
 		The simple form covers anything that is just a name and a description.
 		*/
-		template <typename I, typename AddFieldsFn, typename MakeItemFn, typename TooltipFn>
+		template <
+			typename I,
+			typename AddFieldsFn,
+			typename MakeItemFn,
+			typename TooltipFn>
 		static void renderAddables(
 			std::vector<I>& currentItems,
 			const AddableLabels& labels,
@@ -123,7 +122,9 @@ namespace CombatTrackerApp {
 			TooltipFn&& renderTooltip
 		);
 		template <typename I>
-		static void renderAddables(std::vector<I>& currentItems, const AddableLabels& labels);
+		static void renderAddables(
+			std::vector<I>& currentItems, const AddableLabels& labels
+		);
 
 		/*
 		Saving throws and skills present the same table, a name beside an overridable value beside a
@@ -161,7 +162,11 @@ namespace CombatTrackerApp {
 	};
 
 	// Chunky helper used for rendering traits, gear and actions alike.
-	template <typename I, typename AddFieldsFn, typename MakeItemFn, typename TooltipFn>
+	template <
+		typename I,
+		typename AddFieldsFn,
+		typename MakeItemFn,
+		typename TooltipFn>
 	void EntityCreationScene::renderAddables(
 		std::vector<I>& currentItems,
 		const AddableLabels& labels,
@@ -197,20 +202,34 @@ namespace CombatTrackerApp {
 			CombatTrackerLib::centerNextWindow(0.70f, 0.70f);
 
 			// Popup modal for editing/deleting items.
-			if (CombatTrackerLib::ScopedPopupModal popupModal{ labels.edit, nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize }) {
+			if (CombatTrackerLib::ScopedPopupModal popupModal{
+					labels.edit,
+					nullptr,
+					ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize }) {
 
 				// The layouting is quite similar to the big entity creation popup modal.
 				{
-					CombatTrackerLib::ScopedChild editAddableScroll{ "EditAddableScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(2) }, true };
+					CombatTrackerLib::ScopedChild editAddableScroll{
+						"EditAddableScroll",
+						ImVec2{ 0.0f,
+								-CombatTrackerLib::reservedFooterHeight(2) },
+						true
+					};
 					ImGui::InputText(labels.name.data(), &currentItems[i].name);
-					ImGui::InputText(labels.description.data(), &currentItems[i].description);
+					ImGui::InputText(
+						labels.description.data(), &currentItems[i].description
+					);
 				}
 
 				ImGui::Separator();
-				if (CombatTrackerLib::alignedButton(labels.finishEditing.data(), 0.5f)) {
+				if (CombatTrackerLib::alignedButton(
+						labels.finishEditing.data(), 0.5f
+					)) {
 					ImGui::CloseCurrentPopup();
 				}
-				if (CombatTrackerLib::alignedButton(labels.remove.data(), 0.5f)) {
+				if (CombatTrackerLib::alignedButton(
+						labels.remove.data(), 0.5f
+					)) {
 					s_markedForDeletion.push_back(i);
 					ImGui::CloseCurrentPopup();
 				}
@@ -220,7 +239,10 @@ namespace CombatTrackerApp {
 		// Delete marked items safely, starting from the largest index to the smallest index.
 		std::sort(s_markedForDeletion.begin(), s_markedForDeletion.end());
 		for (size_t i = s_markedForDeletion.size(); i-- > 0;) {
-			currentItems.erase(currentItems.begin() + static_cast<std::ptrdiff_t>(s_markedForDeletion[i]));
+			currentItems.erase(
+				currentItems.begin() +
+				static_cast<std::ptrdiff_t>(s_markedForDeletion[i])
+			);
 		}
 		s_markedForDeletion.clear();
 
@@ -232,7 +254,10 @@ namespace CombatTrackerApp {
 
 		// Setup configs of the add item popup.
 		CombatTrackerLib::centerNextWindow(0.70f, 0.70f);
-		if (CombatTrackerLib::ScopedPopupModal popupModal{ labels.add, NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize }) {
+		if (CombatTrackerLib::ScopedPopupModal popupModal{
+				labels.add,
+				NULL,
+				ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize }) {
 
 			/*
 			These are static so they survive between frames while the popup is open.
@@ -248,7 +273,11 @@ namespace CombatTrackerApp {
 				s_description.clear();
 			}
 			{
-				CombatTrackerLib::ScopedChild addAddableScroll{ "AddAddableScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(1) }, true };
+				CombatTrackerLib::ScopedChild addAddableScroll{
+					"AddAddableScroll",
+					ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(1) },
+					true
+				};
 				renderAddFields();
 				ImGui::InputText(labels.name.data(), &s_name);
 				ImGui::InputText(labels.description.data(), &s_description);
@@ -256,7 +285,9 @@ namespace CombatTrackerApp {
 
 			// Button and cleanup section.
 			ImGui::Separator();
-			if (CombatTrackerLib::alignedButton(labels.finishCreation.data(), 0.5f) &&
+			if (CombatTrackerLib::alignedButton(
+					labels.finishCreation.data(), 0.5f
+				) &&
 				!s_name.empty() && !s_description.empty()) {
 				currentItems.push_back(makeItem(s_name, s_description));
 				s_name.clear();
@@ -268,13 +299,19 @@ namespace CombatTrackerApp {
 
 	// Anything that is just a name and a description needs none of the hooks.
 	template <typename I>
-	void EntityCreationScene::renderAddables(std::vector<I>& currentItems, const AddableLabels& labels) {
+	void EntityCreationScene::renderAddables(
+		std::vector<I>& currentItems, const AddableLabels& labels
+	) {
 		renderAddables(
 			currentItems,
 			labels,
 			[] {},
-			[](const std::string& name, const std::string& description) { return I{ name, description }; },
-			[](const I& item) { ImGui::SetTooltip("%s", item.description.c_str()); }
+			[](const std::string& name, const std::string& description) {
+				return I{ name, description };
+			},
+			[](const I& item) {
+				ImGui::SetTooltip("%s", item.description.c_str());
+			}
 		);
 	}
 }

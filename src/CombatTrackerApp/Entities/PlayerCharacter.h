@@ -3,11 +3,11 @@
 #include "CombatTrackerApp/Entities/Creature.h"
 #include "CombatTrackerLib/Utilities/GenericUtils.h"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
-#include <optional>
-#include <algorithm>
 #include <functional>
+#include <optional>
 
 namespace CombatTrackerApp {
 
@@ -169,56 +169,58 @@ namespace CombatTrackerApp {
 	Once again, using an array instead of an unordered_map has the advantage of constexpr support.
 	And since no changes will be made to the order other than additions, storing them in this format isn't cumbersome.
 	*/
-	inline constexpr std::array<PlayerClass, static_cast<std::size_t>(PlayerSubclass::COUNT)> SUBCLASSES_TO_CLASSES{
-		PlayerClass::BARBARIAN, // PATH_OF_THE_BERSERKER
-		PlayerClass::BARBARIAN, // PATH_OF_THE_WILD_HEART
-		PlayerClass::BARBARIAN, // PATH_OF_THE_WORLD_TREE
-		PlayerClass::BARBARIAN, // PATH_OF_THE_ZEALOT
-		PlayerClass::BARD,      // COLLEGE_OF_DANCE
-		PlayerClass::BARD,      // COLLEGE_OF_GLAMOUR
-		PlayerClass::BARD,      // COLLEGE_OF_LORE
-		PlayerClass::BARD,      // COLLEGE_OF_VALOR
-		PlayerClass::CLERIC,    // LIFE_DOMAIN
-		PlayerClass::CLERIC,    // LIGHT_DOMAIN
-		PlayerClass::CLERIC,    // TRICKERY_DOMAIN
-		PlayerClass::CLERIC,    // WAR_DOMAIN
-		PlayerClass::DRUID,     // CIRCLE_OF_THE_LAND
-		PlayerClass::DRUID,     // CIRCLE_OF_THE_MOON
-		PlayerClass::DRUID,     // CIRCLE_OF_THE_SEA
-		PlayerClass::DRUID,     // CIRCLE_OF_THE_STARS
-		PlayerClass::FIGHTER,   // BATTLE_MASTER
-		PlayerClass::FIGHTER,   // CHAMPION
-		PlayerClass::FIGHTER,   // ELDRITCH_KNIGHT
-		PlayerClass::FIGHTER,   // PSI_WARRIOR
-		PlayerClass::MONK,      // WARRIOR_OF_MERCY
-		PlayerClass::MONK,      // WARRIOR_OF_SHADOW
-		PlayerClass::MONK,      // WARRIOR_OF_THE_ELEMENTS
-		PlayerClass::MONK,      // WARRIOR_OF_THE_OPEN_HAND
-		PlayerClass::PALADIN,   // OATH_OF_DEVOTION
-		PlayerClass::PALADIN,   // OATH_OF_GLORY
-		PlayerClass::PALADIN,   // OATH_OF_THE_ANCIENTS
-		PlayerClass::PALADIN,   // OATH_OF_VENGEANCE
-		PlayerClass::RANGER,    // BEAST_MASTER
-		PlayerClass::RANGER,    // FEY_WANDERER
-		PlayerClass::RANGER,    // GLOOM_STALKER
-		PlayerClass::RANGER,    // HUNTER
-		PlayerClass::ROGUE,     // ARCANE_TRICKSTER
-		PlayerClass::ROGUE,     // ASSASSIN
-		PlayerClass::ROGUE,     // SOULKNIFE
-		PlayerClass::ROGUE,     // THIEF
-		PlayerClass::SORCERER,  // ABERRANT_SORCERY
-		PlayerClass::SORCERER,  // CLOCKWORK_SORCERY
-		PlayerClass::SORCERER,  // DRACONIC_SORCERY
-		PlayerClass::SORCERER,  // WILD_MAGIC_SORCERY
-		PlayerClass::WARLOCK,   // ARCHFEY_PATRON
-		PlayerClass::WARLOCK,   // CELESTIAL_PATRON
-		PlayerClass::WARLOCK,   // FIEND_PATRON
-		PlayerClass::WARLOCK,   // GREAT_OLD_ONE_PATRON
-		PlayerClass::WIZARD,    // ABJURER
-		PlayerClass::WIZARD,    // DIVINER
-		PlayerClass::WIZARD,    // EVOKER
-		PlayerClass::WIZARD     // ILLUSIONIST
-	};
+	inline constexpr std::
+		array<PlayerClass, static_cast<std::size_t>(PlayerSubclass::COUNT)>
+			SUBCLASSES_TO_CLASSES{
+				PlayerClass::BARBARIAN, // PATH_OF_THE_BERSERKER
+				PlayerClass::BARBARIAN, // PATH_OF_THE_WILD_HEART
+				PlayerClass::BARBARIAN, // PATH_OF_THE_WORLD_TREE
+				PlayerClass::BARBARIAN, // PATH_OF_THE_ZEALOT
+				PlayerClass::BARD,		// COLLEGE_OF_DANCE
+				PlayerClass::BARD,		// COLLEGE_OF_GLAMOUR
+				PlayerClass::BARD,		// COLLEGE_OF_LORE
+				PlayerClass::BARD,		// COLLEGE_OF_VALOR
+				PlayerClass::CLERIC,	// LIFE_DOMAIN
+				PlayerClass::CLERIC,	// LIGHT_DOMAIN
+				PlayerClass::CLERIC,	// TRICKERY_DOMAIN
+				PlayerClass::CLERIC,	// WAR_DOMAIN
+				PlayerClass::DRUID,		// CIRCLE_OF_THE_LAND
+				PlayerClass::DRUID,		// CIRCLE_OF_THE_MOON
+				PlayerClass::DRUID,		// CIRCLE_OF_THE_SEA
+				PlayerClass::DRUID,		// CIRCLE_OF_THE_STARS
+				PlayerClass::FIGHTER,	// BATTLE_MASTER
+				PlayerClass::FIGHTER,	// CHAMPION
+				PlayerClass::FIGHTER,	// ELDRITCH_KNIGHT
+				PlayerClass::FIGHTER,	// PSI_WARRIOR
+				PlayerClass::MONK,		// WARRIOR_OF_MERCY
+				PlayerClass::MONK,		// WARRIOR_OF_SHADOW
+				PlayerClass::MONK,		// WARRIOR_OF_THE_ELEMENTS
+				PlayerClass::MONK,		// WARRIOR_OF_THE_OPEN_HAND
+				PlayerClass::PALADIN,	// OATH_OF_DEVOTION
+				PlayerClass::PALADIN,	// OATH_OF_GLORY
+				PlayerClass::PALADIN,	// OATH_OF_THE_ANCIENTS
+				PlayerClass::PALADIN,	// OATH_OF_VENGEANCE
+				PlayerClass::RANGER,	// BEAST_MASTER
+				PlayerClass::RANGER,	// FEY_WANDERER
+				PlayerClass::RANGER,	// GLOOM_STALKER
+				PlayerClass::RANGER,	// HUNTER
+				PlayerClass::ROGUE,		// ARCANE_TRICKSTER
+				PlayerClass::ROGUE,		// ASSASSIN
+				PlayerClass::ROGUE,		// SOULKNIFE
+				PlayerClass::ROGUE,		// THIEF
+				PlayerClass::SORCERER,	// ABERRANT_SORCERY
+				PlayerClass::SORCERER,	// CLOCKWORK_SORCERY
+				PlayerClass::SORCERER,	// DRACONIC_SORCERY
+				PlayerClass::SORCERER,	// WILD_MAGIC_SORCERY
+				PlayerClass::WARLOCK,	// ARCHFEY_PATRON
+				PlayerClass::WARLOCK,	// CELESTIAL_PATRON
+				PlayerClass::WARLOCK,	// FIEND_PATRON
+				PlayerClass::WARLOCK,	// GREAT_OLD_ONE_PATRON
+				PlayerClass::WIZARD,	// ABJURER
+				PlayerClass::WIZARD,	// DIVINER
+				PlayerClass::WIZARD,	// EVOKER
+				PlayerClass::WIZARD		// ILLUSIONIST
+			};
 	inline constexpr int MIN_CLASS_LEVEL{ 0 };
 	inline constexpr int MAX_TOTAL_CLASS_LEVEL{ 20 };
 	inline constexpr int SUBCLASS_LEVEL_THRESHOLD{ 3 };
@@ -226,9 +228,8 @@ namespace CombatTrackerApp {
 	// Exact same idea as creature/monster side, currently only applied to total class levels.
 	class PlayerDerivedStats {
 	public:
-		constexpr int getTotalClassLevel() const {
-			return m_totalClassLevel;
-		}
+		constexpr int getTotalClassLevel() const { return m_totalClassLevel; }
+
 	private:
 		friend class PlayerCharacter;
 
@@ -236,24 +237,32 @@ namespace CombatTrackerApp {
 	};
 	struct PlayerStatBlock {
 
-		std::array<CombatTrackerLib::BoundedInt<
-			MIN_CLASS_LEVEL, MAX_TOTAL_CLASS_LEVEL>,
-			static_cast<std::size_t>(PlayerClass::COUNT)
-		> levels{};
+		std::array<
+			CombatTrackerLib::
+				BoundedInt<MIN_CLASS_LEVEL, MAX_TOTAL_CLASS_LEVEL>,
+			static_cast<std::size_t>(PlayerClass::COUNT)>
+			levels{};
 
 		/*
 		A class holds at most one subclass, so each index in the array corresponds to a class (mapped to a subclass).
 		This has the advantage of making the stat block usable in a constant expression, which an unordered map doesn't allow.
 		An empty slot is a class with no subclass chosen, marked by std::nullopt.
 		*/
-		std::array<std::optional<PlayerSubclass>, static_cast<std::size_t>(PlayerClass::COUNT)> subclasses{};
+		std::array<
+			std::optional<PlayerSubclass>,
+			static_cast<std::size_t>(PlayerClass::COUNT)>
+			subclasses{};
 
-		std::array<bool, static_cast<std::size_t>(WeaponType::COUNT)> weaponProficiencies{};
-		std::array<bool, static_cast<std::size_t>(ArmorType::COUNT)> armorProficiencies{};
-		std::array<bool, static_cast<std::size_t>(WeaponMastery::COUNT)> weaponMasteries{};
+		std::array<bool, static_cast<std::size_t>(WeaponType::COUNT)>
+			weaponProficiencies{};
+		std::array<bool, static_cast<std::size_t>(ArmorType::COUNT)>
+			armorProficiencies{};
+		std::array<bool, static_cast<std::size_t>(WeaponMastery::COUNT)>
+			weaponMasteries{};
 
 		// Tools can have expertise as well so we use the proficiency level idea here as well.
-		std::array<ProficiencyLevel, static_cast<std::size_t>(Tool::COUNT)> toolProficiencyLevels{};
+		std::array<ProficiencyLevel, static_cast<std::size_t>(Tool::COUNT)>
+			toolProficiencyLevels{};
 
 		Species species{};
 		Origin origin{};
@@ -265,23 +274,32 @@ namespace CombatTrackerApp {
 	public:
 		friend class PlayerCharacterTest;
 
-		PlayerCharacter(CreatureStatBlock creaturePortion, PlayerStatBlock playerPortion);
+		PlayerCharacter(
+			CreatureStatBlock creaturePortion, PlayerStatBlock playerPortion
+		);
 
 		PlayerCharacter(const PlayerCharacter& playerCharacter) = delete;
-		PlayerCharacter& operator=(const PlayerCharacter& playerCharacter) = delete;
+		PlayerCharacter& operator=(const PlayerCharacter& playerCharacter
+		) = delete;
 
 		PlayerCharacter(PlayerCharacter&& playerCharacter) noexcept = default;
-		PlayerCharacter& operator=(PlayerCharacter&& playerCharacter) noexcept = default;
+		PlayerCharacter& operator=(PlayerCharacter&& playerCharacter
+		) noexcept = default;
 
 		~PlayerCharacter() = default;
 
 		// For a player character the proficiency tier is the total class level across every class.
 		// The total is written back into the block so the a scene can display it without
 		// recomputing it, the same way a monster's XP is cached next to its challenge rating.
-		static constexpr void resolveDerived(CreatureStatBlock& creatureBlock, PlayerStatBlock& playerBlock) {
+		static constexpr void resolveDerived(
+			CreatureStatBlock& creatureBlock, PlayerStatBlock& playerBlock
+		) {
 			resolveSubclasses(playerBlock);
-			playerBlock.derived.m_totalClassLevel = findTotalClassLevel(playerBlock);
-			Creature::resolveDerived(creatureBlock, playerBlock.derived.m_totalClassLevel);
+			playerBlock.derived.m_totalClassLevel =
+				findTotalClassLevel(playerBlock);
+			Creature::resolveDerived(
+				creatureBlock, playerBlock.derived.m_totalClassLevel
+			);
 		}
 
 		/*
@@ -294,30 +312,41 @@ namespace CombatTrackerApp {
 		Every stored subclass also has to belong to a class that actually reached the threshold, which is
 		the one rule a draft is free to break while its levels are still being typed in.
 		*/
-		static constexpr bool isValid(const CreatureStatBlock& creatureBlock, const PlayerStatBlock& playerBlock) {
+		static constexpr bool isValid(
+			const CreatureStatBlock& creatureBlock,
+			const PlayerStatBlock& playerBlock
+		) {
 
 			// Should be computed from scratch as we don't have a guarentee of calling resolveDerived() everywhere.
-			const auto totalClassLevel{ findTotalClassLevel(playerBlock) }; 
-			if (!Creature::isValid(creatureBlock)
-				|| totalClassLevel <= MIN_CLASS_LEVEL
-				|| totalClassLevel > MAX_TOTAL_CLASS_LEVEL) {
+			const auto totalClassLevel{ findTotalClassLevel(playerBlock) };
+			if (!Creature::isValid(creatureBlock) ||
+				totalClassLevel <= MIN_CLASS_LEVEL ||
+				totalClassLevel > MAX_TOTAL_CLASS_LEVEL) {
 				return false;
 			}
-			for (std::size_t classIndex{}; classIndex < CombatTrackerLib::enumToSizeT(PlayerClass::COUNT); ++classIndex) {
-				if (playerBlock.subclasses[classIndex].has_value()
-					&& playerBlock.levels[classIndex].get() < SUBCLASS_LEVEL_THRESHOLD) {
+			for (std::size_t classIndex{};
+				 classIndex < CombatTrackerLib::enumToSizeT(PlayerClass::COUNT);
+				 ++classIndex) {
+				if (playerBlock.subclasses[classIndex].has_value() &&
+					playerBlock.levels[classIndex].get() <
+						SUBCLASS_LEVEL_THRESHOLD) {
 					return false;
 				}
 			}
 			return true;
 		}
+
 	private:
 		PlayerStatBlock m_statBlockPlayerPortion{};
-		static constexpr int findTotalClassLevel(const PlayerStatBlock& statBlock) {
+		static constexpr int
+		findTotalClassLevel(const PlayerStatBlock& statBlock) {
 			return std::ranges::fold_left(
 				statBlock.levels,
 				0,
-				[](int sum, CombatTrackerLib::BoundedInt<MIN_CLASS_LEVEL, MAX_TOTAL_CLASS_LEVEL> boundedInt) {
+				[](int sum,
+				   CombatTrackerLib::BoundedInt<
+					   MIN_CLASS_LEVEL,
+					   MAX_TOTAL_CLASS_LEVEL> boundedInt) {
 					return sum + boundedInt.get();
 				}
 			);
@@ -325,8 +354,11 @@ namespace CombatTrackerApp {
 
 		// Empties the subclass slots for classes that have allocated levels below SUBCLASS_LEVEL_THRESHOLD.
 		static constexpr void resolveSubclasses(PlayerStatBlock& statBlock) {
-			for (std::size_t classIndex{}; classIndex < CombatTrackerLib::enumToSizeT(PlayerClass::COUNT); ++classIndex) {
-				if (statBlock.levels[classIndex].get() < SUBCLASS_LEVEL_THRESHOLD) {
+			for (std::size_t classIndex{};
+				 classIndex < CombatTrackerLib::enumToSizeT(PlayerClass::COUNT);
+				 ++classIndex) {
+				if (statBlock.levels[classIndex].get() <
+					SUBCLASS_LEVEL_THRESHOLD) {
 					statBlock.subclasses[classIndex].reset();
 				}
 			}
