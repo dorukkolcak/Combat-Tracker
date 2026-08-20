@@ -44,5 +44,3 @@
 build
 imgui.ini
 CMakeUserPresets.json
-html
-latex

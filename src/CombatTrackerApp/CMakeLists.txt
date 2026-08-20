@@ -29,3 +29,10 @@ add_custom_command(TARGET Combat-Tracker-App POST_BUILD
         ${PROJECT_SOURCE_DIR}/assets
         $<TARGET_FILE_DIR:Combat-Tracker-App>/assets
 )
+
+install(TARGETS Combat-Tracker-App RUNTIME DESTINATION .)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/assets/ DESTINATION assets)
+
+if(WIN32)
+    install(FILES $<TARGET_RUNTIME_DLLS:Combat-Tracker-App> DESTINATION .)
+endif()

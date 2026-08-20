@@ -4,7 +4,8 @@ Checks: >
   modernize-*,
   performance-*,
   readability-*,
-  -modernize-use-trailing-return-type
+  -modernize-use-trailing-return-type,
+  -readability-redundant-member-init
 WarningsAsErrors: ''
 HeaderFilterRegex: 'CombatTracker(Lib|App)'
 FormatStyle: file

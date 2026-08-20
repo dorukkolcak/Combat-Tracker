@@ -34,10 +34,6 @@ Examples for systems and features that are suitable for this project are as foll
 
 - This architectural distinction is the single most important thing to consider during development and the boundaries listed should be respected at all times.
 
-- **`scripts`** is where utilities that are not part of the core runtime application but are related to the development of the project should live. Some examples can be as follows:
-  - Scripts for generating assets that are shipped with the project. The script itself shouldn't be part of the source code as we only care about the output of the script.
-  - Scripts for logging, automation and setting up the project.
-
 - **`tests`** is where unit tests for the source code live. The directory is further split into two subdirectories: CombatTrackerLib and CombatTrackerApp. 
 Unit tests exist for both the library-side and the application side of the project. Hence, tests written in one subdirectory should only test functionality for the corresponding part of the project.
 

@@ -1,0 +1,99 @@
+name: Lint
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  LLVM_VERSION: "19"
+  CLANG_FORMAT_VERSION: "19.1.5"
+
+jobs:
+  format:
+    name: clang-format
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install clang-format
+        run: pipx install clang-format==${{ env.CLANG_FORMAT_VERSION }}
+
+      - name: Check formatting
+        run: |
+          find src tests -type f \( -name '*.cpp' -o -name '*.h' \) -print0 \
+            | xargs -0 clang-format --dry-run -Werror
+
+  tidy:
+    name: clang-tidy
+    runs-on: ubuntu-latest
+
+    env:
+      CC: clang-19
+      CXX: clang++-19
+      VCPKG_ROOT: ${{ env.VCPKG_INSTALLATION_ROOT }}
+      VCPKG_DEFAULT_TRIPLET: x64-linux
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg-cache,readwrite
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ninja-build \
+            xorg-dev \
+            libwayland-dev \
+            libxkbcommon-dev \
+            wayland-protocols \
+            extra-cmake-modules
+
+      - name: Install LLVM ${{ env.LLVM_VERSION }}
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh ${{ env.LLVM_VERSION }}
+          sudo apt-get install -y clang-tidy-${{ env.LLVM_VERSION }}
+          sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy \
+            /usr/bin/clang-tidy-${{ env.LLVM_VERSION }} 100
+
+      - name: Cache vcpkg binaries
+        uses: actions/cache@v6
+        with:
+          path: vcpkg-cache
+          key: vcpkg-linux-clang-tidy-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-linux-clang-tidy-
+
+      - name: Configure
+        run: cmake --preset debug -D COMBAT_TRACKER_CLANG_TIDY=ON
+
+      - name: Build with clang-tidy
+        run: |
+          set -o pipefail
+          cmake --build --preset debug 2>&1 | tee tidy.log
+
+      - name: Summarise findings
+        if: always()
+        run: |
+          {
+            echo "### clang-tidy findings"
+            echo
+            echo '| Count | Check |'
+            echo '| --- | --- |'
+            grep -ohE '\[[a-z][a-z-]+-[a-z][a-z0-9.,-]*\]$' tidy.log \
+              | sort | uniq -c | sort -rn \
+              | awk '{ gsub(/[][]/, "", $2); print "| " $1 " | `" $2 "` |" }'
+          } >> "$GITHUB_STEP_SUMMARY"
