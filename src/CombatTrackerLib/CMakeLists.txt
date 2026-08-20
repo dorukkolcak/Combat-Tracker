@@ -14,9 +14,9 @@ target_link_libraries(Combat-Tracker-Lib
         Combat-Tracker-Options
     PUBLIC
         glad
-        glfw_target
+        glfw
         OpenGL::GL
-        imgui
+        imgui::imgui
         glm::glm
         stb_image
         nlohmann_json::nlohmann_json

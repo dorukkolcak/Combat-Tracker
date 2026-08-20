@@ -48,6 +48,20 @@ The project is in early development, so the list above should be taken as a plan
 - CMake 3.25+
 - Ninja
 - Git
+- [vcpkg](https://github.com/microsoft/vcpkg), with `VCPKG_ROOT` set to the clone
+
+Dependencies are declared in `vcpkg.json` and resolved by vcpkg in manifest mode. The presets pass
+`$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake` as the CMake toolchain file, so `VCPKG_ROOT` has to
+point at a vcpkg clone before configuring:
+
+```bash
+git clone https://github.com/microsoft/vcpkg C:/vcpkg
+C:/vcpkg/bootstrap-vcpkg.bat
+setx VCPKG_ROOT C:\vcpkg
+```
+
+The first configure builds every dependency from source and takes a while. Later configures reuse
+vcpkg's binary cache.
 
 On Linux, GLFW needs the system windowing headers:
 
@@ -103,10 +117,10 @@ and can be deleted at any point to get the default layout back.
 
 - `cmake --workflow` takes no `-D` options, so configure and build separately when you need one:
   `cmake --preset release -D BUILD_TESTING=OFF` followed by `cmake --build --preset release`.
-- `-D BUILD_TESTING=OFF` skips fetching and building GoogleTest, which is worth doing for a faster first
-  configure if you are not going to run the tests.
-- `-D FETCHCONTENT_BASE_DIR=<path>` moves the fetched dependencies somewhere shared, so several build
-  directories do not each download their own copy.
+- `-D BUILD_TESTING=OFF` skips building the test targets. GoogleTest is still installed by vcpkg, since
+  the manifest lists it unconditionally.
+- `-D VCPKG_INSTALLED_DIR=<path>` moves the vcpkg install tree somewhere shared, so several build
+  directories do not each build their own copy of the dependencies.
 - Warnings are always enabled, but only become errors when the `CI` environment variable is set, which every
   CI provider does automatically. To reproduce that strictness locally, configure with
   `-D CMAKE_COMPILE_WARNING_AS_ERROR=ON`.

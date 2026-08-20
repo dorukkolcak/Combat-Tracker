@@ -120,6 +120,8 @@ namespace CombatTrackerLib {
 			// Draw UI on top of OpenGL render data.
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+			//OptionsHandlerProxy::invokeDeferredCallbacks(m_optionsHandler);
+
 			// Any window updates go here, after all operations are done.
 			m_windowPointer->update();
 

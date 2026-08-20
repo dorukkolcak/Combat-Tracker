@@ -7,7 +7,7 @@
 #include "CombatTrackerLib/Providers/LocaleProvider.h"
 #include "CombatTrackerLib/OptionsHandler.h"
 #include "CombatTrackerLib/Providers/ThemeProvider.h"
-#include "CombatTrackerLib/Utilities/Unique.h"
+#include "CombatTrackerLib/Utilities/GenericUtils.h"
 
 #include <array>
 #include <string>
@@ -17,6 +17,7 @@
 
 namespace CombatTrackerLib {
 	class Scene;
+	class OptionsHandler;
 	class App : public Unique<App> {
 	public:
 		struct Specification {
@@ -32,6 +33,7 @@ namespace CombatTrackerLib {
 			int initialWindowWidth{};
 			int initialWindowHeight{};
 		};
+
 		App() = delete;
 		explicit App(Specification specification);
 

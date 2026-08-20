@@ -32,4 +32,29 @@ namespace CombatTrackerLib {
 		}
 		return true;
 	}
+	void OptionsHandler::registerImmediateOptionChangeCallback(
+		OptionsCategory category,
+		const std::string& option,
+		std::function<void()> callback
+	) {
+		m_immediateCallbacks[{category, option}] = callback;
+	}
+	void OptionsHandler::registerDeferredOptionChangeCallback(
+		OptionsCategory category,
+		const std::string& option,
+		std::function<void()> callback
+	) {
+		const auto pair{ std::pair{category, option} };
+		m_deferredCallbacks[pair] = callback;
+		m_deferredCallbackStatuses[pair] = false;
+	}
+	void OptionsHandler::invokeDeferredCallbacks() {
+		for (const auto& callbackPair : m_deferredCallbacks) {
+			callbackPair.second();
+			m_deferredCallbackStatuses[callbackPair.first] = false;
+		}
+	}
+	void OptionsHandlerProxy::invokeDeferredCallbacks(OptionsHandler& handler) {
+		handler.invokeDeferredCallbacks();
+	}
 }

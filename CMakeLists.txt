@@ -7,7 +7,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies.cmake)
 
 # CMAKE_COMPILE_WARNING_AS_ERROR is deliberately set here rather than at the top of the file.
 # The COMPILE_WARNING_AS_ERROR property of a target is initialized from this variable at the moment the target is created,
-# so setting it after the dependencies are declared leaves every fetched and vendored target out of it and covers only ours.
+# so setting it after the dependencies are declared leaves every vendored target out of it and covers only ours.
 # We only set this during the CI builds as it makes testing things locally really cumbersome.
 if(DEFINED ENV{CI})
     set(CMAKE_COMPILE_WARNING_AS_ERROR ON)

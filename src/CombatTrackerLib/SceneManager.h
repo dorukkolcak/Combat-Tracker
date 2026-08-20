@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CombatTrackerLib/Utilities/Unique.h"
+#include "CombatTrackerLib/Utilities/GenericUtils.h"
 
 #include <memory>
 #include <vector>

@@ -30,35 +30,44 @@ jobs:
             os: windows-latest
             c: cl
             cxx: cl
+            triplet: x64-windows
           - id: windows-clang
             name: Windows Clang
             os: windows-latest
             c: clang-cl
             cxx: clang-cl
+            triplet: x64-windows
           - id: windows-gcc
             name: Windows GCC
             os: windows-latest
             c: gcc
             cxx: g++
+            triplet: x64-mingw-static
           - id: linux-gcc
             name: Linux GCC
             os: ubuntu-latest
             c: gcc
             cxx: g++
+            triplet: x64-linux
           - id: linux-clang
             name: Linux Clang
             os: ubuntu-latest
             c: clang
             cxx: clang++
+            triplet: x64-linux
           - id: macos-clang
             name: macOS Clang
             os: macos-latest
             c: clang
             cxx: clang++
+            triplet: arm64-osx
 
     env:
       CC: ${{ matrix.toolchain.c }}
       CXX: ${{ matrix.toolchain.cxx }}
+      VCPKG_ROOT: ${{ env.VCPKG_INSTALLATION_ROOT }}
+      VCPKG_DEFAULT_TRIPLET: ${{ matrix.toolchain.triplet }}
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg-cache,readwrite
 
     steps:
       - name: Check out repository
@@ -94,13 +103,13 @@ jobs:
         if: matrix.toolchain.id == 'windows-gcc'
         run: choco install mingw ninja -y --no-progress
 
-      - name: Cache fetched dependencies
+      - name: Cache vcpkg binaries
         uses: actions/cache@v6
         with:
-          path: build/${{ matrix.preset }}/_deps
-          key: deps-${{ matrix.toolchain.id }}-${{ matrix.preset }}-${{ hashFiles('Dependencies.cmake') }}
+          path: vcpkg-cache
+          key: vcpkg-${{ matrix.toolchain.id }}-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            deps-${{ matrix.toolchain.id }}-${{ matrix.preset }}-
+            vcpkg-${{ matrix.toolchain.id }}-
 
       - name: Configure, build and test
         run: cmake --workflow --preset ${{ matrix.preset }}
@@ -138,6 +147,9 @@ jobs:
     env:
       CC: ${{ matrix.toolchain.c }}
       CXX: ${{ matrix.toolchain.cxx }}
+      VCPKG_ROOT: ${{ env.VCPKG_INSTALLATION_ROOT }}
+      VCPKG_DEFAULT_TRIPLET: x64-linux
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg-cache,readwrite
 
     steps:
       - name: Check out repository
@@ -157,13 +169,13 @@ jobs:
       - name: Lower ASLR entropy for ASan
         run: sudo sysctl -w vm.mmap_rnd_bits=28
 
-      - name: Cache fetched dependencies
+      - name: Cache vcpkg binaries
         uses: actions/cache@v6
         with:
-          path: build/sanitize/_deps
-          key: deps-${{ matrix.toolchain.id }}-sanitize-${{ hashFiles('Dependencies.cmake') }}
+          path: vcpkg-cache
+          key: vcpkg-${{ matrix.toolchain.id }}-sanitize-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            deps-${{ matrix.toolchain.id }}-sanitize-
+            vcpkg-${{ matrix.toolchain.id }}-sanitize-
 
       - name: Configure, build and test
         run: cmake --workflow --preset sanitize
