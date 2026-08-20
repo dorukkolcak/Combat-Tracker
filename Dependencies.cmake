@@ -14,10 +14,10 @@ add_library(stb_image STATIC
     ${PROJECT_SOURCE_DIR}/external/stb/stb_image.cpp
     ${PROJECT_SOURCE_DIR}/external/stb/stb_image.h
 )
-target_include_directories(
-    glad SYSTEM PUBLIC
+target_include_directories(glad SYSTEM PUBLIC
     ${PROJECT_SOURCE_DIR}/external/glad/include
-    stb_image SYSTEM PUBLIC
+)
+target_include_directories(stb_image SYSTEM PUBLIC
     ${PROJECT_SOURCE_DIR}/external/stb
 )
 target_link_libraries(glad PUBLIC
