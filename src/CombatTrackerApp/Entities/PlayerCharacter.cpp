@@ -2,5 +2,6 @@
 
 namespace CombatTrackerApp {
 	PlayerCharacter::PlayerCharacter(CreatureStatBlock creatureBlock, PlayerStatBlock playerBlock)
-		: Creature{ creatureBlock }, m_statBlockPlayerPortion{ playerBlock } {}
+		: Creature{creatureBlock},
+		  m_statBlockPlayerPortion{playerBlock} {}
 }

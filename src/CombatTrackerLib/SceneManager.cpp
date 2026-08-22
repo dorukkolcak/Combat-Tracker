@@ -1,4 +1,5 @@
 #include "CombatTrackerLib/SceneManager.h"
+
 #include "CombatTrackerLib/Scene.h"
 
 #include <algorithm>
@@ -7,11 +8,18 @@ namespace CombatTrackerLib {
 	SceneManager::SceneManager() = default;
 	SceneManager::~SceneManager() = default;
 
-	void SceneManager::queueAddScene(std::unique_ptr<Scene> scene) { m_sceneAdditionQueue.push_back(std::move(scene)); }
-	void SceneManager::queueDeleteScene(Scene* sceneToBeDeleted) { m_sceneDeletionQueue.push_back(sceneToBeDeleted); }
-	void SceneManager::queueSceneTransition(Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo) {
-		m_sceneTransitionQueue.insert({ transitionedFrom, std::move(transitionedTo) });
+	void SceneManager::queueAddScene(std::unique_ptr<Scene> scene) {
+		m_sceneAdditionQueue.push_back(std::move(scene));
 	}
+
+	void SceneManager::queueDeleteScene(Scene* sceneToBeDeleted) {
+		m_sceneDeletionQueue.push_back(sceneToBeDeleted);
+	}
+
+	void SceneManager::queueSceneTransition(Scene* transitionedFrom, std::unique_ptr<Scene> transitionedTo) {
+		m_sceneTransitionQueue.insert({transitionedFrom, std::move(transitionedTo)});
+	}
+
 	void SceneManager::dequeueSceneOperations() {
 
 		// Handle scene transition.
@@ -60,5 +68,8 @@ namespace CombatTrackerLib {
 		}
 		m_sceneAdditionQueue.clear();
 	}
-	const std::vector<std::unique_ptr<Scene>>& SceneManager::getScenes() const { return m_sceneStack; }
+
+	const std::vector<std::unique_ptr<Scene>>& SceneManager::getScenes() const {
+		return m_sceneStack;
+	}
 }

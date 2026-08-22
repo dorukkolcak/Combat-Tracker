@@ -62,6 +62,8 @@ When adding a feature, the guidelines in this section should be taken into consi
 
 - The codebase is formatted with clang-format and analysed with clang-tidy, using the copies that ship with Visual Studio. Both tools take their configuration from the `.clang-format` and `.clang-tidy` files at the repository root. Both walk parent directories and stop at the first configuration they find, so these committed files take precedence over anything in the developer's user profile and are what CI and any contributor will use. Treat them as the single source of truth for style, and do not run a formatting pass across the tree on your own initiative.
 
+- clang-tidy is a reporting mechanism rather than a gate. `.clang-tidy` sets `WarningsAsErrors: ''` and CI summarises the findings without failing on them, so a clang-tidy finding never breaks a build while a compiler warning under CI still does. `readability-redundant-member-init` is disabled deliberately because it contradicts the brace initialization rule above and would otherwise account for most of the report; do not re-enable it and do not rewrite the initializers it would flag.
+
 - Two kinds of tool marker exist in the source and must be preserved. `// clang-format off` / `// clang-format on` guards include blocks whose order is load bearing: in `Window.h`, `glad/glad.h` has to precede `GLFW/glfw3.h` or glad's `#error` for an already included OpenGL header fires. `// NOLINTNEXTLINE(readability-identifier-naming)` marks identifiers whose spelling an external API dictates, such as nlohmann's `from_json` and `to_json` or the standard library's `is_transparent`. Names like these are marked at the declaration rather than exempted through a regex in the tool configuration.
 
 - It is really important that you respect the given style/convention guidelines and visible conventions/stylistic choices already available in the code. Additions that do not conform to these guidelines/visible stylistic choices shouldn't be made at all.
@@ -71,6 +73,10 @@ When adding a feature, the guidelines in this section should be taken into consi
 ## Other Guidelines
 
 - The build is driven by `CMakePresets.json`, which names vcpkg's toolchain file through `$env{VCPKG_ROOT}`. Configuring fails outright when that environment variable is unset, which is intended: vcpkg is the dependency mechanism, not an optional accelerator. Dependency versions are pinned by the `builtin-baseline` commit in `vcpkg.json`, so changing a version means moving that baseline deliberately rather than editing `Dependencies.cmake`.
+
+- The install tree is deliberately flat: the executable sits at the prefix root with `assets/` beside it, joined on Windows by the runtime DLLs of the dependencies. This is a constraint rather than a preference, because `DirectoryProvider` resolves resources from the executable's own location, so splitting the layout into `bin/` and `share/` the way `GNUInstallDirs` encourages breaks every packaged build at runtime. `Packaging.cmake` holds the CPack configuration, and archives are produced by an explicit `cpack --preset release` rather than as part of an ordinary build. The version given to `project()` is the single source for the package name and for the generated documentation, so releasing means changing it there and nowhere else.
+
+- Each workflow under `.github/workflows` owns exactly one concern: cross platform compilation, sanitizers, coverage, linting and releasing. A new check belongs to whichever workflow matches its concern, or to a new one of its own, rather than being appended to the build matrix.
 
 - Architectural decisions should be made by the developer. You can give suggestions but the final decision on how to organize code and layers should be made by the developer.
 

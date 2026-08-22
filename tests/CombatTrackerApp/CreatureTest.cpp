@@ -1,4 +1,5 @@
 #include "tests/CombatTrackerApp/CreatureTest.h"
+
 #include "CombatTrackerLib/Utilities/GenericUtils.h"
 
 #include <array>
@@ -7,40 +8,45 @@
 #include <utility>
 
 namespace CombatTrackerApp {
-	CreatureTest::CreatureTest() : m_mockCreature{ CreatureStatBlock{} } {}
+	CreatureTest::CreatureTest() : m_mockCreature{CreatureStatBlock{}} {}
 
-	CreatureStatBlock& CreatureTest::getCreatureBlock() { return m_mockCreature.m_statBlockCreaturePortion; }
+	CreatureStatBlock& CreatureTest::getCreatureBlock() {
+		return m_mockCreature.m_statBlockCreaturePortion;
+	}
 
 	// Just amazing stuff right here.
 	void CreatureTest::resolveCreatureDerived(CreatureStatBlock& statBlock, double proficiencyTier) {
 		Creature::resolveDerived(statBlock, proficiencyTier);
 	}
+
 	int CreatureTest::findProficiencyBonus(double proficiencyTier) {
 		return Creature::findProficiencyBonus(proficiencyTier);
 	}
+
 	int CreatureTest::findAbilityScoreModifier(int abilityScore) {
 		return Creature::findAbilityScoreModifier(abilityScore);
 	}
+
 	TEST_F(CreatureTest, TestSkillMapping) {
 		constexpr std::array<std::pair<Skill, Ability>, CombatTrackerLib::enumToSizeT(Skill::COUNT)> expectedMappings{
-			{ { Skill::ATHLETICS, Ability::STRENGTH },
-			  { Skill::ACROBATICS, Ability::DEXTERITY },
-			  { Skill::SLEIGHT_OF_HAND, Ability::DEXTERITY },
-			  { Skill::STEALTH, Ability::DEXTERITY },
-			  { Skill::ARCANA, Ability::INTELLIGENCE },
-			  { Skill::HISTORY, Ability::INTELLIGENCE },
-			  { Skill::INVESTIGATION, Ability::INTELLIGENCE },
-			  { Skill::NATURE, Ability::INTELLIGENCE },
-			  { Skill::RELIGION, Ability::INTELLIGENCE },
-			  { Skill::ANIMAL_HANDLING, Ability::WISDOM },
-			  { Skill::INSIGHT, Ability::WISDOM },
-			  { Skill::MEDICINE, Ability::WISDOM },
-			  { Skill::PERCEPTION, Ability::WISDOM },
-			  { Skill::SURVIVAL, Ability::WISDOM },
-			  { Skill::DECEPTION, Ability::CHARISMA },
-			  { Skill::INTIMIDATION, Ability::CHARISMA },
-			  { Skill::PERFORMANCE, Ability::CHARISMA },
-			  { Skill::PERSUASION, Ability::CHARISMA } }
+			{{Skill::ATHLETICS, Ability::STRENGTH},
+		     {Skill::ACROBATICS, Ability::DEXTERITY},
+		     {Skill::SLEIGHT_OF_HAND, Ability::DEXTERITY},
+		     {Skill::STEALTH, Ability::DEXTERITY},
+		     {Skill::ARCANA, Ability::INTELLIGENCE},
+		     {Skill::HISTORY, Ability::INTELLIGENCE},
+		     {Skill::INVESTIGATION, Ability::INTELLIGENCE},
+		     {Skill::NATURE, Ability::INTELLIGENCE},
+		     {Skill::RELIGION, Ability::INTELLIGENCE},
+		     {Skill::ANIMAL_HANDLING, Ability::WISDOM},
+		     {Skill::INSIGHT, Ability::WISDOM},
+		     {Skill::MEDICINE, Ability::WISDOM},
+		     {Skill::PERCEPTION, Ability::WISDOM},
+		     {Skill::SURVIVAL, Ability::WISDOM},
+		     {Skill::DECEPTION, Ability::CHARISMA},
+		     {Skill::INTIMIDATION, Ability::CHARISMA},
+		     {Skill::PERFORMANCE, Ability::CHARISMA},
+		     {Skill::PERSUASION, Ability::CHARISMA}}
 		};
 		ASSERT_EQ(expectedMappings.size(), MAPPED_SKILLS.size());
 		for (const auto& pair : expectedMappings) {
@@ -49,6 +55,7 @@ namespace CombatTrackerApp {
 				<< std::endl;
 		}
 	}
+
 	TEST_F(CreatureTest, TestPBCalculation) {
 		EXPECT_EQ(PB_LOWER_BOUND, findProficiencyBonus(0.0));
 		EXPECT_EQ(PB_LOWER_BOUND, findProficiencyBonus(0.125));
@@ -71,12 +78,13 @@ namespace CombatTrackerApp {
 		EXPECT_EQ(9, findProficiencyBonus(29.0));
 		EXPECT_EQ(PB_UPPER_BOUND, findProficiencyBonus(30.0));
 
-		auto& statBlock{ getCreatureBlock() };
+		auto& statBlock{getCreatureBlock()};
 		resolveCreatureDerived(statBlock, 1000.0);
 		EXPECT_EQ(PB_UPPER_BOUND, statBlock.derived.getProficiencyBonus());
 		resolveCreatureDerived(statBlock, -1000.0);
 		EXPECT_EQ(PB_LOWER_BOUND, statBlock.derived.getProficiencyBonus());
 	}
+
 	TEST_F(CreatureTest, TestAbilityScoreModifierCalculation) {
 		EXPECT_EQ(ABILITY_MODIFIERS_LOWER_BOUND, findAbilityScoreModifier(ABILITY_SCORE_LOWER_BOUND));
 		EXPECT_EQ(ABILITY_MODIFIERS_UPPER_BOUND, findAbilityScoreModifier(ABILITY_SCORE_UPPER_BOUND));
@@ -88,23 +96,27 @@ namespace CombatTrackerApp {
 		EXPECT_EQ(1, findAbilityScoreModifier(12));
 		EXPECT_EQ(5, findAbilityScoreModifier(20));
 
-		auto& statBlock{ getCreatureBlock() };
+		auto& statBlock{getCreatureBlock()};
 		statBlock.abilityScores[CombatTrackerLib::enumToSizeT(Ability::STRENGTH)] = ABILITY_SCORE_UPPER_BOUND + 20;
 		statBlock.abilityScores[CombatTrackerLib::enumToSizeT(Ability::DEXTERITY)] = ABILITY_SCORE_LOWER_BOUND - 20;
 		resolveCreatureDerived(statBlock, 1.0);
 		EXPECT_EQ(ABILITY_MODIFIERS_UPPER_BOUND, statBlock.derived.getAbilityScoreModifier(Ability::STRENGTH));
 		EXPECT_EQ(ABILITY_MODIFIERS_LOWER_BOUND, statBlock.derived.getAbilityScoreModifier(Ability::DEXTERITY));
 	}
+
 	TEST_F(CreatureTest, TestSavingThrowModifierCalculation) {
-		auto& statBlock{ getCreatureBlock() };
-		constexpr std::array<int, CombatTrackerLib::enumToSizeT(Ability::COUNT)> abilityScores{ 10, 14, 18, 7, 3, 20 };
+		auto& statBlock{getCreatureBlock()};
+		constexpr std::array<int, CombatTrackerLib::enumToSizeT(Ability::COUNT)> abilityScores{10, 14, 18, 7, 3, 20};
 		constexpr std::array<ProficiencyLevel, CombatTrackerLib::enumToSizeT(Ability::COUNT)> proficiencyLevels{
-			ProficiencyLevel::NONE, ProficiencyLevel::PROFICIENT, ProficiencyLevel::EXPERT,
-			ProficiencyLevel::NONE, ProficiencyLevel::PROFICIENT, ProficiencyLevel::EXPERT
+			ProficiencyLevel::NONE,
+			ProficiencyLevel::PROFICIENT,
+			ProficiencyLevel::EXPERT,
+			ProficiencyLevel::NONE,
+			ProficiencyLevel::PROFICIENT,
+			ProficiencyLevel::EXPERT
 		};
-		constexpr std::array<int, CombatTrackerLib::enumToSizeT(Ability::COUNT)> expectedModifiers{
-			0, 5, 10, -2, -1, 11
-		};
+		constexpr std::array<int, CombatTrackerLib::enumToSizeT(Ability::COUNT)>
+			expectedModifiers{0, 5, 10, -2, -1, 11};
 
 		for (std::size_t abilityIndex{}; abilityIndex < CombatTrackerLib::enumToSizeT(Ability::COUNT); ++abilityIndex) {
 			statBlock.abilityScores[abilityIndex] = abilityScores[abilityIndex];
@@ -117,12 +129,15 @@ namespace CombatTrackerApp {
 				<< "Ability " << abilityIndex << " has the wrong saving throw modifier." << std::endl;
 		}
 	}
+
 	TEST_F(CreatureTest, TestSkillModifierCalculation) {
-		auto& statBlock{ getCreatureBlock() };
-		constexpr std::array<int, CombatTrackerLib::enumToSizeT(Ability::COUNT)> abilityScores{ 10, 14, 18, 7, 3, 20 };
-		constexpr std::array<ProficiencyLevel, 3> cyclingProficiencyLevels{ ProficiencyLevel::NONE,
-																			ProficiencyLevel::PROFICIENT,
-																			ProficiencyLevel::EXPERT };
+		auto& statBlock{getCreatureBlock()};
+		constexpr std::array<int, CombatTrackerLib::enumToSizeT(Ability::COUNT)> abilityScores{10, 14, 18, 7, 3, 20};
+		constexpr std::array<ProficiencyLevel, 3> cyclingProficiencyLevels{
+			ProficiencyLevel::NONE,
+			ProficiencyLevel::PROFICIENT,
+			ProficiencyLevel::EXPERT
+		};
 		for (std::size_t abilityIndex{}; abilityIndex < CombatTrackerLib::enumToSizeT(Ability::COUNT); ++abilityIndex) {
 			statBlock.abilityScores[abilityIndex] = abilityScores[abilityIndex];
 		}
@@ -140,9 +155,10 @@ namespace CombatTrackerApp {
 		EXPECT_EQ(-2, statBlock.skillModifiers[CombatTrackerLib::enumToSizeT(Skill::PERCEPTION)].get());
 		EXPECT_EQ(13, statBlock.skillModifiers[CombatTrackerLib::enumToSizeT(Skill::PERSUASION)].get());
 	}
+
 	TEST_F(CreatureTest, TestPassivePerceptionCalculation) {
-		auto& statBlock{ getCreatureBlock() };
-		const auto perceptionIndex{ CombatTrackerLib::enumToSizeT(Skill::PERCEPTION) };
+		auto& statBlock{getCreatureBlock()};
+		const auto perceptionIndex{CombatTrackerLib::enumToSizeT(Skill::PERCEPTION)};
 		statBlock.abilityScores[CombatTrackerLib::enumToSizeT(Ability::WISDOM)] = 16;
 		statBlock.skillProficiencyLevels[perceptionIndex] = ProficiencyLevel::PROFICIENT;
 
@@ -159,8 +175,9 @@ namespace CombatTrackerApp {
 		EXPECT_EQ(30, statBlock.passivePerception.get());
 		EXPECT_EQ(PASSIVE_PERCEPTION_BASE + 11, statBlock.passivePerception.getDefault());
 	}
+
 	TEST_F(CreatureTest, TestInitiativeBonusCalculation) {
-		auto& statBlock{ getCreatureBlock() };
+		auto& statBlock{getCreatureBlock()};
 		statBlock.abilityScores[CombatTrackerLib::enumToSizeT(Ability::DEXTERITY)] = 18;
 
 		resolveCreatureDerived(statBlock, 20.0);
@@ -179,10 +196,11 @@ namespace CombatTrackerApp {
 		EXPECT_EQ(-3, statBlock.initiativeBonus.get());
 		EXPECT_EQ(4, statBlock.initiativeBonus.getDefault());
 	}
+
 	TEST_F(CreatureTest, TestDerivedMemberResolution) {
-		auto& statBlock{ getCreatureBlock() };
-		const auto strengthIndex{ CombatTrackerLib::enumToSizeT(Ability::STRENGTH) };
-		const auto perceptionIndex{ CombatTrackerLib::enumToSizeT(Skill::PERCEPTION) };
+		auto& statBlock{getCreatureBlock()};
+		const auto strengthIndex{CombatTrackerLib::enumToSizeT(Ability::STRENGTH)};
+		const auto perceptionIndex{CombatTrackerLib::enumToSizeT(Skill::PERCEPTION)};
 		statBlock.abilityScores[strengthIndex] = 16;
 		statBlock.abilityScores[CombatTrackerLib::enumToSizeT(Ability::WISDOM)] = 12;
 		statBlock.savingThrowProficiencyLevels[strengthIndex] = ProficiencyLevel::PROFICIENT;

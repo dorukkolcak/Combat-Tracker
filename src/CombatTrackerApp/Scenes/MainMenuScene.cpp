@@ -1,11 +1,13 @@
 #include "CombatTrackerApp/Scenes/MainMenuScene.h"
+
 #include "CombatTrackerApp/Scenes/EncounterCreationScene.h"
 #include "CombatTrackerLib/Utilities/GenericUtils.h"
 #include "CombatTrackerLib/Utilities/UIUtils.h"
 
 #include <glad/glad.h>
-#include <algorithm>
 #include <imgui.h>
+
+#include <algorithm>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -13,20 +15,26 @@
 namespace CombatTrackerApp {
 
 	MainMenuScene::MainMenuScene(CombatTrackerLib::App* app)
-		: CombatTrackerLib::Scene{ app },
-		  m_titleTexture{ app->getDirectoryProvider().getResourceDirectory() / "assets" / "Textures" / "Title.png",
-						  4,
-						  false,
-						  GL_REPEAT,
-						  GL_REPEAT,
-						  GL_LINEAR,
-						  GL_LINEAR_MIPMAP_LINEAR },
-		  m_selectedOptionsCategory{}, m_isDockspaceInitialized{ false } {
+		: CombatTrackerLib::Scene{app},
+		  m_titleTexture{
+			  app->getDirectoryProvider().getResourceDirectory() / "assets" / "Textures" / "Title.png",
+			  4,
+			  false,
+			  GL_REPEAT,
+			  GL_REPEAT,
+			  GL_LINEAR,
+			  GL_LINEAR_MIPMAP_LINEAR
+		  },
+		  m_selectedOptionsCategory{},
+		  m_isDockspaceInitialized{false} {
 		m_titleWindowClass.DockNodeFlagsOverrideSet =
 			ImGuiDockNodeFlags_NoResize | ImGuiDockNodeFlags_NoSplit | ImGuiDockNodeFlags_NoTabBar;
 	}
+
 	void MainMenuScene::notifyScene(const ImGuiIO&) {}
+
 	void MainMenuScene::updateScene(double) {}
+
 	void MainMenuScene::renderUI() {
 
 		std::optional<std::string_view> pendingLocaleCode{};
@@ -49,10 +57,14 @@ namespace CombatTrackerApp {
 			ImGui::DockBuilderSetNodeSize(m_dockspaceID, viewport->WorkSize);
 
 			// Configure dockspace layout.
-			ImGuiID bottom{ m_dockspaceID };
+			ImGuiID bottom{m_dockspaceID};
 			ImGui::DockBuilderSplitNode(m_dockspaceID, ImGuiDir_Up, 0.60f, &m_titleWindowID, &bottom);
 			ImGui::DockBuilderSplitNode(
-				bottom, ImGuiDir_Left, 0.33f, &m_encounterCreationWindowID, &m_encounterRunningWindowID
+				bottom,
+				ImGuiDir_Left,
+				0.33f,
+				&m_encounterCreationWindowID,
+				&m_encounterRunningWindowID
 			);
 			ImGui::DockBuilderSplitNode(
 				m_encounterRunningWindowID,
@@ -64,7 +76,8 @@ namespace CombatTrackerApp {
 
 			// Dock windows.
 			ImGui::DockBuilderDockWindow(
-				m_localeProviderPointer->getText("/scenes/mainMenu/titleWindow").data(), m_titleWindowID
+				m_localeProviderPointer->getText("/scenes/mainMenu/titleWindow").data(),
+				m_titleWindowID
 			);
 			ImGui::DockBuilderDockWindow(
 				m_localeProviderPointer->getText("/scenes/mainMenu/encounterCreation/windowTitle").data(),
@@ -89,7 +102,7 @@ namespace CombatTrackerApp {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		{
-			CombatTrackerLib::ScopedWindow hostWindow{ "Host Window", nullptr, HOST_WINDOW_FLAGS };
+			CombatTrackerLib::ScopedWindow hostWindow{"Host Window", nullptr, HOST_WINDOW_FLAGS};
 			ImGui::PopStyleVar(3);
 
 			// Render the dockspace of the host window.
@@ -99,11 +112,11 @@ namespace CombatTrackerApp {
 		// Title window.
 		ImGui::SetNextWindowClass(&m_titleWindowClass);
 		{
-			CombatTrackerLib::ScopedWindow titleWindow{ m_localeProviderPointer->getText("/scenes/mainMenu/titleWindow"
-			) };
+			CombatTrackerLib::ScopedWindow titleWindow{m_localeProviderPointer->getText("/scenes/mainMenu/titleWindow")
+			};
 
-			const auto optionsLabel{ m_localeProviderPointer->getText("/scenes/mainMenu/options") };
-			const auto exitLabel{ m_localeProviderPointer->getText("/scenes/mainMenu/exit") };
+			const auto optionsLabel{m_localeProviderPointer->getText("/scenes/mainMenu/options")};
+			const auto exitLabel{m_localeProviderPointer->getText("/scenes/mainMenu/exit")};
 
 			/*
             The two buttons are aligned as one row instead of individually.
@@ -111,9 +124,10 @@ namespace CombatTrackerApp {
             I thought initially this should be a constexpr static variable as the width is set.
             But the ImGui style can change during run time through changing the UI preset so this has to be calculated every render.
             */
-			const auto buttonRowWidth{ CombatTrackerLib::buttonWidth(optionsLabel.data()) +
-									   CombatTrackerLib::buttonWidth(exitLabel.data()) +
-									   ImGui::GetStyle().ItemSpacing.x };
+			const auto buttonRowWidth{
+				CombatTrackerLib::buttonWidth(optionsLabel.data()) + CombatTrackerLib::buttonWidth(exitLabel.data()) +
+				ImGui::GetStyle().ItemSpacing.x
+			};
 			CombatTrackerLib::alignCursorForWidth(buttonRowWidth, 1.0f);
 			if (ImGui::Button(optionsLabel.data())) {
 				ImGui::OpenPopup("Options Popup");
@@ -133,7 +147,7 @@ namespace CombatTrackerApp {
             Options popup for application-wide settings.
             TODO: One thing to do is actually save these settings somewhere so they are preserved between runs.
             */
-			const auto viewportSize{ ImGui::GetMainViewport()->Size };
+			const auto viewportSize{ImGui::GetMainViewport()->Size};
 			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
 			// Also default to a sensible minimum popup size.
@@ -142,15 +156,16 @@ namespace CombatTrackerApp {
 				ImGuiCond_Appearing
 			);
 			ImGui::SetNextWindowSizeConstraints(
-				ImVec2(std::min(360.0f, viewportSize.x), std::min(240.0f, viewportSize.y)), viewportSize
+				ImVec2(std::min(360.0f, viewportSize.x), std::min(240.0f, viewportSize.y)),
+				viewportSize
 			);
 
 			// The title bar is hidden so the panel can draw its own header.
-			if (CombatTrackerLib::ScopedPopupModal optionsPopup{
-					"Options Popup", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove }) {
+			if (CombatTrackerLib::ScopedPopupModal
+			        optionsPopup{"Options Popup", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove}) {
 
 				{
-					CombatTrackerLib::ScopedFont headerFont{ nullptr, ImGui::GetStyle().FontSizeBase * 1.35f };
+					CombatTrackerLib::ScopedFont headerFont{nullptr, ImGui::GetStyle().FontSizeBase * 1.35f};
 					ImGui::TextUnformatted(
 						m_localeProviderPointer->getText("/scenes/mainMenu/optionsPopup/header").data()
 					);
@@ -158,23 +173,24 @@ namespace CombatTrackerApp {
 				ImGui::Separator();
 
 				// The footer holds a separator and the close button, the rest of the popup contains the two panels.
-				const auto footerHeight{ CombatTrackerLib::reservedFooterHeight(1) };
-				const auto bodyHeight{ ImGui::GetContentRegionAvail().y - footerHeight };
+				const auto footerHeight{CombatTrackerLib::reservedFooterHeight(1)};
+				const auto bodyHeight{ImGui::GetContentRegionAvail().y - footerHeight};
 
 				// Category list.
-				const auto categoryWidth{
-					std::min(ImGui::GetFontSize() * 9.0f, ImGui::GetContentRegionAvail().x * 0.35f)
+				const auto categoryWidth{std::min(ImGui::GetFontSize() * 9.0f, ImGui::GetContentRegionAvail().x * 0.35f)
 				};
 				{
-					CombatTrackerLib::ScopedChild optionsCategories{ "Options Categories",
-																	 ImVec2(categoryWidth, bodyHeight),
-																	 ImGuiChildFlags_Borders };
+					CombatTrackerLib::ScopedChild optionsCategories{
+						"Options Categories",
+						ImVec2(categoryWidth, bodyHeight),
+						ImGuiChildFlags_Borders
+					};
 					const auto categoryNames{
 						m_localeProviderPointer->getTextList("/scenes/mainMenu/optionsPopup/categories")
 					};
 					for (size_t i{}; i < categoryNames.size(); ++i) {
-						const auto category{ static_cast<CombatTrackerLib::OptionsCategory>(i
-						) }; // Cast is needed here so that we actually store the enumerator type.
+						const auto category{static_cast<CombatTrackerLib::OptionsCategory>(i)
+						}; // Cast is needed here so that we actually store the enumerator type.
 						if (ImGui::Selectable(categoryNames[i].data(), m_selectedOptionsCategory == category)) {
 							m_selectedOptionsCategory = category;
 						}
@@ -185,24 +201,27 @@ namespace CombatTrackerApp {
 
 				// Controls belonging to the selected category.
 				{
-					CombatTrackerLib::ScopedChild optionsContent{ "Options Content",
-																  ImVec2(0.0f, bodyHeight),
-																  ImGuiChildFlags_Borders };
+					CombatTrackerLib::ScopedChild optionsContent{
+						"Options Content",
+						ImVec2(0.0f, bodyHeight),
+						ImGuiChildFlags_Borders
+					};
 					if (m_selectedOptionsCategory == CombatTrackerLib::OptionsCategory::GENERAL) {
 						ImGui::SeparatorText(
 							m_localeProviderPointer->getText("/scenes/mainMenu/optionsPopup/language").data()
 						);
 
 						ImGui::TextUnformatted(m_localeProviderPointer
-												   ->getText("/scenes/mainMenu/optionsPopup/"
-															 "chooseLanguage")
-												   .data());
+						                           ->getText("/scenes/mainMenu/optionsPopup/"
+						                                     "chooseLanguage")
+						                           .data());
 						ImGui::SetNextItemWidth(-1.0f);
 
-						const auto currentLocaleCode{ m_applicationPointer->getOptionsHandler().getOption<std::string>(
-							CombatTrackerLib::OptionsCategory::GENERAL, "language"
-						) };
-						if (CombatTrackerLib::ScopedListBox languages{ "##ChooseLanguage" }) {
+						const auto currentLocaleCode{m_applicationPointer->getOptionsHandler().getOption<std::string>(
+							CombatTrackerLib::OptionsCategory::GENERAL,
+							"language"
+						)};
+						if (CombatTrackerLib::ScopedListBox languages{"##ChooseLanguage"}) {
 							for (const auto& locale : m_localeProviderPointer->getAvailableLocales()) {
 								if (ImGui::Selectable(locale.endonym.c_str(), locale.code == currentLocaleCode)) {
 									pendingLocaleCode = locale.code;
@@ -222,10 +241,11 @@ namespace CombatTrackerApp {
 						ImGui::SetNextItemWidth(-1.0f
 						); // -1.0f passed to the function means that the item spans the entire width.
 
-						const auto currentThemeName{ m_applicationPointer->getOptionsHandler().getOption<std::string>(
-							CombatTrackerLib::OptionsCategory::APPEARANCE, "theme"
-						) };
-						if (CombatTrackerLib::ScopedListBox themes{ "##ChooseTheme" }) {
+						const auto currentThemeName{m_applicationPointer->getOptionsHandler().getOption<std::string>(
+							CombatTrackerLib::OptionsCategory::APPEARANCE,
+							"theme"
+						)};
+						if (CombatTrackerLib::ScopedListBox themes{"##ChooseTheme"}) {
 							for (const auto& themeName : m_applicationPointer->getThemeProvider().getThemeNames()) {
 								if (ImGui::Selectable(themeName.c_str(), themeName == currentThemeName)) {
 									m_applicationPointer->setTheme(themeName
@@ -238,11 +258,12 @@ namespace CombatTrackerApp {
 							m_localeProviderPointer->getText("/scenes/mainMenu/optionsPopup/window").data()
 						);
 
-						auto& optionsHandler{ m_applicationPointer->getOptionsHandler() };
+						auto& optionsHandler{m_applicationPointer->getOptionsHandler()};
 
-						bool isVsyncEnabled{ optionsHandler.getOption<bool>(
-							CombatTrackerLib::OptionsCategory::APPEARANCE, "vsyncEnabled"
-						) };
+						bool isVsyncEnabled{optionsHandler.getOption<bool>(
+							CombatTrackerLib::OptionsCategory::APPEARANCE,
+							"vsyncEnabled"
+						)};
 						if (ImGui::Checkbox(
 								m_localeProviderPointer->getText("/scenes/mainMenu/optionsPopup/vsync").data(),
 								&isVsyncEnabled
@@ -250,13 +271,14 @@ namespace CombatTrackerApp {
 							m_applicationPointer->setWindowVsync(isVsyncEnabled);
 						}
 
-						bool isFullscreenEnabled{ optionsHandler.getOption<bool>(
-							CombatTrackerLib::OptionsCategory::APPEARANCE, "fullscreenEnabled"
-						) };
+						bool isFullscreenEnabled{optionsHandler.getOption<bool>(
+							CombatTrackerLib::OptionsCategory::APPEARANCE,
+							"fullscreenEnabled"
+						)};
 						if (ImGui::Checkbox(
 								m_localeProviderPointer
 									->getText("/scenes/mainMenu/optionsPopup/"
-											  "fullscreen")
+						                      "fullscreen")
 									.data(),
 								&isFullscreenEnabled
 							)) {
@@ -269,7 +291,7 @@ namespace CombatTrackerApp {
 						if (ImGui::Checkbox(
 								m_localeProviderPointer
 									->getText("/scenes/mainMenu/optionsPopup/"
-											  "resizable")
+						                      "resizable")
 									.data(),
 								&isResizable
 							)) {
@@ -283,7 +305,8 @@ namespace CombatTrackerApp {
 
 				// A modal ignores both outside clicks and Escape, so this is the only way out.
 				if (CombatTrackerLib::alignedButton(
-						m_localeProviderPointer->getText("/scenes/mainMenu/optionsPopup/close").data(), 1.0f
+						m_localeProviderPointer->getText("/scenes/mainMenu/optionsPopup/close").data(),
+						1.0f
 					)) {
 					ImGui::CloseCurrentPopup();
 				}
@@ -296,24 +319,28 @@ namespace CombatTrackerApp {
 				m_localeProviderPointer->getText("/scenes/mainMenu/encounterCreation/windowTitle")
 			};
 			ImGui::TextWrapped(
-				"%s", m_localeProviderPointer->getText("/scenes/mainMenu/encounterCreation/creatureManagement").data()
+				"%s",
+				m_localeProviderPointer->getText("/scenes/mainMenu/encounterCreation/creatureManagement").data()
 			);
 			CombatTrackerLib::renderBulletList(
 				m_localeProviderPointer->getTextList("/scenes/mainMenu/encounterCreation/"
-													 "creatureManagementBullets")
+			                                         "creatureManagementBullets")
 			);
 			ImGui::TextWrapped(
-				"%s", m_localeProviderPointer->getText("/scenes/mainMenu/encounterCreation/encounterManagement").data()
+				"%s",
+				m_localeProviderPointer->getText("/scenes/mainMenu/encounterCreation/encounterManagement").data()
 			);
 			CombatTrackerLib::renderBulletList(
 				m_localeProviderPointer->getTextList("/scenes/mainMenu/encounterCreation/"
-													 "encounterManagementBullets")
+			                                         "encounterManagementBullets")
 			);
 			if (CombatTrackerLib::alignedButton(
-					m_localeProviderPointer->getText("/scenes/mainMenu/encounterCreation/createButton").data(), 0.5f
+					m_localeProviderPointer->getText("/scenes/mainMenu/encounterCreation/createButton").data(),
+					0.5f
 				)) {
 				m_applicationPointer->getSceneManager().queueSceneTransition(
-					this, std::make_unique<EncounterCreationScene>(m_applicationPointer)
+					this,
+					std::make_unique<EncounterCreationScene>(m_applicationPointer)
 				);
 			}
 		}
@@ -324,19 +351,22 @@ namespace CombatTrackerApp {
 				m_localeProviderPointer->getText("/scenes/mainMenu/runEncounter/windowTitle")
 			};
 			ImGui::TextWrapped(
-				"%s", m_localeProviderPointer->getText("/scenes/mainMenu/runEncounter/preparationPhase").data()
+				"%s",
+				m_localeProviderPointer->getText("/scenes/mainMenu/runEncounter/preparationPhase").data()
 			);
 			CombatTrackerLib::renderBulletList(
 				m_localeProviderPointer->getTextList("/scenes/mainMenu/runEncounter/preparationBullets")
 			);
 			ImGui::TextWrapped(
-				"%s", m_localeProviderPointer->getText("/scenes/mainMenu/runEncounter/runningEncounters").data()
+				"%s",
+				m_localeProviderPointer->getText("/scenes/mainMenu/runEncounter/runningEncounters").data()
 			);
 			CombatTrackerLib::renderBulletList(
 				m_localeProviderPointer->getTextList("/scenes/mainMenu/runEncounter/runningBullets")
 			);
 			ImGui::TextWrapped(
-				"%s", m_localeProviderPointer->getText("/scenes/mainMenu/runEncounter/finishingEncounters").data()
+				"%s",
+				m_localeProviderPointer->getText("/scenes/mainMenu/runEncounter/finishingEncounters").data()
 			);
 			CombatTrackerLib::renderBulletList(
 				m_localeProviderPointer->getTextList("/scenes/mainMenu/runEncounter/finishingBullets")
@@ -344,7 +374,8 @@ namespace CombatTrackerApp {
 
 			// TODO: Complete the scene transition.
 			if (CombatTrackerLib::alignedButton(
-					m_localeProviderPointer->getText("/scenes/mainMenu/runEncounter/selectButton").data(), 0.5f
+					m_localeProviderPointer->getText("/scenes/mainMenu/runEncounter/selectButton").data(),
+					0.5f
 				)) {
 			}
 		}
@@ -359,7 +390,8 @@ namespace CombatTrackerApp {
 
 		// TODO: Complete the scene transition.
 		if (CombatTrackerLib::alignedButton(
-				m_localeProviderPointer->getText("/scenes/mainMenu/completedEncounters/browseButton").data(), 0.5f
+				m_localeProviderPointer->getText("/scenes/mainMenu/completedEncounters/browseButton").data(),
+				0.5f
 			)) {
 		}
 
@@ -369,5 +401,6 @@ namespace CombatTrackerApp {
 			m_applicationPointer->setLanguage(*pendingLocaleCode);
 		}
 	}
+
 	void MainMenuScene::renderScene() {}
 }

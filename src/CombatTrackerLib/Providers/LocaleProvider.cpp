@@ -1,4 +1,5 @@
 #include "CombatTrackerLib/Providers/LocaleProvider.h"
+
 #include "CombatTrackerLib/Providers/DirectoryProvider.h"
 #include "CombatTrackerLib/Utilities/FileUtils.h"
 
@@ -8,9 +9,9 @@
 
 namespace CombatTrackerLib {
 	LocaleProvider::LocaleProvider(const DirectoryProvider& directoryProvider, std::string_view localeCode)
-		: Unique(), m_directoryProviderPointer{ &directoryProvider } {
+		: m_directoryProviderPointer{&directoryProvider} {
 		buildAvailableLocales();
-		const auto isLocaleSet{ setLocale(localeCode) };
+		const auto isLocaleSet{setLocale(localeCode)};
 		if (!isLocaleSet) {
 			std::cerr << "Locale file couldn't be read." << std::endl;
 		}
@@ -19,8 +20,9 @@ namespace CombatTrackerLib {
 	// One thing to note about this function is that we don't need to clear the view map in success.
 	// As the localization files should have matching keys so a new view map will just overwrite the existing one.
 	bool LocaleProvider::setLocale(std::string_view localeCode) {
-		const std::filesystem::path localePath{ m_directoryProviderPointer->getResourceDirectory() / "assets/Locales" /
-												std::format("{}.json", localeCode) };
+		const std::filesystem::path localePath{
+			m_directoryProviderPointer->getResourceDirectory() / "assets/Locales" / std::format("{}.json", localeCode)
+		};
 		m_locale = readJSONFile(localePath);
 		if (m_locale == std::nullopt) {
 			m_textViewMap.clear();
@@ -44,16 +46,14 @@ namespace CombatTrackerLib {
 	*/
 	void LocaleProvider::buildViewMaps(const nlohmann::json& node, const std::string& pointerPrefix) {
 		for (const auto& item : node.items()) {
-			const auto pointer{ std::format("{}/{}", pointerPrefix, item.key()) };
+			const auto pointer{std::format("{}/{}", pointerPrefix, item.key())};
 
 			if (item.value().is_object()) {
 				buildViewMaps(item.value(), pointer);
-			}
-			else if (item.value().is_string()) {
+			} else if (item.value().is_string()) {
 				m_textViewMap[pointer] = item.value().get_ref<const nlohmann::json::string_t&>();
-			}
-			else if (item.value().is_array()) {
-				auto& list{ m_listViewMap[pointer] };
+			} else if (item.value().is_array()) {
+				auto& list{m_listViewMap[pointer]};
 				list.clear();
 				for (const auto& element : item.value()) {
 					list.push_back(element.get_ref<const nlohmann::json::string_t&>());
@@ -61,18 +61,20 @@ namespace CombatTrackerLib {
 			}
 		}
 	}
+
 	void LocaleProvider::buildAvailableLocales() {
 
 		// Iterate through every file in the locale directory and read their filename and endonym key.
 		// This causes us to read one of the files twice in construction which is fine I guess.
 		std::error_code errorCode{};
-		const std::filesystem::path localeDirectory{ m_directoryProviderPointer->getResourceDirectory() /
-													 "assets/Locales" };
-		for (const auto& entry : std::filesystem::directory_iterator{ localeDirectory, errorCode }) {
+		const std::filesystem::path localeDirectory{
+			m_directoryProviderPointer->getResourceDirectory() / "assets/Locales"
+		};
+		for (const auto& entry : std::filesystem::directory_iterator{localeDirectory, errorCode}) {
 			if (!entry.is_regular_file(errorCode) || entry.path().extension() != ".json") {
 				continue;
 			}
-			const auto contents{ readJSONFile(entry.path()) };
+			const auto contents{readJSONFile(entry.path())};
 			if (contents == std::nullopt || !contents->contains("endonym")) {
 				continue;
 			}
@@ -83,16 +85,21 @@ namespace CombatTrackerLib {
 			m_availableLocales.emplace_back(entry.path().stem().string(), (*contents)["endonym"].get<std::string>());
 		}
 	}
-	std::span<const LocaleInfo> LocaleProvider::getAvailableLocales() const { return m_availableLocales; }
+
+	std::span<const LocaleInfo> LocaleProvider::getAvailableLocales() const {
+		return m_availableLocales;
+	}
+
 	std::string_view LocaleProvider::getText(std::string_view key) const {
-		const auto entry{ m_textViewMap.find(key) };
+		const auto entry{m_textViewMap.find(key)};
 		if (entry == m_textViewMap.end()) {
 			return key; // If this happens, there is something wrong. So this is mostly a debug statement.
 		}
 		return entry->second;
 	}
+
 	std::span<const std::string_view> LocaleProvider::getTextList(std::string_view keyPrefix) const {
-		const auto entry{ m_listViewMap.find(keyPrefix) };
+		const auto entry{m_listViewMap.find(keyPrefix)};
 		if (entry == m_listViewMap.end()) {
 			return {};
 		}

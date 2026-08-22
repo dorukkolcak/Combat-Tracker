@@ -40,7 +40,6 @@ namespace CombatTrackerLib {
 
 		void use() const;
 		void unbind() const;
-
 		void setUnit(unsigned int glUnit, int integerUnit);
 
 		int getIntUnit() const;

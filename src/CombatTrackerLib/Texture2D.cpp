@@ -36,7 +36,8 @@ namespace CombatTrackerLib {
 		unsigned int glUnit,
 		int integerUnit
 	)
-		: m_glUnit{ glUnit }, m_integerUnit{ integerUnit } {
+		: m_glUnit{glUnit},
+		  m_integerUnit{integerUnit} {
 
 		/*
 		Set the internal and CPU format based on the number of desired channels of the loaded texture.
@@ -49,12 +50,10 @@ namespace CombatTrackerLib {
 		if (numberOfDesiredChannels == 4) {
 			internalFormat = GL_RGBA8;
 			cpuFormat = GL_RGBA;
-		}
-		else if (numberOfDesiredChannels == 3) {
+		} else if (numberOfDesiredChannels == 3) {
 			internalFormat = GL_RGB8;
 			cpuFormat = GL_RGB;
-		}
-		else if (numberOfDesiredChannels == 1) {
+		} else if (numberOfDesiredChannels == 1) {
 			internalFormat = GL_R8;
 			cpuFormat = GL_RED;
 		}
@@ -65,9 +64,13 @@ namespace CombatTrackerLib {
 
 		// Load pixel data into CPU memory using stb's image loading API.
 		stbi_set_flip_vertically_on_load(isOriginAtTop);
-		auto* localBuffer{ stbi_load(
-			texturePath.string().c_str(), &m_width, &m_height, &m_numberOfColorChannels, numberOfDesiredChannels
-		) };
+		auto* localBuffer{stbi_load(
+			texturePath.string().c_str(),
+			&m_width,
+			&m_height,
+			&m_numberOfColorChannels,
+			numberOfDesiredChannels
+		)};
 		if (localBuffer == nullptr) {
 			return;
 		}
@@ -76,10 +79,14 @@ namespace CombatTrackerLib {
 		glGenTextures(1, &m_ID);
 		use();
 		glTexParameteri(
-			GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, sAxisWrap
+			GL_TEXTURE_2D,
+			GL_TEXTURE_WRAP_S,
+			sAxisWrap
 		); // Parameter for what to do if texture x coordinates fall outside the range [0, 1].
 		glTexParameteri(
-			GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, tAxisWrap
+			GL_TEXTURE_2D,
+			GL_TEXTURE_WRAP_T,
+			tAxisWrap
 		); // Parameter for what to do if texture y coordinates fall outside the range [0, 1].
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magnifyingFilter);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minifyingMipmapFilter);
@@ -92,6 +99,7 @@ namespace CombatTrackerLib {
 		unbind();
 		stbi_image_free(localBuffer);
 	}
+
 	Texture2D::Texture2D(Texture2D&& texture) noexcept {
 		this->m_numberOfColorChannels = texture.m_numberOfColorChannels;
 		this->m_glUnit = texture.m_glUnit;
@@ -108,6 +116,7 @@ namespace CombatTrackerLib {
 		texture.m_width = 0;
 		texture.m_ID = 0;
 	}
+
 	Texture2D& Texture2D::operator=(Texture2D&& texture) noexcept {
 
 		// Prevent self move.
@@ -135,21 +144,39 @@ namespace CombatTrackerLib {
 
 		return *this;
 	}
-	Texture2D::~Texture2D() { glDeleteTextures(1, &m_ID); }
+
+	Texture2D::~Texture2D() {
+		glDeleteTextures(1, &m_ID);
+	}
+
 	void Texture2D::use() const {
 		glActiveTexture(m_glUnit);
 		glBindTexture(GL_TEXTURE_2D, m_ID);
 	}
+
 	void Texture2D::unbind() const {
 		glActiveTexture(m_glUnit);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
+
 	void Texture2D::setUnit(unsigned int glUnit, int integerUnit) {
 		m_glUnit = glUnit;
 		m_integerUnit = integerUnit;
 	}
-	int Texture2D::getIntUnit() const { return m_integerUnit; }
-	int Texture2D::getWidth() const { return m_width; }
-	int Texture2D::getHeight() const { return m_height; }
-	unsigned int Texture2D::getID() const { return m_ID; }
+
+	int Texture2D::getIntUnit() const {
+		return m_integerUnit;
+	}
+
+	int Texture2D::getWidth() const {
+		return m_width;
+	}
+
+	int Texture2D::getHeight() const {
+		return m_height;
+	}
+
+	unsigned int Texture2D::getID() const {
+		return m_ID;
+	}
 }

@@ -15,13 +15,10 @@ namespace CombatTrackerLib {
 	public:
 		Window() = delete;
 		Window(int initialWidth, int initialHeight, std::string_view applicationName);
-
 		~Window();
-
 		void setVsync(bool enabled);
 		void setFullscreen(bool enabled);
 		void setResizable(bool enabled);
-
 		void update();
 
 	private:

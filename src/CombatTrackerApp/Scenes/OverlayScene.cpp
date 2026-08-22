@@ -1,10 +1,12 @@
 #include "CombatTrackerApp/Scenes/OverlayScene.h"
 
 namespace CombatTrackerApp {
-	OverlayScene::OverlayScene(CombatTrackerLib::App* app) : CombatTrackerLib::Scene{ app } {}
+	OverlayScene::OverlayScene(CombatTrackerLib::App* app) : CombatTrackerLib::Scene{app} {}
 
 	void OverlayScene::notifyScene(const ImGuiIO&) {}
+
 	void OverlayScene::updateScene(double) {}
+
 	void OverlayScene::renderUI() {
 
 		/*
@@ -21,5 +23,6 @@ namespace CombatTrackerApp {
 		ImGui::ShowDemoWindow();
 #endif
 	}
+
 	void OverlayScene::renderScene() {}
 }

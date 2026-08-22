@@ -158,8 +158,11 @@ output with an empty version.
 - `-D VCPKG_INSTALLED_DIR=<path>` moves the vcpkg install tree somewhere shared, so several build
   directories do not each build their own copy of the dependencies.
 - Warnings are always enabled, but only become errors when the `CI` environment variable is set, which every
-  CI provider does automatically. To reproduce that strictness locally, configure with
-  `-D CMAKE_COMPILE_WARNING_AS_ERROR=ON`.
+  CI provider does automatically. To get the same strictness locally, configure with
+  `-D COMBAT_TRACKER_WARNINGS_AS_ERROR=ON`. Prefer it over setting `CMAKE_COMPILE_WARNING_AS_ERROR` directly:
+  that variable is read as each target is created, so passing it on the command line exists before the
+  dependencies are declared and holds `glad` and `stb_image` to the same standard as our own code, which is
+  precisely what the placement of the check in `CMakeLists.txt` avoids.
 - `-D COMBAT_TRACKER_SANITIZE=ON` builds our own targets with ASan and UBSan, leaving the third-party
   dependencies uninstrumented. The `sanitize` preset sets this for you.
 - `-D COMBAT_TRACKER_COVERAGE=ON` builds our own targets with coverage instrumentation, again leaving the

@@ -8,6 +8,7 @@
 #include "CombatTrackerLib/Utilities/UIUtils.h"
 
 #include <imgui_internal.h>
+
 #include <string_view>
 
 namespace CombatTrackerApp {
@@ -20,15 +21,14 @@ namespace CombatTrackerApp {
 		void renderScene() override;
 
 	private:
-		inline static constexpr ImGuiDockNodeFlags DOCKSPACE_FLAGS{ ImGuiDockNodeFlags_NoResize |
-																	ImGuiDockNodeFlags_NoSplit |
-																	ImGuiDockNodeFlags_NoWindowMenuButton };
+		inline static constexpr ImGuiDockNodeFlags DOCKSPACE_FLAGS{
+			ImGuiDockNodeFlags_NoResize | ImGuiDockNodeFlags_NoSplit | ImGuiDockNodeFlags_NoWindowMenuButton
+		};
 		inline static constexpr ImGuiWindowFlags HOST_WINDOW_FLAGS{
 			ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
 			ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
 			ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse
 		};
-
 		CombatTrackerLib::Texture2D
 			m_titleTexture; // No default constructor. Initialize through member initializer list.
 
@@ -48,5 +48,4 @@ namespace CombatTrackerApp {
 		// Dockspace layout flag.
 		bool m_isDockspaceInitialized{};
 	};
-
 }

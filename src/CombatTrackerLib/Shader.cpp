@@ -1,13 +1,14 @@
 #include "CombatTrackerLib/Shader.h"
+
 #include "CombatTrackerLib/Utilities/FileUtils.h"
 
 #include <algorithm>
 
 namespace CombatTrackerLib {
-	Shader::Shader(const std::filesystem::path& shaderPath, Shader::Type type) : m_isLinkedToProgram{ false } {
+	Shader::Shader(const std::filesystem::path& shaderPath, Shader::Type type) : m_isLinkedToProgram{false} {
 
 		// Read the shader file.
-		auto shaderCode{ readFileToString(shaderPath) };
+		auto shaderCode{readFileToString(shaderPath)};
 		if (shaderCode.empty()) {
 			std::cerr << "Failed to read shader file: " << shaderPath << '\n';
 			return;
@@ -28,7 +29,7 @@ namespace CombatTrackerLib {
 			std::cerr << "No corresponding shader type: \n";
 			return;
 		}
-		auto shaderCodePointer{ shaderCode.c_str() };
+		auto shaderCodePointer{shaderCode.c_str()};
 		glShaderSource(m_ID, 1, &shaderCodePointer, nullptr);
 		glCompileShader(m_ID);
 
@@ -46,6 +47,7 @@ namespace CombatTrackerLib {
 			glDeleteShader(m_ID);
 		}
 	}
+
 	Shader::Shader(Shader&& shader) noexcept {
 		this->m_ID = shader.m_ID;
 		this->m_isLinkedToProgram = shader.m_isLinkedToProgram;
@@ -54,6 +56,7 @@ namespace CombatTrackerLib {
 		shader.m_ID = 0;
 		shader.m_isLinkedToProgram = false;
 	}
+
 	Shader& Shader::operator=(Shader&& shader) noexcept {
 
 		// Prevent self move.
@@ -71,6 +74,7 @@ namespace CombatTrackerLib {
 		shader.m_isLinkedToProgram = false;
 		return *this;
 	}
+
 	Shader::~Shader() {
 
 		// A linked shader shoudn't call glDeleteShader from its destructor,
@@ -79,6 +83,12 @@ namespace CombatTrackerLib {
 			glDeleteShader(m_ID);
 		}
 	}
-	unsigned int Shader::getShaderID() const { return m_ID; }
-	void Shader::setAsLinked() { m_isLinkedToProgram = true; }
+
+	unsigned int Shader::getShaderID() const {
+		return m_ID;
+	}
+
+	void Shader::setAsLinked() {
+		m_isLinkedToProgram = true;
+	}
 }

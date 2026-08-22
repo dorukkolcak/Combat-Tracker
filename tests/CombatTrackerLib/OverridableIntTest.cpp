@@ -14,6 +14,7 @@ namespace CombatTrackerLib {
 		EXPECT_FALSE(val.isOverridden());
 		EXPECT_EQ(10, val.get());
 	}
+
 	TEST(OverridableIntTest, TestDefault) {
 		OverridableInt val{};
 		EXPECT_EQ(0, val.getDefault());

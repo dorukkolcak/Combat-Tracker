@@ -30,10 +30,12 @@ namespace CombatTrackerLib {
 			shader.setAsLinked();
 		}
 	}
+
 	ShaderProgram::ShaderProgram(ShaderProgram&& program) noexcept {
 		this->m_ID = program.m_ID;
 		program.m_ID = 0;
 	}
+
 	ShaderProgram& ShaderProgram::operator=(ShaderProgram&& program) noexcept {
 
 		// Prevent self move.
@@ -47,7 +49,16 @@ namespace CombatTrackerLib {
 		program.m_ID = 0;
 		return *this;
 	}
-	ShaderProgram::~ShaderProgram() { glDeleteProgram(m_ID); }
-	void ShaderProgram::use() const { glUseProgram(m_ID); }
-	void ShaderProgram::unbind() const { glUseProgram(0); }
+
+	ShaderProgram::~ShaderProgram() {
+		glDeleteProgram(m_ID);
+	}
+
+	void ShaderProgram::use() const {
+		glUseProgram(m_ID);
+	}
+
+	void ShaderProgram::unbind() const {
+		glUseProgram(0);
+	}
 }

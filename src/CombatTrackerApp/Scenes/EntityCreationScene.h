@@ -5,9 +5,10 @@
 #include "CombatTrackerLib/Scene.h"
 #include "CombatTrackerLib/Utilities/UIUtils.h"
 
+#include <imgui_stdlib.h>
+
 #include <algorithm>
 #include <cstddef>
-#include <imgui_stdlib.h>
 #include <span>
 #include <string>
 #include <string_view>
@@ -51,13 +52,22 @@ namespace CombatTrackerApp {
 			std::string_view remove{};
 		};
 
-		inline static constexpr float MIN_CHILD_HEIGHT{ 180.f };
+	protected:
+		inline static constexpr float MIN_CHILD_HEIGHT{180.f};
 		inline static constexpr ImGuiWindowFlags ENTITY_CREATION_WINDOW_FLAGS{
 			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
 			ImGuiWindowFlags_NoDocking
 		};
 
+		// The block is edited in place by this base scene and by the derived ones alike.
+		CreatureStatBlock m_currentCreatureStatBlock{};
+
+		CombatTrackerLib::ListBoxParameters m_sizeListBoxParameters{};
+		CombatTrackerLib::ListBoxParameters m_creatureTypeParameters{};
+		CombatTrackerLib::ListBoxParameters m_alignmentParameters{};
+
+	protected:
 		/*
 		I kinda hate writing functions like this where it is a meaningless wrapper over a single return statement.
 		But in this case we actually need the polymorphic behaviour (both of the derived classes return a different value here.)
@@ -76,13 +86,6 @@ namespace CombatTrackerApp {
 		// Resolving needs the entity specific block alongside the creature one, which only the derived
 		// scene owns, so the base scene provides a virtual function for this purpose.
 		virtual void resolveDerivedValues() = 0;
-
-		// The block is edited in place by this base scene and by the derived ones alike.
-		CreatureStatBlock m_currentCreatureStatBlock{};
-
-		CombatTrackerLib::ListBoxParameters m_sizeListBoxParameters{};
-		CombatTrackerLib::ListBoxParameters m_creatureTypeParameters{};
-		CombatTrackerLib::ListBoxParameters m_alignmentParameters{};
 
 		// Provide a span of proficiency levels as our array size can differ (skills vs saving throws).
 		static void renderProficiencyAndExpertiseCluster(
@@ -170,14 +173,14 @@ namespace CombatTrackerApp {
 		for (size_t i{}; i < currentItems.size(); ++i) {
 
 			// Push a separate id to the ID stack for each item.
-			CombatTrackerLib::ScopedID scopedID{ static_cast<int>(i) };
+			CombatTrackerLib::ScopedID scopedID{static_cast<int>(i)};
 
 			/*
 			We should check separate IO events explicitly instead of generically checking for any IO events for these buttons.
 			Unlike most of the widgets. This is because we need a tooltip for each button.
 			The items are listed one per row, so the button takes the full width and no SameLine() follows it.
 			*/
-			ImGui::Button(currentItems[i].name.c_str(), ImVec2{ -1.0f, 0.0f });
+			ImGui::Button(currentItems[i].name.c_str(), ImVec2{-1.0f, 0.0f});
 			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				renderTooltip(currentItems[i]);
 			}
@@ -190,13 +193,15 @@ namespace CombatTrackerApp {
 			CombatTrackerLib::centerNextWindow(0.70f, 0.70f);
 
 			// Popup modal for editing/deleting items.
-			if (CombatTrackerLib::ScopedPopupModal popupModal{
-					labels.edit, nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize }) {
+			if (CombatTrackerLib::ScopedPopupModal
+			        popupModal{labels.edit, nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize}) {
 
 				// The layouting is quite similar to the big entity creation popup modal.
 				{
 					CombatTrackerLib::ScopedChild editAddableScroll{
-						"EditAddableScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(2) }, true
+						"EditAddableScroll",
+						ImVec2{0.0f, -CombatTrackerLib::reservedFooterHeight(2)},
+						true
 					};
 					ImGui::InputText(labels.name.data(), &currentItems[i].name);
 					ImGui::InputText(labels.description.data(), &currentItems[i].description);
@@ -228,8 +233,8 @@ namespace CombatTrackerApp {
 
 		// Setup configs of the add item popup.
 		CombatTrackerLib::centerNextWindow(0.70f, 0.70f);
-		if (CombatTrackerLib::ScopedPopupModal popupModal{
-				labels.add, NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize }) {
+		if (CombatTrackerLib::ScopedPopupModal
+		        popupModal{labels.add, NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize}) {
 
 			/*
 			These are static so they survive between frames while the popup is open.
@@ -246,7 +251,9 @@ namespace CombatTrackerApp {
 			}
 			{
 				CombatTrackerLib::ScopedChild addAddableScroll{
-					"AddAddableScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(1) }, true
+					"AddAddableScroll",
+					ImVec2{0.0f, -CombatTrackerLib::reservedFooterHeight(1)},
+					true
 				};
 				renderAddFields();
 				ImGui::InputText(labels.name.data(), &s_name);
@@ -256,7 +263,7 @@ namespace CombatTrackerApp {
 			// Button and cleanup section.
 			ImGui::Separator();
 			if (CombatTrackerLib::alignedButton(labels.finishCreation.data(), 0.5f) && !s_name.empty() &&
-				!s_description.empty()) {
+			    !s_description.empty()) {
 				currentItems.push_back(makeItem(s_name, s_description));
 				s_name.clear();
 				s_description.clear();
@@ -272,7 +279,7 @@ namespace CombatTrackerApp {
 			currentItems,
 			labels,
 			[] {},
-			[](const std::string& name, const std::string& description) { return I{ name, description }; },
+			[](const std::string& name, const std::string& description) { return I{name, description}; },
 			[](const I& item) { ImGui::SetTooltip("%s", item.description.c_str()); }
 		);
 	}

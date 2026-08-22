@@ -10,6 +10,7 @@
 #include "CombatTrackerLib/Window.h"
 
 #include <nlohmann/json.hpp>
+
 #include <array>
 #include <filesystem>
 #include <memory>
@@ -18,6 +19,7 @@
 namespace CombatTrackerLib {
 	class Scene;
 	class OptionsHandler;
+
 	class App : public Unique<App> {
 	public:
 		struct Specification {
@@ -34,6 +36,7 @@ namespace CombatTrackerLib {
 			int initialWindowHeight{};
 		};
 
+	public:
 		App() = delete;
 		explicit App(Specification specification);
 
@@ -79,9 +82,9 @@ namespace CombatTrackerLib {
 		SceneManager m_sceneManager{};
 		Specification m_specification{};
 		DirectoryProvider m_directoryProvider; // Deleted default constructor.
-		OptionsHandler m_optionsHandler;	   // Deleted default constructor.
-		LocaleProvider m_localeProvider;	   // Deleted default constructor
-		ThemeProvider m_themeProvider;		   // Deleted default constructor.
+		OptionsHandler m_optionsHandler;       // Deleted default constructor.
+		LocaleProvider m_localeProvider;       // Deleted default constructor
+		ThemeProvider m_themeProvider;         // Deleted default constructor.
 
 		std::unique_ptr<Window> m_windowPointer{};
 

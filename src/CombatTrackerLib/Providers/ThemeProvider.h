@@ -3,10 +3,11 @@
 #include "CombatTrackerLib/Providers/DirectoryProvider.h"
 #include "CombatTrackerLib/Utilities/GenericUtils.h"
 
+#include <imgui.h>
 #include <nlohmann/json.hpp>
+
 #include <filesystem>
 #include <functional>
-#include <imgui.h>
 #include <ranges>
 #include <string>
 #include <string_view>
@@ -21,9 +22,13 @@ namespace nlohmann {
 		// NOLINTNEXTLINE(readability-identifier-naming)
 		static void from_json(const json& node, ImVec4& color) {
 			color = ImVec4{
-				node.at(0).get<float>(), node.at(1).get<float>(), node.at(2).get<float>(), node.at(3).get<float>()
+				node.at(0).get<float>(),
+				node.at(1).get<float>(),
+				node.at(2).get<float>(),
+				node.at(3).get<float>()
 			};
 		}
+
 		// I don't think to_json is possible as we have no way of passing the name of the color to to_json.
 	};
 }
@@ -35,11 +40,13 @@ namespace CombatTrackerLib {
 		explicit ThemeProvider(const DirectoryProvider& directoryProvider);
 
 		[[nodiscard]] const ImGuiStyle* getStyle(std::string_view themeName) const;
+
 		[[nodiscard]] auto getThemeNames() const { return m_themeToStyle | std::views::keys; }
 
 	private:
 		std::unordered_map<std::string, ImGuiStyle, StringHash, std::equal_to<>> m_themeToStyle{};
 
+	private:
 		void mapThemeToStyle(const std::string& themeName, const nlohmann::json& fileContents);
 	};
 }

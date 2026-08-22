@@ -33,10 +33,11 @@ namespace CombatTrackerLib {
 		explicit operator bool() const;
 
 	protected:
+		bool m_isOpen{};
+
+	protected:
 		explicit ImGuiConditionalScope(bool isOpen);
 		~ImGuiConditionalScope() = default;
-
-		bool m_isOpen{};
 	};
 
 	// The widgets below close only when they opened.
@@ -47,14 +48,15 @@ namespace CombatTrackerLib {
 			std::string_view stableID,
 			int columnCount,
 			ImGuiTableFlags flags = 0,
-			const ImVec2& outerSize = ImVec2{ 0.0f, 0.0f },
+			const ImVec2& outerSize = ImVec2{0.0f, 0.0f},
 			float innerWidth = 0.0f
 		);
 		~ScopedTable();
 	};
+
 	class ScopedListBox : public ImGuiConditionalScope {
 	public:
-		ScopedListBox(std::string_view label, const ImVec2& size = ImVec2{ 0.0f, 0.0f });
+		ScopedListBox(std::string_view label, const ImVec2& size = ImVec2{0.0f, 0.0f});
 		~ScopedListBox();
 	};
 
@@ -64,21 +66,25 @@ namespace CombatTrackerLib {
 		ScopedPopupModal(std::string_view name, bool* isOpenPointer = nullptr, ImGuiWindowFlags flags = 0);
 		~ScopedPopupModal();
 	};
+
 	class ScopedTabBar : public ImGuiConditionalScope {
 	public:
 		ScopedTabBar(std::string_view stableID, ImGuiTabBarFlags flags = 0);
 		~ScopedTabBar();
 	};
+
 	class ScopedTabItem : public ImGuiConditionalScope {
 	public:
 		ScopedTabItem(std::string_view label, bool* isOpenPointer = nullptr, ImGuiTabItemFlags flags = 0);
 		~ScopedTabItem();
 	};
+
 	class ScopedMenuBar : public ImGuiConditionalScope {
 	public:
 		ScopedMenuBar();
 		~ScopedMenuBar();
 	};
+
 	class ScopedMenu : public ImGuiConditionalScope {
 	public:
 		ScopedMenu(std::string_view label, bool isEnabled = true);
@@ -92,11 +98,12 @@ namespace CombatTrackerLib {
 		ScopedWindow(std::string_view name, bool* isOpenPointer = nullptr, ImGuiWindowFlags flags = 0);
 		~ScopedWindow();
 	};
+
 	class ScopedChild : public ImGuiConditionalScope {
 	public:
 		ScopedChild(
 			std::string_view stableID,
-			const ImVec2& size = ImVec2{ 0.0f, 0.0f },
+			const ImVec2& size = ImVec2{0.0f, 0.0f},
 			ImGuiChildFlags childFlags = 0,
 			ImGuiWindowFlags windowFlags = 0
 		);
@@ -111,12 +118,14 @@ namespace CombatTrackerLib {
 		explicit ScopedID(int stableID);
 		~ScopedID();
 	};
+
 	class ScopedStyleVar : public ImGuiScope {
 	public:
 		ScopedStyleVar(ImGuiStyleVar styleVariable, float value);
 		ScopedStyleVar(ImGuiStyleVar styleVariable, const ImVec2& value);
 		~ScopedStyleVar();
 	};
+
 	class ScopedStyleColor : public ImGuiScope {
 	public:
 		ScopedStyleColor(ImGuiCol styleColor, const ImVec4& value);
@@ -129,6 +138,7 @@ namespace CombatTrackerLib {
 		ScopedFont(ImFont* font, float unscaledSize = 0.0f);
 		~ScopedFont();
 	};
+
 	class ScopedDisabled : public ImGuiScope {
 	public:
 		explicit ScopedDisabled(bool isDisabled = true);

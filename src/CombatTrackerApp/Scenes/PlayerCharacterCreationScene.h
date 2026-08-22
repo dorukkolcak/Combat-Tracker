@@ -27,6 +27,7 @@ namespace CombatTrackerApp {
 		CombatTrackerLib::ListBoxParameters m_speciesParameters{};
 		CombatTrackerLib::ListBoxParameters m_originParameters{};
 
+	private:
 		void renderPlayerClassAndSubclasses();
 		void renderPlayerCharacterSpecificInfo();
 	};

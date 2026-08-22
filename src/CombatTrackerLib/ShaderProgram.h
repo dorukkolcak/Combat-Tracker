@@ -5,6 +5,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 #include <iostream>
 #include <string_view>
 #include <type_traits>
@@ -39,74 +40,52 @@ namespace CombatTrackerLib {
 	};
 
 	template <typename T> void ShaderProgram::setUniform(std::string_view uniformName, T value) const {
-		const auto uniformLocation{ glGetUniformLocation(m_ID, uniformName.data()) };
+		const auto uniformLocation{glGetUniformLocation(m_ID, uniformName.data())};
 		if constexpr (std::is_same_v<T, bool>) {
 			glUniform1i(uniformLocation, value);
-		}
-		else if constexpr (std::is_same_v<T, int>) {
+		} else if constexpr (std::is_same_v<T, int>) {
 			glUniform1i(uniformLocation, value);
-		}
-		else if constexpr (std::is_same_v<T, unsigned int>) {
+		} else if constexpr (std::is_same_v<T, unsigned int>) {
 			glUniform1ui(uniformLocation, value);
-		}
-		else if constexpr (std::is_same_v<T, float>) {
+		} else if constexpr (std::is_same_v<T, float>) {
 			glUniform1f(uniformLocation, value);
-		}
-		else if constexpr (std::is_same_v<T, glm::vec2>) {
+		} else if constexpr (std::is_same_v<T, glm::vec2>) {
 			glUniform2fv(uniformLocation, 1, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::vec3>) {
+		} else if constexpr (std::is_same_v<T, glm::vec3>) {
 			glUniform3fv(uniformLocation, 1, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::vec4>) {
+		} else if constexpr (std::is_same_v<T, glm::vec4>) {
 			glUniform4fv(uniformLocation, 1, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::ivec2>) {
+		} else if constexpr (std::is_same_v<T, glm::ivec2>) {
 			glUniform2iv(uniformLocation, 1, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::ivec3>) {
+		} else if constexpr (std::is_same_v<T, glm::ivec3>) {
 			glUniform3iv(uniformLocation, 1, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::ivec4>) {
+		} else if constexpr (std::is_same_v<T, glm::ivec4>) {
 			glUniform4iv(uniformLocation, 1, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::uvec2>) {
+		} else if constexpr (std::is_same_v<T, glm::uvec2>) {
 			glUniform2uiv(uniformLocation, 1, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::uvec3>) {
+		} else if constexpr (std::is_same_v<T, glm::uvec3>) {
 			glUniform3uiv(uniformLocation, 1, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::uvec4>) {
+		} else if constexpr (std::is_same_v<T, glm::uvec4>) {
 			glUniform4uiv(uniformLocation, 1, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::mat2>) {
+		} else if constexpr (std::is_same_v<T, glm::mat2>) {
 			glUniformMatrix2fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::mat3>) {
+		} else if constexpr (std::is_same_v<T, glm::mat3>) {
 			glUniformMatrix3fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::mat4>) {
+		} else if constexpr (std::is_same_v<T, glm::mat4>) {
 			glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::mat2x3>) {
+		} else if constexpr (std::is_same_v<T, glm::mat2x3>) {
 			glUniformMatrix2x3fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::mat3x2>) {
+		} else if constexpr (std::is_same_v<T, glm::mat3x2>) {
 			glUniformMatrix3x2fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::mat2x4>) {
+		} else if constexpr (std::is_same_v<T, glm::mat2x4>) {
 			glUniformMatrix2x4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::mat4x2>) {
+		} else if constexpr (std::is_same_v<T, glm::mat4x2>) {
 			glUniformMatrix4x2fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::mat3x4>) {
+		} else if constexpr (std::is_same_v<T, glm::mat3x4>) {
 			glUniformMatrix3x4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
-		}
-		else if constexpr (std::is_same_v<T, glm::mat4x3>) {
+		} else if constexpr (std::is_same_v<T, glm::mat4x3>) {
 			glUniformMatrix4x3fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
-		}
-		else {
+		} else {
 			std::cerr << "Invalid uniform type.\n";
 		}
 	}

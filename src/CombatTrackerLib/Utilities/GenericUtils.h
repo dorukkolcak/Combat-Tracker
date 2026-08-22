@@ -1,6 +1,7 @@
 #pragma once
 
 #include <nlohmann/json.hpp>
+
 #include <algorithm>
 #include <cstddef>
 #include <optional>
@@ -28,6 +29,7 @@ namespace CombatTrackerLib {
 	*/
 	struct StringHash {
 		using is_transparent = void; // NOLINT(readability-identifier-naming)
+
 		std::size_t operator()(std::string_view key) const { return std::hash<std::string_view>{}(key); }
 	};
 
@@ -44,23 +46,30 @@ namespace CombatTrackerLib {
 	class BoundedInt {
 	public:
 		constexpr BoundedInt() = default;
-		constexpr BoundedInt(int value) : m_value{ std::clamp(value, LOWER_BOUND, UPPER_BOUND) } {}
+
+		constexpr BoundedInt(int value) : m_value{std::clamp(value, LOWER_BOUND, UPPER_BOUND)} {}
+
 		constexpr BoundedInt& operator=(int value) {
 			m_value = std::clamp(value, LOWER_BOUND, UPPER_BOUND);
 			return *this;
 		}
+
 		[[nodiscard]] constexpr int get() const { return m_value; }
+
 		static constexpr int getLowerBound() { return LOWER_BOUND; }
+
 		static constexpr int getUpperBound() { return UPPER_BOUND; }
 
 	private:
-		int m_value{ std::clamp(0, LOWER_BOUND, UPPER_BOUND) };
+		int m_value{std::clamp(0, LOWER_BOUND, UPPER_BOUND)};
 	};
+
 	template <int LOWER_BOUND, int UPPER_BOUND>
 	// NOLINTNEXTLINE(readability-identifier-naming)
 	void from_json(const nlohmann::json& contents, BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt) {
 		boundedInt = contents.get<int>();
 	}
+
 	template <int LOWER_BOUND, int UPPER_BOUND>
 	// NOLINTNEXTLINE(readability-identifier-naming)
 	void to_json(nlohmann::json& contents, const BoundedInt<LOWER_BOUND, UPPER_BOUND>& boundedInt) {
@@ -76,7 +85,8 @@ namespace CombatTrackerLib {
 	class OverridableInt {
 	public:
 		constexpr OverridableInt() = default;
-		constexpr explicit OverridableInt(int defaultValue) : m_defaultValue{ defaultValue } {}
+
+		constexpr explicit OverridableInt(int defaultValue) : m_defaultValue{defaultValue} {}
 
 		// Written by whatever computes the value, and kept fresh even while an override is in place.
 		constexpr OverridableInt& setDefault(int value) {
@@ -90,12 +100,16 @@ namespace CombatTrackerLib {
 			m_override = value;
 			return *this;
 		}
+
 		constexpr OverridableInt& clearOverride() {
 			m_override.reset();
 			return *this;
 		}
+
 		[[nodiscard]] constexpr int get() const { return m_override.value_or(m_defaultValue); }
+
 		[[nodiscard]] constexpr int getDefault() const { return m_defaultValue; }
+
 		[[nodiscard]] constexpr bool isOverridden() const { return m_override.has_value(); }
 
 	private:
@@ -110,8 +124,7 @@ namespace CombatTrackerLib {
 	from_json(const nlohmann::json& contents, OverridableInt& overridableInt) {
 		if (contents.is_null()) {
 			overridableInt.clearOverride();
-		}
-		else {
+		} else {
 			overridableInt.setOverride(contents.get<int>());
 		}
 	}
@@ -122,8 +135,7 @@ namespace CombatTrackerLib {
 	to_json(nlohmann::json& contents, const OverridableInt& overridableInt) {
 		if (overridableInt.isOverridden()) {
 			contents = overridableInt.get();
-		}
-		else {
+		} else {
 			contents = nullptr;
 		}
 	}
@@ -147,14 +159,17 @@ namespace CombatTrackerLib {
 	private:
 		friend Derived;
 
+	private:
+		inline static bool s_isAlive{false};
+
+	private:
 		Unique() {
 			static_assert(std::is_base_of_v<Unique,
-											Derived>); // Evaluates to true if Unique is a base type of Derived.
+			                                Derived>); // Evaluates to true if Unique is a base type of Derived.
 			assert(!s_isAlive);
 			s_isAlive = true;
 		}
-		~Unique() { s_isAlive = false; }
 
-		inline static bool s_isAlive{ false };
+		~Unique() { s_isAlive = false; }
 	};
 }

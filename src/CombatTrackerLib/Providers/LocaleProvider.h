@@ -4,6 +4,7 @@
 #include "CombatTrackerLib/Utilities/GenericUtils.h"
 
 #include <nlohmann/json.hpp>
+
 #include <filesystem>
 #include <functional>
 #include <optional>
@@ -21,10 +22,11 @@ namespace CombatTrackerLib {
 		std::string code{};
 		std::string endonym{};
 	};
+
 	class LocaleProvider : public Unique<LocaleProvider> {
 	public:
 		//friend class LocaleProviderTest;
-
+	public:
 		LocaleProvider() = delete;
 		LocaleProvider(const DirectoryProvider& directoryProvider, std::string_view localeCode);
 		~LocaleProvider() = default;
@@ -50,6 +52,7 @@ namespace CombatTrackerLib {
 		// So we hold a reference to the directory provider via a pointer.
 		const DirectoryProvider* m_directoryProviderPointer{};
 
+	private:
 		void buildViewMaps(const nlohmann::json& node, const std::string& pointerPrefix);
 		void buildAvailableLocales();
 	};

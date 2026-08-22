@@ -14,10 +14,14 @@ namespace CombatTrackerLib {
 	class StubScene : public Scene {
 	public:
 		void notifyScene(const ImGuiIO&) override {}
+
 		void updateScene(double) override {}
+
 		void renderUI() override {}
+
 		void renderScene() override {}
 	};
+
 	class SceneManagerTest : public testing::Test {
 	protected:
 		void SetUp() override;

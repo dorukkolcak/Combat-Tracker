@@ -29,7 +29,8 @@
       "displayName": "Debug",
       "inherits": "release",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "COMBAT_TRACKER_WARNINGS_AS_ERROR": "ON"
       }
     },
     {

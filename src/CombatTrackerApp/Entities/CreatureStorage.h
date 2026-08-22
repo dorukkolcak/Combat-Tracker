@@ -7,6 +7,7 @@
 #include "CombatTrackerLib/Utilities/FileUtils.h"
 
 #include <nlohmann/json.hpp>
+
 #include <concepts>
 #include <filesystem>
 #include <format>
@@ -72,12 +73,14 @@ namespace CombatTrackerApp {
 			}
 			return writeCreature<T>(userDataDirectory, creatureBlock, monsterBlock, playerBlock);
 		}
+
 		template <typename T>
 			requires std::derived_from<T, Creature>
 		static bool deleteCreature(const std::filesystem::path& userDataDirectory, std::string_view creatureName) {
 			std::error_code errorCode{};
 			return std::filesystem::remove(findFilePath<T>(userDataDirectory, creatureName), errorCode);
 		}
+
 		template <typename T>
 			requires std::derived_from<T, Creature>
 		static CreatureStatBlock loadCreature(
@@ -86,21 +89,21 @@ namespace CombatTrackerApp {
 			std::optional<std::reference_wrapper<MonsterStatBlock>> outMonsterBlock,
 			std::optional<std::reference_wrapper<PlayerStatBlock>> outPlayerBlock
 		) {
-			const auto contents{ CombatTrackerLib::readJSONFile(findFilePath<T>(userDataDirectory, entityName)) };
+			const auto contents{CombatTrackerLib::readJSONFile(findFilePath<T>(userDataDirectory, entityName))};
 			if (contents == std::nullopt) {
 				return CreatureStatBlock{};
 			}
-			auto creatureBlock{ contents->at("creatureBlock").get<CreatureStatBlock>() };
+			auto creatureBlock{contents->at("creatureBlock").template get<CreatureStatBlock>()};
 			if constexpr (std::same_as<T, Monster>) {
-				outMonsterBlock->get() = contents->at("monsterBlock").get<MonsterStatBlock>();
+				outMonsterBlock->get() = contents->at("monsterBlock").template get<MonsterStatBlock>();
 				Monster::resolveDerived(creatureBlock, outMonsterBlock->get());
-			}
-			else {
-				outPlayerBlock->get() = contents->at("playerBlock").get<PlayerStatBlock>();
+			} else {
+				outPlayerBlock->get() = contents->at("playerBlock").template get<PlayerStatBlock>();
 				PlayerCharacter::resolveDerived(creatureBlock, outPlayerBlock->get());
 			}
 			return creatureBlock; // Should internally use NRVO so no need for explicit std::move().
 		}
+
 		template <typename T>
 			requires std::derived_from<T, Creature>
 		static bool editCreature(
@@ -110,12 +113,12 @@ namespace CombatTrackerApp {
 			std::optional<std::reference_wrapper<const MonsterStatBlock>> monsterBlock,
 			std::optional<std::reference_wrapper<const PlayerStatBlock>> playerBlock
 		) {
-			const bool isRenamed{ entityName != creatureBlock.name };
+			const bool isRenamed{entityName != creatureBlock.name};
 
 			// If the creature is renamed to a creature that already exists, we should reject the edit.
 			std::error_code errorCode{};
 			if (isRenamed &&
-				std::filesystem::exists(findFilePath<T>(userDataDirectory, creatureBlock.name), errorCode)) {
+			    std::filesystem::exists(findFilePath<T>(userDataDirectory, creatureBlock.name), errorCode)) {
 				return false;
 			}
 
@@ -137,11 +140,11 @@ namespace CombatTrackerApp {
 		findFilePath(const std::filesystem::path& userDataDirectory, std::string_view creatureName) {
 			if constexpr (std::same_as<T, Monster>) {
 				return userDataDirectory / "Monsters" / std::format("{}.json", creatureName);
-			}
-			else {
+			} else {
 				return userDataDirectory / "PlayerCharacters" / std::format("{}.json", creatureName);
 			}
 		}
+
 		template <typename T>
 			requires std::derived_from<T, Creature>
 		static bool writeCreature(
@@ -156,8 +159,7 @@ namespace CombatTrackerApp {
 					return false;
 				}
 				contents["monsterBlock"] = monsterBlock->get();
-			}
-			else {
+			} else {
 				if (!playerBlock.has_value() || !PlayerCharacter::isValid(creatureBlock, playerBlock->get())) {
 					return false;
 				}

@@ -1,31 +1,41 @@
 #include "CombatTrackerApp/Scenes/PlayerCharacterCreationScene.h"
+
 #include "CombatTrackerApp/Entities/CreatureStorage.h"
 #include "CombatTrackerLib/Utilities/GenericUtils.h"
 #include "CombatTrackerLib/Utilities/UIUtils.h"
 
 namespace CombatTrackerApp {
 	PlayerCharacterCreationScene::PlayerCharacterCreationScene(CombatTrackerLib::App* app)
-		: EntityCreationScene{ app }, m_currentPlayerStatBlock{}, m_speciesParameters{}, m_originParameters{} {}
+		: EntityCreationScene{app},
+		  m_currentPlayerStatBlock{},
+		  m_speciesParameters{},
+		  m_originParameters{} {}
+
 	EntityCreationScene::CreationLabels PlayerCharacterCreationScene::getCreationLabels() const {
-		return { m_localeProviderPointer->getText("/scenes/playerCharacterCreation/windowTitle"),
-				 m_localeProviderPointer->getText("/scenes/playerCharacterCreation/completeButton"),
-				 m_localeProviderPointer->getText("/scenes/playerCharacterCreation/cancelButton") };
+		return {
+			m_localeProviderPointer->getText("/scenes/playerCharacterCreation/windowTitle"),
+			m_localeProviderPointer->getText("/scenes/playerCharacterCreation/completeButton"),
+			m_localeProviderPointer->getText("/scenes/playerCharacterCreation/cancelButton")
+		};
 	}
+
 	void PlayerCharacterCreationScene::renderEntitySpecificInfo() {
 		ImGui::SeparatorText(
 			m_localeProviderPointer->getText("/scenes/playerCharacterCreation/classesAndSubclasses").data()
 		);
 		renderPlayerClassAndSubclasses();
 	}
+
 	void PlayerCharacterCreationScene::renderEntitySpecificSection() {
 		ImGui::SeparatorText(m_localeProviderPointer->getText("/scenes/playerCharacterCreation/specificData").data());
 		renderPlayerCharacterSpecificInfo();
 	}
+
 	void PlayerCharacterCreationScene::renderPlayerCharacterSpecificInfo() {
 
 		// The two listboxes sit side by side and split the section between them, instead of stacking at ImGui's default item width.
-		if (CombatTrackerLib::ScopedTable speciesAndOrigin{
-				"##SpeciesAndOrigin", 2, ImGuiTableFlags_SizingStretchSame }) {
+		if (CombatTrackerLib::ScopedTable
+		        speciesAndOrigin{"##SpeciesAndOrigin", 2, ImGuiTableFlags_SizingStretchSame}) {
 			ImGui::TableNextRow();
 
 			ImGui::TableSetColumnIndex(0);
@@ -77,13 +87,14 @@ namespace CombatTrackerApp {
 			3
 		);
 	}
+
 	void PlayerCharacterCreationScene::renderPlayerClassAndSubclasses() {
 
-		const auto classNames{ m_localeProviderPointer->getTextList("/domain/playerClass") };
-		const auto subclassNames{ m_localeProviderPointer->getTextList("/domain/playerSubclass") };
+		const auto classNames{m_localeProviderPointer->getTextList("/domain/playerClass")};
+		const auto subclassNames{m_localeProviderPointer->getTextList("/domain/playerSubclass")};
 
-		if (CombatTrackerLib::ScopedTable classesAndSubclasses{
-				"Classes and Subclasses", 1, ImGuiTableFlags_SizingStretchSame }) {
+		if (CombatTrackerLib::ScopedTable
+		        classesAndSubclasses{"Classes and Subclasses", 1, ImGuiTableFlags_SizingStretchSame}) {
 
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
@@ -100,7 +111,8 @@ namespace CombatTrackerApp {
 				}
 			}
 			if (CombatTrackerLib::alignedButton(
-					m_localeProviderPointer->getText("/scenes/playerCharacterCreation/configureButton").data(), 0.5f
+					m_localeProviderPointer->getText("/scenes/playerCharacterCreation/configureButton").data(),
+					0.5f
 				)) {
 				ImGui::OpenPopup("###ClassConfiguration");
 			}
@@ -110,20 +122,24 @@ namespace CombatTrackerApp {
 			if (CombatTrackerLib::ScopedPopupModal popupModal{
 					m_localeProviderPointer->getText("/scenes/playerCharacterCreation/configureButton"),
 					nullptr,
-					ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize }) {
+					ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize
+				}) {
 				{
 					CombatTrackerLib::ScopedChild editClassScroll{
-						"EditClassScroll", ImVec2{ 0.0f, -CombatTrackerLib::reservedFooterHeight(1) }, true
+						"EditClassScroll",
+						ImVec2{0.0f, -CombatTrackerLib::reservedFooterHeight(1)},
+						true
 					};
 
 					ImGui::TextWrapped(
-						"%s", m_localeProviderPointer->getText("/scenes/playerCharacterCreation/classes").data()
+						"%s",
+						m_localeProviderPointer->getText("/scenes/playerCharacterCreation/classes").data()
 					);
-					if (CombatTrackerLib::ScopedTable classLevels{
-							"##ClassLevels", 4, ImGuiTableFlags_SizingStretchSame }) {
+					if (CombatTrackerLib::ScopedTable
+					        classLevels{"##ClassLevels", 4, ImGuiTableFlags_SizingStretchSame}) {
 						for (size_t i{}; i < classNames.size(); ++i) {
-							const auto className{ classNames[i] };
-							CombatTrackerLib::ScopedID scopedID{ static_cast<int>(i) };
+							const auto className{classNames[i]};
+							CombatTrackerLib::ScopedID scopedID{static_cast<int>(i)};
 							ImGui::TableNextColumn();
 							ImGui::TextUnformatted(className.data());
 							ImGui::SetNextItemWidth(-1.0f);
@@ -143,10 +159,10 @@ namespace CombatTrackerApp {
 					top of the frame, so nothing here has to handle that.
 					*/
 					for (size_t i{}; i < subclassNames.size(); ++i) {
-						const auto subclass{ static_cast<PlayerSubclass>(i) };
-						const auto correspondingClass{ SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(subclass)] };
-						const auto classIndex{ CombatTrackerLib::enumToSizeT(correspondingClass) };
-						auto& subclassSlot{ m_currentPlayerStatBlock.subclasses[classIndex] };
+						const auto subclass{static_cast<PlayerSubclass>(i)};
+						const auto correspondingClass{SUBCLASSES_TO_CLASSES[CombatTrackerLib::enumToSizeT(subclass)]};
+						const auto classIndex{CombatTrackerLib::enumToSizeT(correspondingClass)};
+						auto& subclassSlot{m_currentPlayerStatBlock.subclasses[classIndex]};
 
 						// This prevents printing multiple class labels.
 						// Otherwise we would have a class label for every subclass.
@@ -155,12 +171,11 @@ namespace CombatTrackerApp {
 						}
 
 						// The checkbox reports both directions of the change, so unchecking has to empty the slot again.
-						bool isChosen{ subclassSlot == subclass };
+						bool isChosen{subclassSlot == subclass};
 						if (ImGui::Checkbox(subclassNames[i].data(), &isChosen)) {
 							if (isChosen) {
 								subclassSlot = subclass;
-							}
-							else {
+							} else {
 								subclassSlot.reset();
 							}
 						}
@@ -171,7 +186,7 @@ namespace CombatTrackerApp {
 				if (CombatTrackerLib::alignedButton(
 						m_localeProviderPointer
 							->getText("/scenes/playerCharacterCreation/"
-									  "finishConfiguration")
+				                      "finishConfiguration")
 							.data(),
 						0.5f
 					)) {
@@ -186,12 +201,12 @@ namespace CombatTrackerApp {
 	}
 
 	bool PlayerCharacterCreationScene::completeEntityCreation() {
-		bool isSavingSuccessful{ CreatureStorage::saveCreature<PlayerCharacter>(
+		bool isSavingSuccessful{CreatureStorage::saveCreature<PlayerCharacter>(
 			m_applicationPointer->getDirectoryProvider().getUserDataDirectory(),
 			m_currentCreatureStatBlock,
 			std::nullopt,
 			std::cref(m_currentPlayerStatBlock)
-		) };
+		)};
 		if (isSavingSuccessful) {
 			resetParametersAndOverrides();
 			return true;

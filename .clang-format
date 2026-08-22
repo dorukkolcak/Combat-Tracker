@@ -3,51 +3,58 @@ Language: Cpp
 BasedOnStyle: LLVM
 Standard: Latest
 
-UseTab: Always
+UseTab: AlignWithSpaces
 TabWidth: 4
 IndentWidth: 4
+ContinuationIndentWidth: 4
 AccessModifierOffset: -4
 NamespaceIndentation: All
 ColumnLimit: 120
+MaxEmptyLinesToKeep: 1
+IndentPPDirectives: BeforeHash
+InsertNewlineAtEOF: true
+LineEnding: LF
 
-PointerAlignment: Left
-Cpp11BracedListStyle: false
+BreakBeforeBraces: Attach
+InsertBraces: true
+RemoveSemicolon: true
+SeparateDefinitionBlocks: Always
+EmptyLineBeforeAccessModifier: LogicalBlock
+EmptyLineAfterAccessModifier: Never
+
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortLambdasOnASingleLine: All
+
+AlignAfterOpenBracket: BlockIndent
 BinPackArguments: false
 BinPackParameters: false
-AlignAfterOpenBracket: BlockIndent
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+PackConstructorInitializers: CurrentLine
+BreakConstructorInitializers: BeforeColon
+Cpp11BracedListStyle: true
 
-BreakBeforeBraces: Custom
-BraceWrapping:
-  AfterCaseLabel: false
-  AfterClass: false
-  AfterControlStatement: Never
-  AfterEnum: false
-  AfterFunction: false
-  AfterNamespace: false
-  AfterStruct: false
-  AfterUnion: false
-  AfterExternBlock: false
-  BeforeCatch: true
-  BeforeElse: true
-  BeforeLambdaBody: false
-  BeforeWhile: false
-  IndentBraces: false
-  SplitEmptyFunction: false
-  SplitEmptyRecord: false
-  SplitEmptyNamespace: false
+PointerAlignment: Left
+ReferenceAlignment: Pointer
+DerivePointerAlignment: false
+BreakAfterAttributes: Never
 
 ReflowComments: false
 FixNamespaceComments: false
+BreakStringLiterals: false
 
 SortIncludes: CaseSensitive
-IncludeBlocks: Preserve
-IncludeIsMainRegex: '([-_a-zA-Z0-9]+)?$'
+IncludeBlocks: Regroup
+IncludeIsMainRegex: '$'
 IncludeCategories:
-  - Regex:           '^"([^"]*)\.h"'
+  - Regex:           '^"'
     Priority:        1
-  - Regex:           '^"[^"]*"'
+  - Regex:           '^<[^>]*\.'
     Priority:        2
-  - Regex:           '^<([^>]+/)+[^>]+\..+'
+  - Regex:           '^<'
     Priority:        3
-  - Regex:           '^<.*'
-    Priority:        4

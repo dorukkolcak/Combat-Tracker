@@ -18,6 +18,7 @@ namespace CombatTrackerLib {
 		std::filesystem::path m_resourceDirectory{};
 		std::filesystem::path m_userDataDirectory{};
 
+	private:
 		// Both of the functions below should use NRVO so no expensive copies are made.
 
 		// Finds the path for read only files that ship alongside the application, such as textures and shaders.
